@@ -8,7 +8,7 @@ public class FileLoggerTests : IDisposable
 
     public FileLoggerTests()
     {
-        _testLogPath = Path.Combine(Path.GetTempPath(), $"test_log_{Guid.NewGuid()}.log");
+        _testLogPath = Path.Join(Path.GetTempPath(), $"test_log_{Guid.NewGuid()}.log");
     }
 
     public void Dispose()
@@ -168,8 +168,8 @@ public class FileLoggerTests : IDisposable
     [Fact]
     public void Constructor_CreatesDirectoryIfNotExists()
     {
-        string testDir = Path.Combine(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
-        string testFile = Path.Combine(testDir, "test.log");
+        string testDir = Path.Join(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
+        string testFile = Path.Join(testDir, "test.log");
         
         try
         {

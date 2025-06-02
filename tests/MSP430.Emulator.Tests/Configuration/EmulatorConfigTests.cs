@@ -10,7 +10,7 @@ public class EmulatorConfigTests : IDisposable
 
     public EmulatorConfigTests()
     {
-        _testConfigPath = Path.Combine(Path.GetTempPath(), $"test_config_{Guid.NewGuid()}.json");
+        _testConfigPath = Path.Join(Path.GetTempPath(), $"test_config_{Guid.NewGuid()}.json");
     }
 
     public void Dispose()
@@ -164,8 +164,8 @@ public class EmulatorConfigTests : IDisposable
     [Fact]
     public void SaveToFile_CreatesDirectoryIfNotExists()
     {
-        string testDir = Path.Combine(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
-        string testFile = Path.Combine(testDir, "config.json");
+        string testDir = Path.Join(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
+        string testFile = Path.Join(testDir, "config.json");
         
         try
         {

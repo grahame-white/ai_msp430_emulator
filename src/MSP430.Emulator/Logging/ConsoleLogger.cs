@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace MSP430.Emulator.Logging;
 
 /// <summary>
@@ -24,19 +22,7 @@ public class ConsoleLogger : ILogger
             return;
         }
 
-        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-        string levelString = level.ToString().ToUpper();
-
-        string logEntry = $"[{timestamp}] [{levelString}] {message}";
-
-        if (context != null)
-        {
-            string contextJson = JsonSerializer.Serialize(context, new JsonSerializerOptions
-            {
-                WriteIndented = false
-            });
-            logEntry += $" Context: {contextJson}";
-        }
+        string logEntry = LogEntryFormatter.FormatLogEntry(level, message, context);
 
         // Write to appropriate output stream based on level
         if (level >= LogLevel.Error)

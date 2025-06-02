@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace MSP430.Emulator.Logging;
 
 /// <summary>
@@ -9,7 +7,7 @@ public class FileLogger : ILogger, IDisposable
 {
     private readonly string _filePath;
     private readonly StreamWriter _writer;
-    private readonly object _lock = new object();
+    private readonly object _syncLock = new object();
     private bool _disposed = false;
 
     /// <summary>
@@ -48,21 +46,9 @@ public class FileLogger : ILogger, IDisposable
             return;
         }
 
-        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-        string levelString = level.ToString().ToUpper();
+        string logEntry = LogEntryFormatter.FormatLogEntry(level, message, context);
 
-        string logEntry = $"[{timestamp}] [{levelString}] {message}";
-
-        if (context != null)
-        {
-            string contextJson = JsonSerializer.Serialize(context, new JsonSerializerOptions
-            {
-                WriteIndented = false
-            });
-            logEntry += $" Context: {contextJson}";
-        }
-
-        lock (_lock)
+        lock (_syncLock)
         {
             if (!_disposed)
             {
@@ -121,7 +107,7 @@ public class FileLogger : ILogger, IDisposable
     {
         if (!_disposed && disposing)
         {
-            lock (_lock)
+            lock (_syncLock)
             {
                 _writer?.Dispose();
                 _disposed = true;

@@ -73,35 +73,24 @@ jobs:
         cat vulnerability-report.txt
         
         if grep -q "has the following vulnerable packages" vulnerability-report.txt; then
-          echo "Vulnerable packages detected - analyzing..."
+          echo "Vulnerable packages found - checking for known false positives..."
           
-          # Extract all vulnerability lines that start with "> "
-          grep "^   > " vulnerability-report.txt > vulnerabilities.txt || true
-          
-          # Count total vulnerabilities
-          TOTAL_VULNS=$(wc -l < vulnerabilities.txt || echo "0")
-          echo "Total vulnerabilities found: $TOTAL_VULNS"
-          
-          if [ "$TOTAL_VULNS" -eq 0 ]; then
-            echo "No vulnerability details found despite header detection"
-            exit 0
+          # Check if only known .NET 8 false positives are present
+          if grep -q "System.Net.Http.*4.3.0" vulnerability-report.txt && grep -q "System.Text.RegularExpressions.*4.3.0" vulnerability-report.txt; then
+            # Count total vulnerability lines
+            TOTAL_VULNS=$(grep -c "^   > " vulnerability-report.txt || echo "0")
+            # Count false positive lines
+            FALSE_POSITIVES=$(grep -c "System.Net.Http.*4.3.0\|System.Text.RegularExpressions.*4.3.0" vulnerability-report.txt || echo "0")
+            
+            if [ "$TOTAL_VULNS" -eq "$FALSE_POSITIVES" ]; then
+              echo "Only known .NET 8 false positive vulnerabilities found - these are resolved by the .NET 8 runtime"
+              exit 0
+            fi
           fi
           
-          # Count known false positives by filtering them out
-          grep -v "System.Net.Http.*4.3.0" vulnerabilities.txt | grep -v "System.Text.RegularExpressions.*4.3.0" > real-vulnerabilities.txt || true
-          REAL_VULNS=$(wc -l < real-vulnerabilities.txt || echo "0")
-          
-          echo "Real vulnerabilities (excluding known false positives): $REAL_VULNS"
-          
-          if [ "$REAL_VULNS" -eq 0 ]; then
-            echo "Only known false positive vulnerabilities found - these are resolved by .NET 8 runtime"
-            exit 0
-          else
-            echo "Found $REAL_VULNS genuine security vulnerabilities:"
-            cat real-vulnerabilities.txt
-            echo "Failing build due to security vulnerabilities"
-            exit 1
-          fi
+          echo "Genuine security vulnerabilities detected:"
+          cat vulnerability-report.txt
+          exit 1
         else
           echo "No vulnerable packages found"
         fi

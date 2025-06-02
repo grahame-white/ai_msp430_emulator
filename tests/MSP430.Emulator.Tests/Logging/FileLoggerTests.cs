@@ -75,7 +75,7 @@ public class FileLoggerTests : IDisposable
         logger.Debug("test debug message");
         logger.Dispose();
         
-        var content = File.ReadAllText(_testLogPath);
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test debug message", content);
         Assert.Contains("[DEBUG]", content);
     }
@@ -87,7 +87,7 @@ public class FileLoggerTests : IDisposable
         logger.Info("test info message");
         logger.Dispose();
         
-        var content = File.ReadAllText(_testLogPath);
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test info message", content);
         Assert.Contains("[INFO]", content);
     }
@@ -99,7 +99,7 @@ public class FileLoggerTests : IDisposable
         logger.Warning("test warning message");
         logger.Dispose();
         
-        var content = File.ReadAllText(_testLogPath);
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test warning message", content);
         Assert.Contains("[WARNING]", content);
     }
@@ -111,7 +111,7 @@ public class FileLoggerTests : IDisposable
         logger.Error("test error message");
         logger.Dispose();
         
-        var content = File.ReadAllText(_testLogPath);
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test error message", content);
         Assert.Contains("[ERROR]", content);
     }
@@ -123,7 +123,7 @@ public class FileLoggerTests : IDisposable
         logger.Fatal("test fatal message");
         logger.Dispose();
         
-        var content = File.ReadAllText(_testLogPath);
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test fatal message", content);
         Assert.Contains("[FATAL]", content);
     }
@@ -136,7 +136,7 @@ public class FileLoggerTests : IDisposable
         logger.Info("test message", context);
         logger.Dispose();
         
-        var content = File.ReadAllText(_testLogPath);
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test message", content);
         Assert.Contains("Context:", content);
         Assert.Contains("TestProperty", content);
@@ -150,7 +150,7 @@ public class FileLoggerTests : IDisposable
         logger.Info("test message");
         logger.Dispose();
         
-        var content = File.ReadAllText(_testLogPath);
+        string content = File.ReadAllText(_testLogPath);
         Assert.DoesNotContain("test message", content);
     }
 
@@ -161,15 +161,15 @@ public class FileLoggerTests : IDisposable
         logger.Info("test message");
         logger.Dispose();
         
-        var content = File.ReadAllText(_testLogPath);
+        string content = File.ReadAllText(_testLogPath);
         Assert.Matches(@"\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]", content);
     }
 
     [Fact]
     public void Constructor_CreatesDirectoryIfNotExists()
     {
-        var testDir = Path.Combine(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
-        var testFile = Path.Combine(testDir, "test.log");
+        string testDir = Path.Combine(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
+        string testFile = Path.Combine(testDir, "test.log");
         
         try
         {

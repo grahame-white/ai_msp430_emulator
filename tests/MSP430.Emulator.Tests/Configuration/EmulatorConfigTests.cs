@@ -65,7 +65,7 @@ public class EmulatorConfigTests : IDisposable
     public void ToJson_ReturnsValidJson()
     {
         var config = EmulatorConfig.CreateDefault();
-        var json = config.ToJson();
+        string json = config.ToJson();
         
         Assert.NotEmpty(json);
         Assert.True(IsValidJson(json));
@@ -74,7 +74,7 @@ public class EmulatorConfigTests : IDisposable
     [Fact]
     public void LoadFromJson_WithValidJson_ReturnsCorrectConfig()
     {
-        var json = """
+        string json = """
         {
             "logging": {
                 "minimumLevel": "Debug",
@@ -136,7 +136,7 @@ public class EmulatorConfigTests : IDisposable
         var config = EmulatorConfig.CreateDefault();
         config.SaveToFile(_testConfigPath);
         
-        var content = File.ReadAllText(_testConfigPath);
+        string content = File.ReadAllText(_testConfigPath);
         Assert.True(IsValidJson(content));
     }
 
@@ -164,8 +164,8 @@ public class EmulatorConfigTests : IDisposable
     [Fact]
     public void SaveToFile_CreatesDirectoryIfNotExists()
     {
-        var testDir = Path.Combine(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
-        var testFile = Path.Combine(testDir, "config.json");
+        string testDir = Path.Combine(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
+        string testFile = Path.Combine(testDir, "config.json");
         
         try
         {

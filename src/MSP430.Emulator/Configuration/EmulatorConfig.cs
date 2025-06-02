@@ -47,7 +47,7 @@ public class EmulatorConfig
             throw new FileNotFoundException($"Configuration file not found: {filePath}");
         }
 
-        var json = File.ReadAllText(filePath);
+        string json = File.ReadAllText(filePath);
         return LoadFromJson(json);
     }
 
@@ -76,13 +76,13 @@ public class EmulatorConfig
     /// <param name="filePath">The path to save the configuration file.</param>
     public void SaveToFile(string filePath)
     {
-        var directory = Path.GetDirectoryName(filePath);
+        string? directory = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
         }
 
-        var json = ToJson();
+        string json = ToJson();
         File.WriteAllText(filePath, json);
     }
 

@@ -20,16 +20,18 @@ public class ConsoleLogger : ILogger
     public virtual void Log(LogLevel level, string message, object? context)
     {
         if (!IsEnabled(level))
+        {
             return;
+        }
 
-        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-        var levelString = level.ToString().ToUpper();
+        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+        string levelString = level.ToString().ToUpper();
         
-        var logEntry = $"[{timestamp}] [{levelString}] {message}";
+        string logEntry = $"[{timestamp}] [{levelString}] {message}";
         
         if (context != null)
         {
-            var contextJson = JsonSerializer.Serialize(context, new JsonSerializerOptions 
+            string contextJson = JsonSerializer.Serialize(context, new JsonSerializerOptions 
             { 
                 WriteIndented = false 
             });

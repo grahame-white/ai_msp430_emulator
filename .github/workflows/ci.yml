@@ -84,7 +84,7 @@ jobs:
         echo "Coverage $COVERAGE% meets minimum threshold of 80%"
 
     - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: TestResults

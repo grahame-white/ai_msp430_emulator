@@ -189,16 +189,10 @@ public class FileLoggerTests : IDisposable
     [Fact]
     public void Dispose_CanBeCalledMultipleTimes()
     {
-        var logger = new FileLogger(_testLogPath);
-        try
-        {
-            logger.Dispose();
-            logger.Dispose(); // Should not throw
-        }
-        finally
-        {
-            logger.Dispose();
-        }
+        using var logger = new FileLogger(_testLogPath);
+        // Test that multiple calls to Dispose don't throw
+        logger.Dispose(); // Should not throw
+        logger.Dispose(); // Should not throw
         Assert.True(true); // Test passes if no exception is thrown
     }
 }

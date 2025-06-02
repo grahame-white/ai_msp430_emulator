@@ -140,15 +140,17 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Install license check tool
-      run: dotnet tool install --global dotnet-project-licenses
+      run: dotnet tool install --global nuget-license
 
     - name: Restore dependencies
       run: dotnet restore
 
     - name: Check licenses
       run: |
-        dotnet-project-licenses -i . -o licenses.json -f json
+        nuget-license -i MSP430.Emulator.sln -o Json -fo licenses.json || true
         echo "License information generated in licenses.json"
+        echo "License scan results:"
+        nuget-license -i MSP430.Emulator.sln
 
     - name: Upload license report
       uses: actions/upload-artifact@v4

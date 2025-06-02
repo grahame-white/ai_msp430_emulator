@@ -206,12 +206,12 @@ tests/MSP430.Emulator.Tests/Quality/DefectTrackerTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 1.1
 
-Create automated workflow to populate and update GitHub issues from the task list using GraphQL API for streamlined project management.
+Create automated GitHub workflow to populate and update GitHub issues from the task list using GraphQL API for streamlined project management.
 
 **Acceptance Criteria**:
-- [ ] Create GraphQL client for GitHub API integration
-- [ ] Implement task parser to extract issues from MSP430_EMULATOR_TASKS.md
-- [ ] Create automated issue creation script with proper formatting
+- [ ] Create GitHub workflow for automated issue management
+- [ ] Implement task parsing logic in workflow to extract tasks from MSP430_EMULATOR_TASKS.md
+- [ ] Create automated issue creation with proper formatting and metadata
 - [ ] Add issue update mechanism for task progress tracking
 - [ ] Implement issue labeling based on task phases and priorities
 - [ ] Add milestone assignment based on task dependencies
@@ -220,22 +220,20 @@ Create automated workflow to populate and update GitHub issues from the task lis
 
 **Files to Create**:
 ```
-scripts/github-integration/create-issues
-scripts/github-integration/update-issues
-scripts/github-integration/sync-tasks
-src/MSP430.Emulator.Tools/GitHub/GraphQLClient.cs
-src/MSP430.Emulator.Tools/GitHub/IssueManager.cs
-src/MSP430.Emulator.Tools/TaskParser/TaskListParser.cs
-tests/MSP430.Emulator.Tests/Tools/GitHub/GraphQLClientTests.cs
-tests/MSP430.Emulator.Tests/Tools/TaskParser/TaskListParserTests.cs
-config/github-automation.json
+.github/workflows/issue-management.yml
+.github/scripts/parse-tasks.js
+.github/scripts/create-issues.js
+.github/scripts/update-issues.js
+.github/scripts/sync-tasks.js
+.github/config/issue-templates.json
 ```
 
 **Testing Strategy**:
-- Test GraphQL client with GitHub API sandbox
-- Verify task parsing correctly extracts all task details
+- Test workflow execution with sample task list changes
+- Verify task parsing correctly extracts all task details from markdown
 - Test issue creation with proper formatting and metadata
 - Validate issue updates reflect actual task progress
+- Test workflow triggers on task file modifications
 
 ---
 

@@ -1,0 +1,48 @@
+version: 2
+updates:
+  # Enable version updates for .NET packages
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "grahame-white"
+    labels:
+      - "dependencies"
+      - "nuget"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Group related dependency updates
+    groups:
+      test-dependencies:
+        patterns:
+          - "xunit*"
+          - "Microsoft.NET.Test.Sdk"
+          - "coverlet*"
+      microsoft-packages:
+        patterns:
+          - "Microsoft.*"
+      productivity-packages:
+        patterns:
+          - "System.*"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"  
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "grahame-white"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

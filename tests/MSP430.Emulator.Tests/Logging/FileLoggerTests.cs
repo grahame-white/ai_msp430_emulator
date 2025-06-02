@@ -200,15 +200,15 @@ public class FileLoggerTests : IDisposable
     public async Task Log_WithMultipleThreads_IsThreadSafe()
     {
         string testPath = Path.Join(Path.GetTempPath(), $"test_multithread_{Guid.NewGuid()}.log");
-        
+
         const int threadCount = 5;
         const int messagesPerThread = 10;
-        
+
         try
         {
             using var logger = new FileLogger(testPath);
             var tasks = new Task[threadCount];
-            var barrier = new Barrier(threadCount);
+            using var barrier = new Barrier(threadCount);
 
             // Create multiple threads that write to the logger simultaneously
             for (int threadId = 0; threadId < threadCount; threadId++)
@@ -218,7 +218,7 @@ public class FileLoggerTests : IDisposable
                 {
                     // Wait for all threads to be ready before starting
                     barrier.SignalAndWait();
-                    
+
                     for (int messageId = 0; messageId < messagesPerThread; messageId++)
                     {
                         logger.Info($"Thread {capturedThreadId} Message {messageId}",
@@ -229,7 +229,7 @@ public class FileLoggerTests : IDisposable
 
             // Wait for all threads to complete
             await Task.WhenAll(tasks);
-            
+
             // Dispose the logger to ensure all data is flushed
         }
         finally
@@ -239,15 +239,15 @@ public class FileLoggerTests : IDisposable
 
         // Verify the log file was written correctly
         Assert.True(File.Exists(testPath));
-        
+
         try
         {
             string[] lines = File.ReadAllLines(testPath);
-            
+
             // Should have exactly the expected number of log entries
             int expectedLines = threadCount * messagesPerThread;
             Assert.Equal(expectedLines, lines.Length);
-            
+
             // Verify each line contains proper JSON context
             foreach (string line in lines)
             {

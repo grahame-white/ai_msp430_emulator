@@ -74,7 +74,7 @@ public class FileLoggerTests : IDisposable
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Debug("test debug message");
         logger.Dispose();
-        
+
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test debug message", content);
         Assert.Contains("[DEBUG]", content);
@@ -86,7 +86,7 @@ public class FileLoggerTests : IDisposable
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Info("test info message");
         logger.Dispose();
-        
+
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test info message", content);
         Assert.Contains("[INFO]", content);
@@ -98,7 +98,7 @@ public class FileLoggerTests : IDisposable
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Warning("test warning message");
         logger.Dispose();
-        
+
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test warning message", content);
         Assert.Contains("[WARNING]", content);
@@ -110,7 +110,7 @@ public class FileLoggerTests : IDisposable
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Error("test error message");
         logger.Dispose();
-        
+
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test error message", content);
         Assert.Contains("[ERROR]", content);
@@ -122,7 +122,7 @@ public class FileLoggerTests : IDisposable
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Fatal("test fatal message");
         logger.Dispose();
-        
+
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test fatal message", content);
         Assert.Contains("[FATAL]", content);
@@ -135,7 +135,7 @@ public class FileLoggerTests : IDisposable
         var context = new { TestProperty = "value", Number = 42 };
         logger.Info("test message", context);
         logger.Dispose();
-        
+
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test message", content);
         Assert.Contains("Context:", content);
@@ -149,7 +149,7 @@ public class FileLoggerTests : IDisposable
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Warning };
         logger.Info("test message");
         logger.Dispose();
-        
+
         string content = File.ReadAllText(_testLogPath);
         Assert.DoesNotContain("test message", content);
     }
@@ -160,7 +160,7 @@ public class FileLoggerTests : IDisposable
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Info("test message");
         logger.Dispose();
-        
+
         string content = File.ReadAllText(_testLogPath);
         Assert.Matches(@"\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]", content);
     }
@@ -170,7 +170,7 @@ public class FileLoggerTests : IDisposable
     {
         string testDir = Path.Join(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
         string testFile = Path.Join(testDir, "test.log");
-        
+
         try
         {
             using var logger = new FileLogger(testFile);

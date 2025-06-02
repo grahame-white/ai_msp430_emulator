@@ -20,7 +20,7 @@ public class FileLogger : ILogger, IDisposable
     public FileLogger(string filePath, bool append = true)
     {
         _filePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
-        
+
         // Ensure directory exists
         string? directory = Path.GetDirectoryName(_filePath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -50,14 +50,14 @@ public class FileLogger : ILogger, IDisposable
 
         string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
         string levelString = level.ToString().ToUpper();
-        
+
         string logEntry = $"[{timestamp}] [{levelString}] {message}";
-        
+
         if (context != null)
         {
-            string contextJson = JsonSerializer.Serialize(context, new JsonSerializerOptions 
-            { 
-                WriteIndented = false 
+            string contextJson = JsonSerializer.Serialize(context, new JsonSerializerOptions
+            {
+                WriteIndented = false
             });
             logEntry += $" Context: {contextJson}";
         }

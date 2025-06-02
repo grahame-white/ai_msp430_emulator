@@ -1,6 +1,6 @@
+using System.Text.Json;
 using MSP430.Emulator.Configuration;
 using MSP430.Emulator.Logging;
-using System.Text.Json;
 
 namespace MSP430.Emulator.Tests.Configuration;
 
@@ -25,7 +25,7 @@ public class EmulatorConfigTests : IDisposable
     public void CreateDefault_ReturnsConfigWithDefaultValues()
     {
         var config = EmulatorConfig.CreateDefault();
-        
+
         Assert.NotNull(config);
         Assert.NotNull(config.Logging);
         Assert.NotNull(config.Memory);
@@ -36,7 +36,7 @@ public class EmulatorConfigTests : IDisposable
     public void DefaultLoggingConfig_HasExpectedValues()
     {
         var config = EmulatorConfig.CreateDefault();
-        
+
         Assert.Equal(LogLevel.Info, config.Logging.MinimumLevel);
         Assert.True(config.Logging.EnableConsole);
         Assert.False(config.Logging.EnableFile);
@@ -47,7 +47,7 @@ public class EmulatorConfigTests : IDisposable
     public void DefaultMemoryConfig_HasExpectedValues()
     {
         var config = EmulatorConfig.CreateDefault();
-        
+
         Assert.Equal(65536, config.Memory.TotalSize);
         Assert.True(config.Memory.EnableProtection);
     }
@@ -56,7 +56,7 @@ public class EmulatorConfigTests : IDisposable
     public void DefaultCpuConfig_HasExpectedValues()
     {
         var config = EmulatorConfig.CreateDefault();
-        
+
         Assert.Equal(1000000, config.Cpu.Frequency);
         Assert.False(config.Cpu.EnableTracing);
     }
@@ -66,7 +66,7 @@ public class EmulatorConfigTests : IDisposable
     {
         var config = EmulatorConfig.CreateDefault();
         string json = config.ToJson();
-        
+
         Assert.NotEmpty(json);
         Assert.True(IsValidJson(json));
     }
@@ -92,9 +92,9 @@ public class EmulatorConfigTests : IDisposable
             }
         }
         """;
-        
+
         var config = EmulatorConfig.LoadFromJson(json);
-        
+
         Assert.Equal(LogLevel.Debug, config.Logging.MinimumLevel);
         Assert.False(config.Logging.EnableConsole);
         Assert.True(config.Logging.EnableFile);
@@ -109,7 +109,7 @@ public class EmulatorConfigTests : IDisposable
     public void LoadFromJson_WithEmptyJson_ReturnsDefaultConfig()
     {
         var config = EmulatorConfig.LoadFromJson("{}");
-        
+
         Assert.Equal(LogLevel.Info, config.Logging.MinimumLevel);
         Assert.True(config.Logging.EnableConsole);
         Assert.False(config.Logging.EnableFile);
@@ -126,7 +126,7 @@ public class EmulatorConfigTests : IDisposable
     {
         var config = EmulatorConfig.CreateDefault();
         config.SaveToFile(_testConfigPath);
-        
+
         Assert.True(File.Exists(_testConfigPath));
     }
 
@@ -135,7 +135,7 @@ public class EmulatorConfigTests : IDisposable
     {
         var config = EmulatorConfig.CreateDefault();
         config.SaveToFile(_testConfigPath);
-        
+
         string content = File.ReadAllText(_testConfigPath);
         Assert.True(IsValidJson(content));
     }
@@ -147,9 +147,9 @@ public class EmulatorConfigTests : IDisposable
         originalConfig.Logging.MinimumLevel = LogLevel.Debug;
         originalConfig.Memory.TotalSize = 32768;
         originalConfig.SaveToFile(_testConfigPath);
-        
+
         var loadedConfig = EmulatorConfig.LoadFromFile(_testConfigPath);
-        
+
         Assert.Equal(LogLevel.Debug, loadedConfig.Logging.MinimumLevel);
         Assert.Equal(32768, loadedConfig.Memory.TotalSize);
     }
@@ -157,7 +157,7 @@ public class EmulatorConfigTests : IDisposable
     [Fact]
     public void LoadFromFile_WithNonExistentFile_ThrowsFileNotFoundException()
     {
-        Assert.Throws<FileNotFoundException>(() => 
+        Assert.Throws<FileNotFoundException>(() =>
             EmulatorConfig.LoadFromFile("nonexistent.json"));
     }
 
@@ -166,12 +166,12 @@ public class EmulatorConfigTests : IDisposable
     {
         string testDir = Path.Join(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
         string testFile = Path.Join(testDir, "config.json");
-        
+
         try
         {
             var config = EmulatorConfig.CreateDefault();
             config.SaveToFile(testFile);
-            
+
             Assert.True(Directory.Exists(testDir));
             Assert.True(File.Exists(testFile));
         }
@@ -194,7 +194,7 @@ public class EmulatorConfigTests : IDisposable
             EnableFile = true,
             FilePath = "test.log"
         };
-        
+
         Assert.Equal(LogLevel.Error, config.MinimumLevel);
         Assert.False(config.EnableConsole);
         Assert.True(config.EnableFile);
@@ -209,7 +209,7 @@ public class EmulatorConfigTests : IDisposable
             TotalSize = 128000,
             EnableProtection = false
         };
-        
+
         Assert.Equal(128000, config.TotalSize);
         Assert.False(config.EnableProtection);
     }
@@ -222,7 +222,7 @@ public class EmulatorConfigTests : IDisposable
             Frequency = 8000000,
             EnableTracing = true
         };
-        
+
         Assert.Equal(8000000, config.Frequency);
         Assert.True(config.EnableTracing);
     }

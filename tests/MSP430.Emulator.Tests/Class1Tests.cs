@@ -1,6 +1,6 @@
 namespace MSP430.Emulator.Tests;
 
-public class UnitTest1
+public class Class1Tests
 {
     [Fact]
     public void Test1()

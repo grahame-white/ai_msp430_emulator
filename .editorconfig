@@ -181,3 +181,21 @@ csharp_using_directive_placement = outside_namespace:warning
 csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = true:silent
 csharp_style_allow_blank_lines_between_consecutive_braces_experimental = true:silent
 csharp_style_allow_embedded_statements_on_same_line_experimental = true:silent
+
+# Additional CodeQL-inspired rules
+# Prefer specific exception types over generic catch clauses
+dotnet_diagnostic.CA1031.severity = warning # Do not catch general exception types
+dotnet_diagnostic.CA2227.severity = warning # Collection properties should be read only
+dotnet_diagnostic.CA1063.severity = warning # Implement IDisposable correctly
+
+# Path operations
+dotnet_diagnostic.CA1305.severity = suggestion # Specify IFormatProvider
+dotnet_diagnostic.CA1307.severity = suggestion # Specify StringComparison for clarity
+
+# Security-related rules
+dotnet_diagnostic.CA5394.severity = warning # Do not use insecure randomness
+dotnet_diagnostic.CA5359.severity = warning # Do not disable certificate validation
+
+# IDisposable patterns
+csharp_prefer_simple_using_statement = true:warning
+dotnet_diagnostic.CA2000.severity = warning # Dispose objects before losing scope

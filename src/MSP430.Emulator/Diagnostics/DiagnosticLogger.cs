@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Diagnostics;

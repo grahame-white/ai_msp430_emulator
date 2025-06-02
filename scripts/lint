@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# scripts/lint
+# Run code analysis and formatting checks
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Running MSP430 Emulator code analysis..."
+
+# Format code (check only, don't modify)
+echo "==> Checking code formatting..."
+dotnet format --verify-no-changes --verbosity diagnostic
+
+# Run static analysis via build with warnings as errors
+echo "==> Running static analysis..."
+dotnet build --configuration Release --verbosity quiet
+
+echo "==> Code analysis completed successfully!"

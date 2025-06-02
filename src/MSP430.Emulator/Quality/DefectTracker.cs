@@ -30,13 +30,19 @@ public class DefectTracker
     public Defect CreateDefect(Defect defect)
     {
         if (defect == null)
+        {
             throw new ArgumentNullException(nameof(defect));
+        }
 
         if (string.IsNullOrWhiteSpace(defect.Id))
+        {
             defect.Id = GenerateDefectId();
+        }
 
         if (_defects.ContainsKey(defect.Id))
+        {
             throw new ArgumentException($"Defect with ID '{defect.Id}' already exists.", nameof(defect));
+        }
 
         defect.CreatedDate = DateTime.UtcNow;
         defect.LastUpdated = DateTime.UtcNow;
@@ -60,16 +66,22 @@ public class DefectTracker
     public Defect UpdateDefect(string defectId, Defect updatedDefect)
     {
         if (string.IsNullOrWhiteSpace(defectId))
+        {
             throw new ArgumentException("Defect ID cannot be null or empty.", nameof(defectId));
+        }
 
         if (updatedDefect == null)
+        {
             throw new ArgumentNullException(nameof(updatedDefect));
+        }
 
         if (!_defects.ContainsKey(defectId))
+        {
             throw new KeyNotFoundException($"Defect with ID '{defectId}' not found.");
+        }
 
-        var existingDefect = _defects[defectId];
-        var oldStatus = existingDefect.Status;
+        Defect existingDefect = _defects[defectId];
+        DefectStatus oldStatus = existingDefect.Status;
 
         updatedDefect.Id = defectId;
         updatedDefect.CreatedDate = existingDefect.CreatedDate;
@@ -91,10 +103,14 @@ public class DefectTracker
     public Defect GetDefect(string defectId)
     {
         if (string.IsNullOrWhiteSpace(defectId))
+        {
             throw new ArgumentException("Defect ID cannot be null or empty.", nameof(defectId));
+        }
 
         if (!_defects.ContainsKey(defectId))
+        {
             throw new KeyNotFoundException($"Defect with ID '{defectId}' not found.");
+        }
 
         return _defects[defectId];
     }
@@ -127,7 +143,9 @@ public class DefectTracker
     public IEnumerable<Defect> GetDefectsByAssignee(string assignee)
     {
         if (string.IsNullOrWhiteSpace(assignee))
+        {
             return Enumerable.Empty<Defect>();
+        }
 
         return _defects.Values.Where(d => string.Equals(d.Assignee, assignee, StringComparison.OrdinalIgnoreCase));
     }
@@ -139,11 +157,11 @@ public class DefectTracker
     public DefectMetrics GetDefectMetrics()
     {
         var metrics = new DefectMetrics();
-        
-        foreach (var defect in _defects.Values)
+
+        foreach (Defect defect in _defects.Values)
         {
             metrics.TotalDefects++;
-            
+
             switch (defect.Status)
             {
                 case DefectStatus.Open:
@@ -159,7 +177,7 @@ public class DefectTracker
                     metrics.ClosedDefects++;
                     break;
             }
-            
+
             switch (defect.Severity)
             {
                 case DefectSeverity.Critical:
@@ -187,8 +205,8 @@ public class DefectTracker
     /// <returns>True if the status was advanced, false if already at final status.</returns>
     public bool AdvanceDefectStatus(string defectId)
     {
-        var defect = GetDefect(defectId);
-        var originalStatus = defect.Status;
+        Defect defect = GetDefect(defectId);
+        DefectStatus originalStatus = defect.Status;
 
         defect.Status = defect.Status switch
         {

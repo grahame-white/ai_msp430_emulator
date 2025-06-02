@@ -40,7 +40,7 @@ public class DefectTrackerTests : IDisposable
             Reporter = "test-user"
         };
 
-        var result = _defectTracker.CreateDefect(defect);
+        Defect result = _defectTracker.CreateDefect(defect);
 
         Assert.NotEmpty(result.Id);
         Assert.Equal(DefectStatus.Open, result.Status);
@@ -74,7 +74,7 @@ public class DefectTrackerTests : IDisposable
             Severity = DefectSeverity.Low
         };
 
-        var created = _defectTracker.CreateDefect(defect);
+        Defect created = _defectTracker.CreateDefect(defect);
         Thread.Sleep(10); // Ensure different timestamps
 
         var updated = new Defect
@@ -84,7 +84,7 @@ public class DefectTrackerTests : IDisposable
             Status = DefectStatus.InProgress
         };
 
-        var result = _defectTracker.UpdateDefect(created.Id, updated);
+        Defect result = _defectTracker.UpdateDefect(created.Id, updated);
 
         Assert.Equal("Updated title", result.Title);
         Assert.Equal(DefectSeverity.Critical, result.Severity);
@@ -98,14 +98,14 @@ public class DefectTrackerTests : IDisposable
     {
         var updatedDefect = new Defect { Title = "Updated" };
 
-        Assert.Throws<KeyNotFoundException>(() => 
+        Assert.Throws<KeyNotFoundException>(() =>
             _defectTracker.UpdateDefect("NON-EXISTENT", updatedDefect));
     }
 
     [Fact]
     public void UpdateDefect_WithNullDefect_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             _defectTracker.UpdateDefect("TEST-001", null!));
     }
 
@@ -117,7 +117,7 @@ public class DefectTrackerTests : IDisposable
     {
         var updatedDefect = new Defect { Title = "Updated" };
 
-        Assert.Throws<ArgumentException>(() => 
+        Assert.Throws<ArgumentException>(() =>
             _defectTracker.UpdateDefect(invalidId!, updatedDefect));
     }
 
@@ -125,9 +125,9 @@ public class DefectTrackerTests : IDisposable
     public void GetDefect_WithValidId_ReturnsDefect()
     {
         var defect = new Defect { Title = "Test defect" };
-        var created = _defectTracker.CreateDefect(defect);
+        Defect created = _defectTracker.CreateDefect(defect);
 
-        var result = _defectTracker.GetDefect(created.Id);
+        Defect result = _defectTracker.GetDefect(created.Id);
 
         Assert.Equal(created.Id, result.Id);
         Assert.Equal("Test defect", result.Title);
@@ -136,7 +136,7 @@ public class DefectTrackerTests : IDisposable
     [Fact]
     public void GetDefect_WithNonExistentId_ThrowsKeyNotFoundException()
     {
-        Assert.Throws<KeyNotFoundException>(() => 
+        Assert.Throws<KeyNotFoundException>(() =>
             _defectTracker.GetDefect("NON-EXISTENT"));
     }
 
@@ -146,7 +146,7 @@ public class DefectTrackerTests : IDisposable
     [InlineData(null)]
     public void GetDefect_WithInvalidId_ThrowsArgumentException(string? invalidId)
     {
-        Assert.Throws<ArgumentException>(() => 
+        Assert.Throws<ArgumentException>(() =>
             _defectTracker.GetDefect(invalidId!));
     }
 
@@ -157,9 +157,9 @@ public class DefectTrackerTests : IDisposable
         var defect2 = new Defect { Title = "Defect 2" };
         var defect3 = new Defect { Title = "Defect 3" };
 
-        var created1 = _defectTracker.CreateDefect(defect1);
-        var created2 = _defectTracker.CreateDefect(defect2);
-        var created3 = _defectTracker.CreateDefect(defect3);
+        Defect created1 = _defectTracker.CreateDefect(defect1);
+        Defect created2 = _defectTracker.CreateDefect(defect2);
+        Defect created3 = _defectTracker.CreateDefect(defect3);
 
         // Update one defect to InProgress status
         created2.Status = DefectStatus.InProgress;
@@ -226,7 +226,7 @@ public class DefectTrackerTests : IDisposable
     public void AdvanceDefectStatus_ThroughFullLifecycle_AdvancesCorrectly()
     {
         var defect = new Defect { Title = "Test defect" };
-        var created = _defectTracker.CreateDefect(defect);
+        Defect created = _defectTracker.CreateDefect(defect);
 
         // Open -> InProgress
         Assert.True(_defectTracker.AdvanceDefectStatus(created.Id));
@@ -248,7 +248,7 @@ public class DefectTrackerTests : IDisposable
     [Fact]
     public void GetDefectMetrics_WithMultipleDefects_ReturnsCorrectMetrics()
     {
-        var defects = new[]
+        Defect[] defects = new[]
         {
             new Defect { Title = "D1", Severity = DefectSeverity.Critical },
             new Defect { Title = "D2", Severity = DefectSeverity.High },
@@ -258,7 +258,7 @@ public class DefectTrackerTests : IDisposable
         };
 
         var createdDefects = new List<Defect>();
-        foreach (var defect in defects)
+        foreach (Defect? defect in defects)
         {
             createdDefects.Add(_defectTracker.CreateDefect(defect));
         }
@@ -276,7 +276,7 @@ public class DefectTrackerTests : IDisposable
         createdDefects[4].Status = DefectStatus.Closed;
         _defectTracker.UpdateDefect(createdDefects[4].Id, createdDefects[4]);
 
-        var metrics = _defectTracker.GetDefectMetrics();
+        DefectMetrics metrics = _defectTracker.GetDefectMetrics();
 
         Assert.Equal(5, metrics.TotalDefects);
         Assert.Equal(1, metrics.OpenDefects);
@@ -294,7 +294,7 @@ public class DefectTrackerTests : IDisposable
     [Fact]
     public void GetDefectMetrics_WithNoDefects_ReturnsZeroMetrics()
     {
-        var metrics = _defectTracker.GetDefectMetrics();
+        DefectMetrics metrics = _defectTracker.GetDefectMetrics();
 
         Assert.Equal(0, metrics.TotalDefects);
         Assert.Equal(0, metrics.OpenDefects);

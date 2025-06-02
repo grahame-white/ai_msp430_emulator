@@ -1,0 +1,82 @@
+using System.Text.Json;
+
+namespace MSP430.Emulator.Logging;
+
+/// <summary>
+/// A logger implementation that writes log messages to the console.
+/// </summary>
+public class ConsoleLogger : ILogger
+{
+    /// <inheritdoc/>
+    public LogLevel MinimumLevel { get; set; } = LogLevel.Info;
+
+    /// <inheritdoc/>
+    public void Log(LogLevel level, string message)
+    {
+        Log(level, message, null);
+    }
+
+    /// <inheritdoc/>
+    public virtual void Log(LogLevel level, string message, object? context)
+    {
+        if (!IsEnabled(level))
+            return;
+
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+        var levelString = level.ToString().ToUpper();
+        
+        var logEntry = $"[{timestamp}] [{levelString}] {message}";
+        
+        if (context != null)
+        {
+            var contextJson = JsonSerializer.Serialize(context, new JsonSerializerOptions 
+            { 
+                WriteIndented = false 
+            });
+            logEntry += $" Context: {contextJson}";
+        }
+
+        // Write to appropriate output stream based on level
+        if (level >= LogLevel.Error)
+        {
+            Console.Error.WriteLine(logEntry);
+        }
+        else
+        {
+            Console.WriteLine(logEntry);
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Debug(string message) => Log(LogLevel.Debug, message);
+
+    /// <inheritdoc/>
+    public void Debug(string message, object? context) => Log(LogLevel.Debug, message, context);
+
+    /// <inheritdoc/>
+    public void Info(string message) => Log(LogLevel.Info, message);
+
+    /// <inheritdoc/>
+    public void Info(string message, object? context) => Log(LogLevel.Info, message, context);
+
+    /// <inheritdoc/>
+    public void Warning(string message) => Log(LogLevel.Warning, message);
+
+    /// <inheritdoc/>
+    public void Warning(string message, object? context) => Log(LogLevel.Warning, message, context);
+
+    /// <inheritdoc/>
+    public void Error(string message) => Log(LogLevel.Error, message);
+
+    /// <inheritdoc/>
+    public void Error(string message, object? context) => Log(LogLevel.Error, message, context);
+
+    /// <inheritdoc/>
+    public void Fatal(string message) => Log(LogLevel.Fatal, message);
+
+    /// <inheritdoc/>
+    public void Fatal(string message, object? context) => Log(LogLevel.Fatal, message, context);
+
+    /// <inheritdoc/>
+    public bool IsEnabled(LogLevel level) => level >= MinimumLevel;
+}

@@ -79,10 +79,10 @@ public class DiagnosticReportGeneratorTests
     public void GenerateReport_WithDiagnosticLogger_ShouldIncludeRecentEntries()
     {
         // Arrange
-        var fileLogger = new FileLogger("test.log");
-        var diagnosticLogger = new DiagnosticLogger(fileLogger);
+        using var fileLogger = new FileLogger("test.log");
+        using var diagnosticLogger = new DiagnosticLogger(fileLogger);
         var generator = new DiagnosticReportGenerator(diagnosticLogger);
-        
+
         // Add some log entries
         diagnosticLogger.Info("Test log entry 1");
         diagnosticLogger.Warning("Test log entry 2");
@@ -96,12 +96,22 @@ public class DiagnosticReportGeneratorTests
         Assert.Contains("Test log entry 1", report);
         Assert.Contains("Test log entry 2", report);
         Assert.Contains("Test log entry 3", report);
-        
-        // Cleanup
-        diagnosticLogger.Dispose();
-        if (File.Exists("test.log"))
+
+        // Cleanup test file
+        try
         {
-            File.Delete("test.log");
+            if (File.Exists("test.log"))
+            {
+                File.Delete("test.log");
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Ignore file access errors during test cleanup
+        }
+        catch (IOException)
+        {
+            // Ignore I/O errors during test cleanup
         }
     }
 
@@ -126,7 +136,7 @@ public class DiagnosticReportGeneratorTests
         // Arrange
         var logger = new ConsoleLogger();
         var generator = new DiagnosticReportGenerator(logger);
-        string testFile = Path.Combine(Path.GetTempPath(), "test-diagnostic-report.md");
+        string testFile = Path.Join(Path.GetTempPath(), "test-diagnostic-report.md");
 
         try
         {
@@ -136,7 +146,7 @@ public class DiagnosticReportGeneratorTests
             // Assert
             Assert.Equal(Path.GetFullPath(testFile), generatedPath);
             Assert.True(File.Exists(testFile));
-            
+
             string content = File.ReadAllText(testFile);
             Assert.Contains("# MSP430 Emulator Diagnostic Report", content);
         }
@@ -166,24 +176,28 @@ public class DiagnosticReportGeneratorTests
             Assert.True(File.Exists(generatedPath));
             Assert.Contains("msp430-diagnostic-", Path.GetFileName(generatedPath));
             Assert.EndsWith(".md", generatedPath);
-            
+
             string content = File.ReadAllText(generatedPath);
             Assert.Contains("# MSP430 Emulator Diagnostic Report", content);
         }
         finally
         {
             // Cleanup - find and delete any files we created
-            var currentDir = Directory.GetCurrentDirectory();
-            var files = Directory.GetFiles(currentDir, "msp430-diagnostic-*.md");
-            foreach (var file in files)
+            string currentDir = Directory.GetCurrentDirectory();
+            string[] files = Directory.GetFiles(currentDir, "msp430-diagnostic-*.md");
+            foreach (string file in files)
             {
                 try
                 {
                     File.Delete(file);
                 }
-                catch
+                catch (UnauthorizedAccessException)
                 {
-                    // Ignore cleanup errors
+                    // Ignore file access errors during test cleanup
+                }
+                catch (IOException)
+                {
+                    // Ignore I/O errors during test cleanup
                 }
             }
         }

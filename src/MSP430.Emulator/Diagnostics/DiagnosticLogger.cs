@@ -26,10 +26,10 @@ public class DiagnosticLogger : ILogger, IDisposable
     }
 
     /// <inheritdoc/>
-    public LogLevel MinimumLevel 
-    { 
-        get => _innerLogger.MinimumLevel; 
-        set => _innerLogger.MinimumLevel = value; 
+    public LogLevel MinimumLevel
+    {
+        get => _innerLogger.MinimumLevel;
+        set => _innerLogger.MinimumLevel = value;
     }
 
     /// <inheritdoc/>
@@ -41,11 +41,14 @@ public class DiagnosticLogger : ILogger, IDisposable
     /// <inheritdoc/>
     public void Log(LogLevel level, string message, object? context)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
 
         // Log to underlying logger
         _innerLogger.Log(level, message, context);
-        
+
         // Store in recent entries buffer
         var entry = new LogEntry
         {
@@ -54,9 +57,9 @@ public class DiagnosticLogger : ILogger, IDisposable
             Message = message,
             Context = context
         };
-        
+
         _recentEntries.Enqueue(entry);
-        
+
         // Maintain buffer size
         while (_recentEntries.Count > _maxEntries)
         {
@@ -104,14 +107,14 @@ public class DiagnosticLogger : ILogger, IDisposable
     /// <returns>An array of recent log entries, ordered chronologically.</returns>
     public LogEntry[] GetRecentEntries(int maxEntries = 0)
     {
-        var entries = _recentEntries.ToArray();
-        
+        LogEntry[] entries = _recentEntries.ToArray();
+
         if (maxEntries > 0 && entries.Length > maxEntries)
         {
             // Return the most recent entries
             return entries.Skip(entries.Length - maxEntries).ToArray();
         }
-        
+
         return entries;
     }
 
@@ -122,7 +125,7 @@ public class DiagnosticLogger : ILogger, IDisposable
     /// <returns>A formatted string containing recent log entries.</returns>
     public string FormatRecentEntries(int maxEntries = 50)
     {
-        var entries = GetRecentEntries(maxEntries);
+        LogEntry[] entries = GetRecentEntries(maxEntries);
         if (entries.Length == 0)
         {
             return "No recent log entries available.";
@@ -131,15 +134,15 @@ public class DiagnosticLogger : ILogger, IDisposable
         var formatted = new System.Text.StringBuilder();
         formatted.AppendLine($"Recent Log Entries (last {entries.Length} entries):");
         formatted.AppendLine("```");
-        
-        foreach (var entry in entries)
+
+        foreach (LogEntry entry in entries)
         {
             string formattedEntry = LogEntryFormatter.FormatLogEntry(entry.Level, entry.Message, entry.Context);
             formatted.AppendLine(formattedEntry);
         }
-        
+
         formatted.AppendLine("```");
-        
+
         return formatted.ToString();
     }
 

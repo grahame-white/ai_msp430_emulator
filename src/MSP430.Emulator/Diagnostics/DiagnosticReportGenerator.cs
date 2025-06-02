@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using MSP430.Emulator.Logging;
 
@@ -28,7 +29,7 @@ public class DiagnosticReportGenerator
     public string GenerateReport()
     {
         var report = new StringBuilder();
-        
+
         report.AppendLine("# MSP430 Emulator Diagnostic Report");
         report.AppendLine();
         report.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
@@ -36,13 +37,13 @@ public class DiagnosticReportGenerator
 
         // System Information
         AppendSystemInformation(report);
-        
+
         // Application Information  
         AppendApplicationInformation(report);
-        
+
         // Runtime Information
         AppendRuntimeInformation(report);
-        
+
         // Recent Log Entries (if available)
         AppendRecentLogEntries(report);
 
@@ -73,7 +74,7 @@ public class DiagnosticReportGenerator
         }
 
         string report = GenerateReport();
-        
+
         // Ensure directory exists
         string? directory = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -82,9 +83,9 @@ public class DiagnosticReportGenerator
         }
 
         File.WriteAllText(filePath, report);
-        
+
         _logger.Info($"Diagnostic report generated: {Path.GetFullPath(filePath)}");
-        
+
         return Path.GetFullPath(filePath);
     }
 
@@ -92,7 +93,7 @@ public class DiagnosticReportGenerator
     {
         report.AppendLine("## System Information");
         report.AppendLine();
-        
+
         try
         {
             report.AppendLine($"**Operating System:** {RuntimeInformation.OSDescription}");
@@ -103,17 +104,25 @@ public class DiagnosticReportGenerator
             report.AppendLine($"**Working Directory:** {Environment.CurrentDirectory}");
             report.AppendLine($"**System Directory:** {Environment.SystemDirectory}");
             report.AppendLine($"**Processor Count:** {Environment.ProcessorCount}");
-            
+
             if (OperatingSystem.IsWindows())
             {
                 report.AppendLine($"**Windows Version:** {Environment.OSVersion}");
             }
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
-            report.AppendLine($"**Error gathering system information:** {ex.Message}");
+            report.AppendLine($"**Error gathering system information (access denied):** {ex.Message}");
         }
-        
+        catch (SecurityException ex)
+        {
+            report.AppendLine($"**Error gathering system information (security):** {ex.Message}");
+        }
+        catch (PlatformNotSupportedException ex)
+        {
+            report.AppendLine($"**Error gathering system information (platform):** {ex.Message}");
+        }
+
         report.AppendLine();
     }
 
@@ -121,18 +130,18 @@ public class DiagnosticReportGenerator
     {
         report.AppendLine("## Application Information");
         report.AppendLine();
-        
+
         try
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var version = assembly.GetName().Version;
-            var location = assembly.Location;
-            
+            Version? version = assembly.GetName().Version;
+            string location = assembly.Location;
+
             report.AppendLine($"**Assembly:** {assembly.GetName().Name}");
             report.AppendLine($"**Version:** {version}");
             report.AppendLine($"**Location:** {location}");
             report.AppendLine($"**Framework:** {Assembly.GetExecutingAssembly().GetCustomAttribute<System.Runtime.Versioning.TargetFrameworkAttribute>()?.FrameworkName ?? "Unknown"}");
-            
+
             // Get file version if available
             if (!string.IsNullOrEmpty(location) && File.Exists(location))
             {
@@ -141,11 +150,19 @@ public class DiagnosticReportGenerator
                 report.AppendLine($"**Product Version:** {fileVersion.ProductVersion}");
             }
         }
-        catch (Exception ex)
+        catch (FileNotFoundException ex)
         {
-            report.AppendLine($"**Error gathering application information:** {ex.Message}");
+            report.AppendLine($"**Error gathering application information (file not found):** {ex.Message}");
         }
-        
+        catch (UnauthorizedAccessException ex)
+        {
+            report.AppendLine($"**Error gathering application information (access denied):** {ex.Message}");
+        }
+        catch (SecurityException ex)
+        {
+            report.AppendLine($"**Error gathering application information (security):** {ex.Message}");
+        }
+
         report.AppendLine();
     }
 
@@ -153,27 +170,27 @@ public class DiagnosticReportGenerator
     {
         report.AppendLine("## Runtime Information");
         report.AppendLine();
-        
+
         try
         {
             report.AppendLine($"**.NET Version:** {RuntimeInformation.FrameworkDescription}");
             report.AppendLine($"**Runtime Identifier:** {RuntimeInformation.RuntimeIdentifier}");
             report.AppendLine($"**GC Memory (bytes):** {GC.GetTotalMemory(false):N0}");
-            
+
             // Memory usage
             var process = System.Diagnostics.Process.GetCurrentProcess();
             report.AppendLine($"**Working Set (bytes):** {process.WorkingSet64:N0}");
             report.AppendLine($"**Private Memory (bytes):** {process.PrivateMemorySize64:N0}");
             report.AppendLine($"**Process Start Time:** {process.StartTime:yyyy-MM-dd HH:mm:ss}");
             report.AppendLine($"**Total Processor Time:** {process.TotalProcessorTime}");
-            
+
             // Environment variables (selected ones that might be relevant)
             report.AppendLine();
             report.AppendLine("### Relevant Environment Variables");
-            var relevantVars = new[] { "DOTNET_ROOT", "DOTNET_CLI_TELEMETRY_OPTOUT", "PATH" };
-            foreach (var varName in relevantVars)
+            string[] relevantVars = new[] { "DOTNET_ROOT", "DOTNET_CLI_TELEMETRY_OPTOUT", "PATH" };
+            foreach (string? varName in relevantVars)
             {
-                var value = Environment.GetEnvironmentVariable(varName);
+                string? value = Environment.GetEnvironmentVariable(varName);
                 if (!string.IsNullOrEmpty(value))
                 {
                     // Truncate PATH if it's very long
@@ -185,11 +202,19 @@ public class DiagnosticReportGenerator
                 }
             }
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
-            report.AppendLine($"**Error gathering runtime information:** {ex.Message}");
+            report.AppendLine($"**Error gathering runtime information (access denied):** {ex.Message}");
         }
-        
+        catch (SecurityException ex)
+        {
+            report.AppendLine($"**Error gathering runtime information (security):** {ex.Message}");
+        }
+        catch (PlatformNotSupportedException ex)
+        {
+            report.AppendLine($"**Error gathering runtime information (platform):** {ex.Message}");
+        }
+
         report.AppendLine();
     }
 
@@ -197,7 +222,7 @@ public class DiagnosticReportGenerator
     {
         report.AppendLine("## Recent Log Entries");
         report.AppendLine();
-        
+
         try
         {
             // Check if the logger is a DiagnosticLogger that can provide recent entries
@@ -211,11 +236,15 @@ public class DiagnosticReportGenerator
                 report.AppendLine("*Recent log entries not available. To capture log history, use DiagnosticLogger instead of the standard logger.*");
             }
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
-            report.AppendLine($"**Error retrieving recent log entries:** {ex.Message}");
+            report.AppendLine($"**Error retrieving recent log entries (invalid state):** {ex.Message}");
         }
-        
+        catch (ArgumentException ex)
+        {
+            report.AppendLine($"**Error retrieving recent log entries (invalid argument):** {ex.Message}");
+        }
+
         report.AppendLine();
     }
 }

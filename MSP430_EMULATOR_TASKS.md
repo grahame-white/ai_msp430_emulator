@@ -235,6 +235,28 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
 - Validate issue updates reflect actual task progress
 - Test workflow triggers on task file modifications
 
+**Script-Specific Test Steps**:
+- **parse-tasks.js**:
+  - Unit test parsing of various task formats (different priorities, efforts, dependencies)
+  - Test extraction of task metadata (acceptance criteria, files to create, testing strategy)
+  - Validate handling of malformed markdown sections
+  - Test task status detection (completed vs pending checkboxes)
+- **create-issues.js**:
+  - Integration test issue creation via GitHub API
+  - Test proper formatting of issue titles and bodies
+  - Validate metadata assignment (labels, milestones, assignees)
+  - Test handling of API rate limits and errors
+- **update-issues.js**:
+  - Unit test comparison of task state vs GitHub issue state
+  - Test selective updating of changed fields only
+  - Validate progress tracking and status synchronization
+  - Test handling of concurrent modifications
+- **sync-tasks.js**:
+  - Integration test full synchronization workflow
+  - Test dependency linking between issues
+  - Validate milestone and phase organization
+  - Test cleanup of obsolete issues when tasks are removed
+
 ---
 
 ## Phase 2: Core Architecture Foundation

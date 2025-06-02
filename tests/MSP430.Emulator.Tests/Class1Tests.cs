@@ -13,7 +13,7 @@ public class Class1Tests
     [Fact]
     public void Class1_GetMessage_ReturnsExpectedMessage()
     {
-        Class1 class1 = new Class1();
+        var class1 = new Class1();
         string result = class1.GetMessage();
         Assert.Equal("Hello, MSP430 Emulator!", result);
     }
@@ -21,7 +21,7 @@ public class Class1Tests
     [Fact]
     public void Class1_Add_ReturnsSum()
     {
-        Class1 class1 = new Class1();
+        var class1 = new Class1();
         int result = class1.Add(2, 3);
         Assert.Equal(5, result);
     }

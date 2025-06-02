@@ -358,6 +358,3 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-
-# MSP430 Emulator specific
-reports/

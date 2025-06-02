@@ -9,4 +9,20 @@ public class UnitTest1
         // This is a placeholder test for the initial project setup
         Assert.True(true);
     }
+
+    [Fact]
+    public void Class1_GetMessage_ReturnsExpectedMessage()
+    {
+        Class1 class1 = new Class1();
+        string result = class1.GetMessage();
+        Assert.Equal("Hello, MSP430 Emulator!", result);
+    }
+
+    [Fact]
+    public void Class1_Add_ReturnsSum()
+    {
+        Class1 class1 = new Class1();
+        int result = class1.Add(2, 3);
+        Assert.Equal(5, result);
+    }
 }

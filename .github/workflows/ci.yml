@@ -145,6 +145,18 @@ jobs:
         echo "Running ESLint..."
         npm run lint
 
+    - name: Validate YAML files
+      run: |
+        cd .github/scripts
+        echo "Running YAML linting..."
+        npm run lint:yaml
+
+    - name: Validate GitHub Actions workflows
+      run: |
+        cd .github/scripts
+        echo "Validating GitHub Actions workflows..."
+        npm run validate:workflows
+
     - name: Validate package.json
       run: |
         cd .github/scripts

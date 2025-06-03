@@ -17,8 +17,13 @@ on:
   
   workflow_dispatch:
     inputs:
+      confirm_execution:
+        description: '⚠️ I understand this will create/update GitHub issues (MUST be checked for real execution)'
+        required: true
+        default: false
+        type: boolean
       dry_run:
-        description: 'Run in dry-run mode (preview only)'
+        description: 'Run in dry-run mode (preview only) - ignored if confirmation is unchecked'
         required: false
         default: 'true'
         type: boolean
@@ -139,7 +144,8 @@ jobs:
     if: |
       needs.validate-tasks.outputs.tasks-valid == 'true' && 
       (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main') &&
-      (github.event.inputs.protect_manual != 'false')
+      (github.event.inputs.protect_manual != 'false') &&
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.confirm_execution == 'true')
     
     steps:
     - name: Checkout code
@@ -162,7 +168,10 @@ jobs:
       run: |
         cd .github/scripts
         DRY_RUN_FLAG=""
-        if [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
+          DRY_RUN_FLAG="--dry-run"
+          echo "⚠️ Running in dry-run mode - confirmation not checked"
+        elif [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
           DRY_RUN_FLAG="--dry-run"
         fi
         
@@ -179,6 +188,35 @@ jobs:
       (needs.protect-manual-issues.result == 'success' || needs.protect-manual-issues.result == 'skipped')
     
     steps:
+    - name: Safety check for manual trigger
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        if [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
+          echo "⚠️ SAFETY MODE ACTIVATED ⚠️"
+          echo ""
+          echo "The confirmation checkbox was not checked."
+          echo "This workflow will run in DRY-RUN mode only."
+          echo "No GitHub issues will be created or modified."
+          echo ""
+          echo "To perform real synchronization:"
+          echo "1. Re-run this workflow manually"
+          echo "2. Check the confirmation checkbox: '⚠️ I understand this will create/update GitHub issues'"
+          echo "3. Optionally uncheck 'dry_run' if you want full execution"
+          echo ""
+          echo "Current mode: DRY-RUN (safe preview only)"
+        else
+          echo "✅ CONFIRMATION RECEIVED ✅"
+          echo ""
+          echo "The confirmation checkbox was checked."
+          echo "This workflow is authorized to create/update GitHub issues."
+          echo ""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "Current mode: DRY-RUN (preview mode requested)"
+          else
+            echo "Current mode: FULL SYNCHRONIZATION"
+          fi
+        fi
+
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -196,15 +234,26 @@ jobs:
     - name: Determine operation mode
       id: mode
       run: |
-        if [ "${{ github.event.inputs.force_recovery }}" = "true" ]; then
+        # Check if confirmation is provided for manual dispatch
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
+          echo "mode=dry-run" >> $GITHUB_OUTPUT
+          echo "⚠️ Confirmation not checked - forcing dry run mode for safety"
+          echo "To perform real execution, please check the confirmation checkbox when triggering the workflow"
+        elif [ "${{ github.event.inputs.force_recovery }}" = "true" ] && [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
           echo "mode=recovery" >> $GITHUB_OUTPUT
-          echo "🚨 Disaster recovery mode enabled"
+          echo "🚨 Disaster recovery mode enabled (confirmed)"
         elif [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
           echo "mode=dry-run" >> $GITHUB_OUTPUT
           echo "🔍 Dry run mode enabled"
-        else
+        elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
           echo "mode=sync" >> $GITHUB_OUTPUT
-          echo "🔄 Full synchronization mode enabled"
+          echo "🔄 Full synchronization mode enabled (confirmed)"
+        elif [ "${{ github.event_name }}" = "push" ]; then
+          echo "mode=sync" >> $GITHUB_OUTPUT
+          echo "🔄 Full synchronization mode enabled (push trigger)"
+        else
+          echo "mode=dry-run" >> $GITHUB_OUTPUT
+          echo "🔍 Dry run mode enabled (default safety)"
         fi
 
     - name: Run disaster recovery
@@ -246,6 +295,14 @@ jobs:
         echo "**Mode:** ${{ steps.mode.outputs.mode }}" >> $GITHUB_STEP_SUMMARY
         echo "**Tasks Processed:** ${{ needs.validate-tasks.outputs.tasks-count }}" >> $GITHUB_STEP_SUMMARY
         echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
+            echo "**Confirmation:** ✅ Confirmed - Real execution authorized" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Confirmation:** ⚠️ Not confirmed - Safety mode (dry-run only)" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
         
         if [ "${{ steps.mode.outputs.mode }}" != "dry-run" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY

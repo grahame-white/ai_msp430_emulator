@@ -67,7 +67,7 @@ MSP430 Register (16-bit):
 │15 │14 │13 │12 │11 │10 │ 9 │ 8 │ 7 │ 6 │ 5 │ 4 │ 3 │ 2 │ 1 │ 0 │
 ├───┴───┴───┴───┴───┴───┴───┴───┼───┴───┴───┴───┴───┴───┴───┴───┤
 │        High Byte (15-8)       │        Low Byte (7-0)        │
-└───────────────────────────────┴──────────────────────────────┘
+└───────────────────────────────┴───────────────────────────────┘
 ```
 
 #### Byte Access Mapping
@@ -170,10 +170,13 @@ The condition code flags are updated by arithmetic and logical operations:
 | Carry (C) | Zero (Z) | Negative (N) | Result Description |
 |-----------|----------|--------------|-------------------|
 | 0 | 0 | 0 | Positive result, no carry |
-| 0 | 1 | 0 | Zero result |
-| 1 | 0 | 0 | Positive result with carry |
 | 0 | 0 | 1 | Negative result |
+| 0 | 1 | 0 | Zero result |
+| 0 | 1 | 1 | Zero result with negative flag (rare) |
+| 1 | 0 | 0 | Positive result with carry |
 | 1 | 0 | 1 | Negative result with carry |
+| 1 | 1 | 0 | Zero result with carry |
+| 1 | 1 | 1 | Zero result with carry and negative (rare) |
 
 ### System Control Flags
 

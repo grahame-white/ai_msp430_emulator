@@ -217,6 +217,9 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
 - [ ] Add milestone assignment based on task dependencies
 - [ ] Create issue linking for task dependencies
 - [ ] Add automated issue closure when tasks are completed
+- [ ] Implement dry run mode to preview changes before execution
+- [ ] Create disaster recovery script to rebuild issues for incomplete tasks
+- [ ] Add protection mechanism to prevent modification of manually created issues
 
 **Files to Create**:
 ```
@@ -225,6 +228,9 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
 .github/scripts/create-issues.js
 .github/scripts/update-issues.js
 .github/scripts/sync-tasks.js
+.github/scripts/dry-run.js
+.github/scripts/disaster-recovery.js
+.github/scripts/manual-issue-protector.js
 .github/config/issue-templates.json
 ```
 
@@ -234,6 +240,9 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
 - Test issue creation with proper formatting and metadata
 - Validate issue updates reflect actual task progress
 - Test workflow triggers on task file modifications
+- Test dry run mode produces accurate preview without making changes
+- Validate disaster recovery script can rebuild issues for incomplete tasks
+- Test manual issue protection prevents automated modification of manually created issues
 
 **Script-Specific Test Steps**:
 - **parse-tasks.js**:
@@ -256,6 +265,21 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
   - Test dependency linking between issues
   - Validate milestone and phase organization
   - Test cleanup of obsolete issues when tasks are removed
+- **dry-run.js**:
+  - Unit test preview generation without making actual API calls
+  - Test comparison of current state vs proposed changes
+  - Validate output formatting for human review
+  - Test detection of potential conflicts or issues
+- **disaster-recovery.js**:
+  - Integration test reconstruction of issues from task list
+  - Test identification of incomplete vs completed tasks
+  - Validate preservation of existing issue relationships
+  - Test handling of orphaned or corrupted issue states
+- **manual-issue-protector.js**:
+  - Unit test detection of manually created issues
+  - Test identification of automation-managed vs manual issues
+  - Validate protection mechanisms prevent unauthorized modifications
+  - Test handling of edge cases (converted manual issues, etc.)
 
 ---
 

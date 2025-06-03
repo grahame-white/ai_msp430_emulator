@@ -384,13 +384,13 @@ class GitHubIssuesCreator {
 
         // For 404, only treat as permission error if message contains permission indicators
         if (errorStatus === 404) {
-            return permissionIndicators.some(indicator => 
+            return permissionIndicators.some(indicator =>
                 errorMessage.toLowerCase().includes(indicator.toLowerCase())
             );
         }
 
         // Check message content for permission indicators
-        return permissionIndicators.some(indicator => 
+        return permissionIndicators.some(indicator =>
             errorMessage.toLowerCase().includes(indicator.toLowerCase())
         );
     }

@@ -348,8 +348,12 @@ class ManualIssueProtector {
             // Report overall success
             if (labelSuccess || commentSuccess) {
                 const actions = [];
-                if (labelSuccess) actions.push('labeled');
-                if (commentSuccess) actions.push('commented');
+                if (labelSuccess) {
+                    actions.push('labeled');
+                }
+                if (commentSuccess) {
+                    actions.push('commented');
+                }
                 console.log(`✅ Protected manual issue #${issue.number} (${actions.join(' + ')}): ${issue.title}`);
             } else {
                 console.log(`⚠️  Issue #${issue.number} identified as manual but could not be fully protected due to permissions: ${issue.title}`);
@@ -436,7 +440,7 @@ class ManualIssueProtector {
                         console.log('✅ Created protection label: manual-issue-protected');
                     } catch (createError) {
                         if (this.isPermissionError(createError)) {
-                            console.warn(`⚠️  Cannot create protection label due to insufficient permissions`);
+                            console.warn('⚠️  Cannot create protection label due to insufficient permissions');
                         } else {
                             console.warn(`⚠️  Could not create protection label: ${createError.message}`);
                         }
@@ -445,7 +449,7 @@ class ManualIssueProtector {
                     console.log('[DRY RUN] Would create protection label: manual-issue-protected');
                 }
             } else if (this.isPermissionError(error)) {
-                console.warn(`⚠️  Cannot access label information due to insufficient permissions`);
+                console.warn('⚠️  Cannot access label information due to insufficient permissions');
             } else {
                 console.warn(`⚠️  Error checking protection label: ${error.message}`);
             }
@@ -503,13 +507,13 @@ class ManualIssueProtector {
 
         // For 404, only treat as permission error if message contains permission indicators
         if (errorStatus === 404) {
-            return permissionIndicators.some(indicator => 
+            return permissionIndicators.some(indicator =>
                 errorMessage.toLowerCase().includes(indicator.toLowerCase())
             );
         }
 
         // Check message content for permission indicators
-        return permissionIndicators.some(indicator => 
+        return permissionIndicators.some(indicator =>
             errorMessage.toLowerCase().includes(indicator.toLowerCase())
         );
     }

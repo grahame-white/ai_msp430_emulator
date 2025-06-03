@@ -294,7 +294,7 @@ module.exports = { TaskParser };
 
 // Main function for CLI usage
 async function main() {
-    const filePath = process.argv[2] || path.join(__dirname, '../../MSP430_EMULATOR_TASKS.md');
+    const filePath = process.argv[2] || path.resolve(__dirname, '../../MSP430_EMULATOR_TASKS.md');
 
     try {
         const parser = new TaskParser(filePath);

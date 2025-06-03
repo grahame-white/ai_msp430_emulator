@@ -151,10 +151,18 @@ jobs:
         echo "Running YAML linting..."
         npm run lint:yaml
 
-    - name: Run actionlint
-      uses: raven-actions/actionlint@v1
+    - name: Setup Go
+      uses: actions/setup-go@v5
       with:
-        files: ".github/workflows/*.yml"
+        go-version: 'stable'
+
+    - name: Install actionlint
+      run: go install github.com/rhysd/actionlint/cmd/actionlint@latest
+
+    - name: Run actionlint
+      run: |
+        export PATH=$PATH:$(go env GOPATH)/bin
+        actionlint .github/workflows/*.yml
 
     - name: Validate package.json
       run: |

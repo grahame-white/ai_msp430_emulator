@@ -1,0 +1,27 @@
+{
+  "name": "msp430-issues-automation",
+  "version": "1.0.0",
+  "description": "GitHub Issues automation for MSP430 Emulator project",
+  "scripts": {
+    "test": "node test-runner.js",
+    "lint": "eslint *.js",
+    "lint:fix": "eslint *.js --fix",
+    "parse": "node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md",
+    "dry-run": "node dry-run.js ../../MSP430_EMULATOR_TASKS.md",
+    "sync": "node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md --dry-run",
+    "protect": "node manual-issue-protector.js --dry-run",
+    "recover": "node disaster-recovery.js ../../MSP430_EMULATOR_TASKS.md --dry-run"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["github", "automation", "issues", "msp430", "emulator"],
+  "author": "MSP430 Emulator Team",
+  "license": "MIT"
+}

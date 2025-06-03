@@ -1,0 +1,331 @@
+{
+  "templates": {
+    "task": {
+      "title": "Task {taskId}: {taskTitle}",
+      "body": "**Priority**: {priority}\n**Estimated Effort**: {effort}\n**Phase**: {phase}\n**Dependencies**: {dependencies}\n\n{description}\n\n## Acceptance Criteria\n\n{acceptanceCriteria}\n\n## Files to Create\n\n```\n{filesToCreate}\n```\n\n## Testing Strategy\n\n{testingStrategy}\n\n---\n\n*This issue was automatically generated from MSP430_EMULATOR_TASKS.md*\n*🤖 Managed by GitHub Issues Automation*",
+      "labels": [
+        "task",
+        "{phase-label}",
+        "priority-{priority-label}",
+        "effort-{effort-label}",
+        "status-{status-label}"
+      ]
+    },
+    "bug": {
+      "title": "Bug: {summary}",
+      "body": "## Bug Description\n\n{description}\n\n## Steps to Reproduce\n\n1. {step1}\n2. {step2}\n3. {step3}\n\n## Expected Behavior\n\n{expectedBehavior}\n\n## Actual Behavior\n\n{actualBehavior}\n\n## Environment\n\n- OS: {os}\n- .NET Version: {dotnetVersion}\n- MSP430 Emulator Version: {emulatorVersion}\n\n## Additional Context\n\n{additionalContext}",
+      "labels": [
+        "bug",
+        "needs-triage"
+      ]
+    },
+    "enhancement": {
+      "title": "Enhancement: {summary}",
+      "body": "## Enhancement Description\n\n{description}\n\n## Use Case\n\n{useCase}\n\n## Proposed Solution\n\n{proposedSolution}\n\n## Acceptance Criteria\n\n{acceptanceCriteria}\n\n## Additional Context\n\n{additionalContext}",
+      "labels": [
+        "enhancement",
+        "needs-discussion"
+      ]
+    }
+  },
+  "labels": {
+    "required": [
+      {
+        "name": "task",
+        "color": "0075ca",
+        "description": "Development task from task list"
+      },
+      {
+        "name": "bug",
+        "color": "d73a49",
+        "description": "Something isn't working"
+      },
+      {
+        "name": "enhancement",
+        "color": "a2eeef",
+        "description": "New feature or request"
+      },
+      {
+        "name": "manual-issue-protected",
+        "color": "ff6b6b",
+        "description": "Issue is manually created and protected from automation"
+      },
+      {
+        "name": "obsolete",
+        "color": "fef2c0",
+        "description": "Issue is no longer relevant"
+      },
+      {
+        "name": "recovered",
+        "color": "c5def5",
+        "description": "Issue was recovered during disaster recovery"
+      },
+      {
+        "name": "corrupted",
+        "color": "f9c513",
+        "description": "Issue was corrupted and replaced"
+      }
+    ],
+    "phases": [
+      {
+        "name": "phase-1",
+        "color": "c5def5",
+        "description": "Phase 1: Project Infrastructure & Setup"
+      },
+      {
+        "name": "phase-2",
+        "color": "c5def5",
+        "description": "Phase 2: Core Architecture Foundation"
+      },
+      {
+        "name": "phase-3",
+        "color": "c5def5",
+        "description": "Phase 3: Memory System Implementation"
+      },
+      {
+        "name": "phase-4",
+        "color": "c5def5",
+        "description": "Phase 4: CPU Core Implementation"
+      },
+      {
+        "name": "phase-5",
+        "color": "c5def5",
+        "description": "Phase 5: Instruction Set - Arithmetic"
+      },
+      {
+        "name": "phase-6",
+        "color": "c5def5",
+        "description": "Phase 6: Instruction Set - Logic & Data Movement"
+      },
+      {
+        "name": "phase-7",
+        "color": "c5def5",
+        "description": "Phase 7: Peripheral System Foundation"
+      },
+      {
+        "name": "phase-8",
+        "color": "c5def5",
+        "description": "Phase 8: Interrupt System"
+      },
+      {
+        "name": "phase-9",
+        "color": "c5def5",
+        "description": "Phase 9: Advanced Features"
+      },
+      {
+        "name": "phase-10",
+        "color": "c5def5",
+        "description": "Phase 10: Validation & Performance"
+      },
+      {
+        "name": "phase-11",
+        "color": "c5def5",
+        "description": "Phase 11: Documentation and Polish"
+      }
+    ],
+    "priorities": [
+      {
+        "name": "priority-critical",
+        "color": "d73a49",
+        "description": "Critical priority task"
+      },
+      {
+        "name": "priority-high",
+        "color": "fd7e14",
+        "description": "High priority task"
+      },
+      {
+        "name": "priority-medium",
+        "color": "fbca04",
+        "description": "Medium priority task"
+      },
+      {
+        "name": "priority-low",
+        "color": "28a745",
+        "description": "Low priority task"
+      }
+    ],
+    "efforts": [
+      {
+        "name": "effort-small",
+        "color": "e4e669",
+        "description": "1-2 hours effort"
+      },
+      {
+        "name": "effort-medium",
+        "color": "f9d71c",
+        "description": "3-4 hours effort"
+      },
+      {
+        "name": "effort-large",
+        "color": "d4ac0d",
+        "description": "5+ hours effort"
+      }
+    ],
+    "statuses": [
+      {
+        "name": "status-pending",
+        "color": "ededed",
+        "description": "Task not yet started"
+      },
+      {
+        "name": "status-in-progress",
+        "color": "ffd700",
+        "description": "Task currently being worked on"
+      },
+      {
+        "name": "status-completed",
+        "color": "28a745",
+        "description": "Task completed"
+      },
+      {
+        "name": "status-blocked",
+        "color": "d73a49",
+        "description": "Task blocked by dependencies"
+      }
+    ],
+    "general": [
+      {
+        "name": "needs-triage",
+        "color": "d4ac0d",
+        "description": "Needs initial assessment"
+      },
+      {
+        "name": "needs-discussion",
+        "color": "c5def5",
+        "description": "Needs team discussion"
+      },
+      {
+        "name": "help-wanted",
+        "color": "7057ff",
+        "description": "Extra attention is needed"
+      },
+      {
+        "name": "good-first-issue",
+        "color": "7057ff",
+        "description": "Good for newcomers"
+      },
+      {
+        "name": "duplicate",
+        "color": "cfd3d7",
+        "description": "This issue or pull request already exists"
+      },
+      {
+        "name": "invalid",
+        "color": "e4e669",
+        "description": "This doesn't seem right"
+      },
+      {
+        "name": "question",
+        "color": "d876e3",
+        "description": "Further information is requested"
+      },
+      {
+        "name": "wontfix",
+        "color": "ffffff",
+        "description": "This will not be worked on"
+      }
+    ]
+  },
+  "milestones": {
+    "template": {
+      "title": "{phase}",
+      "description": "Tasks for {phase} of MSP430 Emulator development\n\n📊 Progress: {completedTasks}/{totalTasks} tasks completed ({progressPercent}%)",
+      "state": "open"
+    },
+    "phases": [
+      {
+        "title": "Phase 1",
+        "description": "Project Infrastructure & Setup - Essential project foundation including defect management and automation"
+      },
+      {
+        "title": "Phase 2", 
+        "description": "Core Architecture Foundation - Basic emulator framework with visual documentation"
+      },
+      {
+        "title": "Phase 3",
+        "description": "Memory System Implementation - Data storage and access with layout diagrams"
+      },
+      {
+        "title": "Phase 4",
+        "description": "CPU Core Implementation - Fundamental processing unit with state diagrams"
+      },
+      {
+        "title": "Phase 5",
+        "description": "Instruction Set - Arithmetic - Mathematical operations with flow diagrams"
+      },
+      {
+        "title": "Phase 6",
+        "description": "Instruction Set - Logic & Data Movement - Logic operations and data transfers"
+      },
+      {
+        "title": "Phase 7",
+        "description": "Peripheral System Foundation - External interfaces and devices with interaction diagrams"
+      },
+      {
+        "title": "Phase 8",
+        "description": "Interrupt System - Interrupt handling and processing"
+      },
+      {
+        "title": "Phase 9",
+        "description": "Advanced Features - Debugging, optimization, validation with workflow diagrams"
+      },
+      {
+        "title": "Phase 10",
+        "description": "Validation & Performance - Testing and optimization"
+      },
+      {
+        "title": "Phase 11",
+        "description": "Documentation & Polish - User-facing materials with comprehensive visual guides"
+      }
+    ]
+  },
+  "automation": {
+    "settings": {
+      "rateLimit": {
+        "requestsPerHour": 5000,
+        "delayBetweenRequests": 300
+      },
+      "retryPolicy": {
+        "maxRetries": 3,
+        "backoffMultiplier": 2,
+        "initialDelay": 1000
+      },
+      "protection": {
+        "preserveManualIssues": true,
+        "requireAutomationMarker": true,
+        "protectionLabels": ["manual-issue-protected"]
+      }
+    },
+    "triggers": {
+      "files": ["MSP430_EMULATOR_TASKS.md"],
+      "events": ["push", "pull_request"],
+      "branches": ["main", "develop"]
+    },
+    "notifications": {
+      "onSuccess": false,
+      "onError": true,
+      "channels": ["issues", "discussions"]
+    }
+  },
+  "formatting": {
+    "acceptanceCriteria": {
+      "format": "- {checkbox} {text}",
+      "checkboxCompleted": "[x]",
+      "checkboxPending": "[ ]"
+    },
+    "filesToCreate": {
+      "format": "```\n{files}\n```",
+      "separator": "\n"
+    },
+    "testingStrategy": {
+      "format": "- {strategy}",
+      "separator": "\n"
+    },
+    "dependencies": {
+      "format": "Task {id}",
+      "separator": ", ",
+      "none": "None"
+    }
+  }
+}

@@ -23,15 +23,15 @@ public class MemorySystemIntegrationTests
         validator.ValidateWrite(0x0000);
         Assert.Throws<MemoryAccessException>(() => validator.ValidateExecute(0x0000));
 
-        // RAM (0x3900-0x3AFF) - All access allowed
-        validator.ValidateRead(0x3900);
-        validator.ValidateWrite(0x3900);
-        validator.ValidateExecute(0x3900);
+        // SRAM (0x2000-0x2FFF) - All access allowed  
+        validator.ValidateRead(0x2000);
+        validator.ValidateWrite(0x2000);
+        validator.ValidateExecute(0x2000);
 
-        // Flash (0x3B00-0xFFDF) - Read/Execute only
-        validator.ValidateRead(0x3B00);
-        validator.ValidateExecute(0x3B00);
-        Assert.Throws<MemoryAccessException>(() => validator.ValidateWrite(0x3B00));
+        // FRAM (0x4000-0xBFFF) - All access allowed (FRAM allows write unlike Flash)
+        validator.ValidateRead(0x4000);
+        validator.ValidateWrite(0x4000);
+        validator.ValidateExecute(0x4000);
 
         // Invalid address - No access
         Assert.Throws<MemoryAccessException>(() => validator.ValidateRead(0x0300));
@@ -57,7 +57,7 @@ public class MemorySystemIntegrationTests
 
         // Unmapped regions
         Assert.False(validator.IsAccessValid(0x0300, MemoryAccessPermissions.Read)); // Between peripherals and BSL
-        Assert.False(validator.IsAccessValid(0x1200, MemoryAccessPermissions.Read)); // Between info memory and RAM
+        Assert.False(validator.IsAccessValid(0x1A00, MemoryAccessPermissions.Read)); // Between info memory and SRAM
     }
 
     [Fact]
@@ -83,10 +83,10 @@ public class MemorySystemIntegrationTests
         Assert.Contains(MemoryRegion.Flash, regionTypes);
         Assert.Contains(MemoryRegion.InterruptVectorTable, regionTypes);
 
-        // Verify address space coverage
+        // Verify address space coverage - MSP430FR2355 specific
         var totalMappedBytes = regions.Sum(r => r.Size);
         Assert.True(totalMappedBytes < 65536); // Should not exceed 16-bit address space
-        Assert.True(totalMappedBytes > 50000); // Should cover significant portion
+        Assert.True(totalMappedBytes > 30000); // Should cover significant portion (adjusted for FR2355)
     }
 
     [Fact]
@@ -98,18 +98,18 @@ public class MemorySystemIntegrationTests
 
         // Act & Assert - Test validation info for different regions
         
-        // Valid address in RAM
-        var ramInfo = validator.GetValidationInfo(0x3900);
+        // Valid address in SRAM
+        var ramInfo = validator.GetValidationInfo(0x2000);
         Assert.True(ramInfo.IsValid);
         Assert.Equal(MemoryAccessPermissions.All, ramInfo.Permissions);
         Assert.NotNull(ramInfo.Region);
         Assert.Equal(MemoryRegion.Ram, ramInfo.Region.Value.Region);
 
-        // Valid address in Flash
-        var flashInfo = validator.GetValidationInfo(0x3B00);
-        Assert.True(flashInfo.IsValid);
-        Assert.Equal(MemoryAccessPermissions.ReadExecute, flashInfo.Permissions);
-        Assert.Equal(MemoryRegion.Flash, flashInfo.Region!.Value.Region);
+        // Valid address in FRAM
+        var framInfo = validator.GetValidationInfo(0x4000);
+        Assert.True(framInfo.IsValid);
+        Assert.Equal(MemoryAccessPermissions.All, framInfo.Permissions);
+        Assert.Equal(MemoryRegion.Flash, framInfo.Region!.Value.Region);
 
         // Invalid address
         var invalidInfo = validator.GetValidationInfo(0x0300);
@@ -122,10 +122,10 @@ public class MemorySystemIntegrationTests
     [InlineData(0x0000, "Special Function Registers")]
     [InlineData(0x0150, "8-bit Peripherals")]
     [InlineData(0x0250, "16-bit Peripherals")]
-    [InlineData(0x0500, "Bootstrap Loader Flash")]
-    [InlineData(0x1050, "Information Memory Flash")]
-    [InlineData(0x3950, "RAM")]
-    [InlineData(0x4000, "Flash Memory")]
+    [InlineData(0x1200, "Bootstrap Loader FRAM")]
+    [InlineData(0x1850, "Information Memory FRAM")]
+    [InlineData(0x2500, "SRAM")]
+    [InlineData(0x6000, "FRAM")]
     [InlineData(0xFFF0, "Interrupt Vector Table")]
     public void MemorySystem_RegionDescriptions_AreCorrect(ushort address, string expectedDescription)
     {

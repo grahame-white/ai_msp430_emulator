@@ -58,11 +58,11 @@ public class MemoryMapTests
         Assert.Equal((ushort)0x0000, sfrRegion.StartAddress);
         Assert.Equal((ushort)0x00FF, sfrRegion.EndAddress);
 
-        // Test RAM region (0x3900-0x3AFF)
-        var ramRegion = memoryMap.GetRegion(0x3A00);
+        // Test SRAM region (0x2000-0x2FFF)
+        var ramRegion = memoryMap.GetRegion(0x2500);
         Assert.Equal(MemoryRegion.Ram, ramRegion.Region);
-        Assert.Equal((ushort)0x3900, ramRegion.StartAddress);
-        Assert.Equal((ushort)0x3AFF, ramRegion.EndAddress);
+        Assert.Equal((ushort)0x2000, ramRegion.StartAddress);
+        Assert.Equal((ushort)0x2FFF, ramRegion.EndAddress);
     }
 
     [Fact]
@@ -81,8 +81,8 @@ public class MemoryMapTests
         
         var ramInfo = memoryMap.GetRegionInfo(MemoryRegion.Ram);
         Assert.Equal(MemoryRegion.Ram, ramInfo.Region);
-        Assert.Equal((ushort)0x3900, ramInfo.StartAddress);
-        Assert.Equal((ushort)0x3AFF, ramInfo.EndAddress);
+        Assert.Equal((ushort)0x2000, ramInfo.StartAddress);
+        Assert.Equal((ushort)0x2FFF, ramInfo.EndAddress);
         Assert.Equal(MemoryAccessPermissions.All, ramInfo.Permissions);
     }
 
@@ -105,8 +105,8 @@ public class MemoryMapTests
         
         Assert.True(memoryMap.IsValidAddress(0x0000)); // SFR start
         Assert.True(memoryMap.IsValidAddress(0x00FF)); // SFR end
-        Assert.True(memoryMap.IsValidAddress(0x3900)); // RAM start
-        Assert.True(memoryMap.IsValidAddress(0x3AFF)); // RAM end
+        Assert.True(memoryMap.IsValidAddress(0x2000)); // RAM start
+        Assert.True(memoryMap.IsValidAddress(0x2FFF)); // SRAM end
         Assert.True(memoryMap.IsValidAddress(0xFFFF)); // Interrupt vector table end
     }
 
@@ -116,7 +116,7 @@ public class MemoryMapTests
         var memoryMap = new MemoryMap();
         
         Assert.False(memoryMap.IsValidAddress(0x0300)); // Between peripherals and bootstrap loader
-        Assert.False(memoryMap.IsValidAddress(0x1200)); // Between info memory and RAM
+        Assert.False(memoryMap.IsValidAddress(0x1A00)); // Between info memory and SRAM
     }
 
     [Fact]
@@ -125,13 +125,13 @@ public class MemoryMapTests
         var memoryMap = new MemoryMap();
         
         // RAM allows all access
-        Assert.True(memoryMap.IsAccessAllowed(0x3900, MemoryAccessPermissions.Read));
-        Assert.True(memoryMap.IsAccessAllowed(0x3900, MemoryAccessPermissions.Write));
-        Assert.True(memoryMap.IsAccessAllowed(0x3900, MemoryAccessPermissions.Execute));
+        Assert.True(memoryMap.IsAccessAllowed(0x2000, MemoryAccessPermissions.Read));
+        Assert.True(memoryMap.IsAccessAllowed(0x2000, MemoryAccessPermissions.Write));
+        Assert.True(memoryMap.IsAccessAllowed(0x2000, MemoryAccessPermissions.Execute));
         
         // Flash allows read and execute
-        Assert.True(memoryMap.IsAccessAllowed(0x3B00, MemoryAccessPermissions.Read));
-        Assert.True(memoryMap.IsAccessAllowed(0x3B00, MemoryAccessPermissions.Execute));
+        Assert.True(memoryMap.IsAccessAllowed(0x4000, MemoryAccessPermissions.Read));
+        Assert.True(memoryMap.IsAccessAllowed(0x4000, MemoryAccessPermissions.Execute));
     }
 
     [Fact]
@@ -140,7 +140,7 @@ public class MemoryMapTests
         var memoryMap = new MemoryMap();
         
         // Flash doesn't allow write
-        Assert.False(memoryMap.IsAccessAllowed(0x3B00, MemoryAccessPermissions.Write));
+        Assert.True(memoryMap.IsAccessAllowed(0x4000, MemoryAccessPermissions.Write)); // FRAM allows write
         
         // Invalid address
         Assert.False(memoryMap.IsAccessAllowed(0x0300, MemoryAccessPermissions.Read));
@@ -151,11 +151,11 @@ public class MemoryMapTests
     {
         var memoryMap = new MemoryMap();
         
-        var ramPermissions = memoryMap.GetPermissions(0x3900);
+        var ramPermissions = memoryMap.GetPermissions(0x2000);
         Assert.Equal(MemoryAccessPermissions.All, ramPermissions);
         
-        var flashPermissions = memoryMap.GetPermissions(0x3B00);
-        Assert.Equal(MemoryAccessPermissions.ReadExecute, flashPermissions);
+        var framPermissions = memoryMap.GetPermissions(0x4000);
+        Assert.Equal(MemoryAccessPermissions.All, framPermissions);
     }
 
     [Fact]
@@ -170,10 +170,10 @@ public class MemoryMapTests
     [InlineData(MemoryRegion.SpecialFunctionRegisters, 0x0000, 0x00FF)]
     [InlineData(MemoryRegion.Peripherals8Bit, 0x0100, 0x01FF)]
     [InlineData(MemoryRegion.Peripherals16Bit, 0x0200, 0x027F)]
-    [InlineData(MemoryRegion.BootstrapLoader, 0x0400, 0x09FF)]
-    [InlineData(MemoryRegion.InformationMemory, 0x1000, 0x10FF)]
-    [InlineData(MemoryRegion.Ram, 0x3900, 0x3AFF)]
-    [InlineData(MemoryRegion.Flash, 0x3B00, 0xFFDF)]
+    [InlineData(MemoryRegion.BootstrapLoader, 0x1000, 0x17FF)]
+    [InlineData(MemoryRegion.InformationMemory, 0x1800, 0x19FF)]
+    [InlineData(MemoryRegion.Ram, 0x2000, 0x2FFF)]
+    [InlineData(MemoryRegion.Flash, 0x4000, 0xBFFF)]
     [InlineData(MemoryRegion.InterruptVectorTable, 0xFFE0, 0xFFFF)]
     public void DefaultMemoryLayout_RegionBoundaries_AreCorrect(MemoryRegion region, ushort expectedStart, ushort expectedEnd)
     {
@@ -201,8 +201,8 @@ public class MemoryMapTests
         // RAM should allow all access
         Assert.Equal(MemoryAccessPermissions.All, memoryMap.GetRegionInfo(MemoryRegion.Ram).Permissions);
         
-        // Flash should be read/execute only
-        Assert.Equal(MemoryAccessPermissions.ReadExecute, memoryMap.GetRegionInfo(MemoryRegion.Flash).Permissions);
+        // FRAM should allow all access (unlike traditional Flash)
+        Assert.Equal(MemoryAccessPermissions.All, memoryMap.GetRegionInfo(MemoryRegion.Flash).Permissions);
         Assert.Equal(MemoryAccessPermissions.ReadExecute, memoryMap.GetRegionInfo(MemoryRegion.InterruptVectorTable).Permissions);
     }
 }

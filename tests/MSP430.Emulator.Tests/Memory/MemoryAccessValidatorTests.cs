@@ -32,8 +32,8 @@ public class MemoryAccessValidatorTests
     [Fact]
     public void ValidateRead_ValidAddress_DoesNotThrow()
     {
-        // RAM allows read access
-        _validator.ValidateRead(0x3900);
+        // SRAM allows read access
+        _validator.ValidateRead(0x2000);
         
         // Should not throw
         Assert.True(true);
@@ -53,7 +53,7 @@ public class MemoryAccessValidatorTests
     public void ValidateWrite_ValidAddress_DoesNotThrow()
     {
         // RAM allows write access
-        _validator.ValidateWrite(0x3900);
+        _validator.ValidateWrite(0x2000);
         
         // Should not throw
         Assert.True(true);
@@ -62,9 +62,9 @@ public class MemoryAccessValidatorTests
     [Fact]
     public void ValidateWrite_ReadOnlyRegion_ThrowsMemoryAccessException()
     {
-        var exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x3B00)); // Flash
+        var exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x1000)); // Bootstrap Loader FRAM - read/execute only
         
-        Assert.Equal((ushort)0x3B00, exception.Address);
+        Assert.Equal((ushort)0x1000, exception.Address);
         Assert.Equal(MemoryAccessPermissions.Write, exception.AccessType);
         Assert.Contains("Access denied", exception.Message);
     }
@@ -72,8 +72,8 @@ public class MemoryAccessValidatorTests
     [Fact]
     public void ValidateExecute_ValidAddress_DoesNotThrow()
     {
-        // Flash allows execute access
-        _validator.ValidateExecute(0x3B00);
+        // FRAM allows execute access
+        _validator.ValidateExecute(0x4000);
         
         // Should not throw
         Assert.True(true);
@@ -100,34 +100,34 @@ public class MemoryAccessValidatorTests
     public void ValidateAccess_WithAccessType_ValidatesCorrectly()
     {
         // Test valid access
-        _validator.ValidateAccess(0x3900, MemoryAccessPermissions.Read);
+        _validator.ValidateAccess(0x2000, MemoryAccessPermissions.Read);
         
         // Test invalid access
         Assert.Throws<MemoryAccessException>(() => 
-            _validator.ValidateAccess(0x3B00, MemoryAccessPermissions.Write));
+            _validator.ValidateAccess(0x1000, MemoryAccessPermissions.Write)); // Bootstrap Loader doesn't allow write
     }
 
     [Fact]
     public void IsAccessValid_ValidAccess_ReturnsTrue()
     {
-        Assert.True(_validator.IsAccessValid(0x3900, MemoryAccessPermissions.Read));  // RAM read
-        Assert.True(_validator.IsAccessValid(0x3900, MemoryAccessPermissions.Write)); // RAM write
-        Assert.True(_validator.IsAccessValid(0x3B00, MemoryAccessPermissions.Read));  // Flash read
+        Assert.True(_validator.IsAccessValid(0x2000, MemoryAccessPermissions.Read));  // RAM read
+        Assert.True(_validator.IsAccessValid(0x2000, MemoryAccessPermissions.Write)); // RAM write
+        Assert.True(_validator.IsAccessValid(0x4000, MemoryAccessPermissions.Read));  // FRAM read
     }
 
     [Fact]
     public void IsAccessValid_InvalidAccess_ReturnsFalse()
     {
         Assert.False(_validator.IsAccessValid(0x0300, MemoryAccessPermissions.Read));  // Invalid address
-        Assert.False(_validator.IsAccessValid(0x3B00, MemoryAccessPermissions.Write)); // Flash write (not allowed)
+        Assert.True(_validator.IsAccessValid(0x4000, MemoryAccessPermissions.Write)); // FRAM write (allowed)
     }
 
     [Fact]
     public void GetValidationInfo_ValidAddress_ReturnsCorrectInfo()
     {
-        var info = _validator.GetValidationInfo(0x3900); // RAM
+        var info = _validator.GetValidationInfo(0x2000); // RAM
         
-        Assert.Equal((ushort)0x3900, info.Address);
+        Assert.Equal((ushort)0x2000, info.Address);
         Assert.True(info.IsValid);
         Assert.Equal(MemoryAccessPermissions.All, info.Permissions);
         Assert.NotNull(info.Region);
@@ -160,7 +160,7 @@ public class MemoryAccessValidatorTests
     {
         _logger.MinimumLevel = LogLevel.Debug;
         
-        _validator.ValidateRead(0x3900);
+        _validator.ValidateRead(0x2000);
         
         Assert.Contains(_logger.LogEntries, entry => 
             entry.Level == LogLevel.Debug && 
@@ -170,9 +170,9 @@ public class MemoryAccessValidatorTests
     [Theory]
     [InlineData(0x0000, MemoryAccessPermissions.Read, true)]   // SFR read
     [InlineData(0x0000, MemoryAccessPermissions.Write, true)]  // SFR write
-    [InlineData(0x3900, MemoryAccessPermissions.All, true)]    // RAM all access
-    [InlineData(0x3B00, MemoryAccessPermissions.Read, true)]   // Flash read
-    [InlineData(0x3B00, MemoryAccessPermissions.Write, false)] // Flash write (denied)
+    [InlineData(0x2000, MemoryAccessPermissions.All, true)]    // RAM all access
+    [InlineData(0x4000, MemoryAccessPermissions.Read, true)]   // FRAM read
+    [InlineData(0x4000, MemoryAccessPermissions.Write, true)] // FRAM write (allowed)
     [InlineData(0x0300, MemoryAccessPermissions.Read, false)]  // Invalid address
     public void IsAccessValid_VariousScenarios_ReturnsExpectedResult(ushort address, MemoryAccessPermissions accessType, bool expected)
     {
@@ -185,9 +185,9 @@ public class MemoryAccessValidatorTests
     {
         _logger.MinimumLevel = LogLevel.Debug;
 
-        _validator.ValidateRead(0x3900);
-        _validator.ValidateWrite(0x3900);
-        _validator.ValidateExecute(0x3900);
+        _validator.ValidateRead(0x2000);
+        _validator.ValidateWrite(0x2000);
+        _validator.ValidateExecute(0x2000);
 
         Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains("read access validated"));
         Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains("write access validated"));

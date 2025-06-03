@@ -1,7 +1,11 @@
 namespace MSP430.Emulator.Memory;
 
 /// <summary>
-/// Defines the memory regions in the MSP430 address space.
+/// Defines the memory regions in the MSP430FR2355 address space.
+/// 
+/// This enum defines memory regions specific to the MSP430FR2355 microcontroller,
+/// which features FRAM-based architecture instead of traditional Flash memory.
+/// The FR2355 serves as the reference implementation for modern MSP430 FRAM devices.
 /// </summary>
 public enum MemoryRegion
 {
@@ -29,8 +33,8 @@ public enum MemoryRegion
     Unused1,
 
     /// <summary>
-    /// Bootstrap Loader Flash (0x0400-0x09FF).
-    /// Contains the bootstrap loader code.
+    /// Bootstrap Loader FRAM (MSP430FR2355: 0x1000-0x17FF).
+    /// Contains the bootstrap loader code in FRAM memory.
     /// </summary>
     BootstrapLoader,
 
@@ -40,8 +44,8 @@ public enum MemoryRegion
     Unused2,
 
     /// <summary>
-    /// Information Memory Flash (0x1000-0x10FF).
-    /// Contains calibration data and device-specific information.
+    /// Information Memory FRAM (MSP430FR2355: 0x1800-0x19FF).
+    /// Contains calibration data and device-specific information in FRAM.
     /// </summary>
     InformationMemory,
 
@@ -51,14 +55,15 @@ public enum MemoryRegion
     Unused3,
 
     /// <summary>
-    /// RAM (0x3900-0x3AFF).
-    /// Random Access Memory for program variables and stack.
+    /// SRAM (MSP430FR2355: 0x2000-0x2FFF).
+    /// High-speed volatile memory for program variables and stack.
     /// </summary>
     Ram,
 
     /// <summary>
-    /// Flash Memory (0x3B00-0xFFDF).
-    /// Main program memory (Flash ROM).
+    /// FRAM Memory (MSP430FR2355: 0x4000-0xBFFF).
+    /// Non-volatile ferroelectric memory for unified code and data storage.
+    /// Supports byte-level write operations unlike traditional Flash.
     /// </summary>
     Flash,
 

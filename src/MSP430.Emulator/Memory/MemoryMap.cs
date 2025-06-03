@@ -1,7 +1,20 @@
 namespace MSP430.Emulator.Memory;
 
 /// <summary>
-/// Implementation of the MSP430 memory map with unified 16-bit address space.
+/// Implementation of the MSP430FR2355 memory map with unified 16-bit address space.
+/// 
+/// This implementation is specifically designed for the MSP430FR2355 mixed-signal microcontroller,
+/// featuring FRAM-based non-volatile memory architecture. The FR2355 was chosen as the reference
+/// implementation to represent modern MSP430 FRAM devices with their unified memory model.
+/// 
+/// Key characteristics of MSP430FR2355:
+/// - 32KB FRAM (Ferroelectric RAM) for non-volatile code/data storage
+/// - 4KB SRAM for high-speed volatile operations  
+/// - FRAM allows byte-level write access unlike traditional Flash
+/// - Von Neumann architecture with unified code/data address space
+/// 
+/// Future developers: This memory layout is specifically for MSP430FR2355. Other MSP430 variants
+/// can be supported using the constructor with custom memory regions.
 /// </summary>
 public class MemoryMap : IMemoryMap
 {
@@ -9,7 +22,7 @@ public class MemoryMap : IMemoryMap
     private readonly MemoryRegionInfo[] _addressLookup;
 
     /// <summary>
-    /// Initializes a new instance of the MemoryMap class with default MSP430 memory layout.
+    /// Initializes a new instance of the MemoryMap class with default MSP430FR2355 memory layout.
     /// </summary>
     public MemoryMap()
     {
@@ -88,9 +101,17 @@ public class MemoryMap : IMemoryMap
     }
 
     /// <summary>
-    /// Creates the default MSP430 memory regions.
+    /// Creates the default MSP430FR2355 memory regions.
+    /// 
+    /// This implementation is based on the MSP430FR2355 microcontroller specifications:
+    /// - FRAM-based architecture with unified code/data memory
+    /// - 4KB SRAM for high-speed data operations
+    /// - 32KB FRAM for non-volatile program and data storage
+    /// - Enhanced bootstrap loader and information memory
+    /// 
+    /// Reference: MSP430FR2355 Mixed-Signal Microcontroller
     /// </summary>
-    /// <returns>A list of default memory regions for the MSP430.</returns>
+    /// <returns>A list of default memory regions for the MSP430FR2355.</returns>
     private static List<MemoryRegionInfo> CreateDefaultRegions()
     {
         return new List<MemoryRegionInfo>
@@ -107,21 +128,21 @@ public class MemoryMap : IMemoryMap
                 MemoryAccessPermissions.ReadWrite, 
                 "16-bit Peripherals"),
             
-            new(MemoryRegion.BootstrapLoader, 0x0400, 0x09FF, 
+            new(MemoryRegion.BootstrapLoader, 0x1000, 0x17FF, 
                 MemoryAccessPermissions.ReadExecute, 
-                "Bootstrap Loader Flash"),
+                "Bootstrap Loader FRAM"),
             
-            new(MemoryRegion.InformationMemory, 0x1000, 0x10FF, 
+            new(MemoryRegion.InformationMemory, 0x1800, 0x19FF, 
                 MemoryAccessPermissions.ReadWrite, 
-                "Information Memory Flash"),
+                "Information Memory FRAM"),
             
-            new(MemoryRegion.Ram, 0x3900, 0x3AFF, 
+            new(MemoryRegion.Ram, 0x2000, 0x2FFF, 
                 MemoryAccessPermissions.All, 
-                "RAM"),
+                "SRAM - High-speed volatile memory"),
             
-            new(MemoryRegion.Flash, 0x3B00, 0xFFDF, 
-                MemoryAccessPermissions.ReadExecute, 
-                "Flash Memory"),
+            new(MemoryRegion.Flash, 0x4000, 0xBFFF, 
+                MemoryAccessPermissions.All, 
+                "FRAM - Non-volatile unified code/data memory"),
             
             new(MemoryRegion.InterruptVectorTable, 0xFFE0, 0xFFFF, 
                 MemoryAccessPermissions.ReadExecute, 

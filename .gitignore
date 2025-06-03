@@ -358,3 +358,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Node.js dependencies for GitHub automation scripts
+.github/scripts/node_modules/
+.github/scripts/.npm
+.github/scripts/.yarn

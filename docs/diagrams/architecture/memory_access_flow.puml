@@ -1,0 +1,178 @@
+@startuml memory_access_flow
+!theme plain
+title MSP430 Memory Access Validation Flow
+
+start
+
+:Memory Access Request\n(Address, Access Type);
+
+partition "Address Validation" {
+    :Check if address is valid\n(mapped to a region);
+    
+    if (Address valid?) then (yes)
+        :Get memory region info;
+    else (no)
+        :Log warning;
+        :Throw MemoryAccessException\n"Invalid address";
+        stop
+    endif
+}
+
+partition "Permission Validation" {
+    :Get region permissions;
+    
+    if (Access type allowed?) then (yes)
+        if (Debug logging enabled?) then (yes)
+            :Log debug message\n"Access validated";
+        else (no)
+        endif
+        :Allow access;
+        end
+    else (no)
+        :Log warning with context;
+        :Throw MemoryAccessException\n"Access denied";
+        stop
+    endif
+}
+
+note right of "Memory Access Request"
+    Access Types:
+    - Read (0x01)
+    - Write (0x02)
+    - Execute (0x04)
+    - Combinations (ReadWrite, etc.)
+end note
+
+note left of "Get memory region info"
+    Memory Regions:
+    - Special Function Registers
+    - 8-bit/16-bit Peripherals
+    - Bootstrap Loader
+    - Information Memory
+    - RAM
+    - Flash Memory
+    - Interrupt Vector Table
+end note
+
+@enduml
+
+@startuml memory_access_permissions_matrix
+!theme plain
+title MSP430 Memory Access Permissions Matrix
+
+|= Memory Region |= Address Range |= Read |= Write |= Execute |= Description |
+| Special Function Registers | 0x0000-0x00FF | ✓ | ✓ | ✗ | System control registers |
+| 8-bit Peripherals | 0x0100-0x01FF | ✓ | ✓ | ✗ | Memory-mapped 8-bit peripherals |
+| 16-bit Peripherals | 0x0200-0x027F | ✓ | ✓ | ✗ | Memory-mapped 16-bit peripherals |
+| Bootstrap Loader | 0x0400-0x09FF | ✓ | ✗ | ✓ | Bootstrap loader flash code |
+| Information Memory | 0x1000-0x10FF | ✓ | ✓ | ✗ | Device calibration data |
+| RAM | 0x3900-0x3AFF | ✓ | ✓ | ✓ | Random Access Memory |
+| Flash Memory | 0x3B00-0xFFDF | ✓ | ✗ | ✓ | Main program memory |
+| Interrupt Vector Table | 0xFFE0-0xFFFF | ✓ | ✗ | ✓ | Interrupt service routine addresses |
+
+note bottom
+    ✓ = Access allowed
+    ✗ = Access denied
+    
+    Write access to Flash regions typically requires
+    special unlock sequences in real hardware.
+end note
+
+@enduml
+
+@startuml memory_component_architecture
+!theme plain
+title Memory System Component Architecture
+
+package "MSP430.Emulator.Memory" {
+    interface IMemoryMap {
+        +GetRegion(address): MemoryRegionInfo
+        +IsValidAddress(address): bool
+        +IsAccessAllowed(address, type): bool
+        +GetPermissions(address): MemoryAccessPermissions
+    }
+    
+    class MemoryMap {
+        -regionLookup: Dictionary<MemoryRegion, MemoryRegionInfo>
+        -addressLookup: MemoryRegionInfo[]
+        +GetRegion(address): MemoryRegionInfo
+        +IsValidAddress(address): bool
+        +IsAccessAllowed(address, type): bool
+    }
+    
+    class MemoryAccessValidator {
+        -memoryMap: IMemoryMap
+        -logger: ILogger?
+        +ValidateRead(address): void
+        +ValidateWrite(address): void
+        +ValidateExecute(address): void
+        +IsAccessValid(address, type): bool
+    }
+    
+    enum MemoryRegion {
+        SpecialFunctionRegisters
+        Peripherals8Bit
+        Peripherals16Bit
+        BootstrapLoader
+        InformationMemory
+        Ram
+        Flash
+        InterruptVectorTable
+    }
+    
+    enum MemoryAccessPermissions {
+        None = 0
+        Read = 1
+        Write = 2
+        Execute = 4
+        ReadWrite = 3
+        ReadExecute = 5
+        All = 7
+    }
+    
+    struct MemoryRegionInfo {
+        +Region: MemoryRegion
+        +StartAddress: ushort
+        +EndAddress: ushort
+        +Permissions: MemoryAccessPermissions
+        +Description: string
+        +Size: int
+        +Contains(address): bool
+    }
+    
+    class MemoryAccessException {
+        +Address: ushort
+        +AccessType: MemoryAccessPermissions
+    }
+}
+
+package "MSP430.Emulator.Logging" {
+    interface ILogger {
+        +Log(level, message): void
+        +Debug(message): void
+        +Warning(message): void
+    }
+}
+
+' Relationships
+IMemoryMap <|.. MemoryMap
+MemoryAccessValidator --> IMemoryMap
+MemoryAccessValidator --> ILogger
+MemoryMap --> MemoryRegionInfo
+MemoryMap --> MemoryRegion
+MemoryMap --> MemoryAccessPermissions
+MemoryAccessValidator --> MemoryAccessException
+MemoryRegionInfo --> MemoryRegion
+MemoryRegionInfo --> MemoryAccessPermissions
+
+note top of MemoryMap
+    Uses fast address lookup table
+    for O(1) address-to-region mapping
+end note
+
+note bottom of MemoryAccessValidator
+    Provides validation with optional
+    logging for debugging and security
+end note
+
+@enduml

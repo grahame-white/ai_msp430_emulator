@@ -343,14 +343,47 @@ class GitHubIssuesCreator {
                             });
                             console.log(`Created label: ${labelData.name}`);
                         } catch (createError) {
-                            console.warn(`Warning: Could not create label ${labelData.name}: ${createError.message}`);
+                            if (this.isPermissionError(createError)) {
+                                console.warn(`⚠️  Cannot create label ${labelData.name} due to insufficient permissions`);
+                            } else {
+                                console.warn(`⚠️  Could not create label ${labelData.name}: ${createError.message}`);
+                            }
                         }
                     } else {
                         console.log(`[DRY RUN] Would create label: ${labelData.name}`);
                     }
+                } else if (this.isPermissionError(error)) {
+                    console.warn(`⚠️  Cannot access label ${labelData.name} due to insufficient permissions`);
+                } else {
+                    console.warn(`⚠️  Error checking label ${labelData.name}: ${error.message}`);
                 }
             }
         }
+    }
+
+    /**
+     * Check if an error is a permission-related error
+     */
+    isPermissionError(error) {
+        const permissionIndicators = [
+            'Resource not accessible by integration',
+            'Bad credentials',
+            'Not Found', // Sometimes GitHub returns 404 for permission issues
+            'Forbidden',
+            'insufficient permissions',
+            'requires authentication',
+            'token does not have'
+        ];
+
+        const errorMessage = error.message || '';
+        const errorStatus = error.status || 0;
+
+        return errorStatus === 403 || 
+               errorStatus === 401 || 
+               (errorStatus === 404 && errorMessage.includes('Resource not accessible')) ||
+               permissionIndicators.some(indicator => 
+                   errorMessage.toLowerCase().includes(indicator.toLowerCase())
+               );
     }
 
     /**

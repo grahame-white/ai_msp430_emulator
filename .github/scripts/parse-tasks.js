@@ -122,6 +122,8 @@ class TaskParser {
         const lines = content.split('\n');
         let description = '';
         let foundDependencies = false;
+        let fallbackDescription = '';
+        let inFallbackCapture = false;
 
         for (const line of lines) {
             const trimmed = line.trim();
@@ -129,6 +131,14 @@ class TaskParser {
             // Start looking for description after Dependencies line
             if (trimmed.startsWith('**Dependencies**')) {
                 foundDependencies = true;
+                inFallbackCapture = false;
+                continue;
+            }
+
+            // Start fallback capture after task metadata (Priority, Effort, Dependencies)
+            if (trimmed.startsWith('**Priority**') ||
+                trimmed.startsWith('**Estimated Effort**')) {
+                inFallbackCapture = false;
                 continue;
             }
 
@@ -139,13 +149,25 @@ class TaskParser {
                 break;
             }
 
-            // Capture description after dependencies
+            // Capture description after dependencies (primary method)
             if (foundDependencies && trimmed && !trimmed.startsWith('**')) {
                 description += trimmed + ' ';
             }
+
+            // Fallback: capture content that looks like description
+            if (!foundDependencies && !inFallbackCapture &&
+                trimmed && !trimmed.startsWith('**') && !trimmed.startsWith('#')) {
+                inFallbackCapture = true;
+            }
+
+            if (inFallbackCapture && trimmed && !trimmed.startsWith('**')) {
+                fallbackDescription += trimmed + ' ';
+            }
         }
 
-        return description.trim();
+        // Return primary description if found, otherwise fallback
+        const result = description.trim() || fallbackDescription.trim();
+        return result;
     }
 
     /**
@@ -295,3 +317,6 @@ async function main() {
 if (require.main === module) {
     main();
 }
+
+// Export the TaskParser class for testing
+module.exports = TaskParser;

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "GitHub Issues automation for MSP430 Emulator project",
   "scripts": {
-    "test": "echo \"No tests yet\" && exit 0",
+    "test": "node test-runner.js",
     "lint": "eslint *.js",
     "lint:fix": "eslint *.js --fix",
     "parse": "node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md",

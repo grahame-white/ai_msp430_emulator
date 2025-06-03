@@ -107,11 +107,11 @@ jobs:
     steps:
     - name: Check build status
       run: |
-        if [[ "${{ needs.build-and-test.result }}" != "success" ]]; then
+        if [ "${{ needs.build-and-test.result }}" != "success" ]; then
           echo "Build and test job failed"
           exit 1
         fi
-        if [[ "${{ needs.automation-scripts.result }}" != "success" ]]; then
+        if [ "${{ needs.automation-scripts.result }}" != "success" ]; then
           echo "Automation scripts job failed"
           exit 1
         fi

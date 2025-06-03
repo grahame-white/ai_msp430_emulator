@@ -283,7 +283,7 @@ jobs:
           license-checker --summary || true
           
           # Check for problematic licenses
-          if license-checker --failOn 'GPL' --json > /dev/null 2>&1; then
+          if ! license-checker --failOn 'GPL' --json > /dev/null 2>&1; then
             echo "❌ Found GPL or other restricted licenses"
             license-checker --failOn 'GPL'
             exit 1

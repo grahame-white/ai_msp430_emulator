@@ -6,44 +6,74 @@ The MSP430 CPU contains a 16-register file, where each register is 16 bits wide.
 
 ## Register File Organization
 
+### MSP430 Register Layout
+
 ```mermaid
 graph TB
-    subgraph regfile["MSP430 Register File (16 x 16-bit Registers)"]
-        subgraph special["Special Purpose Registers"]
-            R0["R0 (PC)<br/>Program Counter<br/>🔴 Word-aligned"]
-            R1["R1 (SP)<br/>Stack Pointer<br/>🔵 Word-aligned"]
-            R2["R2 (SR)<br/>Status Register<br/>🟢 CPU flags"]
-            R3["R3 (CG1)<br/>Constant Generator<br/>🟡 Hardware constants"]
-        end
+    subgraph special["Special Purpose Registers"]
+        R0["R0 - PC<br/>Program Counter<br/>🔴"]
+        R1["R1 - SP<br/>Stack Pointer<br/>🔵"]
+        R2["R2 - SR<br/>Status Register<br/>🟢"]
+        R3["R3 - CG1<br/>Constant Generator<br/>🟡"]
+    end
+    
+    subgraph general["General Purpose Registers"]
+        R4["R4"] 
+        R5["R5"]
+        R6["R6"] 
+        R7["R7"]
+        R8["R8"] 
+        R9["R9"]
+        R10["R10"] 
+        R11["R11"]
+        R12["R12"] 
+        R13["R13"]
+        R14["R14"] 
+        R15["R15"]
+    end
+```
+
+### Register Access Modes
+
+```mermaid
+graph LR
+    subgraph access["Register Access Options"]
+        R["Any Register<br/>R0-R15"]
         
-        subgraph general["General Purpose Registers"]
-            R4["R4<br/>General Purpose"]
-            R5["R5<br/>General Purpose"]
-            R6["R6<br/>General Purpose"]
-            R7["R7<br/>General Purpose"]
-            R8["R8<br/>General Purpose"]
-            R9["R9<br/>General Purpose"]
-            R10["R10<br/>General Purpose"]
-            R11["R11<br/>General Purpose"]
-            R12["R12<br/>General Purpose"]
-            R13["R13<br/>General Purpose"]
-            R14["R14<br/>General Purpose"]
-            R15["R15<br/>General Purpose"]
+        R --> ACCESS16["16-bit Full Access<br/>Read/Write entire register"]
+        R --> ACCESS8L["8-bit Low Byte Access<br/>Bits 0-7 only"]
+        R --> ACCESS8H["8-bit High Byte Access<br/>Bits 8-15 only"]
+    end
+```
+
+### Individual Register Structure
+
+```mermaid
+graph LR
+    subgraph reg["16-bit Register Layout"]
+        B15["Bit 15<br/>MSB"] 
+        B14["Bit 14"] 
+        DOTS1["..."]
+        B8["Bit 8<br/>High Byte"]
+        DOTS2["..."]
+        B7["Bit 7<br/>Low Byte"] 
+        DOTS3["..."]
+        B1["Bit 1"] 
+        B0["Bit 0<br/>LSB"]
+        
+        B15 --- B14
+        B14 --- DOTS1
+        DOTS1 --- B8
+        B8 --- DOTS2
+        DOTS2 --- B7
+        B7 --- DOTS3
+        DOTS3 --- B1
+        B1 --- B0
+        
+        subgraph bytes["Byte Access"]
+            HIGH["High Byte<br/>Bits 15-8"]
+            LOW["Low Byte<br/>Bits 7-0"]
         end
-    end
-    
-    subgraph access["Register Access Modes"]
-        ACCESS16["16-bit Access<br/>Read/Write full register"]
-        ACCESS8L["8-bit Low Byte Access<br/>Bits 0-7"]
-        ACCESS8H["8-bit High Byte Access<br/>Bits 8-15"]
-    end
-    
-    special --> access
-    general --> access
-    
-    subgraph structure["Register Structure (Each Register)"]
-        direction LR
-        B15["Bit 15"] --> B14["Bit 14"] --> BDOTS["..."] --> B1["Bit 1"] --> B0["Bit 0"]
     end
 ```
 
@@ -58,44 +88,80 @@ graph TB
 
 The Status Register contains CPU flags and system control bits that affect processor operation.
 
+### Status Register Bit Map
+
 ```mermaid
 graph LR
     subgraph sr["Status Register (R2/SR) - 16 bits"]
         direction LR
-        B15["15<br/>Reserved"] --> B14["14<br/>Reserved"] --> B13["13<br/>Reserved"] --> B12["12<br/>Reserved"]
-        B12 --> B11["11<br/>Reserved"] --> B10["10<br/>Reserved"] --> B9["9<br/>Reserved"] --> B8["8<br/>V<br/>🔴"]
-        B8 --> B7["7<br/>SCG1<br/>🟡"] --> B6["6<br/>SCG0<br/>🟡"] --> B5["5<br/>OSCOFF<br/>🔵"]
-        B5 --> B4["4<br/>CPUOFF<br/>🔵"] --> B3["3<br/>GIE<br/>🟢"] --> B2["2<br/>N<br/>🟣"] --> B1["1<br/>Z<br/>🟣"] --> B0["0<br/>C<br/>🟣"]
+        B15["Bit 15<br/>Reserved"] 
+        B14["Bit 14<br/>Reserved"] 
+        B13["Bit 13<br/>Reserved"] 
+        B12["Bit 12<br/>Reserved"]
+        B11["Bit 11<br/>Reserved"] 
+        B10["Bit 10<br/>Reserved"] 
+        B9["Bit 9<br/>Reserved"] 
+        B8["Bit 8<br/>V Flag<br/>🔴"]
+        B7["Bit 7<br/>SCG1<br/>🟡"] 
+        B6["Bit 6<br/>SCG0<br/>🟡"] 
+        B5["Bit 5<br/>OSCOFF<br/>🔵"]
+        B4["Bit 4<br/>CPUOFF<br/>🔵"] 
+        B3["Bit 3<br/>GIE<br/>🟢"] 
+        B2["Bit 2<br/>N Flag<br/>🟣"] 
+        B1["Bit 1<br/>Z Flag<br/>🟣"] 
+        B0["Bit 0<br/>C Flag<br/>🟣"]
+        
+        B15 --- B14
+        B14 --- B13
+        B13 --- B12
+        B12 --- B11
+        B11 --- B10
+        B10 --- B9
+        B9 --- B8
+        B8 --- B7
+        B7 --- B6
+        B6 --- B5
+        B5 --- B4
+        B4 --- B3
+        B3 --- B2
+        B2 --- B1
+        B1 --- B0
     end
-    
-    subgraph flags["Flag Categories"]
-        subgraph cc["Condition Code Flags 🟣"]
-            CFLAG["C (Bit 0): Carry Flag<br/>Set on arithmetic carry/borrow"]
-            ZFLAG["Z (Bit 1): Zero Flag<br/>Set when result equals zero"]
-            NFLAG["N (Bit 2): Negative Flag<br/>Set when result is negative"]
-        end
+```
+
+### Condition Code Flags (Bits 0-2)
+
+```mermaid
+graph TB
+    subgraph cc["Condition Code Flags 🟣"]
+        C["C (Bit 0)<br/>Carry Flag"]
+        Z["Z (Bit 1)<br/>Zero Flag"]
+        N["N (Bit 2)<br/>Negative Flag"]
         
-        subgraph overflow["Overflow Flag 🔴"]
-            VFLAG["V (Bit 8): Overflow Flag<br/>Set on signed arithmetic overflow"]
-        end
+        C --> CARRY["Set on arithmetic carry/borrow<br/>Used in multi-precision arithmetic"]
+        Z --> ZERO["Set when result equals zero<br/>Used in conditional branches"]
+        N --> NEG["Set when result is negative<br/>MSB of result"]
+    end
+```
+
+### System Control Flags
+
+```mermaid
+graph TB
+    subgraph sys["System Control Flags"]
+        GIE["GIE (Bit 3)<br/>Global Interrupt Enable 🟢"]
+        CPUOFF["CPUOFF (Bit 4)<br/>CPU Off 🔵"]
+        OSCOFF["OSCOFF (Bit 5)<br/>Oscillator Off 🔵"]
+        SCG0["SCG0 (Bit 6)<br/>System Clock Generator 0 🟡"]
+        SCG1["SCG1 (Bit 7)<br/>System Clock Generator 1 🟡"]
+        V["V (Bit 8)<br/>Overflow Flag 🔴"]
         
-        subgraph sys["System Control Flags 🟢"]
-            GIEFLAG["GIE (Bit 3): Global Interrupt Enable<br/>Enables maskable interrupts"]
-        end
-        
-        subgraph power["Power Management Flags 🔵"]
-            CPUOFFFLAG["CPUOFF (Bit 4): CPU Off<br/>Turns off CPU (LPM0+)"]
-            OSCOFFFLAG["OSCOFF (Bit 5): Oscillator Off<br/>Turns off LFXT1 oscillator"]
-        end
-        
-        subgraph clock["Clock Control Flags 🟡"]
-            SCG0FLAG["SCG0 (Bit 6): System Clock Generator 0<br/>Turns off SMCLK"]
-            SCG1FLAG["SCG1 (Bit 7): System Clock Generator 1<br/>Turns off DCO"]
-        end
-        
-        subgraph reserved["Reserved Bits ⚪"]
-            RESERVED["Bits 9-15: Reserved<br/>Should be written as 0<br/>Read as undefined"]
-        end
+        GIE --> GIEDESC["Enables maskable interrupts<br/>Cleared by interrupt, set by RETI"]
+        CPUOFF --> CPUDESC["CPU enters low power mode<br/>LPM0 and higher modes"]
+        OSCOFF --> OSCDESC["Turns off LFXT1 oscillator<br/>LPM4 mode"]
+        SCG0 --> SCG0DESC["Turns off SMCLK<br/>LPM1 and higher modes"]
+        SCG1 --> SCG1DESC["Turns off DCO<br/>LPM3 and higher modes"]
+        V --> VDESC["Set on signed arithmetic overflow<br/>Two's complement overflow"]
     end
 ```
 
@@ -110,117 +176,139 @@ graph LR
 | 🟡 Clock Control | Controls system clocks | Software |
 | ⚪ Reserved | Should not be used | N/A |
 
-## Program Counter (PC/R0) State Machine
+## Program Counter (PC/R0) State Management
 
 The Program Counter controls instruction execution flow and has several operational states.
+
+### Basic PC Operation States
 
 ```mermaid
 stateDiagram-v2
     [*] --> Reset
-    
-    state Reset {
-        [*] --> PC_Reset
-        PC_Reset : PC = 0x0000
-        PC_Reset : Power-up state
-    }
-    
-    state Normal {
-        [*] --> Fetch
-        Fetch --> Decode : Increment PC (+2)
-        Decode --> Execute : Instruction ready
-        Execute --> Fetch : Next instruction
-        
-        Fetch : PC points to instruction
-        Fetch : Read instruction from memory
-        Decode : PC incremented by 2
-        Decode : Instruction decoded
-        Execute : Execute instruction
-        Execute : May modify PC
-    }
-    
-    state Branch {
-        [*] --> CondBranch
-        CondBranch : Branch if condition met
-        CondBranch : PC = PC + offset
-        
-        state UncondJump {
-            UncondJump : Always jump
-            UncondJump : PC = new address
-        }
-        
-        state Call {
-            Call : Push PC to stack
-            Call : PC = subroutine address
-        }
-        
-        state Return {
-            Return : Pop PC from stack
-            Return : Restore saved PC
-        }
-    }
-    
-    state Interrupt {
-        [*] --> IRQ
-        IRQ --> Vector : GIE = 1, interrupt pending
-        Vector --> ISR : PC = vector address
-        ISR --> RETI : Execute handler
-        RETI --> [*] : Restore PC and SR
-        
-        IRQ : Interrupt pending
-        IRQ : GIE flag checked
-        Vector : Read interrupt vector
-        Vector : PC = vector address
-        ISR : Execute interrupt handler
-        ISR : PC in ISR code
-        RETI : Return from interrupt
-        RETI : Restore PC and SR
-    }
-    
-    state Special {
-        [*] --> Stack
-        Stack : PUSH/POP instructions
-        Stack : May affect PC indirectly
-        
-        state RegOps {
-            RegOps : Direct PC modification
-            RegOps : MOV #value, PC
-        }
-        
-        state AddrCalc {
-            AddrCalc : PC-relative addressing
-            AddrCalc : PC + offset calculations
-        }
-    }
-    
-    state Error {
-        [*] --> Invalid
-        Invalid : PC points to invalid memory
-        Invalid : Access violation
-        
-        state Misalign {
-            Misalign : PC has odd value
-            Misalign : Automatic alignment
-        }
-        
-        state StackErr {
-            StackErr : Stack pointer corruption
-            StackErr : PC restoration fails
-        }
-    }
-    
     Reset --> Normal : System startup
     Normal --> Branch : Branch/Jump instruction
     Branch --> Normal : Branch completed
-    Normal --> Interrupt : Interrupt occurs
-    Interrupt --> Normal : Return from interrupt (RETI)
-    Normal --> Special : Special instruction
-    Special --> Normal : Operation complete
+    Normal --> Error : Invalid condition
+    Error --> Reset : System reset
     
-    Normal --> Error : Error condition detected
-    Branch --> Error : Invalid branch target
-    Interrupt --> Error : Vector table corruption
-    Special --> Error : Invalid PC value
-    Error --> Reset : System reset required
+    state Reset {
+        Reset_State : PC = 0x0000
+        Reset_State : Power-up initialization
+    }
+    
+    state Normal {
+        Fetch : Read instruction at PC
+        Decode : Increment PC by 2
+        Execute : Process instruction
+        
+        [*] --> Fetch
+        Fetch --> Decode
+        Decode --> Execute
+        Execute --> Fetch
+    }
+    
+    state Branch {
+        ConditionalBranch : Check condition flags
+        UnconditionalJump : Direct PC modification
+        
+        [*] --> ConditionalBranch
+        ConditionalBranch --> UnconditionalJump : Condition met
+    }
+    
+    state Error {
+        InvalidAddress : PC points to invalid memory
+        Misalignment : PC has odd value (auto-corrected)
+    }
+```
+
+### Interrupt Handling States
+
+```mermaid
+stateDiagram-v2
+    [*] --> NormalExecution
+    NormalExecution --> InterruptCheck : Each instruction cycle
+    InterruptCheck --> InterruptPending : GIE=1 and interrupt present
+    InterruptCheck --> NormalExecution : No interrupt
+    
+    InterruptPending --> VectorFetch : Hardware saves PC and SR
+    VectorFetch --> InterruptService : PC = vector address
+    InterruptService --> ReturnFromInterrupt : RETI instruction
+    ReturnFromInterrupt --> NormalExecution : Restore PC and SR
+    
+    state NormalExecution {
+        Normal_State : Execute normal instructions
+        Normal_State : PC increments by 2
+    }
+    
+    state InterruptPending {
+        Pending_State : Interrupt request active
+        Pending_State : GIE flag is set
+    }
+    
+    state VectorFetch {
+        Vector_State : Read interrupt vector
+        Vector_State : Push PC and SR to stack
+    }
+    
+    state InterruptService {
+        ISR_State : Execute interrupt handler
+        ISR_State : PC in ISR code space
+    }
+    
+    state ReturnFromInterrupt {
+        RETI_State : Pop SR and PC from stack
+        RETI_State : Restore execution context
+    }
+```
+
+### Subroutine Call States
+
+```mermaid
+stateDiagram-v2
+    [*] --> MainProgram
+    MainProgram --> CallInstruction : CALL instruction
+    MainProgram --> JumpInstruction : JMP instruction
+    
+    CallInstruction --> PushPC : Save return address
+    PushPC --> SetNewPC : PC = subroutine address
+    SetNewPC --> SubroutineExecution : Execute subroutine
+    
+    SubroutineExecution --> ReturnInstruction : RET instruction
+    ReturnInstruction --> PopPC : Restore return address
+    PopPC --> MainProgram : Continue execution
+    
+    JumpInstruction --> SetJumpPC : PC = jump target
+    SetJumpPC --> MainProgram : Continue at new location
+    
+    state MainProgram {
+        Main_State : Normal program execution
+        Main_State : Sequential instruction flow
+    }
+    
+    state CallInstruction {
+        Call_State : CALL instruction decoded
+        Call_State : Subroutine call initiated
+    }
+    
+    state PushPC {
+        Push_State : Push current PC to stack
+        Push_State : SP decremented by 2
+    }
+    
+    state SubroutineExecution {
+        Sub_State : Execute subroutine code
+        Sub_State : Independent PC management
+    }
+    
+    state ReturnInstruction {
+        Ret_State : RET instruction decoded
+        Ret_State : Return from subroutine
+    }
+    
+    state PopPC {
+        Pop_State : Pop return address from stack
+        Pop_State : SP incremented by 2
+    }
 ```
 
 ### PC Alignment and Addressing Rules

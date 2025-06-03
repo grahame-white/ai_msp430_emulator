@@ -206,36 +206,80 @@ tests/MSP430.Emulator.Tests/Quality/DefectTrackerTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 1.1
 
-Create automated workflow to populate and update GitHub issues from the task list using GraphQL API for streamlined project management.
+Create automated GitHub workflow to populate and update GitHub issues from the task list using GraphQL API for streamlined project management.
 
 **Acceptance Criteria**:
-- [ ] Create GraphQL client for GitHub API integration
-- [ ] Implement task parser to extract issues from MSP430_EMULATOR_TASKS.md
-- [ ] Create automated issue creation script with proper formatting
+- [ ] Create GitHub workflow for automated issue management
+- [ ] Implement task parsing logic in workflow to extract tasks from MSP430_EMULATOR_TASKS.md
+- [ ] Create automated issue creation with proper formatting and metadata
 - [ ] Add issue update mechanism for task progress tracking
 - [ ] Implement issue labeling based on task phases and priorities
 - [ ] Add milestone assignment based on task dependencies
 - [ ] Create issue linking for task dependencies
 - [ ] Add automated issue closure when tasks are completed
+- [ ] Implement dry run mode to preview changes before execution
+- [ ] Create disaster recovery script to rebuild issues for incomplete tasks
+- [ ] Add protection mechanism to prevent modification of manually created issues
 
 **Files to Create**:
 ```
-scripts/github-integration/create-issues
-scripts/github-integration/update-issues
-scripts/github-integration/sync-tasks
-src/MSP430.Emulator.Tools/GitHub/GraphQLClient.cs
-src/MSP430.Emulator.Tools/GitHub/IssueManager.cs
-src/MSP430.Emulator.Tools/TaskParser/TaskListParser.cs
-tests/MSP430.Emulator.Tests/Tools/GitHub/GraphQLClientTests.cs
-tests/MSP430.Emulator.Tests/Tools/TaskParser/TaskListParserTests.cs
-config/github-automation.json
+.github/workflows/issue-management.yml
+.github/scripts/parse-tasks.js
+.github/scripts/create-issues.js
+.github/scripts/update-issues.js
+.github/scripts/sync-tasks.js
+.github/scripts/dry-run.js
+.github/scripts/disaster-recovery.js
+.github/scripts/manual-issue-protector.js
+.github/config/issue-templates.json
 ```
 
 **Testing Strategy**:
-- Test GraphQL client with GitHub API sandbox
-- Verify task parsing correctly extracts all task details
+- Test workflow execution with sample task list changes
+- Verify task parsing correctly extracts all task details from markdown
 - Test issue creation with proper formatting and metadata
 - Validate issue updates reflect actual task progress
+- Test workflow triggers on task file modifications
+- Test dry run mode produces accurate preview without making changes
+- Validate disaster recovery script can rebuild issues for incomplete tasks
+- Test manual issue protection prevents automated modification of manually created issues
+
+**Script-Specific Test Steps**:
+- **parse-tasks.js**:
+  - Unit test parsing of various task formats (different priorities, efforts, dependencies)
+  - Test extraction of task metadata (acceptance criteria, files to create, testing strategy)
+  - Validate handling of malformed markdown sections
+  - Test task status detection (completed vs pending checkboxes)
+- **create-issues.js**:
+  - Integration test issue creation via GitHub API
+  - Test proper formatting of issue titles and bodies
+  - Validate metadata assignment (labels, milestones, assignees)
+  - Test handling of API rate limits and errors
+- **update-issues.js**:
+  - Unit test comparison of task state vs GitHub issue state
+  - Test selective updating of changed fields only
+  - Validate progress tracking and status synchronization
+  - Test handling of concurrent modifications
+- **sync-tasks.js**:
+  - Integration test full synchronization workflow
+  - Test dependency linking between issues
+  - Validate milestone and phase organization
+  - Test cleanup of obsolete issues when tasks are removed
+- **dry-run.js**:
+  - Unit test preview generation without making actual API calls
+  - Test comparison of current state vs proposed changes
+  - Validate output formatting for human review
+  - Test detection of potential conflicts or issues
+- **disaster-recovery.js**:
+  - Integration test reconstruction of issues from task list
+  - Test identification of incomplete vs completed tasks
+  - Validate preservation of existing issue relationships
+  - Test handling of orphaned or corrupted issue states
+- **manual-issue-protector.js**:
+  - Unit test detection of manually created issues
+  - Test identification of automation-managed vs manual issues
+  - Validate protection mechanisms prevent unauthorized modifications
+  - Test handling of edge cases (converted manual issues, etc.)
 
 ---
 

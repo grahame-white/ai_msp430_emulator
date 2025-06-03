@@ -159,7 +159,7 @@ class DryRunPreview {
         const synchronizer = new GitHubIssuesSynchronizer(token, owner, repo);
         synchronizer.enableDryRun();
 
-        const results = await synchronizer.synchronize('./MSP430_EMULATOR_TASKS.md');
+        const results = await synchronizer.synchronize('../../MSP430_EMULATOR_TASKS.md');
 
         this.changes.newIssues = results.created.map(r => ({
             taskId: r.task.id,
@@ -329,7 +329,7 @@ async function main() {
     const token = process.env.GITHUB_TOKEN;
     const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
     const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-    const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
+    const tasksFile = process.argv[2] || '../../MSP430_EMULATOR_TASKS.md';
     const jsonOutput = process.argv.includes('--json');
 
     try {

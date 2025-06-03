@@ -413,7 +413,7 @@ async function main() {
     const token = process.env.GITHUB_TOKEN;
     const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
     const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-    const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
+    const tasksFile = process.argv[2] || '../../MSP430_EMULATOR_TASKS.md';
     const dryRun = process.argv.includes('--dry-run');
     const force = process.argv.includes('--force');
 

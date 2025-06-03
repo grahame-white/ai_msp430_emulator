@@ -317,6 +317,3 @@ async function main() {
 if (require.main === module) {
     main();
 }
-
-// Export the TaskParser class for testing
-module.exports = TaskParser;

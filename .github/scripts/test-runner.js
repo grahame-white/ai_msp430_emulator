@@ -121,7 +121,7 @@ runner.test('Tasks file path can be resolved', () => {
 
 // Test: Basic TaskParser functionality (without GitHub API)
 runner.test('TaskParser can parse basic task structure', () => {
-    const TaskParser = require('./parse-tasks.js');
+    const { TaskParser } = require('./parse-tasks.js');
     const parser = new TaskParser();
 
     const mockTaskContent = `### Task 1.1: Test Task
@@ -149,7 +149,7 @@ This is a test task description.
 
 // Test: Enhanced description extraction with fallback
 runner.test('TaskParser fallback description extraction works', () => {
-    const TaskParser = require('./parse-tasks.js');
+    const { TaskParser } = require('./parse-tasks.js');
     const parser = new TaskParser();
 
     // Test case without Dependencies section

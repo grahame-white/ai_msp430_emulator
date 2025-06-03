@@ -2,7 +2,7 @@
 
 /**
  * GitHub Issues Creator
- * 
+ *
  * Creates GitHub issues from parsed tasks using GitHub API v4 (GraphQL).
  * Handles proper formatting, metadata assignment, and rate limiting.
  */
@@ -19,7 +19,7 @@ class GitHubIssuesCreator {
         this.owner = owner;
         this.repo = repo;
         this.dryRun = false;
-        
+
         // Tasks to exclude from issue creation (already implemented or actively being developed)
         this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
@@ -66,17 +66,17 @@ class GitHubIssuesCreator {
 
                 // Create the issue
                 const issueData = this.formatIssueData(task);
-                
+
                 if (this.dryRun) {
                     console.log(`[DRY RUN] Would create issue: ${issueData.title}`);
                     results.created.push({ task, issueNumber: null, dryRun: true });
                 } else {
                     const issue = await this.createIssue(issueData);
                     results.created.push({ task, issueNumber: issue.number });
-                    
+
                     // Add labels and milestone
                     await this.applyMetadata(issue.number, task);
-                    
+
                     // Small delay to respect rate limits
                     await this.delay(500);
                 }
@@ -128,7 +128,7 @@ class GitHubIssuesCreator {
         return {
             title,
             body,
-            labels: this.generateLabels(task),
+            labels: this.generateLabels(task)
         };
     }
 
@@ -142,11 +142,11 @@ class GitHubIssuesCreator {
         body += `**Priority**: ${task.priority}\n`;
         body += `**Estimated Effort**: ${task.effort}\n`;
         body += `**Phase**: ${task.phase}\n`;
-        
+
         if (task.dependencies && task.dependencies.length > 0) {
             body += `**Dependencies**: ${task.dependencies.map(dep => `Task ${dep}`).join(', ')}\n`;
         } else {
-            body += `**Dependencies**: None\n`;
+            body += '**Dependencies**: None\n';
         }
         body += '\n';
 
@@ -157,7 +157,7 @@ class GitHubIssuesCreator {
 
         // Acceptance Criteria
         if (task.acceptanceCriteria && task.acceptanceCriteria.length > 0) {
-            body += `## Acceptance Criteria\n\n`;
+            body += '## Acceptance Criteria\n\n';
             for (const criterion of task.acceptanceCriteria) {
                 const checkbox = criterion.completed ? '[x]' : '[ ]';
                 body += `- ${checkbox} ${criterion.text}\n`;
@@ -167,7 +167,7 @@ class GitHubIssuesCreator {
 
         // Files to Create
         if (task.filesToCreate && task.filesToCreate.length > 0) {
-            body += `## Files to Create\n\n`;
+            body += '## Files to Create\n\n';
             body += '```\n';
             for (const file of task.filesToCreate) {
                 body += `${file}\n`;
@@ -177,7 +177,7 @@ class GitHubIssuesCreator {
 
         // Testing Strategy
         if (task.testingStrategy && task.testingStrategy.length > 0) {
-            body += `## Testing Strategy\n\n`;
+            body += '## Testing Strategy\n\n';
             for (const strategy of task.testingStrategy) {
                 body += `- ${strategy}\n`;
             }
@@ -185,9 +185,9 @@ class GitHubIssuesCreator {
         }
 
         // Automation footer
-        body += `---\n\n`;
-        body += `*This issue was automatically generated from MSP430_EMULATOR_TASKS.md*\n`;
-        body += `*🤖 Managed by GitHub Issues Automation*`;
+        body += '---\n\n';
+        body += '*This issue was automatically generated from MSP430_EMULATOR_TASKS.md*\n';
+        body += '*🤖 Managed by GitHub Issues Automation*';
 
         return body;
     }
@@ -319,7 +319,7 @@ class GitHubIssuesCreator {
             { name: 'effort-medium', color: 'f9d71c', description: '3-4 hours effort' },
             { name: 'effort-large', color: 'd4ac0d', description: '5+ hours effort' },
             { name: 'status-pending', color: 'ededed', description: 'Task not yet started' },
-            { name: 'status-completed', color: '28a745', description: 'Task completed' },
+            { name: 'status-completed', color: '28a745', description: 'Task completed' }
         ];
 
         for (const labelData of requiredLabels) {
@@ -364,58 +364,59 @@ class GitHubIssuesCreator {
 // Export for use as module
 module.exports = { GitHubIssuesCreator };
 
-// CLI usage if run directly
-if (require.main === module) {
-    async function main() {
-        const token = process.env.GITHUB_TOKEN;
-        const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
-        const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-        const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
-        const dryRun = process.argv.includes('--dry-run');
+// Main function for CLI usage
+async function main() {
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
+    const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
+    const dryRun = process.argv.includes('--dry-run');
 
-        if (!token) {
-            console.error('Error: GITHUB_TOKEN environment variable is required');
-            process.exit(1);
-        }
-
-        try {
-            // Parse tasks
-            const parser = new TaskParser(tasksFile);
-            const tasks = await parser.parse();
-            const incompleteTasks = parser.getIncompleteTasks();
-
-            console.log(`Found ${tasks.length} total tasks, ${incompleteTasks.length} incomplete`);
-
-            // Create issues
-            const creator = new GitHubIssuesCreator(token, owner, repo);
-            if (dryRun) {
-                creator.enableDryRun();
-                console.log('Running in DRY RUN mode - no actual changes will be made');
-            }
-
-            // Ensure labels exist
-            await creator.ensureLabelsExist();
-
-            // Create issues for incomplete tasks
-            const results = await creator.createIssuesFromTasks(incompleteTasks);
-
-            console.log('\nResults:');
-            console.log(`- Created: ${results.created.length} issues`);
-            console.log(`- Skipped: ${results.skipped.length} issues`);
-            console.log(`- Errors: ${results.errors.length} issues`);
-
-            if (results.errors.length > 0) {
-                console.log('\nErrors:');
-                results.errors.forEach(error => {
-                    console.log(`- Task ${error.task.id}: ${error.error}`);
-                });
-            }
-
-        } catch (error) {
-            console.error('Error:', error.message);
-            process.exit(1);
-        }
+    if (!token) {
+        console.error('Error: GITHUB_TOKEN environment variable is required');
+        process.exit(1);
     }
 
+    try {
+        // Parse tasks
+        const parser = new TaskParser(tasksFile);
+        const tasks = await parser.parse();
+        const incompleteTasks = parser.getIncompleteTasks();
+
+        console.log(`Found ${tasks.length} total tasks, ${incompleteTasks.length} incomplete`);
+
+        // Create issues
+        const creator = new GitHubIssuesCreator(token, owner, repo);
+        if (dryRun) {
+            creator.enableDryRun();
+            console.log('Running in DRY RUN mode - no actual changes will be made');
+        }
+
+        // Ensure labels exist
+        await creator.ensureLabelsExist();
+
+        // Create issues for incomplete tasks
+        const results = await creator.createIssuesFromTasks(incompleteTasks);
+
+        console.log('\nResults:');
+        console.log(`- Created: ${results.created.length} issues`);
+        console.log(`- Skipped: ${results.skipped.length} issues`);
+        console.log(`- Errors: ${results.errors.length} issues`);
+
+        if (results.errors.length > 0) {
+            console.log('\nErrors:');
+            results.errors.forEach(error => {
+                console.log(`- Task ${error.task.id}: ${error.error}`);
+            });
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
+// CLI usage if run directly
+if (require.main === module) {
     main();
 }

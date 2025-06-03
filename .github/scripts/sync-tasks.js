@@ -2,7 +2,7 @@
 
 /**
  * GitHub Issues Synchronizer
- * 
+ *
  * Orchestrates the full synchronization workflow between MSP430_EMULATOR_TASKS.md
  * and GitHub issues. Handles dependency linking, milestone organization, and cleanup.
  */
@@ -23,7 +23,7 @@ class GitHubIssuesSynchronizer {
         this.dryRun = false;
         this.creator = new GitHubIssuesCreator(token, owner, repo);
         this.updater = new GitHubIssuesUpdater(token, owner, repo);
-        
+
         // Tasks to exclude from synchronization (already implemented or actively being developed)
         this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
@@ -119,7 +119,7 @@ class GitHubIssuesSynchronizer {
      */
     async ensurePhaseMilestonesExist(tasks) {
         const phases = [...new Set(tasks.map(task => task.phase))];
-        
+
         for (const phase of phases) {
             try {
                 await this.findOrCreateMilestone(phase);
@@ -172,10 +172,10 @@ class GitHubIssuesSynchronizer {
      */
     async linkDependencies(tasks) {
         const results = { linked: [], errors: [] };
-        
+
         // Get all task issues
         const allIssues = await this.getAllTaskIssues();
-        
+
         for (const task of tasks) {
             if (!task.dependencies || task.dependencies.length === 0) {
                 continue;
@@ -211,7 +211,7 @@ class GitHubIssuesSynchronizer {
                     } else {
                         await this.createDependencyLink(taskIssue, depIssue, depTask);
                         results.linked.push({ task: task.id, dependency: depTaskId });
-                        
+
                         // Small delay to respect rate limits
                         await this.delay(300);
                     }
@@ -239,8 +239,8 @@ class GitHubIssuesSynchronizer {
                 per_page: 100
             });
 
-            return comments.data.some(comment => 
-                comment.body && comment.body.includes(`#${depIssue.number}`) && 
+            return comments.data.some(comment =>
+                comment.body && comment.body.includes(`#${depIssue.number}`) &&
                 comment.body.includes('depends on')
             );
         } catch (error) {
@@ -254,7 +254,7 @@ class GitHubIssuesSynchronizer {
      */
     async createDependencyLink(taskIssue, depIssue, depTask) {
         const comment = `🔗 **Dependency Link**\n\nThis task depends on:\n- #${depIssue.number} (Task ${depTask.id}: ${depTask.title})\n\n*Automatically linked by GitHub Issues Automation*`;
-        
+
         await this.octokit.rest.issues.createComment({
             owner: this.owner,
             repo: this.repo,
@@ -268,7 +268,7 @@ class GitHubIssuesSynchronizer {
      */
     async cleanupObsoleteIssues(tasks) {
         const results = { cleaned: [], errors: [] };
-        
+
         try {
             const allIssues = await this.getAllTaskIssues();
             const taskIds = new Set(tasks.map(task => task.id));
@@ -282,7 +282,7 @@ class GitHubIssuesSynchronizer {
                 const issueTaskId = titleMatch[1];
                 if (!taskIds.has(issueTaskId)) {
                     // This issue corresponds to a task that no longer exists
-                    
+
                     if (this.dryRun) {
                         console.log(`[DRY RUN] Would mark obsolete issue #${issue.number} for Task ${issueTaskId}`);
                         results.cleaned.push({ issueNumber: issue.number, taskId: issueTaskId, dryRun: true });
@@ -306,10 +306,10 @@ class GitHubIssuesSynchronizer {
      */
     async markIssueObsolete(issue, taskId) {
         // Add obsolete label
-        const currentLabels = issue.labels.map(label => 
+        const currentLabels = issue.labels.map(label =>
             typeof label === 'string' ? label : label.name
         );
-        
+
         if (!currentLabels.includes('obsolete')) {
             await this.octokit.rest.issues.addLabels({
                 owner: this.owner,
@@ -321,7 +321,7 @@ class GitHubIssuesSynchronizer {
 
         // Add comment explaining obsolescence
         const comment = `⚠️ **Task Obsolete**\n\nTask ${taskId} is no longer present in MSP430_EMULATOR_TASKS.md.\n\nThis issue has been marked as obsolete and will be closed.\n\n*Automatically detected by GitHub Issues Automation*`;
-        
+
         await this.octokit.rest.issues.createComment({
             owner: this.owner,
             repo: this.repo,
@@ -343,7 +343,7 @@ class GitHubIssuesSynchronizer {
      */
     async organizeMilestones(tasks) {
         const tasksByPhase = {};
-        
+
         // Group tasks by phase
         for (const task of tasks) {
             if (!tasksByPhase[task.phase]) {
@@ -356,7 +356,9 @@ class GitHubIssuesSynchronizer {
         for (const [phase, phaseTasks] of Object.entries(tasksByPhase)) {
             try {
                 const milestone = await this.findOrCreateMilestone(phase);
-                if (!milestone) continue;
+                if (!milestone) {
+                    continue;
+                }
 
                 const completedTasks = phaseTasks.filter(task => task.completed).length;
                 const totalTasks = phaseTasks.length;
@@ -364,7 +366,7 @@ class GitHubIssuesSynchronizer {
 
                 // Update milestone description with progress
                 const description = `Tasks for ${phase} of MSP430 Emulator development\n\n📊 Progress: ${completedTasks}/${totalTasks} tasks completed (${progressPercent}%)`;
-                
+
                 if (!this.dryRun) {
                     await this.octokit.rest.issues.updateMilestone({
                         owner: this.owner,
@@ -440,39 +442,40 @@ class GitHubIssuesSynchronizer {
 // Export for use as module
 module.exports = { GitHubIssuesSynchronizer };
 
-// CLI usage if run directly
-if (require.main === module) {
-    async function main() {
-        const token = process.env.GITHUB_TOKEN;
-        const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
-        const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-        const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
-        const dryRun = process.argv.includes('--dry-run');
+// Main function for CLI usage
+async function main() {
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
+    const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
+    const dryRun = process.argv.includes('--dry-run');
 
-        if (!token) {
-            console.error('Error: GITHUB_TOKEN environment variable is required');
-            process.exit(1);
-        }
-
-        try {
-            const synchronizer = new GitHubIssuesSynchronizer(token, owner, repo);
-            if (dryRun) {
-                synchronizer.enableDryRun();
-                console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
-            }
-
-            const results = await synchronizer.synchronize(tasksFile);
-
-            // Exit with error code if there were errors
-            if (results.errors.length > 0) {
-                process.exit(1);
-            }
-
-        } catch (error) {
-            console.error('Error:', error.message);
-            process.exit(1);
-        }
+    if (!token) {
+        console.error('Error: GITHUB_TOKEN environment variable is required');
+        process.exit(1);
     }
 
+    try {
+        const synchronizer = new GitHubIssuesSynchronizer(token, owner, repo);
+        if (dryRun) {
+            synchronizer.enableDryRun();
+            console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
+        }
+
+        const results = await synchronizer.synchronize(tasksFile);
+
+        // Exit with error code if there were errors
+        if (results.errors.length > 0) {
+            process.exit(1);
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
+// CLI usage if run directly
+if (require.main === module) {
     main();
 }

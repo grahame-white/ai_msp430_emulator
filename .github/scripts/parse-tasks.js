@@ -2,7 +2,7 @@
 
 /**
  * Task Parser for MSP430 Emulator Task List
- * 
+ *
  * Parses MSP430_EMULATOR_TASKS.md to extract task information for GitHub issues automation.
  * Each task is parsed with its metadata, acceptance criteria, files to create, and testing strategy.
  */
@@ -104,14 +104,14 @@ class TaskParser {
         if (!match || match[1].trim() === 'None') {
             return [];
         }
-        
+
         // Parse dependencies like "Task 1.1" or "Task 1.1, Task 1.2"
         const depString = match[1].trim();
         const deps = depString.split(',').map(dep => {
             const taskMatch = dep.trim().match(/Task (\d+\.\d+)/);
             return taskMatch ? taskMatch[1] : null;
         }).filter(Boolean);
-        
+
         return deps;
     }
 
@@ -122,29 +122,29 @@ class TaskParser {
         const lines = content.split('\n');
         let description = '';
         let foundDependencies = false;
-        
+
         for (const line of lines) {
             const trimmed = line.trim();
-            
+
             // Start looking for description after Dependencies line
             if (trimmed.startsWith('**Dependencies**')) {
                 foundDependencies = true;
                 continue;
             }
-            
+
             // Stop at acceptance criteria or other sections
-            if (trimmed.startsWith('**Acceptance Criteria**') || 
+            if (trimmed.startsWith('**Acceptance Criteria**') ||
                 trimmed.startsWith('**Files to Create**') ||
                 trimmed.startsWith('**Testing Strategy**')) {
                 break;
             }
-            
+
             // Capture description after dependencies
             if (foundDependencies && trimmed && !trimmed.startsWith('**')) {
                 description += trimmed + ' ';
             }
         }
-        
+
         return description.trim();
     }
 
@@ -154,11 +154,11 @@ class TaskParser {
     extractAcceptanceCriteria(content) {
         const criteria = [];
         const criteriaMatch = content.match(/\*\*Acceptance Criteria\*\*:\s*([\s\S]*?)(?=\*\*Files to Create\*\*|\*\*Testing Strategy\*\*|$)/);
-        
+
         if (criteriaMatch) {
             const criteriaText = criteriaMatch[1];
             const lines = criteriaText.split('\n');
-            
+
             for (const line of lines) {
                 const trimmed = line.trim();
                 if (trimmed.startsWith('- [ ]') || trimmed.startsWith('- [x]')) {
@@ -169,7 +169,7 @@ class TaskParser {
                 }
             }
         }
-        
+
         return criteria;
     }
 
@@ -179,11 +179,11 @@ class TaskParser {
     extractFilesToCreate(content) {
         const files = [];
         const filesMatch = content.match(/\*\*Files to Create\*\*:\s*```[\s\S]*?\n([\s\S]*?)```/);
-        
+
         if (filesMatch) {
             const filesText = filesMatch[1];
             const lines = filesText.split('\n');
-            
+
             for (const line of lines) {
                 const trimmed = line.trim();
                 if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('//')) {
@@ -191,7 +191,7 @@ class TaskParser {
                 }
             }
         }
-        
+
         return files;
     }
 
@@ -201,11 +201,11 @@ class TaskParser {
     extractTestingStrategy(content) {
         const strategy = [];
         const strategyMatch = content.match(/\*\*Testing Strategy\*\*:\s*([\s\S]*?)(?=\*\*Script-Specific Test Steps\*\*|---|\n## |$)/);
-        
+
         if (strategyMatch) {
             const strategyText = strategyMatch[1];
             const lines = strategyText.split('\n');
-            
+
             for (const line of lines) {
                 const trimmed = line.trim();
                 if (trimmed.startsWith('- ')) {
@@ -213,7 +213,7 @@ class TaskParser {
                 }
             }
         }
-        
+
         return strategy;
     }
 
@@ -222,8 +222,10 @@ class TaskParser {
      */
     checkCompletion(content) {
         const criteria = this.extractAcceptanceCriteria(content);
-        if (criteria.length === 0) return false;
-        
+        if (criteria.length === 0) {
+            return false;
+        }
+
         return criteria.every(criterion => criterion.completed);
     }
 
@@ -232,14 +234,14 @@ class TaskParser {
      */
     getTasksByPhase() {
         const tasksByPhase = {};
-        
+
         for (const task of this.tasks) {
             if (!tasksByPhase[task.phase]) {
                 tasksByPhase[task.phase] = [];
             }
             tasksByPhase[task.phase].push(task);
         }
-        
+
         return tasksByPhase;
     }
 
@@ -268,27 +270,28 @@ class TaskParser {
 // Export for use as module
 module.exports = { TaskParser };
 
+// Main function for CLI usage
+async function main() {
+    const filePath = process.argv[2] || path.join(__dirname, '../../MSP430_EMULATOR_TASKS.md');
+
+    try {
+        const parser = new TaskParser(filePath);
+        const tasks = await parser.parse();
+
+        console.log(JSON.stringify({
+            totalTasks: tasks.length,
+            completedTasks: parser.getCompletedTasks().length,
+            incompleteTasks: parser.getIncompleteTasks().length,
+            tasksByPhase: parser.getTasksByPhase(),
+            tasks: tasks
+        }, null, 2));
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
 // CLI usage if run directly
 if (require.main === module) {
-    const filePath = process.argv[2] || path.join(__dirname, '../../MSP430_EMULATOR_TASKS.md');
-    
-    async function main() {
-        try {
-            const parser = new TaskParser(filePath);
-            const tasks = await parser.parse();
-            
-            console.log(JSON.stringify({
-                totalTasks: tasks.length,
-                completedTasks: parser.getCompletedTasks().length,
-                incompleteTasks: parser.getIncompleteTasks().length,
-                tasksByPhase: parser.getTasksByPhase(),
-                tasks: tasks
-            }, null, 2));
-        } catch (error) {
-            console.error('Error:', error.message);
-            process.exit(1);
-        }
-    }
-    
     main();
 }

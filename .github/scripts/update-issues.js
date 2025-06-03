@@ -2,7 +2,7 @@
 
 /**
  * GitHub Issues Updater
- * 
+ *
  * Updates existing GitHub issues when tasks change in MSP430_EMULATOR_TASKS.md.
  * Compares current task state with GitHub issue state and updates only changed fields.
  */
@@ -19,7 +19,7 @@ class GitHubIssuesUpdater {
         this.owner = owner;
         this.repo = repo;
         this.dryRun = false;
-        
+
         // Tasks to exclude from issue updates (already implemented or actively being developed)
         this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
@@ -58,7 +58,7 @@ class GitHubIssuesUpdater {
                 }
 
                 const issue = this.findIssueForTask(existingIssues, task);
-                
+
                 if (!issue) {
                     results.skipped.push({
                         task: task,
@@ -78,7 +78,7 @@ class GitHubIssuesUpdater {
                 }
 
                 const changes = this.detectChanges(issue, task);
-                
+
                 if (changes.length === 0) {
                     results.skipped.push({
                         task: task,
@@ -96,7 +96,7 @@ class GitHubIssuesUpdater {
                 } else {
                     await this.applyUpdates(issue, task, changes);
                     results.updated.push({ task, issueNumber: issue.number, changes });
-                    
+
                     // Small delay to respect rate limits
                     await this.delay(500);
                 }
@@ -199,10 +199,10 @@ class GitHubIssuesUpdater {
         // Check label changes
         const expectedLabels = this.generateLabels(task);
         const currentLabels = issue.labels.map(label => typeof label === 'string' ? label : label.name);
-        
+
         const missingLabels = expectedLabels.filter(label => !currentLabels.includes(label));
-        const extraLabels = currentLabels.filter(label => 
-            !expectedLabels.includes(label) && 
+        const extraLabels = currentLabels.filter(label =>
+            !expectedLabels.includes(label) &&
             !label.startsWith('automated-') // Keep automation-related labels
         );
 
@@ -226,15 +226,15 @@ class GitHubIssuesUpdater {
 
         for (const change of changes) {
             switch (change.field) {
-                case 'title':
-                    updateData.title = change.expected;
-                    break;
-                case 'body':
-                    updateData.body = this.generateIssueBody(task);
-                    break;
-                case 'labels':
-                    updateData.labels = change.expected;
-                    break;
+            case 'title':
+                updateData.title = change.expected;
+                break;
+            case 'body':
+                updateData.body = this.generateIssueBody(task);
+                break;
+            case 'labels':
+                updateData.labels = change.expected;
+                break;
             }
         }
 
@@ -258,11 +258,11 @@ class GitHubIssuesUpdater {
         body += `**Priority**: ${task.priority}\n`;
         body += `**Estimated Effort**: ${task.effort}\n`;
         body += `**Phase**: ${task.phase}\n`;
-        
+
         if (task.dependencies && task.dependencies.length > 0) {
             body += `**Dependencies**: ${task.dependencies.map(dep => `Task ${dep}`).join(', ')}\n`;
         } else {
-            body += `**Dependencies**: None\n`;
+            body += '**Dependencies**: None\n';
         }
         body += '\n';
 
@@ -273,7 +273,7 @@ class GitHubIssuesUpdater {
 
         // Acceptance Criteria
         if (task.acceptanceCriteria && task.acceptanceCriteria.length > 0) {
-            body += `## Acceptance Criteria\n\n`;
+            body += '## Acceptance Criteria\n\n';
             for (const criterion of task.acceptanceCriteria) {
                 const checkbox = criterion.completed ? '[x]' : '[ ]';
                 body += `- ${checkbox} ${criterion.text}\n`;
@@ -283,7 +283,7 @@ class GitHubIssuesUpdater {
 
         // Files to Create
         if (task.filesToCreate && task.filesToCreate.length > 0) {
-            body += `## Files to Create\n\n`;
+            body += '## Files to Create\n\n';
             body += '```\n';
             for (const file of task.filesToCreate) {
                 body += `${file}\n`;
@@ -293,7 +293,7 @@ class GitHubIssuesUpdater {
 
         // Testing Strategy
         if (task.testingStrategy && task.testingStrategy.length > 0) {
-            body += `## Testing Strategy\n\n`;
+            body += '## Testing Strategy\n\n';
             for (const strategy of task.testingStrategy) {
                 body += `- ${strategy}\n`;
             }
@@ -301,9 +301,9 @@ class GitHubIssuesUpdater {
         }
 
         // Automation footer
-        body += `---\n\n`;
-        body += `*This issue was automatically generated from MSP430_EMULATOR_TASKS.md*\n`;
-        body += `*🤖 Managed by GitHub Issues Automation*`;
+        body += '---\n\n';
+        body += '*This issue was automatically generated from MSP430_EMULATOR_TASKS.md*\n';
+        body += '*🤖 Managed by GitHub Issues Automation*';
 
         return body;
     }
@@ -377,7 +377,7 @@ class GitHubIssuesUpdater {
             owner: this.owner,
             repo: this.repo,
             issue_number: issueNumber,
-            body: `🔄 **Task reopened**\n\nTask status changed back to incomplete.\n\n*Automatically reopened by GitHub Issues Automation*`
+            body: '🔄 **Task reopened**\n\nTask status changed back to incomplete.\n\n*Automatically reopened by GitHub Issues Automation*'
         });
 
         await this.octokit.rest.issues.update({
@@ -399,55 +399,56 @@ class GitHubIssuesUpdater {
 // Export for use as module
 module.exports = { GitHubIssuesUpdater };
 
-// CLI usage if run directly
-if (require.main === module) {
-    async function main() {
-        const token = process.env.GITHUB_TOKEN;
-        const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
-        const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-        const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
-        const dryRun = process.argv.includes('--dry-run');
+// Main function for CLI usage
+async function main() {
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
+    const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
+    const dryRun = process.argv.includes('--dry-run');
 
-        if (!token) {
-            console.error('Error: GITHUB_TOKEN environment variable is required');
-            process.exit(1);
-        }
-
-        try {
-            // Parse tasks
-            const parser = new TaskParser(tasksFile);
-            const tasks = await parser.parse();
-
-            console.log(`Found ${tasks.length} tasks to check for updates`);
-
-            // Update issues
-            const updater = new GitHubIssuesUpdater(token, owner, repo);
-            if (dryRun) {
-                updater.enableDryRun();
-                console.log('Running in DRY RUN mode - no actual changes will be made');
-            }
-
-            const results = await updater.updateIssuesFromTasks(tasks);
-
-            console.log('\nResults:');
-            console.log(`- Updated: ${results.updated.length} issues`);
-            console.log(`- Closed: ${results.closed.length} issues`);
-            console.log(`- Skipped: ${results.skipped.length} issues`);
-            console.log(`- Errors: ${results.errors.length} issues`);
-
-            if (results.errors.length > 0) {
-                console.log('\nErrors:');
-                results.errors.forEach(error => {
-                    console.log(`- Task ${error.task.id}: ${error.error}`);
-                });
-                process.exit(1);
-            }
-
-        } catch (error) {
-            console.error('Error:', error.message);
-            process.exit(1);
-        }
+    if (!token) {
+        console.error('Error: GITHUB_TOKEN environment variable is required');
+        process.exit(1);
     }
 
+    try {
+        // Parse tasks
+        const parser = new TaskParser(tasksFile);
+        const tasks = await parser.parse();
+
+        console.log(`Found ${tasks.length} tasks to check for updates`);
+
+        // Update issues
+        const updater = new GitHubIssuesUpdater(token, owner, repo);
+        if (dryRun) {
+            updater.enableDryRun();
+            console.log('Running in DRY RUN mode - no actual changes will be made');
+        }
+
+        const results = await updater.updateIssuesFromTasks(tasks);
+
+        console.log('\nResults:');
+        console.log(`- Updated: ${results.updated.length} issues`);
+        console.log(`- Closed: ${results.closed.length} issues`);
+        console.log(`- Skipped: ${results.skipped.length} issues`);
+        console.log(`- Errors: ${results.errors.length} issues`);
+
+        if (results.errors.length > 0) {
+            console.log('\nErrors:');
+            results.errors.forEach(error => {
+                console.log(`- Task ${error.task.id}: ${error.error}`);
+            });
+            process.exit(1);
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
+// CLI usage if run directly
+if (require.main === module) {
     main();
 }

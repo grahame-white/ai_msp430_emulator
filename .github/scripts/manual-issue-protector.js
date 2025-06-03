@@ -2,7 +2,7 @@
 
 /**
  * Manual Issue Protector
- * 
+ *
  * Protects manually created GitHub issues from being modified or deleted
  * by the automation system. Identifies and marks manual issues.
  */
@@ -45,14 +45,14 @@ class ManualIssueProtector {
             // Get all issues in the repository
             const allIssues = await this.getAllIssues();
             results.analyzed = allIssues.length;
-            
+
             console.log(`Found ${allIssues.length} total issues to analyze`);
 
             // Analyze each issue
             for (const issue of allIssues) {
                 try {
                     const analysis = this.analyzeIssue(issue);
-                    
+
                     if (analysis.isManual) {
                         results.manual.push({
                             number: issue.number,
@@ -74,7 +74,7 @@ class ManualIssueProtector {
                                 results.protected.push({
                                     number: issue.number
                                 });
-                                
+
                                 // Small delay to respect rate limits
                                 await this.delay(300);
                             }
@@ -114,6 +114,7 @@ class ManualIssueProtector {
             let page = 1;
             const perPage = 100;
 
+            // eslint-disable-next-line no-constant-condition
             while (true) {
                 const response = await this.octokit.rest.issues.listForRepo({
                     owner: this.owner,
@@ -164,7 +165,7 @@ class ManualIssueProtector {
             'Automatically created by'
         ];
 
-        const hasAutomationMarker = automationMarkers.some(marker => 
+        const hasAutomationMarker = automationMarkers.some(marker =>
             issue.body && issue.body.includes(marker)
         );
 
@@ -175,9 +176,9 @@ class ManualIssueProtector {
             'MANUAL_ISSUE_DO_NOT_MODIFY'
         ];
 
-        const hasProtectionMarker = protectionMarkers.some(marker => 
+        const hasProtectionMarker = protectionMarkers.some(marker =>
             (issue.body && issue.body.includes(marker)) ||
-            (issue.labels && issue.labels.some(label => 
+            (issue.labels && issue.labels.some(label =>
                 (typeof label === 'string' ? label : label.name) === marker
             ))
         );
@@ -198,7 +199,7 @@ class ManualIssueProtector {
         } else {
             // Check other indicators
             const indicators = this.getManualIndicators(issue);
-            
+
             if (indicators.score >= 0.7) {
                 analysis.isManual = true;
                 analysis.reason = indicators.reasons.join(', ');
@@ -230,7 +231,7 @@ class ManualIssueProtector {
         // Check creation date vs. automation start
         const createdDate = new Date(issue.created_at);
         const automationStartDate = new Date('2024-01-01'); // Adjust based on when automation started
-        
+
         if (createdDate < automationStartDate) {
             indicators.score += 0.3;
             indicators.reasons.push('created before automation');
@@ -244,10 +245,10 @@ class ManualIssueProtector {
 
         // Check body structure
         if (issue.body) {
-            const hasStructuredSections = issue.body.includes('## Acceptance Criteria') || 
+            const hasStructuredSections = issue.body.includes('## Acceptance Criteria') ||
                                         issue.body.includes('## Files to Create') ||
                                         issue.body.includes('## Testing Strategy');
-            
+
             if (!hasStructuredSections) {
                 indicators.score += 0.3;
                 indicators.reasons.push('lacks structured sections');
@@ -265,7 +266,7 @@ class ManualIssueProtector {
                 'suggestion'
             ];
 
-            if (manualPatterns.some(pattern => 
+            if (manualPatterns.some(pattern =>
                 issue.body.toLowerCase().includes(pattern.toLowerCase())
             )) {
                 indicators.score += 0.2;
@@ -344,7 +345,7 @@ class ManualIssueProtector {
             });
 
             // Add unprotection comment
-            const unprotectionComment = `🔓 **Manual Issue Protection Removed**\n\nThis issue is no longer protected from automated modifications.\n\n*Protection removed by Manual Issue Protector*`;
+            const unprotectionComment = '🔓 **Manual Issue Protection Removed**\n\nThis issue is no longer protected from automated modifications.\n\n*Protection removed by Manual Issue Protector*';
 
             await this.octokit.rest.issues.createComment({
                 owner: this.owner,
@@ -449,56 +450,57 @@ class ManualIssueProtector {
 // Export for use as module
 module.exports = { ManualIssueProtector };
 
-// CLI usage if run directly
-if (require.main === module) {
-    async function main() {
-        const token = process.env.GITHUB_TOKEN;
-        const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
-        const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-        const dryRun = process.argv.includes('--dry-run');
-        const unprotectIssue = process.argv.find(arg => arg.startsWith('--unprotect='));
-        const checkIssue = process.argv.find(arg => arg.startsWith('--check='));
+// Main function for CLI usage
+async function main() {
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
+    const dryRun = process.argv.includes('--dry-run');
+    const unprotectIssue = process.argv.find(arg => arg.startsWith('--unprotect='));
+    const checkIssue = process.argv.find(arg => arg.startsWith('--check='));
 
-        if (!token) {
-            console.error('Error: GITHUB_TOKEN environment variable is required');
-            process.exit(1);
-        }
-
-        try {
-            const protector = new ManualIssueProtector(token, owner, repo);
-            
-            if (dryRun) {
-                protector.enableDryRun();
-                console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
-            }
-
-            // Ensure protection label exists
-            await protector.ensureProtectionLabelExists();
-
-            if (unprotectIssue) {
-                // Unprotect specific issue
-                const issueNumber = parseInt(unprotectIssue.split('=')[1]);
-                await protector.unprotectIssue(issueNumber);
-            } else if (checkIssue) {
-                // Check protection status of specific issue
-                const issueNumber = parseInt(checkIssue.split('=')[1]);
-                const isProtected = await protector.isIssueProtected(issueNumber);
-                console.log(`Issue #${issueNumber} is ${isProtected ? 'protected' : 'not protected'}`);
-            } else {
-                // Scan and protect all manual issues
-                const results = await protector.protectManualIssues();
-
-                // Exit with error code if there were errors
-                if (results.errors.length > 0) {
-                    process.exit(1);
-                }
-            }
-
-        } catch (error) {
-            console.error('Error:', error.message);
-            process.exit(1);
-        }
+    if (!token) {
+        console.error('Error: GITHUB_TOKEN environment variable is required');
+        process.exit(1);
     }
 
+    try {
+        const protector = new ManualIssueProtector(token, owner, repo);
+
+        if (dryRun) {
+            protector.enableDryRun();
+            console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
+        }
+
+        // Ensure protection label exists
+        await protector.ensureProtectionLabelExists();
+
+        if (unprotectIssue) {
+            // Unprotect specific issue
+            const issueNumber = parseInt(unprotectIssue.split('=')[1]);
+            await protector.unprotectIssue(issueNumber);
+        } else if (checkIssue) {
+            // Check protection status of specific issue
+            const issueNumber = parseInt(checkIssue.split('=')[1]);
+            const isProtected = await protector.isIssueProtected(issueNumber);
+            console.log(`Issue #${issueNumber} is ${isProtected ? 'protected' : 'not protected'}`);
+        } else {
+            // Scan and protect all manual issues
+            const results = await protector.protectManualIssues();
+
+            // Exit with error code if there were errors
+            if (results.errors.length > 0) {
+                process.exit(1);
+            }
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
+// CLI usage if run directly
+if (require.main === module) {
     main();
 }

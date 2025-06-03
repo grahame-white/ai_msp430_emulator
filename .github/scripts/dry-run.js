@@ -2,7 +2,7 @@
 
 /**
  * GitHub Issues Dry Run Preview
- * 
+ *
  * Generates a preview of what changes would be made during synchronization
  * without actually making any API calls or modifications.
  */
@@ -21,7 +21,7 @@ class DryRunPreview {
             milestones: [],
             labels: []
         };
-        
+
         // Tasks to exclude from preview (already implemented or actively being developed)
         this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
@@ -49,7 +49,7 @@ class DryRunPreview {
             // Generate preview sections
             await this.previewTaskAnalysis(tasks);
             await this.previewLabelsAndMilestones(tasks);
-            
+
             if (token) {
                 // If token provided, use actual API for more accurate preview
                 await this.previewWithApi(tasks, token, owner, repo);
@@ -59,7 +59,7 @@ class DryRunPreview {
             }
 
             this.printPreviewSummary();
-            this.generateHumanReadableReport(tasks);
+            this.generateHumanReadableReport();
 
             return this.changes;
 
@@ -74,11 +74,11 @@ class DryRunPreview {
      */
     async previewTaskAnalysis(tasks) {
         console.log('📊 Task Analysis:');
-        
+
         const completedTasks = tasks.filter(task => task.completed);
         const incompleteTasks = tasks.filter(task => !task.completed);
         const tasksByPhase = {};
-        
+
         // Group by phase
         for (const task of tasks) {
             if (!tasksByPhase[task.phase]) {
@@ -94,7 +94,7 @@ class DryRunPreview {
         console.log(`   Completed: ${completedTasks.length}`);
         console.log(`   Incomplete: ${incompleteTasks.length}`);
         console.log('\n   Phase breakdown:');
-        
+
         for (const [phase, stats] of Object.entries(tasksByPhase)) {
             const percentage = Math.round((stats.completed / stats.total) * 100);
             console.log(`     ${phase}: ${stats.completed}/${stats.total} (${percentage}%)`);
@@ -107,20 +107,20 @@ class DryRunPreview {
      */
     async previewLabelsAndMilestones(tasks) {
         console.log('🏷️  Labels and Milestones:');
-        
+
         // Generate unique labels that would be created
         const allLabels = new Set();
         const phases = new Set();
-        
+
         for (const task of tasks) {
             phases.add(task.phase);
-            
+
             // Phase label
             allLabels.add(task.phase.toLowerCase().replace(' ', '-'));
-            
+
             // Priority label
             allLabels.add(`priority-${task.priority.toLowerCase()}`);
-            
+
             // Effort label
             if (task.effort.includes('hours')) {
                 const hours = task.effort.match(/(\d+)-?(\d+)?/);
@@ -135,7 +135,7 @@ class DryRunPreview {
                     }
                 }
             }
-            
+
             // Status label
             allLabels.add(task.completed ? 'status-completed' : 'status-pending');
         }
@@ -155,34 +155,34 @@ class DryRunPreview {
      */
     async previewWithApi(tasks, token, owner, repo) {
         console.log('🔗 Analyzing with GitHub API...');
-        
+
         const synchronizer = new GitHubIssuesSynchronizer(token, owner, repo);
         synchronizer.enableDryRun();
-        
+
         const results = await synchronizer.synchronize('./MSP430_EMULATOR_TASKS.md');
-        
+
         this.changes.newIssues = results.created.map(r => ({
             taskId: r.task.id,
             title: r.task.title,
             priority: r.task.priority
         }));
-        
+
         this.changes.updatedIssues = results.updated.map(r => ({
             taskId: r.task.id,
             issueNumber: r.issueNumber,
             changes: r.changes
         }));
-        
+
         this.changes.closedIssues = results.closed.map(r => ({
             taskId: r.task.id,
             issueNumber: r.issueNumber
         }));
-        
+
         this.changes.dependencies = results.linked.map(r => ({
             taskId: r.task,
             dependsOn: r.dependency
         }));
-        
+
         this.changes.obsoleteIssues = results.cleaned.map(r => ({
             issueNumber: r.issueNumber,
             taskId: r.taskId
@@ -194,9 +194,9 @@ class DryRunPreview {
      */
     async previewWithoutApi(tasks) {
         console.log('📝 Basic Analysis (no API access):');
-        
+
         const incompleteTasks = tasks.filter(task => !task.completed);
-        
+
         this.changes.newIssues = incompleteTasks.map(task => ({
             taskId: task.id,
             title: task.title,
@@ -237,7 +237,7 @@ class DryRunPreview {
     /**
      * Generate human-readable report
      */
-    generateHumanReadableReport(tasks) {
+    generateHumanReadableReport() {
         console.log('📄 Detailed Preview Report:');
         console.log('─'.repeat(60));
 
@@ -289,9 +289,9 @@ class DryRunPreview {
 
         // Risk assessment
         console.log('\n⚠️  RISK ASSESSMENT:');
-        const totalChanges = this.changes.newIssues.length + 
-                           this.changes.updatedIssues.length + 
-                           this.changes.closedIssues.length + 
+        const totalChanges = this.changes.newIssues.length +
+                           this.changes.updatedIssues.length +
+                           this.changes.closedIssues.length +
                            this.changes.obsoleteIssues.length;
 
         if (totalChanges === 0) {
@@ -309,7 +309,7 @@ class DryRunPreview {
         console.log('   2. If satisfied, run the sync script without --dry-run');
         console.log('   3. Monitor the GitHub repository for proper issue creation');
         console.log('   4. Verify dependency links and milestone assignments');
-        
+
         console.log('\n─'.repeat(60));
     }
 
@@ -324,28 +324,29 @@ class DryRunPreview {
 // Export for use as module
 module.exports = { DryRunPreview };
 
+// Main function for CLI usage
+async function main() {
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
+    const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
+    const jsonOutput = process.argv.includes('--json');
+
+    try {
+        const preview = new DryRunPreview();
+        await preview.generatePreview(tasksFile, token, owner, repo);
+
+        if (jsonOutput) {
+            console.log(preview.generateJsonOutput());
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
 // CLI usage if run directly
 if (require.main === module) {
-    async function main() {
-        const token = process.env.GITHUB_TOKEN;
-        const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
-        const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-        const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
-        const jsonOutput = process.argv.includes('--json');
-
-        try {
-            const preview = new DryRunPreview();
-            await preview.generatePreview(tasksFile, token, owner, repo);
-
-            if (jsonOutput) {
-                console.log(preview.generateJsonOutput());
-            }
-
-        } catch (error) {
-            console.error('Error:', error.message);
-            process.exit(1);
-        }
-    }
-
     main();
 }

@@ -2,7 +2,7 @@
 
 /**
  * GitHub Issues Disaster Recovery
- * 
+ *
  * Rebuilds GitHub issues from scratch based on MSP430_EMULATOR_TASKS.md
  * when the issue automation system needs to be reset or recovered.
  */
@@ -21,7 +21,7 @@ class DisasterRecovery {
         this.repo = repo;
         this.dryRun = false;
         this.force = false;
-        
+
         // Tasks to exclude from recovery (already implemented or actively being developed)
         this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
@@ -69,7 +69,7 @@ class DisasterRecovery {
         try {
             console.log('🚨 Starting Disaster Recovery Process...');
             console.log('⚠️  This will analyze and potentially recreate all task issues');
-            
+
             if (!this.dryRun && !this.force) {
                 console.log('\n❗ Add --force flag to proceed with actual recovery');
                 console.log('   Add --dry-run to preview changes without making them');
@@ -195,7 +195,7 @@ class DisasterRecovery {
         };
 
         const existingTaskIssues = new Map();
-        
+
         // Map existing issues by task ID
         for (const issue of existingIssues) {
             if (issue.taskId) {
@@ -235,7 +235,7 @@ class DisasterRecovery {
      */
     needsRecreation(task, issue) {
         // Check for significant corruption or missing automation markers
-        return !issue.body || 
+        return !issue.body ||
                !issue.body.includes('🤖 Managed by GitHub Issues Automation') ||
                issue.title !== `Task ${task.id}: ${task.title}`;
     }
@@ -245,7 +245,7 @@ class DisasterRecovery {
      */
     async executeRecoveryPlan(plan, tasks, results) {
         const creator = new GitHubIssuesCreator(this.octokit.auth, this.owner, this.repo);
-        
+
         if (this.dryRun) {
             creator.enableDryRun();
         }
@@ -264,7 +264,7 @@ class DisasterRecovery {
         // Recreate corrupted issues
         if (plan.toRecreate.length > 0) {
             console.log(`   Recreating ${plan.toRecreate.length} corrupted issues...`);
-            
+
             for (const { task, issue } of plan.toRecreate) {
                 try {
                     // Close old issue with explanation
@@ -327,7 +327,7 @@ class DisasterRecovery {
     /**
      * Verify recovery was successful
      */
-    async verifyRecovery(tasks, results) {
+    async verifyRecovery(tasks) {
         try {
             // Re-fetch issues to verify
             const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
@@ -350,7 +350,7 @@ class DisasterRecovery {
             }
 
             const missingTasks = Array.from(taskIds).filter(id => !recoveredTaskIds.has(id));
-            
+
             if (missingTasks.length > 0) {
                 console.log(`   ⚠️  ${missingTasks.length} tasks still missing issues: ${missingTasks.join(', ')}`);
             } else {
@@ -408,45 +408,46 @@ class DisasterRecovery {
 // Export for use as module
 module.exports = { DisasterRecovery };
 
-// CLI usage if run directly
-if (require.main === module) {
-    async function main() {
-        const token = process.env.GITHUB_TOKEN;
-        const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
-        const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-        const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
-        const dryRun = process.argv.includes('--dry-run');
-        const force = process.argv.includes('--force');
+// Main function for CLI usage
+async function main() {
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
+    const tasksFile = process.argv[2] || './MSP430_EMULATOR_TASKS.md';
+    const dryRun = process.argv.includes('--dry-run');
+    const force = process.argv.includes('--force');
 
-        if (!token) {
-            console.error('Error: GITHUB_TOKEN environment variable is required');
-            process.exit(1);
-        }
-
-        try {
-            const recovery = new DisasterRecovery(token, owner, repo);
-            
-            if (dryRun) {
-                recovery.enableDryRun();
-                console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
-            }
-            
-            if (force) {
-                recovery.enableForce();
-            }
-
-            const results = await recovery.recover(tasksFile);
-
-            // Exit with error code if there were errors
-            if (results.errors.length > 0) {
-                process.exit(1);
-            }
-
-        } catch (error) {
-            console.error('Error:', error.message);
-            process.exit(1);
-        }
+    if (!token) {
+        console.error('Error: GITHUB_TOKEN environment variable is required');
+        process.exit(1);
     }
 
+    try {
+        const recovery = new DisasterRecovery(token, owner, repo);
+
+        if (dryRun) {
+            recovery.enableDryRun();
+            console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
+        }
+
+        if (force) {
+            recovery.enableForce();
+        }
+
+        const results = await recovery.recover(tasksFile);
+
+        // Exit with error code if there were errors
+        if (results.errors.length > 0) {
+            process.exit(1);
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
+// CLI usage if run directly
+if (require.main === module) {
     main();
 }

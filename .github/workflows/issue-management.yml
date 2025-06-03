@@ -66,7 +66,7 @@ jobs:
       id: validate
       run: |
         cd .github/scripts
-        node parse-tasks.js ../../../MSP430_EMULATOR_TASKS.md > /tmp/tasks.json
+        node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > /tmp/tasks.json
         
         # Check if parsing was successful
         if [ $? -eq 0 ]; then
@@ -115,7 +115,7 @@ jobs:
       run: |
         cd .github/scripts
         echo "🔍 Generating preview of changes..."
-        node dry-run.js ../../../MSP430_EMULATOR_TASKS.md > /tmp/preview.txt
+        node dry-run.js ../../MSP430_EMULATOR_TASKS.md > /tmp/preview.txt
         
         echo "## 📋 Issue Automation Preview" >> $GITHUB_STEP_SUMMARY
         echo "Found **${{ needs.validate-tasks.outputs.tasks-count }}** tasks to process" >> $GITHUB_STEP_SUMMARY
@@ -214,7 +214,7 @@ jobs:
       run: |
         cd .github/scripts
         echo "🚨 Running disaster recovery..."
-        node disaster-recovery.js ../../../MSP430_EMULATOR_TASKS.md --force
+        node disaster-recovery.js ../../MSP430_EMULATOR_TASKS.md --force
 
     - name: Run synchronization
       if: steps.mode.outputs.mode == 'sync'
@@ -223,7 +223,7 @@ jobs:
       run: |
         cd .github/scripts
         echo "🔄 Running full synchronization..."
-        node sync-tasks.js ../../../MSP430_EMULATOR_TASKS.md
+        node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md
 
     - name: Run dry run
       if: steps.mode.outputs.mode == 'dry-run'
@@ -232,7 +232,7 @@ jobs:
       run: |
         cd .github/scripts
         echo "🔍 Running dry run synchronization..."
-        node sync-tasks.js ../../../MSP430_EMULATOR_TASKS.md --dry-run
+        node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md --dry-run
 
     - name: Generate summary report
       if: always()

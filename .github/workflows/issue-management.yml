@@ -71,10 +71,9 @@ jobs:
       id: validate
       run: |
         cd .github/scripts
-        node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > /tmp/tasks.json
         
         # Check if parsing was successful
-        if [ $? -eq 0 ]; then
+        if node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > /tmp/tasks.json; then
           echo "valid=true" >> $GITHUB_OUTPUT
           TASK_COUNT=$(jq '.totalTasks' /tmp/tasks.json)
           echo "count=$TASK_COUNT" >> $GITHUB_OUTPUT
@@ -122,13 +121,15 @@ jobs:
         echo "🔍 Generating preview of changes..."
         node dry-run.js ../../MSP430_EMULATOR_TASKS.md > /tmp/preview.txt
         
-        echo "## 📋 Issue Automation Preview" >> $GITHUB_STEP_SUMMARY
-        echo "Found **${{ needs.validate-tasks.outputs.tasks-count }}** tasks to process" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Preview Details" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
-        cat /tmp/preview.txt >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
+        {
+          echo "## 📋 Issue Automation Preview"
+          echo "Found **${{ needs.validate-tasks.outputs.tasks-count }}** tasks to process"
+          echo ""
+          echo "### Preview Details"
+          echo '```'
+          cat /tmp/preview.txt
+          echo '```'
+        } >> $GITHUB_STEP_SUMMARY
 
     - name: Upload preview
       uses: actions/upload-artifact@v4
@@ -291,10 +292,12 @@ jobs:
         cd .github/scripts
         echo "📊 Generating summary report..."
         
-        echo "## 🔄 Issue Synchronization Summary" >> $GITHUB_STEP_SUMMARY
-        echo "**Mode:** ${{ steps.mode.outputs.mode }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Tasks Processed:** ${{ needs.validate-tasks.outputs.tasks-count }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        {
+          echo "## 🔄 Issue Synchronization Summary"
+          echo "**Mode:** ${{ steps.mode.outputs.mode }}"
+          echo "**Tasks Processed:** ${{ needs.validate-tasks.outputs.tasks-count }}"
+          echo "**Trigger:** ${{ github.event_name }}"
+        } >> $GITHUB_STEP_SUMMARY
         
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           if [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
@@ -305,15 +308,19 @@ jobs:
         fi
         
         if [ "${{ steps.mode.outputs.mode }}" != "dry-run" ]; then
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Synchronization Complete" >> $GITHUB_STEP_SUMMARY
-          echo "Issues have been synchronized with the task list." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📋 [View Issues](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+label%3Atask)" >> $GITHUB_STEP_SUMMARY
+          {
+            echo ""
+            echo "### ✅ Synchronization Complete"
+            echo "Issues have been synchronized with the task list."
+            echo ""
+            echo "📋 [View Issues](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+label%3Atask)"
+          } >> $GITHUB_STEP_SUMMARY
         else
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔍 Dry Run Complete" >> $GITHUB_STEP_SUMMARY
-          echo "No changes were made. Check the preview above for planned changes." >> $GITHUB_STEP_SUMMARY
+          {
+            echo ""
+            echo "### 🔍 Dry Run Complete"
+            echo "No changes were made. Check the preview above for planned changes."
+          } >> $GITHUB_STEP_SUMMARY
         fi
 
   notify-completion:
@@ -375,3 +382,4 @@ permissions:
   contents: read
   issues: write
   pull-requests: read
+  repository-projects: read

@@ -8,6 +8,7 @@
  */
 
 const { Octokit } = require('@octokit/rest');
+const { isPermissionError, executeWithPermissionHandling } = require('./github-utils.js');
 
 class ManualIssueProtector {
     constructor(token, owner, repo) {
@@ -307,27 +308,55 @@ class ManualIssueProtector {
     async protectIssue(issue, reason) {
         try {
             // Add protection label
-            await this.octokit.rest.issues.addLabels({
-                owner: this.owner,
-                repo: this.repo,
-                issue_number: issue.number,
-                labels: ['manual-issue-protected']
-            });
+            const labelResult = await executeWithPermissionHandling(
+                async() => {
+                    await this.octokit.rest.issues.addLabels({
+                        owner: this.owner,
+                        repo: this.repo,
+                        issue_number: issue.number,
+                        labels: ['manual-issue-protected']
+                    });
+                },
+                'add protection label',
+                `issue #${issue.number}`
+            );
 
             // Add protection comment
             const protectionComment = `🛡️ **Manual Issue Protection Activated**\n\nThis issue has been identified as manually created and is now protected from automated modifications.\n\n**Detection Reason:** ${reason}\n\n**Protection Details:**\n- This issue will not be modified by GitHub Issues Automation\n- The automation system will preserve this issue's content and state\n- If you need to remove this protection, remove the \`manual-issue-protected\` label\n\n*Automatically protected by Manual Issue Protector*`;
 
-            await this.octokit.rest.issues.createComment({
-                owner: this.owner,
-                repo: this.repo,
-                issue_number: issue.number,
-                body: protectionComment
-            });
+            const commentResult = await executeWithPermissionHandling(
+                async() => {
+                    await this.octokit.rest.issues.createComment({
+                        owner: this.owner,
+                        repo: this.repo,
+                        issue_number: issue.number,
+                        body: protectionComment
+                    });
+                },
+                'add protection comment',
+                `issue #${issue.number}`
+            );
 
-            console.log(`Protected manual issue #${issue.number}: ${issue.title}`);
+            // Report overall success
+            if (labelResult.success || commentResult.success) {
+                const actions = [];
+                if (labelResult.success) {
+                    actions.push('labeled');
+                }
+                if (commentResult.success) {
+                    actions.push('commented');
+                }
+                console.log(`✅ Protected manual issue #${issue.number} (${actions.join(' + ')}): ${issue.title}`);
+            } else {
+                console.log(`⚠️  Issue #${issue.number} identified as manual but could not be fully protected due to permissions: ${issue.title}`);
+            }
 
         } catch (error) {
-            throw new Error(`Failed to protect issue #${issue.number}: ${error.message}`);
+            if (isPermissionError(error)) {
+                console.warn(`⚠️  Cannot protect issue #${issue.number} due to insufficient permissions: ${issue.title}`);
+            } else {
+                throw new Error(`Failed to protect issue #${issue.number}: ${error.message}`);
+            }
         }
     }
 
@@ -400,13 +429,21 @@ class ManualIssueProtector {
                             color: 'ff6b6b',
                             description: 'Issue is manually created and protected from automation'
                         });
-                        console.log('Created protection label: manual-issue-protected');
+                        console.log('✅ Created protection label: manual-issue-protected');
                     } catch (createError) {
-                        console.warn(`Warning: Could not create protection label: ${createError.message}`);
+                        if (isPermissionError(createError)) {
+                            console.warn('⚠️  Cannot create protection label due to insufficient permissions');
+                        } else {
+                            console.warn(`⚠️  Could not create protection label: ${createError.message}`);
+                        }
                     }
                 } else {
                     console.log('[DRY RUN] Would create protection label: manual-issue-protected');
                 }
+            } else if (isPermissionError(error)) {
+                console.warn('⚠️  Cannot access label information due to insufficient permissions');
+            } else {
+                console.warn(`⚠️  Error checking protection label: ${error.message}`);
             }
         }
     }
@@ -438,6 +475,8 @@ class ManualIssueProtector {
             });
         }
     }
+
+
 
     /**
      * Utility function for delays

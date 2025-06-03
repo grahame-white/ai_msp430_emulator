@@ -9,6 +9,7 @@
 
 const { Octokit } = require('@octokit/rest');
 const { TaskParser } = require('./parse-tasks.js');
+const { isPermissionError, executeWithPermissionHandling } = require('./github-utils.js');
 
 class GitHubIssuesCreator {
     constructor(token, owner, repo) {
@@ -333,25 +334,35 @@ class GitHubIssuesCreator {
                 if (error.status === 404) {
                     // Label doesn't exist, create it
                     if (!this.dryRun) {
-                        try {
-                            await this.octokit.rest.issues.createLabel({
-                                owner: this.owner,
-                                repo: this.repo,
-                                name: labelData.name,
-                                color: labelData.color,
-                                description: labelData.description
-                            });
+                        const createResult = await executeWithPermissionHandling(
+                            async() => {
+                                await this.octokit.rest.issues.createLabel({
+                                    owner: this.owner,
+                                    repo: this.repo,
+                                    name: labelData.name,
+                                    color: labelData.color,
+                                    description: labelData.description
+                                });
+                            },
+                            `create label ${labelData.name}`,
+                            'repository'
+                        );
+                        if (createResult.success) {
                             console.log(`Created label: ${labelData.name}`);
-                        } catch (createError) {
-                            console.warn(`Warning: Could not create label ${labelData.name}: ${createError.message}`);
                         }
                     } else {
                         console.log(`[DRY RUN] Would create label: ${labelData.name}`);
                     }
+                } else if (isPermissionError(error)) {
+                    console.warn(`⚠️  Cannot access label ${labelData.name} due to insufficient permissions`);
+                } else {
+                    console.warn(`⚠️  Error checking label ${labelData.name}: ${error.message}`);
                 }
             }
         }
     }
+
+
 
     /**
      * Utility function for delays

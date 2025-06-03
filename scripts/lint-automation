@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# scripts/lint-automation
+# Run automation scripts linting and validation
+
+set -e
+
+cd "$(dirname "$0")/../.github/scripts"
+
+echo "==> Running automation scripts validation..."
+
+echo "==> Installing dependencies..."
+npm install --silent
+
+echo "==> Linting JavaScript code..."
+npm run lint
+
+echo "==> Validating YAML files..."
+npm run lint:yaml
+
+echo "==> Validating GitHub Actions workflows..."
+npm run validate:workflows
+
+echo "==> Running tests..."
+npm test
+
+echo "==> Automation scripts validation completed successfully!"

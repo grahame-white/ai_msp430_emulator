@@ -71,7 +71,7 @@ jobs:
           echo "No coverage report found. Skipping coverage check."
           exit 0
         fi
-        COVERAGE=$(cat TestResults/CoverageReport/Summary.json | grep -o '"linecoverage": [0-9.]*' | grep -o '[0-9.]*')
+        COVERAGE=$(grep -o '"linecoverage": [0-9.]*' TestResults/CoverageReport/Summary.json | grep -o '[0-9.]*')
         if [ -z "$COVERAGE" ] || [ "$COVERAGE" = "null" ]; then
           echo "No coverage data available. Skipping coverage check."
           exit 0
@@ -145,6 +145,26 @@ jobs:
         echo "Running ESLint..."
         npm run lint
 
+    - name: Validate YAML files
+      run: |
+        cd .github/scripts
+        echo "Running YAML linting..."
+        npm run lint:yaml
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 'stable'
+
+    - name: Install actionlint
+      run: go install github.com/rhysd/actionlint/cmd/actionlint@latest
+
+    - name: Run actionlint
+      run: |
+        GOPATH_BIN=$(go env GOPATH)/bin
+        export PATH=$PATH:$GOPATH_BIN
+        actionlint .github/workflows/*.yml
+
     - name: Validate package.json
       run: |
         cd .github/scripts
@@ -155,8 +175,7 @@ jobs:
       run: |
         cd .github/scripts
         echo "Testing task parsing functionality..."
-        node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > /tmp/parse-test.json
-        if [ $? -eq 0 ]; then
+        if node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > /tmp/parse-test.json; then
           echo "✅ Parse test passed"
           # Validate JSON output
           jq empty /tmp/parse-test.json
@@ -172,8 +191,7 @@ jobs:
       run: |
         cd .github/scripts
         echo "Testing dry-run functionality..."
-        timeout 30s node dry-run.js ../../MSP430_EMULATOR_TASKS.md > /tmp/dry-run-test.txt
-        if [ $? -eq 0 ]; then
+        if timeout 30s node dry-run.js ../../MSP430_EMULATOR_TASKS.md > /tmp/dry-run-test.txt; then
           echo "✅ Dry-run test passed"
         else
           echo "❌ Dry-run test failed or timed out"

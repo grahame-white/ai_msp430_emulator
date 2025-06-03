@@ -8,9 +8,9 @@ cd "$(dirname "$0")/.."
 
 echo "==> Running MSP430 Emulator CI build..."
 
-# Update dependencies
-echo "==> Updating dependencies..."
-./script/update
+# Bootstrap dependencies
+echo "==> Bootstrapping dependencies..."
+./script/bootstrap
 
 # Check code formatting
 echo "==> Checking code formatting..."

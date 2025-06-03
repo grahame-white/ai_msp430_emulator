@@ -39,6 +39,9 @@ Thank you for your interest in contributing to the MSP430 Emulator project! This
 #### For .NET Code Changes
 
 ```bash
+# Bootstrap dependencies (install all required dependencies)
+./script/bootstrap
+
 # Auto-format code (recommended - fixes issues automatically)
 ./script/format
 

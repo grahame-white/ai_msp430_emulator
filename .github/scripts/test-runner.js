@@ -167,6 +167,106 @@ This is a description without dependencies section.
         'Fallback description extraction failed');
 });
 
+// Test: Sync-tasks module structure
+runner.test('sync-tasks.js has required exports', () => {
+    const syncTasksPath = path.resolve('./sync-tasks.js');
+    runner.assertExists(syncTasksPath);
+
+    const content = fs.readFileSync(syncTasksPath, 'utf8');
+    runner.assert(content.includes('class GitHubIssuesSynchronizer'), 'GitHubIssuesSynchronizer class not found');
+    runner.assert(content.includes('synchronize'), 'synchronize method not found');
+    runner.assert(content.includes('module.exports'), 'module.exports not found');
+});
+
+// Test: Create-issues module structure
+runner.test('create-issues.js has required exports', () => {
+    const createIssuesPath = path.resolve('./create-issues.js');
+    runner.assertExists(createIssuesPath);
+
+    const content = fs.readFileSync(createIssuesPath, 'utf8');
+    runner.assert(content.includes('class GitHubIssuesCreator'), 'GitHubIssuesCreator class not found');
+    runner.assert(content.includes('createIssue'), 'createIssue method not found');
+    runner.assert(content.includes('module.exports'), 'module.exports not found');
+});
+
+// Test: Update-issues module structure
+runner.test('update-issues.js has required exports', () => {
+    const updateIssuesPath = path.resolve('./update-issues.js');
+    runner.assertExists(updateIssuesPath);
+
+    const content = fs.readFileSync(updateIssuesPath, 'utf8');
+    runner.assert(content.includes('class GitHubIssuesUpdater'), 'GitHubIssuesUpdater class not found');
+    runner.assert(content.includes('updateIssue'), 'updateIssue method not found');
+    runner.assert(content.includes('module.exports'), 'module.exports not found');
+});
+
+// Test: Manual-issue-protector module structure
+runner.test('manual-issue-protector.js has required exports', () => {
+    const protectorPath = path.resolve('./manual-issue-protector.js');
+    runner.assertExists(protectorPath);
+
+    const content = fs.readFileSync(protectorPath, 'utf8');
+    runner.assert(content.includes('class ManualIssueProtector'), 'ManualIssueProtector class not found');
+    runner.assert(content.includes('protectManualIssues'), 'protectManualIssues method not found');
+    runner.assert(content.includes('module.exports'), 'module.exports not found');
+});
+
+// Test: Disaster-recovery module structure
+runner.test('disaster-recovery.js has required exports', () => {
+    const recoveryPath = path.resolve('./disaster-recovery.js');
+    runner.assertExists(recoveryPath);
+
+    const content = fs.readFileSync(recoveryPath, 'utf8');
+    runner.assert(content.includes('class DisasterRecovery'), 'DisasterRecovery class not found');
+    runner.assert(content.includes('recover'), 'recover method not found');
+    runner.assert(content.includes('module.exports'), 'module.exports not found');
+});
+
+// Test: Dry-run module structure
+runner.test('dry-run.js has required exports', () => {
+    const dryRunPath = path.resolve('./dry-run.js');
+    runner.assertExists(dryRunPath);
+
+    const content = fs.readFileSync(dryRunPath, 'utf8');
+    runner.assert(content.includes('class DryRunPreview'), 'DryRunPreview class not found');
+    runner.assert(content.includes('generatePreview'), 'generatePreview method not found');
+    runner.assert(content.includes('module.exports'), 'module.exports not found');
+});
+
+// Test: Module exports are properly structured (without loading dependencies)
+runner.test('All automation modules have proper exports', () => {
+    const moduleFiles = [
+        { name: 'parse-tasks.js', export: 'TaskParser' },
+        { name: 'sync-tasks.js', export: 'GitHubIssuesSynchronizer' },
+        { name: 'create-issues.js', export: 'GitHubIssuesCreator' },
+        { name: 'update-issues.js', export: 'GitHubIssuesUpdater' },
+        { name: 'manual-issue-protector.js', export: 'ManualIssueProtector' },
+        { name: 'disaster-recovery.js', export: 'DisasterRecovery' },
+        { name: 'dry-run.js', export: 'DryRunPreview' }
+    ];
+
+    for (const { name, export: exportName } of moduleFiles) {
+        const content = fs.readFileSync(name, 'utf8');
+        runner.assert(content.includes('module.exports'), `${name} missing module.exports`);
+        runner.assert(content.includes(`class ${exportName}`), `${name} missing ${exportName} class`);
+    }
+});
+
+// Test: Core TaskParser functionality works independently
+runner.test('TaskParser can be imported and instantiated', () => {
+    try {
+        const { TaskParser } = require('./parse-tasks.js');
+        runner.assert(typeof TaskParser === 'function', 'TaskParser should be a constructor function');
+
+        const parser = new TaskParser();
+        runner.assert(typeof parser.extractDescription === 'function', 'extractDescription method should exist');
+        runner.assert(typeof parser.extractAcceptanceCriteria === 'function', 'extractAcceptanceCriteria method should exist');
+        runner.assert(typeof parser.extractDependencies === 'function', 'extractDependencies method should exist');
+    } catch (error) {
+        throw new Error(`TaskParser import/instantiation failed: ${error.message}`);
+    }
+});
+
 // Run all tests
 async function main() {
     const success = await runner.run();

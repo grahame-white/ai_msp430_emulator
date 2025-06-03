@@ -107,9 +107,9 @@ public class MemoryAccessValidator
             return new MemoryAccessValidationInfo(address, false, MemoryAccessPermissions.None, null);
         }
 
-        var region = _memoryMap.GetRegion(address);
-        var permissions = _memoryMap.GetPermissions(address);
-        
+        MemoryRegionInfo region = _memoryMap.GetRegion(address);
+        MemoryAccessPermissions permissions = _memoryMap.GetPermissions(address);
+
         return new MemoryAccessValidationInfo(address, true, permissions, region);
     }
 
@@ -118,7 +118,7 @@ public class MemoryAccessValidator
         // Check if address is valid
         if (!_memoryMap.IsValidAddress(address))
         {
-            var message = $"Invalid memory address 0x{address:X4} for {accessTypeName} access - address not mapped";
+            string message = $"Invalid memory address 0x{address:X4} for {accessTypeName} access - address not mapped";
             _logger?.Warning($"Memory access violation: {message}");
             throw new MemoryAccessException(address, accessType, message);
         }
@@ -126,8 +126,8 @@ public class MemoryAccessValidator
         // Check if access is allowed
         if (!_memoryMap.IsAccessAllowed(address, accessType))
         {
-            var region = _memoryMap.GetRegion(address);
-            var message = $"Access denied for {accessTypeName} at address 0x{address:X4} in {region.Region} region - insufficient permissions";
+            MemoryRegionInfo region = _memoryMap.GetRegion(address);
+            string message = $"Access denied for {accessTypeName} at address 0x{address:X4} in {region.Region} region - insufficient permissions";
             _logger?.Warning($"Memory access violation: {message}", new { Address = address, Region = region.Region, RequestedAccess = accessType, AllowedPermissions = region.Permissions });
             throw new MemoryAccessException(address, accessType, message);
         }
@@ -135,7 +135,7 @@ public class MemoryAccessValidator
         // Log successful access if debug logging is enabled
         if (_logger?.IsEnabled(LogLevel.Debug) == true)
         {
-            var region = _memoryMap.GetRegion(address);
+            MemoryRegionInfo region = _memoryMap.GetRegion(address);
             _logger.Debug($"Memory {accessTypeName} access validated for address 0x{address:X4} in {region.Region} region");
         }
     }

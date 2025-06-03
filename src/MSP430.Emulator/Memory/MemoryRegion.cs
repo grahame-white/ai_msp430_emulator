@@ -129,7 +129,7 @@ public readonly struct MemoryRegionInfo
     /// <param name="endAddress">The ending address of the region (inclusive).</param>
     /// <param name="permissions">The access permissions for the region.</param>
     /// <param name="description">A description of the region.</param>
-    public MemoryRegionInfo(MemoryRegion region, ushort startAddress, ushort endAddress, 
+    public MemoryRegionInfo(MemoryRegion region, ushort startAddress, ushort endAddress,
         MemoryAccessPermissions permissions, string description)
     {
         Region = region;

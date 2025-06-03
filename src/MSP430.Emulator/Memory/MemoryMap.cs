@@ -26,7 +26,7 @@ public class MemoryMap : IMemoryMap
     /// </summary>
     public MemoryMap()
     {
-        var regions = CreateDefaultRegions();
+        List<MemoryRegionInfo> regions = CreateDefaultRegions();
         _regionLookup = regions.ToDictionary(r => r.Region, r => r);
         _addressLookup = new MemoryRegionInfo[65536]; // 16-bit address space
 
@@ -59,7 +59,7 @@ public class MemoryMap : IMemoryMap
     /// <inheritdoc />
     public MemoryRegionInfo GetRegion(ushort address)
     {
-        var region = _addressLookup[address];
+        MemoryRegionInfo region = _addressLookup[address];
         if (region.Equals(default(MemoryRegionInfo)))
         {
             throw new ArgumentException($"Address 0x{address:X4} is not mapped to any memory region", nameof(address));
@@ -70,7 +70,7 @@ public class MemoryMap : IMemoryMap
     /// <inheritdoc />
     public MemoryRegionInfo GetRegionInfo(MemoryRegion region)
     {
-        if (!_regionLookup.TryGetValue(region, out var regionInfo))
+        if (!_regionLookup.TryGetValue(region, out MemoryRegionInfo regionInfo))
         {
             throw new ArgumentException($"Memory region {region} is not defined in this memory map", nameof(region));
         }
@@ -87,16 +87,18 @@ public class MemoryMap : IMemoryMap
     public bool IsAccessAllowed(ushort address, MemoryAccessPermissions accessType)
     {
         if (!IsValidAddress(address))
+        {
             return false;
+        }
 
-        var region = _addressLookup[address];
+        MemoryRegionInfo region = _addressLookup[address];
         return (region.Permissions & accessType) == accessType;
     }
 
     /// <inheritdoc />
     public MemoryAccessPermissions GetPermissions(ushort address)
     {
-        var region = GetRegion(address);
+        MemoryRegionInfo region = GetRegion(address);
         return region.Permissions;
     }
 
@@ -116,36 +118,36 @@ public class MemoryMap : IMemoryMap
     {
         return new List<MemoryRegionInfo>
         {
-            new(MemoryRegion.SpecialFunctionRegisters, 0x0000, 0x00FF, 
-                MemoryAccessPermissions.ReadWrite, 
+            new(MemoryRegion.SpecialFunctionRegisters, 0x0000, 0x00FF,
+                MemoryAccessPermissions.ReadWrite,
                 "Special Function Registers"),
-            
-            new(MemoryRegion.Peripherals8Bit, 0x0100, 0x01FF, 
-                MemoryAccessPermissions.ReadWrite, 
+
+            new(MemoryRegion.Peripherals8Bit, 0x0100, 0x01FF,
+                MemoryAccessPermissions.ReadWrite,
                 "8-bit Peripherals"),
-            
-            new(MemoryRegion.Peripherals16Bit, 0x0200, 0x027F, 
-                MemoryAccessPermissions.ReadWrite, 
+
+            new(MemoryRegion.Peripherals16Bit, 0x0200, 0x027F,
+                MemoryAccessPermissions.ReadWrite,
                 "16-bit Peripherals"),
-            
-            new(MemoryRegion.BootstrapLoader, 0x1000, 0x17FF, 
-                MemoryAccessPermissions.ReadExecute, 
+
+            new(MemoryRegion.BootstrapLoader, 0x1000, 0x17FF,
+                MemoryAccessPermissions.ReadExecute,
                 "Bootstrap Loader FRAM"),
-            
-            new(MemoryRegion.InformationMemory, 0x1800, 0x19FF, 
-                MemoryAccessPermissions.ReadWrite, 
+
+            new(MemoryRegion.InformationMemory, 0x1800, 0x19FF,
+                MemoryAccessPermissions.ReadWrite,
                 "Information Memory FRAM"),
-            
-            new(MemoryRegion.Ram, 0x2000, 0x2FFF, 
-                MemoryAccessPermissions.All, 
+
+            new(MemoryRegion.Ram, 0x2000, 0x2FFF,
+                MemoryAccessPermissions.All,
                 "SRAM - High-speed volatile memory"),
-            
-            new(MemoryRegion.Flash, 0x4000, 0xBFFF, 
-                MemoryAccessPermissions.All, 
+
+            new(MemoryRegion.Flash, 0x4000, 0xBFFF,
+                MemoryAccessPermissions.All,
                 "FRAM - Non-volatile unified code/data memory"),
-            
-            new(MemoryRegion.InterruptVectorTable, 0xFFE0, 0xFFFF, 
-                MemoryAccessPermissions.ReadExecute, 
+
+            new(MemoryRegion.InterruptVectorTable, 0xFFE0, 0xFFFF,
+                MemoryAccessPermissions.ReadExecute,
                 "Interrupt Vector Table")
         };
     }
@@ -163,7 +165,7 @@ public class MemoryMap : IMemoryMap
         }
 
         // Map each region's address range
-        foreach (var region in regions)
+        foreach (MemoryRegionInfo region in regions)
         {
             for (int address = region.StartAddress; address <= region.EndAddress; address++)
             {
@@ -180,20 +182,18 @@ public class MemoryMap : IMemoryMap
     private static void ValidateRegions(List<MemoryRegionInfo> regions)
     {
         // Check for invalid regions
-        foreach (var region in regions)
+        MemoryRegionInfo invalidRegion = regions.Where(r => r.StartAddress > r.EndAddress).FirstOrDefault();
+        if (!invalidRegion.Equals(default(MemoryRegionInfo)))
         {
-            if (region.StartAddress > region.EndAddress)
-            {
-                throw new ArgumentException($"Invalid region {region.Region}: start address 0x{region.StartAddress:X4} is greater than end address 0x{region.EndAddress:X4}");
-            }
+            throw new ArgumentException($"Invalid region {invalidRegion.Region}: start address 0x{invalidRegion.StartAddress:X4} is greater than end address 0x{invalidRegion.EndAddress:X4}");
         }
 
         // Check for overlapping regions
         var sortedRegions = regions.OrderBy(r => r.StartAddress).ToList();
         for (int i = 0; i < sortedRegions.Count - 1; i++)
         {
-            var current = sortedRegions[i];
-            var next = sortedRegions[i + 1];
+            MemoryRegionInfo current = sortedRegions[i];
+            MemoryRegionInfo next = sortedRegions[i + 1];
 
             if (current.EndAddress >= next.StartAddress)
             {

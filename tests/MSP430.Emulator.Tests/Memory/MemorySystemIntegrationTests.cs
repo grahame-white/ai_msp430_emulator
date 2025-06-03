@@ -17,7 +17,7 @@ public class MemorySystemIntegrationTests
         var validator = new MemoryAccessValidator(memoryMap, logger);
 
         // Act & Assert - Test each memory region
-        
+
         // Special Function Registers (0x0000-0x00FF) - Read/Write allowed
         validator.ValidateRead(0x0000);
         validator.ValidateWrite(0x0000);
@@ -45,7 +45,7 @@ public class MemorySystemIntegrationTests
         var validator = new MemoryAccessValidator(memoryMap);
 
         // Act & Assert - Test boundary conditions
-        
+
         // SFR region boundaries
         Assert.True(validator.IsAccessValid(0x0000, MemoryAccessPermissions.Read)); // Start
         Assert.True(validator.IsAccessValid(0x00FF, MemoryAccessPermissions.Read)); // End
@@ -67,7 +67,7 @@ public class MemorySystemIntegrationTests
         var memoryMap = new MemoryMap();
 
         // Act
-        var regions = memoryMap.Regions;
+        IReadOnlyList<MemoryRegionInfo> regions = memoryMap.Regions;
 
         // Assert
         Assert.Equal(8, regions.Count); // Expected number of regions
@@ -84,7 +84,7 @@ public class MemorySystemIntegrationTests
         Assert.Contains(MemoryRegion.InterruptVectorTable, regionTypes);
 
         // Verify address space coverage - MSP430FR2355 specific
-        var totalMappedBytes = regions.Sum(r => r.Size);
+        int totalMappedBytes = regions.Sum(r => r.Size);
         Assert.True(totalMappedBytes < 65536); // Should not exceed 16-bit address space
         Assert.True(totalMappedBytes > 30000); // Should cover significant portion (adjusted for FR2355)
     }
@@ -97,22 +97,22 @@ public class MemorySystemIntegrationTests
         var validator = new MemoryAccessValidator(memoryMap);
 
         // Act & Assert - Test validation info for different regions
-        
+
         // Valid address in SRAM
-        var ramInfo = validator.GetValidationInfo(0x2000);
+        MemoryAccessValidationInfo ramInfo = validator.GetValidationInfo(0x2000);
         Assert.True(ramInfo.IsValid);
         Assert.Equal(MemoryAccessPermissions.All, ramInfo.Permissions);
         Assert.NotNull(ramInfo.Region);
         Assert.Equal(MemoryRegion.Ram, ramInfo.Region.Value.Region);
 
         // Valid address in FRAM
-        var framInfo = validator.GetValidationInfo(0x4000);
+        MemoryAccessValidationInfo framInfo = validator.GetValidationInfo(0x4000);
         Assert.True(framInfo.IsValid);
         Assert.Equal(MemoryAccessPermissions.All, framInfo.Permissions);
         Assert.Equal(MemoryRegion.Flash, framInfo.Region!.Value.Region);
 
         // Invalid address
-        var invalidInfo = validator.GetValidationInfo(0x0300);
+        MemoryAccessValidationInfo invalidInfo = validator.GetValidationInfo(0x0300);
         Assert.False(invalidInfo.IsValid);
         Assert.Equal(MemoryAccessPermissions.None, invalidInfo.Permissions);
         Assert.Null(invalidInfo.Region);
@@ -133,7 +133,7 @@ public class MemorySystemIntegrationTests
         var memoryMap = new MemoryMap();
 
         // Act
-        var region = memoryMap.GetRegion(address);
+        MemoryRegionInfo region = memoryMap.GetRegion(address);
 
         // Assert
         Assert.Contains(expectedDescription, region.Description);

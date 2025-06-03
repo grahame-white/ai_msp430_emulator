@@ -145,23 +145,16 @@ jobs:
         echo "Running ESLint..."
         npm run lint
 
-    - name: Install actionlint
-      run: |
-        # Download and install actionlint
-        curl -L https://github.com/rhymond/actionlint/releases/download/v1.6.26/actionlint_1.6.26_linux_amd64.tar.gz | tar xz
-        sudo mv ./actionlint /usr/local/bin/
-
     - name: Validate YAML files
       run: |
         cd .github/scripts
         echo "Running YAML linting..."
         npm run lint:yaml
 
-    - name: Validate GitHub Actions workflows with actionlint
-      run: |
-        cd .github/scripts
-        echo "Validating GitHub Actions workflows with actionlint..."
-        npm run lint:workflows
+    - name: Run actionlint
+      uses: raven-actions/actionlint@v1
+      with:
+        files: ".github/workflows/*.yml"
 
     - name: Validate package.json
       run: |

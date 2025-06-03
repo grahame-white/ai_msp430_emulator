@@ -7,8 +7,9 @@
     "lint": "eslint *.js",
     "lint:fix": "eslint *.js --fix",
     "lint:yaml": "yamllint ../**/*.yml ../**/*.yaml",
-    "validate:workflows": "node validate-workflows.js",
-    "validate:all": "npm run lint && npm run lint:yaml && npm run validate:workflows",
+    "lint:workflows": "find ../workflows -name '*.yml' -o -name '*.yaml' | xargs -r actionlint",
+    "validate:workflows": "npm run lint:workflows",
+    "validate:all": "npm run lint && npm run lint:yaml && npm run lint:workflows",
     "parse": "node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md",
     "dry-run": "node dry-run.js ../../MSP430_EMULATOR_TASKS.md",
     "sync": "node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md --dry-run",
@@ -20,7 +21,6 @@
   },
   "devDependencies": {
     "eslint": "^8.56.0",
-    "js-yaml": "^4.1.0",
     "yaml-lint": "^1.7.0"
   },
   "engines": {

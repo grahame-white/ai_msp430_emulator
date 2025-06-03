@@ -166,14 +166,14 @@ The condition code flags are updated by arithmetic and logical operations:
 - **Instructions**: Operations that affect the sign bit
 
 #### Flag Combinations
-```
-Common Flag Patterns:
-├── C=0, Z=0, N=0  → Positive result, no carry
-├── C=0, Z=1, N=0  → Zero result
-├── C=1, Z=0, N=0  → Positive result with carry
-├── C=0, Z=0, N=1  → Negative result
-└── C=1, Z=0, N=1  → Negative result with carry
-```
+
+| Carry (C) | Zero (Z) | Negative (N) | Result Description |
+|-----------|----------|--------------|-------------------|
+| 0 | 0 | 0 | Positive result, no carry |
+| 0 | 1 | 0 | Zero result |
+| 1 | 0 | 0 | Positive result with carry |
+| 0 | 0 | 1 | Negative result |
+| 1 | 0 | 1 | Negative result with carry |
 
 ### System Control Flags
 
@@ -216,14 +216,14 @@ The system control flags manage CPU operation modes and interrupt handling:
 - **Instructions**: ADD, SUB operations on signed values
 
 #### Power Mode Combinations
-```
-Low Power Mode Settings:
-├── LPM0: CPUOFF=1, SCG0=0, SCG1=0, OSCOFF=0
-├── LPM1: CPUOFF=1, SCG0=1, SCG1=0, OSCOFF=0  
-├── LPM2: CPUOFF=1, SCG0=0, SCG1=1, OSCOFF=0
-├── LPM3: CPUOFF=1, SCG0=1, SCG1=1, OSCOFF=0
-└── LPM4: CPUOFF=1, SCG0=1, SCG1=1, OSCOFF=1
-```
+
+| Mode | CPUOFF | SCG0 | SCG1 | OSCOFF | Description |
+|------|---------|-------|-------|---------|-------------|
+| LPM0 | 1 | 0 | 0 | 0 | CPU off, all clocks active |
+| LPM1 | 1 | 1 | 0 | 0 | CPU off, SMCLK off |
+| LPM2 | 1 | 0 | 1 | 0 | CPU off, DCO off |
+| LPM3 | 1 | 1 | 1 | 0 | CPU off, SMCLK and DCO off |
+| LPM4 | 1 | 1 | 1 | 1 | CPU off, all clocks off |
 
 ### Status Register Flag Usage
 

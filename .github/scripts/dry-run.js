@@ -239,7 +239,7 @@ class DryRunPreview {
      */
     generateHumanReadableReport() {
         console.log('📄 Detailed Preview Report:');
-        console.log('─'.repeat(60));
+        console.log('-'.repeat(60));
 
         // New issues section
         if (this.changes.newIssues.length > 0) {
@@ -310,7 +310,7 @@ class DryRunPreview {
         console.log('   3. Monitor the GitHub repository for proper issue creation');
         console.log('   4. Verify dependency links and milestone assignments');
 
-        console.log('\n─'.repeat(60));
+        console.log('\n' + '-'.repeat(60));
     }
 
     /**

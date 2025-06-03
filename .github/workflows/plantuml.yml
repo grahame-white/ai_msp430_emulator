@@ -1,0 +1,81 @@
+name: PlantUML Documentation
+
+on:
+  push:
+    paths:
+      - 'docs/diagrams/**/*.puml'
+      - '.github/workflows/plantuml.yml'
+  pull_request:
+    paths:
+      - 'docs/diagrams/**/*.puml'
+      - '.github/workflows/plantuml.yml'
+
+jobs:
+  render-plantuml:
+    runs-on: ubuntu-latest
+    name: Render PlantUML Diagrams
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install Graphviz
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y graphviz
+
+    - name: Download PlantUML
+      run: |
+        wget -O plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+
+    - name: Create output directory
+      run: |
+        mkdir -p docs/diagrams/rendered
+
+    - name: Render PlantUML diagrams to PNG
+      run: |
+        # Find all .puml files and render them
+        find docs/diagrams -name "*.puml" -exec java -jar plantuml.jar -tpng -o ../rendered {} \;
+
+    - name: Render PlantUML diagrams to SVG
+      run: |
+        # Find all .puml files and render them to SVG for better quality
+        find docs/diagrams -name "*.puml" -exec java -jar plantuml.jar -tsvg -o ../rendered {} \;
+
+    - name: List generated files
+      run: |
+        echo "Generated diagram files:"
+        ls -la docs/diagrams/rendered/
+
+    - name: Check for changes
+      id: changes
+      run: |
+        if [ -n "$(git status --porcelain docs/diagrams/rendered/)" ]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Commit rendered diagrams
+      if: steps.changes.outputs.changes == 'true' && github.event_name == 'push'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add docs/diagrams/rendered/
+        git commit -m "Auto-render PlantUML diagrams [skip ci]"
+        git push
+
+    - name: Upload rendered diagrams as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: plantuml-diagrams
+        path: docs/diagrams/rendered/
+        retention-days: 30

@@ -5,12 +5,29 @@ title MSP430 Memory Access Validation Flow
 start
 
 :Memory Access Request\n(Address, Access Type);
+note right
+    Access Types:
+    - Read (0x01)
+    - Write (0x02)
+    - Execute (0x04)
+    - Combinations (ReadWrite, etc.)
+end note
 
 partition "Address Validation" {
     :Check if address is valid\n(mapped to a region);
     
     if (Address valid?) then (yes)
         :Get memory region info;
+        note right
+            Memory Regions:
+            - Special Function Registers
+            - 8-bit/16-bit Peripherals
+            - Bootstrap Loader
+            - Information Memory
+            - RAM
+            - Flash Memory
+            - Interrupt Vector Table
+        end note
     else (no)
         :Log warning;
         :Throw MemoryAccessException\n"Invalid address";
@@ -35,44 +52,29 @@ partition "Permission Validation" {
     endif
 }
 
-note right of "Memory Access Request"
-    Access Types:
-    - Read (0x01)
-    - Write (0x02)
-    - Execute (0x04)
-    - Combinations (ReadWrite, etc.)
-end note
-
-note left of "Get memory region info"
-    Memory Regions:
-    - Special Function Registers
-    - 8-bit/16-bit Peripherals
-    - Bootstrap Loader
-    - Information Memory
-    - RAM
-    - Flash Memory
-    - Interrupt Vector Table
-end note
-
 @enduml
 
 @startuml memory_access_permissions_matrix
 !theme plain
 title MSP430 Memory Access Permissions Matrix
 
-|= Memory Region |= Address Range |= Read |= Write |= Execute |= Description |
-| Special Function Registers | 0x0000-0x00FF | ✓ | ✓ | ✗ | System control registers |
-| 8-bit Peripherals | 0x0100-0x01FF | ✓ | ✓ | ✗ | Memory-mapped 8-bit peripherals |
-| 16-bit Peripherals | 0x0200-0x027F | ✓ | ✓ | ✗ | Memory-mapped 16-bit peripherals |
-| Bootstrap Loader FRAM | 0x1000-0x17FF | ✓ | ✗ | ✓ | Bootstrap loader FRAM |
-| Information Memory FRAM | 0x1800-0x19FF | ✓ | ✓ | ✗ | Device calibration data |
-| SRAM | 0x2000-0x2FFF | ✓ | ✓ | ✓ | High-speed volatile memory |
-| FRAM Memory | 0x4000-0xBFFF | ✓ | ✓ | ✓ | Non-volatile unified code/data memory |
-| Interrupt Vector Table | 0xFFE0-0xFFFF | ✓ | ✗ | ✓ | Interrupt service routine addresses |
+salt
+{
+{SI
+Memory Region | Address Range | Read | Write | Execute | Description
+Special Function Registers | 0x0000-0x00FF | ✓ | ✓ | ✗ | System control registers
+8-bit Peripherals | 0x0100-0x01FF | ✓ | ✓ | ✗ | Memory-mapped 8-bit peripherals
+16-bit Peripherals | 0x0200-0x027F | ✓ | ✓ | ✗ | Memory-mapped 16-bit peripherals
+Bootstrap Loader FRAM | 0x1000-0x17FF | ✓ | ✗ | ✓ | Bootstrap loader FRAM
+Information Memory FRAM | 0x1800-0x19FF | ✓ | ✓ | ✗ | Device calibration data
+SRAM | 0x2000-0x2FFF | ✓ | ✓ | ✓ | High-speed volatile memory
+FRAM Memory | 0x4000-0xBFFF | ✓ | ✓ | ✓ | Non-volatile unified code/data memory
+Interrupt Vector Table | 0xFFE0-0xFFFF | ✓ | ✗ | ✓ | Interrupt service routine addresses
+}
+}
 
 note bottom
-    ✓ = Access allowed
-    ✗ = Access denied
+    ✓ = Access allowed, ✗ = Access denied
     
     Write access to Flash regions typically requires
     special unlock sequences in real hardware.

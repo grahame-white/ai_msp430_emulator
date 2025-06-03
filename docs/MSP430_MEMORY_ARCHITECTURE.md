@@ -22,6 +22,8 @@ The MSP430FR2355 was chosen as the reference implementation for several key reas
 
 ### Memory Layout (MSP430FR2355)
 
+![MSP430FR2355 Memory Layout](diagrams/rendered/memory_layout.svg)
+
 | Region | Address Range | Size | Permissions | Description |
 |--------|---------------|------|-------------|-------------|
 | Special Function Registers | 0x0000-0x00FF | 256B | Read/Write | System control registers |
@@ -52,5 +54,31 @@ var customMemoryMap = new MemoryMap(customRegions);
 2. **Address Mapping**: Memory regions are pre-computed for O(1) lookup performance
 3. **Validation**: All memory access is validated against region permissions and boundaries
 4. **Extensibility**: The interface-based design allows for other MSP430 variants through custom memory maps
+
+## Memory Access Validation
+
+The memory system implements comprehensive access validation to ensure proper operation and security. The following diagram illustrates the validation flow:
+
+![Memory Access Flow](diagrams/rendered/memory_access_flow.svg)
+
+### Access Permissions Matrix
+
+The system enforces different access permissions for each memory region:
+
+![Memory Access Permissions Matrix](diagrams/rendered/memory_access_permissions_matrix.svg)
+
+## System Architecture
+
+The memory system is built around a component-based architecture that provides flexibility and extensibility:
+
+![Memory Component Architecture](diagrams/rendered/memory_component_architecture.svg)
+
+### Key Components
+
+- **`IMemoryMap`**: Interface defining the memory mapping contract
+- **`MemoryMap`**: Concrete implementation with O(1) address lookup
+- **`MemoryAccessValidator`**: Validates memory access with optional logging
+- **`MemoryRegionInfo`**: Struct containing region metadata and permissions
+- **`MemoryAccessException`**: Exception thrown for access violations
 
 For detailed technical specifications, refer to the official MSP430FR2355 datasheet from Texas Instruments.

@@ -9,6 +9,7 @@
 
 const { Octokit } = require('@octokit/rest');
 const { TaskParser } = require('./parse-tasks.js');
+const { isPermissionError } = require('./github-utils.js');
 
 class GitHubIssuesCreator {
     constructor(token, owner, repo) {
@@ -343,7 +344,7 @@ class GitHubIssuesCreator {
                             });
                             console.log(`Created label: ${labelData.name}`);
                         } catch (createError) {
-                            if (this.isPermissionError(createError)) {
+                            if (isPermissionError(createError)) {
                                 console.warn(`⚠️  Cannot create label ${labelData.name} due to insufficient permissions`);
                             } else {
                                 console.warn(`⚠️  Could not create label ${labelData.name}: ${createError.message}`);
@@ -352,7 +353,7 @@ class GitHubIssuesCreator {
                     } else {
                         console.log(`[DRY RUN] Would create label: ${labelData.name}`);
                     }
-                } else if (this.isPermissionError(error)) {
+                } else if (isPermissionError(error)) {
                     console.warn(`⚠️  Cannot access label ${labelData.name} due to insufficient permissions`);
                 } else {
                     console.warn(`⚠️  Error checking label ${labelData.name}: ${error.message}`);
@@ -361,39 +362,7 @@ class GitHubIssuesCreator {
         }
     }
 
-    /**
-     * Check if an error is a permission-related error
-     */
-    isPermissionError(error) {
-        const permissionIndicators = [
-            'Resource not accessible by integration',
-            'Bad credentials',
-            'Forbidden',
-            'insufficient permissions',
-            'requires authentication',
-            'token does not have'
-        ];
 
-        const errorMessage = error.message || '';
-        const errorStatus = error.status || 0;
-
-        // Check status codes that clearly indicate permission issues
-        if (errorStatus === 403 || errorStatus === 401) {
-            return true;
-        }
-
-        // For 404, only treat as permission error if message contains permission indicators
-        if (errorStatus === 404) {
-            return permissionIndicators.some(indicator =>
-                errorMessage.toLowerCase().includes(indicator.toLowerCase())
-            );
-        }
-
-        // Check message content for permission indicators
-        return permissionIndicators.some(indicator =>
-            errorMessage.toLowerCase().includes(indicator.toLowerCase())
-        );
-    }
 
     /**
      * Utility function for delays

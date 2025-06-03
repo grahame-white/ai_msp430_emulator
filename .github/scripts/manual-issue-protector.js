@@ -8,6 +8,7 @@
  */
 
 const { Octokit } = require('@octokit/rest');
+const { isPermissionError } = require('./github-utils.js');
 
 class ManualIssueProtector {
     constructor(token, owner, repo) {
@@ -319,7 +320,7 @@ class ManualIssueProtector {
                 });
                 labelSuccess = true;
             } catch (labelError) {
-                if (this.isPermissionError(labelError)) {
+                if (isPermissionError(labelError)) {
                     console.warn(`⚠️  Cannot add protection label to issue #${issue.number}: Insufficient permissions`);
                 } else {
                     console.warn(`⚠️  Failed to add protection label to issue #${issue.number}: ${labelError.message}`);
@@ -338,7 +339,7 @@ class ManualIssueProtector {
                 });
                 commentSuccess = true;
             } catch (commentError) {
-                if (this.isPermissionError(commentError)) {
+                if (isPermissionError(commentError)) {
                     console.warn(`⚠️  Cannot add protection comment to issue #${issue.number}: Insufficient permissions`);
                 } else {
                     console.warn(`⚠️  Failed to add protection comment to issue #${issue.number}: ${commentError.message}`);
@@ -360,7 +361,7 @@ class ManualIssueProtector {
             }
 
         } catch (error) {
-            if (this.isPermissionError(error)) {
+            if (isPermissionError(error)) {
                 console.warn(`⚠️  Cannot protect issue #${issue.number} due to insufficient permissions: ${issue.title}`);
             } else {
                 throw new Error(`Failed to protect issue #${issue.number}: ${error.message}`);
@@ -439,7 +440,7 @@ class ManualIssueProtector {
                         });
                         console.log('✅ Created protection label: manual-issue-protected');
                     } catch (createError) {
-                        if (this.isPermissionError(createError)) {
+                        if (isPermissionError(createError)) {
                             console.warn('⚠️  Cannot create protection label due to insufficient permissions');
                         } else {
                             console.warn(`⚠️  Could not create protection label: ${createError.message}`);
@@ -448,7 +449,7 @@ class ManualIssueProtector {
                 } else {
                     console.log('[DRY RUN] Would create protection label: manual-issue-protected');
                 }
-            } else if (this.isPermissionError(error)) {
+            } else if (isPermissionError(error)) {
                 console.warn('⚠️  Cannot access label information due to insufficient permissions');
             } else {
                 console.warn(`⚠️  Error checking protection label: ${error.message}`);
@@ -484,39 +485,7 @@ class ManualIssueProtector {
         }
     }
 
-    /**
-     * Check if an error is a permission-related error
-     */
-    isPermissionError(error) {
-        const permissionIndicators = [
-            'Resource not accessible by integration',
-            'Bad credentials',
-            'Forbidden',
-            'insufficient permissions',
-            'requires authentication',
-            'token does not have'
-        ];
 
-        const errorMessage = error.message || '';
-        const errorStatus = error.status || 0;
-
-        // Check status codes that clearly indicate permission issues
-        if (errorStatus === 403 || errorStatus === 401) {
-            return true;
-        }
-
-        // For 404, only treat as permission error if message contains permission indicators
-        if (errorStatus === 404) {
-            return permissionIndicators.some(indicator =>
-                errorMessage.toLowerCase().includes(indicator.toLowerCase())
-            );
-        }
-
-        // Check message content for permission indicators
-        return permissionIndicators.some(indicator =>
-            errorMessage.toLowerCase().includes(indicator.toLowerCase())
-        );
-    }
 
     /**
      * Utility function for delays

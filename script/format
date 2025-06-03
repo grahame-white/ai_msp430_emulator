@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/format
+# script/format
 # Auto-format code to ensure consistency
 
 set -e

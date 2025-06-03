@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# script/update
+# Update dependencies and packages
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Updating MSP430 Emulator dependencies..."
+
+# Update NuGet packages
+echo "==> Updating NuGet packages..."
+dotnet restore --force
+
+# Clean any cached build artifacts
+echo "==> Cleaning build artifacts..."
+dotnet clean
+
+echo "==> Dependencies updated successfully!"
+echo "==> Run 'script/build' to rebuild with updated dependencies"

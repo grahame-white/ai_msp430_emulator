@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# script/cibuild
+# CI-specific build and test script
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Running MSP430 Emulator CI build..."
+
+# Update dependencies
+echo "==> Updating dependencies..."
+./script/update
+
+# Check code formatting
+echo "==> Checking code formatting..."
+./script/lint
+
+# Build the project
+echo "==> Building project..."
+./script/build
+
+# Run all tests
+echo "==> Running tests..."
+./script/test
+
+echo "==> CI build completed successfully!"

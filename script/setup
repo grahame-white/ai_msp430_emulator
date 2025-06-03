@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/setup
+# script/setup
 # Set up the project for development
 
 set -e
@@ -28,9 +28,18 @@ dotnet build --configuration Debug
 
 # Setup git hooks for automatic formatting
 echo "==> Setting up git hooks..."
-./scripts/setup-hooks
+git config core.hooksPath .githooks
 
 echo "==> Setup completed successfully!"
-echo "==> You can now run 'scripts/build' to build the project"
-echo "==> You can now run 'scripts/test' to run tests"
-echo "==> You can now run 'scripts/format' to format code"
+echo ""
+echo "The following git hooks are now active:"
+echo "  - pre-commit: Automatically formats code before commits"
+echo ""
+echo "Available commands:"
+echo "  script/build   - Build the project"
+echo "  script/test    - Run all tests"
+echo "  script/format  - Format code"
+echo "  script/lint    - Check code formatting"
+echo "  script/update  - Update dependencies"
+echo "  script/server  - Run the emulator"
+echo "  script/console - Start interactive console"

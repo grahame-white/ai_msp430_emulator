@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/lint-automation
+# script/lint-automation
 # Run automation scripts linting and validation
 
 set -e

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/test
+# script/test
 # Run all tests
 
 set -e

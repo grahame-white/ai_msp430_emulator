@@ -20,7 +20,7 @@ Thank you for your interest in contributing to the MSP430 Emulator project! This
 
 2. Run the setup script:
    ```bash
-   ./scripts/setup
+   ./script/setup
    ```
 
 3. Install automation script dependencies:
@@ -40,25 +40,25 @@ Thank you for your interest in contributing to the MSP430 Emulator project! This
 
 ```bash
 # Auto-format code (recommended - fixes issues automatically)
-./scripts/format
+./script/format
 
 # Check code formatting and run static analysis (check-only mode)
-./scripts/lint
+./script/lint
 
 # Run all tests
-./scripts/test
+./script/test
 
 # Build the project
-./scripts/build
+./script/build
 ```
 
-#### Automatic Formatting Setup (Recommended)
+#### Automatic Formatting Setup (Included in Setup)
 
-To automatically format code before every commit:
+Automatic formatting is set up when you run the main setup script:
 
 ```bash
-# Set up git hooks for automatic formatting
-./scripts/setup-hooks
+# Git hooks are automatically configured during setup
+./script/setup
 ```
 
 This will:
@@ -105,9 +105,9 @@ echo "Running pre-commit checks..."
 # Check for .NET code changes
 if git diff --cached --name-only | grep -E '\.(cs|csproj|sln)$' > /dev/null; then
     echo "==> .NET code changes detected, running linter..."
-    ./scripts/lint
+    ./script/lint
     echo "==> Running .NET tests..."
-    ./scripts/test
+    ./script/test
 fi
 
 # Check for automation script changes
@@ -201,7 +201,7 @@ Our CI pipeline runs the following checks:
 
 ```bash
 # Before committing .NET changes:
-./scripts/lint && ./scripts/test
+./script/lint && ./script/test
 
 # Before committing automation script changes:
 cd .github/scripts && npm run validate:all && npm test

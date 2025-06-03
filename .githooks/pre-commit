@@ -13,7 +13,7 @@ fi
 echo "==> Running pre-commit formatting check..."
 
 # Run the formatter
-./scripts/format
+./script/format
 
 # Check if any files were modified by the formatter
 if ! git diff --quiet; then

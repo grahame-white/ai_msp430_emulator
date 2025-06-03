@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# script/server
+# Run the MSP430 emulator application
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Starting MSP430 Emulator..."
+
+# Check if the project is built
+if [ ! -d "src/MSP430.Emulator/bin" ]; then
+    echo "==> Project not built, building first..."
+    ./script/build
+fi
+
+# Run the emulator with any provided arguments
+echo "==> Running emulator..."
+dotnet run --project src/MSP430.Emulator/MSP430.Emulator.csproj --configuration Release -- "$@"

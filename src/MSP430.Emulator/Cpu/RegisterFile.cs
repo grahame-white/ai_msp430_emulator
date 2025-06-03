@@ -46,7 +46,7 @@ public class RegisterFile : IRegisterFile
     public ushort ReadRegister(RegisterName register)
     {
         ValidateRegister(register);
-        
+
         int index = (int)register;
         ushort value;
 
@@ -119,13 +119,13 @@ public class RegisterFile : IRegisterFile
     {
         ushort value = ReadRegister(register);
         byte lowByte = (byte)(value & 0xFF);
-        
+
         if (_logger?.IsEnabled(LogLevel.Debug) == true)
         {
-            _logger.Debug($"Register {register} low byte read: 0x{lowByte:X2}", 
+            _logger.Debug($"Register {register} low byte read: 0x{lowByte:X2}",
                 new { Register = register, LowByte = lowByte, FullValue = value });
         }
-        
+
         return lowByte;
     }
 
@@ -138,13 +138,13 @@ public class RegisterFile : IRegisterFile
     {
         ushort value = ReadRegister(register);
         byte highByte = (byte)((value >> 8) & 0xFF);
-        
+
         if (_logger?.IsEnabled(LogLevel.Debug) == true)
         {
-            _logger.Debug($"Register {register} high byte read: 0x{highByte:X2}", 
+            _logger.Debug($"Register {register} high byte read: 0x{highByte:X2}",
                 new { Register = register, HighByte = highByte, FullValue = value });
         }
-        
+
         return highByte;
     }
 
@@ -158,10 +158,10 @@ public class RegisterFile : IRegisterFile
         ushort currentValue = ReadRegister(register);
         ushort newValue = (ushort)((currentValue & 0xFF00) | value);
         WriteRegister(register, newValue);
-        
+
         if (_logger?.IsEnabled(LogLevel.Debug) == true)
         {
-            _logger.Debug($"Register {register} low byte written: 0x{value:X2}", 
+            _logger.Debug($"Register {register} low byte written: 0x{value:X2}",
                 new { Register = register, LowByte = value, NewValue = newValue, PreviousValue = currentValue });
         }
     }
@@ -176,10 +176,10 @@ public class RegisterFile : IRegisterFile
         ushort currentValue = ReadRegister(register);
         ushort newValue = (ushort)((currentValue & 0x00FF) | (value << 8));
         WriteRegister(register, newValue);
-        
+
         if (_logger?.IsEnabled(LogLevel.Debug) == true)
         {
-            _logger.Debug($"Register {register} high byte written: 0x{value:X2}", 
+            _logger.Debug($"Register {register} high byte written: 0x{value:X2}",
                 new { Register = register, HighByte = value, NewValue = newValue, PreviousValue = currentValue });
         }
     }
@@ -212,7 +212,7 @@ public class RegisterFile : IRegisterFile
         ushort currentPc = _registers[0];
         ushort newPc = (ushort)(currentPc + increment);
         WriteRegister(RegisterName.R0, newPc);
-        
+
         if (_logger?.IsEnabled(LogLevel.Debug) == true)
         {
             _logger.Debug($"Program Counter incremented by {increment}: 0x{currentPc:X4} -> 0x{newPc:X4}",
@@ -246,15 +246,15 @@ public class RegisterFile : IRegisterFile
     {
         // Clear all registers
         Array.Clear(_registers, 0, _registers.Length);
-        
+
         // Reset status register
         _statusRegister.Reset();
-        
+
         // Set typical power-up values
         // PC is typically initialized by hardware/bootloader
         // SP is typically initialized to top of RAM
         // Other registers start at 0
-        
+
         _logger?.Info("Register file reset - all registers cleared to 0x0000");
     }
 
@@ -275,12 +275,12 @@ public class RegisterFile : IRegisterFile
     /// <returns>An array of 16 register values (R0-R15).</returns>
     public ushort[] GetAllRegisters()
     {
-        var snapshot = new ushort[16];
+        ushort[] snapshot = new ushort[16];
         Array.Copy(_registers, snapshot, 16);
-        
+
         // Ensure SR value is current
         snapshot[2] = _statusRegister.Value;
-        
+
         return snapshot;
     }
 
@@ -293,7 +293,7 @@ public class RegisterFile : IRegisterFile
     {
         if (!IsValidRegister(register))
         {
-            var message = $"Invalid register: {register} (value: {(int)register})";
+            string message = $"Invalid register: {register} (value: {(int)register})";
             _logger?.Error(message, new { Register = register, RegisterValue = (int)register });
             throw new ArgumentException(message, nameof(register));
         }

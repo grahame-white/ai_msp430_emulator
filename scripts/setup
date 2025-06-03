@@ -26,6 +26,11 @@ dotnet restore
 echo "==> Building solution..."
 dotnet build --configuration Debug
 
+# Setup git hooks for automatic formatting
+echo "==> Setting up git hooks..."
+./scripts/setup-hooks
+
 echo "==> Setup completed successfully!"
 echo "==> You can now run 'scripts/build' to build the project"
 echo "==> You can now run 'scripts/test' to run tests"
+echo "==> You can now run 'scripts/format' to format code"

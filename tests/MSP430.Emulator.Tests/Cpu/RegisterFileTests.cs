@@ -70,7 +70,7 @@ public class RegisterFileTests
     {
         // Write odd address to PC
         _registerFile.WriteRegister(RegisterName.R0, 0x1235);
-        
+
         // Should be word-aligned (even address)
         ushort pcValue = _registerFile.ReadRegister(RegisterName.R0);
         Assert.Equal((ushort)0x1234, pcValue);
@@ -81,7 +81,7 @@ public class RegisterFileTests
     {
         // Write odd address to SP
         _registerFile.WriteRegister(RegisterName.R1, 0x2FFF);
-        
+
         // Should be word-aligned (even address)
         ushort spValue = _registerFile.ReadRegister(RegisterName.R1);
         Assert.Equal((ushort)0x2FFE, spValue);
@@ -92,7 +92,7 @@ public class RegisterFileTests
     {
         ushort testValue = 0x0007; // Set C, Z, N flags
         _registerFile.WriteRegister(RegisterName.R2, testValue);
-        
+
         Assert.Equal(testValue, _registerFile.ReadRegister(RegisterName.R2));
         Assert.Equal(testValue, _registerFile.StatusRegister.Value);
         Assert.True(_registerFile.StatusRegister.Carry);
@@ -127,7 +127,7 @@ public class RegisterFileTests
     {
         _registerFile.WriteRegister(RegisterName.R4, 0x1234);
         _registerFile.WriteRegisterLowByte(RegisterName.R4, 0xAB);
-        
+
         ushort newValue = _registerFile.ReadRegister(RegisterName.R4);
         Assert.Equal((ushort)0x12AB, newValue);
     }
@@ -137,7 +137,7 @@ public class RegisterFileTests
     {
         _registerFile.WriteRegister(RegisterName.R4, 0x1234);
         _registerFile.WriteRegisterHighByte(RegisterName.R4, 0xAB);
-        
+
         ushort newValue = _registerFile.ReadRegister(RegisterName.R4);
         Assert.Equal((ushort)0xAB34, newValue);
     }
@@ -147,7 +147,7 @@ public class RegisterFileTests
     {
         ushort testValue = 0x8000;
         _registerFile.WriteRegister(RegisterName.R0, testValue);
-        
+
         ushort pcValue = _registerFile.GetProgramCounter();
         Assert.Equal(testValue & 0xFFFE, pcValue); // Should be word-aligned
     }
@@ -157,7 +157,7 @@ public class RegisterFileTests
     {
         ushort testValue = 0x8000;
         _registerFile.SetProgramCounter(testValue);
-        
+
         ushort r0Value = _registerFile.ReadRegister(RegisterName.R0);
         Assert.Equal(testValue, r0Value);
     }
@@ -167,7 +167,7 @@ public class RegisterFileTests
     {
         _registerFile.SetProgramCounter(0x8000);
         _registerFile.IncrementProgramCounter();
-        
+
         ushort pcValue = _registerFile.GetProgramCounter();
         Assert.Equal((ushort)0x8002, pcValue);
     }
@@ -177,7 +177,7 @@ public class RegisterFileTests
     {
         _registerFile.SetProgramCounter(0x8000);
         _registerFile.IncrementProgramCounter(4);
-        
+
         ushort pcValue = _registerFile.GetProgramCounter();
         Assert.Equal((ushort)0x8004, pcValue);
     }
@@ -187,7 +187,7 @@ public class RegisterFileTests
     {
         ushort testValue = 0x2FFE;
         _registerFile.WriteRegister(RegisterName.R1, testValue);
-        
+
         ushort spValue = _registerFile.GetStackPointer();
         Assert.Equal(testValue, spValue);
     }
@@ -197,7 +197,7 @@ public class RegisterFileTests
     {
         ushort testValue = 0x2FFE;
         _registerFile.SetStackPointer(testValue);
-        
+
         ushort r1Value = _registerFile.ReadRegister(RegisterName.R1);
         Assert.Equal(testValue, r1Value);
     }
@@ -209,10 +209,10 @@ public class RegisterFileTests
         _registerFile.WriteRegister(RegisterName.R0, 0x1234);
         _registerFile.WriteRegister(RegisterName.R4, 0x5678);
         _registerFile.WriteRegister(RegisterName.R15, 0x9ABC);
-        
+
         // Reset
         _registerFile.Reset();
-        
+
         // All registers should be zero
         for (int i = 0; i <= 15; i++)
         {
@@ -235,9 +235,9 @@ public class RegisterFileTests
     [Fact]
     public void ReadRegister_InvalidRegister_ThrowsArgumentException()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() => 
+        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.ReadRegister((RegisterName)16));
-        
+
         Assert.Contains("Invalid register", exception.Message);
         Assert.Equal("register", exception.ParamName);
     }
@@ -245,9 +245,9 @@ public class RegisterFileTests
     [Fact]
     public void WriteRegister_InvalidRegister_ThrowsArgumentException()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() => 
+        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.WriteRegister((RegisterName)16, 0x1234));
-        
+
         Assert.Contains("Invalid register", exception.Message);
         Assert.Equal("register", exception.ParamName);
     }
@@ -259,14 +259,14 @@ public class RegisterFileTests
         _registerFile.WriteRegister(RegisterName.R0, 0x1000);
         _registerFile.WriteRegister(RegisterName.R4, 0x4000);
         _registerFile.WriteRegister(RegisterName.R15, 0xF000);
-        
+
         ushort[] snapshot = _registerFile.GetAllRegisters();
-        
+
         Assert.Equal(16, snapshot.Length);
         Assert.Equal((ushort)0x1000, snapshot[0]);
         Assert.Equal((ushort)0x4000, snapshot[4]);
         Assert.Equal((ushort)0xF000, snapshot[15]);
-        
+
         // Verify it's a copy, not the original array
         snapshot[0] = 0x9999;
         Assert.NotEqual((ushort)0x9999, _registerFile.ReadRegister(RegisterName.R0));
@@ -276,16 +276,16 @@ public class RegisterFileTests
     public void RegisterAccess_WithDebugLogging_LogsOperations()
     {
         _logger.MinimumLevel = LogLevel.Debug;
-        
+
         _registerFile.WriteRegister(RegisterName.R4, 0x1234);
         _registerFile.ReadRegister(RegisterName.R4);
-        
-        Assert.Contains(_logger.LogEntries, entry => 
-            entry.Level == LogLevel.Debug && 
+
+        Assert.Contains(_logger.LogEntries, entry =>
+            entry.Level == LogLevel.Debug &&
             entry.Message.Contains("Register write: R4 = 0x1234"));
-        
-        Assert.Contains(_logger.LogEntries, entry => 
-            entry.Level == LogLevel.Debug && 
+
+        Assert.Contains(_logger.LogEntries, entry =>
+            entry.Level == LogLevel.Debug &&
             entry.Message.Contains("Register read: R4 = 0x1234"));
     }
 
@@ -293,12 +293,12 @@ public class RegisterFileTests
     public void ProgramCounterIncrement_WithDebugLogging_LogsOperation()
     {
         _logger.MinimumLevel = LogLevel.Debug;
-        
+
         _registerFile.SetProgramCounter(0x8000);
         _registerFile.IncrementProgramCounter(4);
-        
-        Assert.Contains(_logger.LogEntries, entry => 
-            entry.Level == LogLevel.Debug && 
+
+        Assert.Contains(_logger.LogEntries, entry =>
+            entry.Level == LogLevel.Debug &&
             entry.Message.Contains("Program Counter incremented by 4"));
     }
 
@@ -306,11 +306,11 @@ public class RegisterFileTests
     public void RegisterAccess_WithoutDebugLogging_DoesNotLog()
     {
         _logger.MinimumLevel = LogLevel.Info;
-        
+
         _registerFile.WriteRegister(RegisterName.R4, 0x1234);
         _registerFile.ReadRegister(RegisterName.R4);
-        
-        Assert.DoesNotContain(_logger.LogEntries, entry => 
+
+        Assert.DoesNotContain(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug);
     }
 

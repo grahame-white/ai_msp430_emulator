@@ -136,13 +136,13 @@ public class StatusRegister
     {
         Zero = result == 0;
         Negative = (result & 0x8000) != 0;
-        
+
         if (updateCarry)
         {
             // Note: Carry logic would need to be implemented based on the specific operation
             // This is a placeholder for the interface
         }
-        
+
         if (updateOverflow)
         {
             // Note: Overflow logic would need to be implemented based on the specific operation
@@ -157,16 +157,51 @@ public class StatusRegister
     public override string ToString()
     {
         var flags = new List<string>();
-        
-        if (Carry) flags.Add("C");
-        if (Zero) flags.Add("Z");
-        if (Negative) flags.Add("N");
-        if (GeneralInterruptEnable) flags.Add("GIE");
-        if (CpuOff) flags.Add("CPU_OFF");
-        if (OscillatorOff) flags.Add("OSC_OFF");
-        if (SystemClockGenerator0) flags.Add("SCG0");
-        if (SystemClockGenerator1) flags.Add("SCG1");
-        if (Overflow) flags.Add("V");
+
+        if (Carry)
+        {
+            flags.Add("C");
+        }
+
+        if (Zero)
+        {
+            flags.Add("Z");
+        }
+
+        if (Negative)
+        {
+            flags.Add("N");
+        }
+
+        if (GeneralInterruptEnable)
+        {
+            flags.Add("GIE");
+        }
+
+        if (CpuOff)
+        {
+            flags.Add("CPU_OFF");
+        }
+
+        if (OscillatorOff)
+        {
+            flags.Add("OSC_OFF");
+        }
+
+        if (SystemClockGenerator0)
+        {
+            flags.Add("SCG0");
+        }
+
+        if (SystemClockGenerator1)
+        {
+            flags.Add("SCG1");
+        }
+
+        if (Overflow)
+        {
+            flags.Add("V");
+        }
 
         return $"SR: 0x{_value:X4} [{string.Join(", ", flags)}]";
     }

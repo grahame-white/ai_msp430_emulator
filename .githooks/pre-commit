@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit
+# Pre-commit hook to ensure code formatting
+
+set -e
+
+# Check if we're in the right directory
+if [ ! -f "MSP430.Emulator.sln" ]; then
+    echo "Error: pre-commit hook must be run from repository root"
+    exit 1
+fi
+
+echo "==> Running pre-commit formatting check..."
+
+# Run the formatter
+./scripts/format
+
+# Check if any files were modified by the formatter
+if ! git diff --quiet; then
+    echo ""
+    echo "⚠️  Code formatting changes were applied!"
+    echo "    Please review the changes and commit them:"
+    echo ""
+    git diff --name-only | sed 's/^/      /'
+    echo ""
+    echo "    Run the following commands to include formatting changes:"
+    echo "      git add ."
+    echo "      git commit --amend --no-edit"
+    echo ""
+    exit 1
+fi
+
+echo "✅ Code formatting check passed"

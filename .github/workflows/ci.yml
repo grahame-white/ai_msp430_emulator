@@ -34,7 +34,21 @@ jobs:
       run: dotnet restore
 
     - name: Code formatting check
-      run: ./scripts/lint
+      run: |
+        if ! ./scripts/lint; then
+          echo ""
+          echo "❌ Code formatting check failed!"
+          echo ""
+          echo "To fix formatting issues locally:"
+          echo "  1. Run: ./scripts/format"
+          echo "  2. Review and commit the changes"
+          echo "  3. Push the updated code"
+          echo ""
+          echo "To prevent future formatting issues:"
+          echo "  - Run: ./scripts/setup-hooks (sets up automatic formatting)"
+          echo ""
+          exit 1
+        fi
 
     - name: Build
       run: ./scripts/build

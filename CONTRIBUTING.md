@@ -39,7 +39,10 @@ Thank you for your interest in contributing to the MSP430 Emulator project! This
 #### For .NET Code Changes
 
 ```bash
-# Check code formatting and run static analysis
+# Auto-format code (recommended - fixes issues automatically)
+./scripts/format
+
+# Check code formatting and run static analysis (check-only mode)
 ./scripts/lint
 
 # Run all tests
@@ -48,6 +51,20 @@ Thank you for your interest in contributing to the MSP430 Emulator project! This
 # Build the project
 ./scripts/build
 ```
+
+#### Automatic Formatting Setup (Recommended)
+
+To automatically format code before every commit:
+
+```bash
+# Set up git hooks for automatic formatting
+./scripts/setup-hooks
+```
+
+This will:
+- Automatically format code before each commit
+- Prevent commits with formatting issues
+- Save time by catching formatting problems early
 
 #### For Automation Scripts (.github/scripts)
 

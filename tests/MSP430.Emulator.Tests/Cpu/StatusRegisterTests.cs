@@ -35,7 +35,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.Carry = true;
         Assert.Equal((ushort)0x0001, sr.Value);
-        
+
         sr.Carry = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -56,7 +56,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.Zero = true;
         Assert.Equal((ushort)0x0002, sr.Value);
-        
+
         sr.Zero = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -77,7 +77,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.Negative = true;
         Assert.Equal((ushort)0x0004, sr.Value);
-        
+
         sr.Negative = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -98,7 +98,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.GeneralInterruptEnable = true;
         Assert.Equal((ushort)0x0008, sr.Value);
-        
+
         sr.GeneralInterruptEnable = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -119,7 +119,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.CpuOff = true;
         Assert.Equal((ushort)0x0010, sr.Value);
-        
+
         sr.CpuOff = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -140,7 +140,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.OscillatorOff = true;
         Assert.Equal((ushort)0x0020, sr.Value);
-        
+
         sr.OscillatorOff = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -161,7 +161,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.SystemClockGenerator0 = true;
         Assert.Equal((ushort)0x0040, sr.Value);
-        
+
         sr.SystemClockGenerator0 = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -182,7 +182,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.SystemClockGenerator1 = true;
         Assert.Equal((ushort)0x0080, sr.Value);
-        
+
         sr.SystemClockGenerator1 = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -203,7 +203,7 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.Overflow = true;
         Assert.Equal((ushort)0x0100, sr.Value);
-        
+
         sr.Overflow = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -212,12 +212,12 @@ public class StatusRegisterTests
     public void MultipleFlags_SetSimultaneously_WorkCorrectly()
     {
         var sr = new StatusRegister();
-        
+
         sr.Carry = true;
         sr.Zero = true;
         sr.Negative = true;
         sr.GeneralInterruptEnable = true;
-        
+
         Assert.Equal((ushort)0x000F, sr.Value); // Bits 0-3 set
         Assert.True(sr.Carry);
         Assert.True(sr.Zero);
@@ -230,7 +230,7 @@ public class StatusRegisterTests
     {
         var sr = new StatusRegister();
         sr.Value = 0x01FF; // Set bits 0-8
-        
+
         Assert.True(sr.Carry);
         Assert.True(sr.Zero);
         Assert.True(sr.Negative);
@@ -247,7 +247,7 @@ public class StatusRegisterTests
     {
         var sr = new StatusRegister(0xFFFF);
         sr.Reset();
-        
+
         Assert.Equal((ushort)0, sr.Value);
         Assert.False(sr.Carry);
         Assert.False(sr.Zero);
@@ -269,7 +269,7 @@ public class StatusRegisterTests
     {
         var sr = new StatusRegister();
         sr.UpdateFlags(result, updateCarry, updateOverflow);
-        
+
         Assert.Equal(result == 0, sr.Zero);
         Assert.Equal((result & 0x8000) != 0, sr.Negative);
     }
@@ -279,7 +279,7 @@ public class StatusRegisterTests
     {
         var sr = new StatusRegister();
         string result = sr.ToString();
-        
+
         Assert.Contains("SR: 0x0000", result);
         Assert.Contains("[]", result);
     }
@@ -297,9 +297,9 @@ public class StatusRegisterTests
         sr.SystemClockGenerator0 = true;
         sr.SystemClockGenerator1 = true;
         sr.Overflow = true;
-        
+
         string result = sr.ToString();
-        
+
         Assert.Contains("C", result);
         Assert.Contains("Z", result);
         Assert.Contains("N", result);
@@ -317,9 +317,9 @@ public class StatusRegisterTests
         var sr = new StatusRegister();
         sr.Carry = true;
         sr.Zero = true;
-        
+
         string result = sr.ToString();
-        
+
         Assert.Contains("C", result);
         Assert.Contains("Z", result);
         Assert.DoesNotContain("N", result);
@@ -334,11 +334,11 @@ public class StatusRegisterTests
     public void FlagOperations_PreserveOtherBits(ushort initialValue)
     {
         var sr = new StatusRegister(initialValue);
-        
+
         // Toggle one flag and verify others are preserved
         bool originalCarry = sr.Carry;
         sr.Carry = !originalCarry;
-        
+
         // All other flags should remain the same
         Assert.Equal((initialValue & 0x0002) != 0, sr.Zero);
         Assert.Equal((initialValue & 0x0004) != 0, sr.Negative);

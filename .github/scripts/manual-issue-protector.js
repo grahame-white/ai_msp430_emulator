@@ -487,7 +487,6 @@ class ManualIssueProtector {
         const permissionIndicators = [
             'Resource not accessible by integration',
             'Bad credentials',
-            'Not Found', // Sometimes GitHub returns 404 for permission issues
             'Forbidden',
             'insufficient permissions',
             'requires authentication',
@@ -497,12 +496,22 @@ class ManualIssueProtector {
         const errorMessage = error.message || '';
         const errorStatus = error.status || 0;
 
-        return errorStatus === 403 || 
-               errorStatus === 401 || 
-               (errorStatus === 404 && errorMessage.includes('Resource not accessible')) ||
-               permissionIndicators.some(indicator => 
-                   errorMessage.toLowerCase().includes(indicator.toLowerCase())
-               );
+        // Check status codes that clearly indicate permission issues
+        if (errorStatus === 403 || errorStatus === 401) {
+            return true;
+        }
+
+        // For 404, only treat as permission error if message contains permission indicators
+        if (errorStatus === 404) {
+            return permissionIndicators.some(indicator => 
+                errorMessage.toLowerCase().includes(indicator.toLowerCase())
+            );
+        }
+
+        // Check message content for permission indicators
+        return permissionIndicators.some(indicator => 
+            errorMessage.toLowerCase().includes(indicator.toLowerCase())
+        );
     }
 
     /**

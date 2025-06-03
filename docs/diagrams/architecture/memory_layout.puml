@@ -15,29 +15,17 @@ rectangle "MSP430FR2355 Memory Map\n(0x0000 - 0xFFFF)" as MEMORY {
     rectangle "16-bit Peripherals\n0x0200 - 0x027F\n128 bytes" as PER16 #lightgreen
     note right of PER16 : Read/Write\nMemory-mapped 16-bit peripherals
     
-    rectangle "Unused\n0x0280 - 0x0FFF\n3456 bytes" as UNUSED1 #lightgray
-    note right of UNUSED1 : No access\nUnmapped address space
-    
     rectangle "Bootstrap Loader FRAM\n0x1000 - 0x17FF\n2048 bytes" as BSL #orange
     note right of BSL : Read/Execute\nBootstrap loader FRAM
     
     rectangle "Information Memory FRAM\n0x1800 - 0x19FF\n512 bytes" as INFO #yellow
     note right of INFO : Read/Write\nDevice calibration data
     
-    rectangle "Unused\n0x1A00 - 0x1FFF\n1536 bytes" as UNUSED2 #lightgray
-    note right of UNUSED2 : No access\nUnmapped address space
-    
     rectangle "SRAM\n0x2000 - 0x2FFF\n4096 bytes" as RAM #lightpink
     note right of RAM : Read/Write/Execute\nHigh-speed volatile memory
     
-    rectangle "Unused\n0x3000 - 0x3FFF\n4096 bytes" as UNUSED3 #lightgray
-    note right of UNUSED3 : No access\nUnmapped address space
-    
     rectangle "FRAM Memory\n0x4000 - 0xBFFF\n32768 bytes" as FRAM #lightyellow
     note right of FRAM : Read/Write/Execute\nNon-volatile unified code/data
-    
-    rectangle "Unused\n0xC000 - 0xFFDF\n16352 bytes" as UNUSED4 #lightgray
-    note right of UNUSED4 : No access\nUnmapped address space
     
     rectangle "Interrupt Vector Table\n0xFFE0 - 0xFFFF\n32 bytes" as IVT #red
     note right of IVT : Read/Execute\nInterrupt service routine addresses
@@ -56,7 +44,6 @@ legend bottom
     |<#lightpink>| SRAM | Read/Write/Execute |
     |<#lightyellow>| FRAM Memory | Read/Write/Execute |
     |<#red>| Interrupt Vectors | Read/Execute |
-    |<#lightgray>| Unused | No Access |
 endlegend
 
 @enduml

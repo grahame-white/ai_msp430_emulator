@@ -135,14 +135,20 @@ public class MemoryMapTests
     }
 
     [Fact]
-    public void IsAccessAllowed_InvalidPermissions_ReturnsFalse()
+    public void IsAccessAllowed_FramWriteAccess_ReturnsTrue()
     {
         var memoryMap = new MemoryMap();
 
-        // Flash doesn't allow write
-        Assert.True(memoryMap.IsAccessAllowed(0x4000, MemoryAccessPermissions.Write)); // FRAM allows write
+        // FRAM allows write access
+        Assert.True(memoryMap.IsAccessAllowed(0x4000, MemoryAccessPermissions.Write));
+    }
 
-        // Invalid address
+    [Fact]
+    public void IsAccessAllowed_InvalidAddress_ReturnsFalse()
+    {
+        var memoryMap = new MemoryMap();
+
+        // Invalid/unmapped address
         Assert.False(memoryMap.IsAccessAllowed(0x0300, MemoryAccessPermissions.Read));
     }
 

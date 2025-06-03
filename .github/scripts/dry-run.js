@@ -335,7 +335,7 @@ if (require.main === module) {
 
         try {
             const preview = new DryRunPreview();
-            const changes = await preview.generatePreview(tasksFile, token, owner, repo);
+            await preview.generatePreview(tasksFile, token, owner, repo);
 
             if (jsonOutput) {
                 console.log(preview.generateJsonOutput());

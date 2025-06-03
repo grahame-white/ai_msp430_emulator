@@ -4,6 +4,8 @@
   "description": "GitHub Issues automation for MSP430 Emulator project",
   "scripts": {
     "test": "echo \"No tests yet\" && exit 0",
+    "lint": "eslint *.js",
+    "lint:fix": "eslint *.js --fix",
     "parse": "node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md",
     "dry-run": "node dry-run.js ../../MSP430_EMULATOR_TASKS.md",
     "sync": "node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md --dry-run",
@@ -12,6 +14,9 @@
   },
   "dependencies": {
     "@octokit/rest": "^20.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0"
   },
   "engines": {
     "node": ">=18.0.0"

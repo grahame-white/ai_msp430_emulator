@@ -140,13 +140,10 @@ jobs:
     - name: Lint automation scripts
       run: |
         cd .github/scripts
-        # Basic syntax validation for all JS files
-        for file in *.js; do
-          if [ -f "$file" ]; then
-            echo "Validating syntax for $file"
-            node -c "$file"
-          fi
-        done
+        echo "Installing ESLint..."
+        npm install
+        echo "Running ESLint..."
+        npm run lint
 
     - name: Validate package.json
       run: |

@@ -335,7 +335,7 @@ class GitHubIssuesCreator {
                     // Label doesn't exist, create it
                     if (!this.dryRun) {
                         const createResult = await executeWithPermissionHandling(
-                            async () => {
+                            async() => {
                                 await this.octokit.rest.issues.createLabel({
                                     owner: this.owner,
                                     repo: this.repo,
@@ -347,7 +347,6 @@ class GitHubIssuesCreator {
                             `create label ${labelData.name}`,
                             'repository'
                         );
-                        
                         if (createResult.success) {
                             console.log(`Created label: ${labelData.name}`);
                         }

@@ -309,7 +309,7 @@ class ManualIssueProtector {
         try {
             // Add protection label
             const labelResult = await executeWithPermissionHandling(
-                async () => {
+                async() => {
                     await this.octokit.rest.issues.addLabels({
                         owner: this.owner,
                         repo: this.repo,
@@ -325,7 +325,7 @@ class ManualIssueProtector {
             const protectionComment = `🛡️ **Manual Issue Protection Activated**\n\nThis issue has been identified as manually created and is now protected from automated modifications.\n\n**Detection Reason:** ${reason}\n\n**Protection Details:**\n- This issue will not be modified by GitHub Issues Automation\n- The automation system will preserve this issue's content and state\n- If you need to remove this protection, remove the \`manual-issue-protected\` label\n\n*Automatically protected by Manual Issue Protector*`;
 
             const commentResult = await executeWithPermissionHandling(
-                async () => {
+                async() => {
                     await this.octokit.rest.issues.createComment({
                         owner: this.owner,
                         repo: this.repo,

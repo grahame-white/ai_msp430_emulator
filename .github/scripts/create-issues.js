@@ -19,6 +19,9 @@ class GitHubIssuesCreator {
         this.owner = owner;
         this.repo = repo;
         this.dryRun = false;
+        
+        // Tasks to exclude from issue creation (already implemented or actively being developed)
+        this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
 
     /**
@@ -40,6 +43,16 @@ class GitHubIssuesCreator {
 
         for (const task of tasks) {
             try {
+                // Check if task is excluded from issue creation
+                if (this.excludedTasks.includes(task.id)) {
+                    results.skipped.push({
+                        task: task,
+                        reason: 'Task excluded (already implemented or actively being developed)',
+                        issueNumber: null
+                    });
+                    continue;
+                }
+
                 // Check if issue already exists
                 const existingIssue = await this.findExistingIssue(task);
                 if (existingIssue) {

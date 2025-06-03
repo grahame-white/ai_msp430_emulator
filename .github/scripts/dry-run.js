@@ -21,6 +21,16 @@ class DryRunPreview {
             milestones: [],
             labels: []
         };
+        
+        // Tasks to exclude from preview (already implemented or actively being developed)
+        this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
+    }
+
+    /**
+     * Filter out excluded tasks
+     */
+    filterIncludedTasks(tasks) {
+        return tasks.filter(task => !this.excludedTasks.includes(task.id));
     }
 
     /**
@@ -32,7 +42,9 @@ class DryRunPreview {
 
             // Parse tasks
             const parser = new TaskParser(tasksFile);
-            const tasks = await parser.parse();
+            const allTasks = await parser.parse();
+            const tasks = this.filterIncludedTasks(allTasks);
+            console.log(`Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} included)\n`);
 
             // Generate preview sections
             await this.previewTaskAnalysis(tasks);

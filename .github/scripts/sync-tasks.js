@@ -23,6 +23,9 @@ class GitHubIssuesSynchronizer {
         this.dryRun = false;
         this.creator = new GitHubIssuesCreator(token, owner, repo);
         this.updater = new GitHubIssuesUpdater(token, owner, repo);
+        
+        // Tasks to exclude from synchronization (already implemented or actively being developed)
+        this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
 
     /**
@@ -32,6 +35,13 @@ class GitHubIssuesSynchronizer {
         this.dryRun = true;
         this.creator.enableDryRun();
         this.updater.enableDryRun();
+    }
+
+    /**
+     * Filter out excluded tasks
+     */
+    filterIncludedTasks(tasks) {
+        return tasks.filter(task => !this.excludedTasks.includes(task.id));
     }
 
     /**
@@ -53,8 +63,9 @@ class GitHubIssuesSynchronizer {
             // Step 1: Parse tasks
             console.log('\n📖 Parsing tasks from markdown...');
             const parser = new TaskParser(tasksFile);
-            const tasks = await parser.parse();
-            console.log(`Found ${tasks.length} tasks`);
+            const allTasks = await parser.parse();
+            const tasks = this.filterIncludedTasks(allTasks);
+            console.log(`Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} included)`);
 
             // Step 2: Ensure labels and milestones exist
             console.log('\n🏷️  Setting up labels and milestones...');
@@ -63,7 +74,7 @@ class GitHubIssuesSynchronizer {
 
             // Step 3: Create new issues for tasks without issues
             console.log('\n➕ Creating new issues...');
-            const incompleteTasks = parser.getIncompleteTasks();
+            const incompleteTasks = tasks.filter(task => !task.completed);
             const createResults = await this.creator.createIssuesFromTasks(incompleteTasks);
             results.created = createResults.created;
             results.errors.push(...createResults.errors);

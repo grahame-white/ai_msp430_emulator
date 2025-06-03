@@ -21,6 +21,9 @@ class DisasterRecovery {
         this.repo = repo;
         this.dryRun = false;
         this.force = false;
+        
+        // Tasks to exclude from recovery (already implemented or actively being developed)
+        this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
 
     /**
@@ -35,6 +38,13 @@ class DisasterRecovery {
      */
     enableForce() {
         this.force = true;
+    }
+
+    /**
+     * Filter out excluded tasks
+     */
+    filterIncludedTasks(tasks) {
+        return tasks.filter(task => !this.excludedTasks.includes(task.id));
     }
 
     /**
@@ -69,9 +79,10 @@ class DisasterRecovery {
             // Step 1: Parse current tasks
             console.log('\n📖 Parsing tasks from markdown...');
             const parser = new TaskParser(tasksFile);
-            const tasks = await parser.parse();
+            const allTasks = await parser.parse();
+            const tasks = this.filterIncludedTasks(allTasks);
             results.analyzed = tasks.length;
-            console.log(`Found ${tasks.length} tasks to recover`);
+            console.log(`Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} to recover)`);
 
             // Step 2: Backup existing state
             console.log('\n💾 Backing up existing state...');

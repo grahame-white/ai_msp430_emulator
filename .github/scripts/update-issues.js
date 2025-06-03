@@ -19,6 +19,9 @@ class GitHubIssuesUpdater {
         this.owner = owner;
         this.repo = repo;
         this.dryRun = false;
+        
+        // Tasks to exclude from issue updates (already implemented or actively being developed)
+        this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
     }
 
     /**
@@ -44,6 +47,16 @@ class GitHubIssuesUpdater {
 
         for (const task of tasks) {
             try {
+                // Check if task is excluded from issue updates
+                if (this.excludedTasks.includes(task.id)) {
+                    results.skipped.push({
+                        task: task,
+                        reason: 'Task excluded (already implemented or actively being developed)',
+                        issueNumber: null
+                    });
+                    continue;
+                }
+
                 const issue = this.findIssueForTask(existingIssues, task);
                 
                 if (!issue) {

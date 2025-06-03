@@ -376,4 +376,3 @@ permissions:
   issues: write
   pull-requests: read
   repository-projects: read
-  metadata: read

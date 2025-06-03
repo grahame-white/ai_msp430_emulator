@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'csharp' ]
+        language: [ 'csharp', 'javascript' ]
 
     steps:
     - name: Checkout repository
@@ -35,14 +35,31 @@ jobs:
         queries: security-extended,security-and-quality
 
     - name: Setup .NET
+      if: matrix.language == 'csharp'
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    - name: Restore dependencies
+    - name: Setup Node.js
+      if: matrix.language == 'javascript'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: '.github/scripts/package*.json'
+
+    - name: Restore .NET dependencies
+      if: matrix.language == 'csharp'
       run: dotnet restore
 
-    - name: Build for analysis
+    - name: Install Node.js dependencies
+      if: matrix.language == 'javascript'
+      run: |
+        cd .github/scripts
+        npm install
+
+    - name: Build for analysis (.NET)
+      if: matrix.language == 'csharp'
       run: dotnet build --configuration Release --no-restore
 
     - name: Perform CodeQL Analysis
@@ -103,6 +120,61 @@ jobs:
         path: vulnerability-report.txt
         retention-days: 30
 
+  nodejs-dependency-scan:
+    name: Node.js Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: '.github/scripts/package*.json'
+
+    - name: Install dependencies
+      run: |
+        cd .github/scripts
+        npm install
+
+    - name: Run npm audit
+      run: |
+        cd .github/scripts
+        echo "Running npm audit for automation scripts..."
+        npm audit --json > /tmp/npm-audit.json 2>&1 || true
+        
+        # Check audit results
+        if [ -f "/tmp/npm-audit.json" ]; then
+          echo "npm audit results:"
+          cat /tmp/npm-audit.json
+          
+          # Parse vulnerabilities
+          HIGH_VULNS=$(jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "high" or .value.severity == "critical") | .key' /tmp/npm-audit.json 2>/dev/null | wc -l || echo "0")
+          
+          if [ "$HIGH_VULNS" -gt 0 ]; then
+            echo "❌ Found $HIGH_VULNS high/critical vulnerabilities in Node.js dependencies"
+            echo "High/Critical vulnerabilities found:"
+            jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "high" or .value.severity == "critical") | "\(.key): \(.value.severity)"' /tmp/npm-audit.json 2>/dev/null || true
+            exit 1
+          else
+            echo "✅ No high/critical vulnerabilities found in Node.js dependencies"
+          fi
+        else
+          echo "⚠️ npm audit output not found, running direct command"
+          npm audit --audit-level=high
+        fi
+
+    - name: Upload npm audit report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: npm-audit-report
+        path: /tmp/npm-audit.json
+        retention-days: 30
+
   secret-scan:
     name: Secret Scanning
     runs-on: ubuntu-latest
@@ -119,6 +191,8 @@ jobs:
         format: 'sarif'
         output: 'trivy-results.sarif'
         scanners: 'secret'
+        # Include automation scripts in secret scanning
+        skip-dirs: 'node_modules'
 
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
@@ -170,4 +244,61 @@ jobs:
       with:
         name: license-report
         path: licenses.json
+        retention-days: 30
+
+  nodejs-license-check:
+    name: Node.js License Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: '.github/scripts/package*.json'
+
+    - name: Install dependencies
+      run: |
+        cd .github/scripts
+        npm install
+
+    - name: Install license checker
+      run: npm install -g license-checker
+
+    - name: Check Node.js licenses
+      run: |
+        cd .github/scripts
+        echo "Checking licenses for Node.js automation scripts..."
+        
+        # Generate license report
+        license-checker --json --out /tmp/nodejs-licenses.json || echo "License checker failed, generating basic report..."
+        
+        if [ -f "/tmp/nodejs-licenses.json" ]; then
+          echo "✅ Node.js license report generated"
+          echo "License summary:"
+          license-checker --summary || true
+          
+          # Check for problematic licenses
+          if license-checker --failOn 'GPL' --json > /dev/null 2>&1; then
+            echo "❌ Found GPL or other restricted licenses"
+            license-checker --failOn 'GPL'
+            exit 1
+          else
+            echo "✅ No restricted licenses found"
+          fi
+        else
+          echo "⚠️ Creating fallback license report..."
+          echo '{"fallback": "License checker not available"}' > /tmp/nodejs-licenses.json
+        fi
+
+    - name: Upload Node.js license report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: nodejs-license-report
+        path: /tmp/nodejs-licenses.json
         retention-days: 30

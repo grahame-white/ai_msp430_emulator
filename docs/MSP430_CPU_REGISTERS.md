@@ -8,98 +8,131 @@ The MSP430 CPU contains a 16-register file, where each register is 16 bits wide.
 
 ### MSP430 Register Layout
 
-```mermaid
-graph LR
-    subgraph special["Special Purpose Registers"]
-        direction LR
-        R0["R0 - PC<br/>Program Counter<br/>🔴"] 
-        R1["R1 - SP<br/>Stack Pointer<br/>🔵"]
-        R2["R2 - SR<br/>Status Register<br/>🟢"] 
-        R3["R3 - CG1<br/>Constant Generator<br/>🟡"]
-        R0 --- R1
-        R1 --- R2 
-        R2 --- R3
-    end
-    
-    subgraph general["General Purpose Registers"]
-        direction LR
-        R4["R4"] --- R5["R5"] --- R6["R6"] --- R7["R7"]
-        R8["R8"] --- R9["R9"] --- R10["R10"] --- R11["R11"] 
-        R12["R12"] --- R13["R13"] --- R14["R14"] --- R15["R15"]
-    end
-    
-    special --- general
+The MSP430 CPU contains 16 registers organized as follows:
+
+#### Special Purpose Registers (R0-R3)
 ```
+┌──────┬──────┬─────────────────────────┬─────────────────────────────────┐
+│ Reg  │ Name │        Alias           │           Function              │
+├──────┼──────┼─────────────────────────┼─────────────────────────────────┤
+│  R0  │  PC  │   Program Counter      │ Points to next instruction     │
+│  R1  │  SP  │   Stack Pointer        │ Points to top of stack         │
+│  R2  │  SR  │   Status Register      │ CPU flags and control bits     │
+│  R3  │ CG1  │  Constant Generator    │ Hardware constant generation   │
+└──────┴──────┴─────────────────────────┴─────────────────────────────────┘
+```
+
+#### General Purpose Registers (R4-R15)
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  R4    R5    R6    R7    R8    R9   R10   R11   R12   R13   R14   R15   │
+│ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ │
+│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │
+│ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Total Register File:** 16 registers × 16 bits = 256 bits of register storage
 
 ### Register Access Modes
 
-```mermaid
-graph LR
-    subgraph access["Register Access Options"]
-        R["Any Register<br/>R0-R15"]
-        
-        R --> ACCESS16["16-bit Full Access<br/>Read/Write entire register"]
-        R --> ACCESS8L["8-bit Low Byte Access<br/>Bits 0-7 only"]
-        R --> ACCESS8H["8-bit High Byte Access<br/>Bits 8-15 only"]
-    end
+Each register supports multiple access patterns:
+
+#### Access Mode Summary
 ```
+Register (R0-R15) supports:
+├── 16-bit Full Access
+│   ├── Read entire 16-bit value
+│   └── Write entire 16-bit value
+├── 8-bit Low Byte Access (Bits 0-7)
+│   ├── Read lower 8 bits only
+│   └── Write lower 8 bits only
+└── 8-bit High Byte Access (Bits 8-15)
+    ├── Read upper 8 bits only
+    └── Write upper 8 bits only
+```
+
+#### Access Pattern Details
+| Access Type | Bit Range | Operation | Usage |
+|-------------|-----------|-----------|-------|
+| 16-bit Full | 15-0 | Read/Write complete register | Standard operations |
+| 8-bit Low   | 7-0  | Read/Write lower byte only | Byte-oriented operations |
+| 8-bit High  | 15-8 | Read/Write upper byte only | Byte-oriented operations |
 
 ### Individual Register Structure
 
-```mermaid
-graph LR
-    subgraph reg["16-bit Register Structure"]
-        direction LR
-        MSB["Bit 15<br/>MSB"] 
-        UPPER["Bits 14-8<br/>Upper Byte"]
-        LOWER["Bits 7-1<br/>Lower Byte"] 
-        LSB["Bit 0<br/>LSB"]
-        
-        MSB --- UPPER
-        UPPER --- LOWER
-        LOWER --- LSB
-    end
-    
-    subgraph access["Byte Access Options"]
-        direction TB
-        HIGH["High Byte Access<br/>Bits 15-8<br/>Upper portion"]
-        LOW["Low Byte Access<br/>Bits 7-0<br/>Lower portion"]
-    end
-    
-    reg --- access
+Each MSP430 register is organized as a 16-bit word:
+
+#### Bit Organization
+```
+MSP430 Register (16-bit):
+┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+│15 │14 │13 │12 │11 │10 │ 9 │ 8 │ 7 │ 6 │ 5 │ 4 │ 3 │ 2 │ 1 │ 0 │
+├───┴───┴───┴───┴───┴───┴───┴───┼───┴───┴───┴───┴───┴───┴───┴───┤
+│        High Byte (15-8)       │        Low Byte (7-0)        │
+└───────────────────────────────┴──────────────────────────────┘
 ```
 
-### Register Color Legend
-- 🔴 **Program Counter**: Word-aligned addressing
-- 🔵 **Stack Pointer**: Word-aligned, stack operations  
-- 🟢 **Status Register**: Individual flag management
-- 🟡 **Constant Generator**: Hardware constant generation
-- ⚪ **General Purpose**: Standard read/write operations
+#### Byte Access Mapping
+- **High Byte Access**: Reads/writes bits 15-8 (upper portion)
+- **Low Byte Access**: Reads/writes bits 7-0 (lower portion)
+- **Full Access**: Reads/writes all 16 bits simultaneously
+
+#### Bit Significance
+- **MSB (Most Significant Bit)**: Bit 15
+- **LSB (Least Significant Bit)**: Bit 0
+- **Word Boundary**: All registers aligned on 16-bit boundaries
+
+### Register Function Legend
+- **🔴 Program Counter**: Word-aligned addressing for instruction fetch
+- **🔵 Stack Pointer**: Word-aligned, handles stack operations  
+- **🟢 Status Register**: Individual flag management and system control
+- **🟡 Constant Generator**: Hardware constant generation (0, +1, +2, +4, +8, -1)
+- **⚪ General Purpose**: Standard read/write operations for program data
 
 ## Status Register (SR/R2) Bit Layout
 
 The Status Register contains CPU flags and system control bits that affect processor operation.
 
-### Status Register Bit Map
+### Status Register Bit Organization
 
-The Status Register is organized into functional groups:
+The Status Register is organized into functional groups with specific bit assignments:
 
-```mermaid
-graph LR
-    subgraph sr["Status Register Layout (MSB → LSB)"]
-        direction LR
-        RESERVED["Bits 15-9<br/>RESERVED<br/>⚪"] 
-        VFLAG["Bit 8<br/>V FLAG<br/>🔴"]
-        POWER["Bits 7-4<br/>POWER MGMT<br/>🟡🔵"] 
-        GIE["Bit 3<br/>GIE<br/>🟢"]
-        COND["Bits 2-0<br/>CONDITION<br/>🟣"]
-        
-        RESERVED --- VFLAG
-        VFLAG --- POWER
-        POWER --- GIE  
-        GIE --- COND
-    end
 ```
+Status Register (R2) - 16-bit Layout:
+┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+│15 │14 │13 │12 │11 │10 │ 9 │ 8 │ 7 │ 6 │ 5 │ 4 │ 3 │ 2 │ 1 │ 0 │
+├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+│ R │ R │ R │ R │ R │ R │ R │ V │SCG│SCG│OSC│CPU│GIE│ N │ Z │ C │
+│ E │ E │ E │ E │ E │ E │ E │   │ 1 │ 0 │OFF│OFF│   │   │   │   │
+│ S │ S │ S │ S │ S │ S │ S │   │   │   │   │   │   │   │   │   │
+│ E │ E │ E │ E │ E │ E │ E │   │   │   │   │   │   │   │   │   │
+│ R │ R │ R │ R │ R │ R │ R │   │   │   │   │   │   │   │   │   │
+│ V │ V │ V │ V │ V │ V │ V │   │   │   │   │   │   │   │   │   │
+│ E │ E │ E │ E │ E │ E │ E │   │   │   │   │   │   │   │   │   │
+│ D │ D │ D │ D │ D │ D │ D │   │   │   │   │   │   │   │   │   │
+└───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
+```
+
+### Functional Groupings
+
+#### Reserved Bits (15-9) ⚪
+- **Purpose**: Unused by hardware
+- **Software Use**: Should be written as 0, ignored on read
+- **Count**: 7 bits reserved for future expansion
+
+#### Arithmetic Flags (8, 2-0) 🔴🟣  
+- **V (Bit 8)**: Overflow Flag - signed arithmetic overflow detection
+- **N (Bit 2)**: Negative Flag - result sign indication  
+- **Z (Bit 1)**: Zero Flag - zero result detection
+- **C (Bit 0)**: Carry Flag - arithmetic carry/borrow indication
+
+#### System Control (7-3) 🟡🔵🟢
+- **SCG1 (Bit 7)**: System Clock Generator 1 control
+- **SCG0 (Bit 6)**: System Clock Generator 0 control  
+- **OSCOFF (Bit 5)**: Oscillator control
+- **CPUOFF (Bit 4)**: CPU power control
+- **GIE (Bit 3)**: Global Interrupt Enable
 
 ### Detailed Bit Assignments
 
@@ -116,40 +149,83 @@ graph LR
 | 1 | Z | Zero Flag | 🟣 |
 | 0 | C | Carry Flag | 🟣 |
 
-### Condition Code Flags (Bits 0-2)
+### Condition Code Flags (Bits 0-2) 🟣
 
-```mermaid
-graph TB
-    subgraph cc["Condition Code Flags 🟣"]
-        C["C (Bit 0)<br/>Carry Flag"]
-        Z["Z (Bit 1)<br/>Zero Flag"]
-        N["N (Bit 2)<br/>Negative Flag"]
-        
-        C --> CARRY["Set on arithmetic carry/borrow<br/>Used in multi-precision arithmetic"]
-        Z --> ZERO["Set when result equals zero<br/>Used in conditional branches"]
-        N --> NEG["Set when result is negative<br/>MSB of result"]
-    end
+The condition code flags are updated by arithmetic and logical operations:
+
+#### Carry Flag (C - Bit 0)
+- **Set When**: Arithmetic operation produces carry out or borrow in
+- **Usage**: Multi-precision arithmetic, unsigned comparison results
+- **Instructions**: ADD, SUB, CMP operations and their variants
+
+#### Zero Flag (Z - Bit 1)  
+- **Set When**: Result of operation equals zero
+- **Usage**: Conditional branches, equality testing
+- **Instructions**: Any operation that produces a zero result
+
+#### Negative Flag (N - Bit 2)
+- **Set When**: Result has MSB set (negative in two's complement)
+- **Usage**: Signed comparisons, conditional branches
+- **Instructions**: Operations that affect the sign bit
+
+#### Flag Combinations
+```
+Common Flag Patterns:
+├── C=0, Z=0, N=0  → Positive result, no carry
+├── C=0, Z=1, N=0  → Zero result
+├── C=1, Z=0, N=0  → Positive result with carry
+├── C=0, Z=0, N=1  → Negative result
+└── C=1, Z=0, N=1  → Negative result with carry
 ```
 
 ### System Control Flags
 
-```mermaid
-graph TB
-    subgraph sys["System Control Flags"]
-        GIE["GIE (Bit 3)<br/>Global Interrupt Enable 🟢"]
-        CPUOFF["CPUOFF (Bit 4)<br/>CPU Off 🔵"]
-        OSCOFF["OSCOFF (Bit 5)<br/>Oscillator Off 🔵"]
-        SCG0["SCG0 (Bit 6)<br/>System Clock Generator 0 🟡"]
-        SCG1["SCG1 (Bit 7)<br/>System Clock Generator 1 🟡"]
-        V["V (Bit 8)<br/>Overflow Flag 🔴"]
-        
-        GIE --> GIEDESC["Enables maskable interrupts<br/>Cleared by interrupt, set by RETI"]
-        CPUOFF --> CPUDESC["CPU enters low power mode<br/>LPM0 and higher modes"]
-        OSCOFF --> OSCDESC["Turns off LFXT1 oscillator<br/>LPM4 mode"]
-        SCG0 --> SCG0DESC["Turns off SMCLK<br/>LPM1 and higher modes"]
-        SCG1 --> SCG1DESC["Turns off DCO<br/>LPM3 and higher modes"]
-        V --> VDESC["Set on signed arithmetic overflow<br/>Two's complement overflow"]
-    end
+The system control flags manage CPU operation modes and interrupt handling:
+
+#### Global Interrupt Enable (GIE - Bit 3) 🟢
+- **Function**: Enables/disables maskable interrupts
+- **Set By**: Software (BIS instruction) or RETI instruction
+- **Cleared By**: Hardware on interrupt acceptance or software (BIC instruction)
+- **Usage**: Interrupt system control
+
+#### CPU Power Control (CPUOFF - Bit 4) 🔵  
+- **Function**: Disables CPU core while leaving peripherals active
+- **Power Mode**: LPM0 and higher low power modes
+- **Wake**: Any enabled interrupt or reset
+- **Usage**: Power management, LPM0-LPM4 modes
+
+#### Oscillator Control (OSCOFF - Bit 5) 🔵
+- **Function**: Turns off LFXT1 crystal oscillator  
+- **Power Mode**: LPM4 mode
+- **Effect**: Disables low-frequency clock source
+- **Usage**: Maximum power savings
+
+#### System Clock Generator 0 (SCG0 - Bit 6) 🟡
+- **Function**: Turns off SMCLK (sub-main clock)
+- **Power Mode**: LPM1 and higher modes
+- **Effect**: Disables sub-main clock to peripherals
+- **Usage**: Intermediate power savings
+
+#### System Clock Generator 1 (SCG1 - Bit 7) 🟡  
+- **Function**: Turns off DCO (digitally controlled oscillator)
+- **Power Mode**: LPM3 and higher modes
+- **Effect**: Disables high-frequency clock source
+- **Usage**: Significant power savings
+
+#### Overflow Flag (V - Bit 8) 🔴
+- **Function**: Indicates signed arithmetic overflow
+- **Set When**: Two's complement overflow occurs
+- **Usage**: Signed arithmetic validation
+- **Instructions**: ADD, SUB operations on signed values
+
+#### Power Mode Combinations
+```
+Low Power Mode Settings:
+├── LPM0: CPUOFF=1, SCG0=0, SCG1=0, OSCOFF=0
+├── LPM1: CPUOFF=1, SCG0=1, SCG1=0, OSCOFF=0  
+├── LPM2: CPUOFF=1, SCG0=0, SCG1=1, OSCOFF=0
+├── LPM3: CPUOFF=1, SCG0=1, SCG1=1, OSCOFF=0
+└── LPM4: CPUOFF=1, SCG0=1, SCG1=1, OSCOFF=1
 ```
 
 ### Status Register Flag Usage
@@ -166,6 +242,35 @@ graph TB
 ## Program Counter (PC/R0) State Management
 
 The Program Counter controls instruction execution flow and has several operational states.
+
+### PC State Summary
+
+The PC operates in distinct states with specific transition conditions:
+
+#### State Overview
+```
+PC State Management:
+├── Reset State
+│   ├── Condition: System startup/reset
+│   ├── PC Value: 0x0000 (initial)
+│   └── Transition: → Normal State
+├── Normal Execution State  
+│   ├── Operations: Fetch → Decode → Execute cycle
+│   ├── PC Behavior: Auto-increment by 2 per instruction
+│   └── Transitions: → Branch State | → Interrupt State | → Error State
+├── Branch/Jump State
+│   ├── Triggers: Branch/Jump instructions
+│   ├── PC Behavior: Set to target address (word-aligned)
+│   └── Transition: → Normal State
+├── Interrupt State
+│   ├── Triggers: Interrupt request with GIE=1
+│   ├── PC Behavior: Save current PC, load interrupt vector
+│   └── Transition: → Normal State (via RETI)
+└── Error State
+    ├── Triggers: Invalid address, misalignment
+    ├── PC Behavior: Error handling/auto-correction
+    └── Transition: → Reset State | → Normal State
+```
 
 ### Basic PC Operation States
 
@@ -210,6 +315,43 @@ stateDiagram-v2
 
 ### Interrupt Handling States
 
+#### Interrupt Processing Flow
+```
+Interrupt Handling Sequence:
+1. Normal Execution
+   ├── Check: GIE flag status each instruction cycle
+   ├── If GIE=0: Continue normal execution
+   └── If GIE=1: Check for pending interrupts
+
+2. Interrupt Detection  
+   ├── Condition: Interrupt request + GIE=1
+   ├── Action: Hardware saves context
+   └── Next: Vector fetch
+
+3. Context Save
+   ├── Push current PC to stack (SP -= 2)
+   ├── Push current SR to stack (SP -= 2)  
+   ├── Clear GIE flag (disable interrupts)
+   └── Next: Load interrupt vector
+
+4. Vector Processing
+   ├── Read interrupt vector address
+   ├── Set PC = vector address
+   ├── Begin interrupt service routine
+   └── Next: Execute ISR
+
+5. Service Routine Execution
+   ├── Execute interrupt handler code
+   ├── PC operates normally within ISR
+   └── Wait for: RETI instruction
+
+6. Return from Interrupt
+   ├── RETI instruction executed
+   ├── Pop SR from stack (SP += 2, restore GIE)
+   ├── Pop PC from stack (SP += 2)
+   └── Resume: Normal execution at saved PC
+```
+
 ```mermaid
 stateDiagram-v2
     [*] --> NormalExecution
@@ -249,6 +391,47 @@ stateDiagram-v2
 ```
 
 ### Subroutine Call States
+
+#### Call/Return Flow Sequence
+```
+Subroutine Management:
+
+CALL Instruction Flow:
+1. Main Program Execution
+   ├── Executing sequential instructions
+   ├── PC increments normally by 2
+   └── Encounters CALL instruction
+
+2. Call Processing
+   ├── Save return address: Push PC to stack (SP -= 2)
+   ├── Set PC = subroutine address (word-aligned)
+   └── Begin subroutine execution
+
+3. Subroutine Execution  
+   ├── Execute subroutine instructions
+   ├── PC operates independently in subroutine space
+   └── Can make nested calls (recursive)
+
+4. Return Processing (RET instruction)
+   ├── Pop return address from stack (SP += 2)
+   ├── Set PC = return address
+   └── Resume main program execution
+
+JMP Instruction Flow:
+1. Main Program Execution
+   └── Encounters JMP instruction
+
+2. Jump Processing
+   ├── Set PC = jump target address (word-aligned)
+   ├── No return address saved
+   └── Continue execution at new location
+
+Stack Frame Management:
+├── CALL: SP decreases (push return address)
+├── RET:  SP increases (pop return address)
+├── Nested calls: Multiple stack entries
+└── Stack overflow: Potential error condition
+```
 
 ```mermaid
 stateDiagram-v2

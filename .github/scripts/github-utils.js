@@ -40,6 +40,28 @@ function isPermissionError(error) {
     );
 }
 
+/**
+ * Execute an async operation with standardized permission error handling
+ * @param {Function} operation - Async function to execute
+ * @param {string} operationDescription - Description for logging (e.g., "add protection label")
+ * @param {string} context - Context information for logging (e.g., "issue #123")
+ * @returns {Promise<{success: boolean, error?: Error}>} - Result object
+ */
+async function executeWithPermissionHandling(operation, operationDescription, context) {
+    try {
+        await operation();
+        return { success: true };
+    } catch (error) {
+        if (isPermissionError(error)) {
+            console.warn(`⚠️  Cannot ${operationDescription} for ${context}: Insufficient permissions`);
+        } else {
+            console.warn(`⚠️  Failed to ${operationDescription} for ${context}: ${error.message}`);
+        }
+        return { success: false, error };
+    }
+}
+
 module.exports = {
-    isPermissionError
+    isPermissionError,
+    executeWithPermissionHandling
 };

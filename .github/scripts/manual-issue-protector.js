@@ -8,7 +8,7 @@
  */
 
 const { Octokit } = require('@octokit/rest');
-const { isPermissionError } = require('./github-utils.js');
+const { isPermissionError, executeWithPermissionHandling } = require('./github-utils.js');
 
 class ManualIssueProtector {
     constructor(token, owner, repo) {
@@ -306,53 +306,44 @@ class ManualIssueProtector {
      * Protect a manual issue from automation
      */
     async protectIssue(issue, reason) {
-        let labelSuccess = false;
-        let commentSuccess = false;
-
         try {
             // Add protection label
-            try {
-                await this.octokit.rest.issues.addLabels({
-                    owner: this.owner,
-                    repo: this.repo,
-                    issue_number: issue.number,
-                    labels: ['manual-issue-protected']
-                });
-                labelSuccess = true;
-            } catch (labelError) {
-                if (isPermissionError(labelError)) {
-                    console.warn(`⚠️  Cannot add protection label to issue #${issue.number}: Insufficient permissions`);
-                } else {
-                    console.warn(`⚠️  Failed to add protection label to issue #${issue.number}: ${labelError.message}`);
-                }
-            }
+            const labelResult = await executeWithPermissionHandling(
+                async () => {
+                    await this.octokit.rest.issues.addLabels({
+                        owner: this.owner,
+                        repo: this.repo,
+                        issue_number: issue.number,
+                        labels: ['manual-issue-protected']
+                    });
+                },
+                'add protection label',
+                `issue #${issue.number}`
+            );
 
             // Add protection comment
-            try {
-                const protectionComment = `🛡️ **Manual Issue Protection Activated**\n\nThis issue has been identified as manually created and is now protected from automated modifications.\n\n**Detection Reason:** ${reason}\n\n**Protection Details:**\n- This issue will not be modified by GitHub Issues Automation\n- The automation system will preserve this issue's content and state\n- If you need to remove this protection, remove the \`manual-issue-protected\` label\n\n*Automatically protected by Manual Issue Protector*`;
+            const protectionComment = `🛡️ **Manual Issue Protection Activated**\n\nThis issue has been identified as manually created and is now protected from automated modifications.\n\n**Detection Reason:** ${reason}\n\n**Protection Details:**\n- This issue will not be modified by GitHub Issues Automation\n- The automation system will preserve this issue's content and state\n- If you need to remove this protection, remove the \`manual-issue-protected\` label\n\n*Automatically protected by Manual Issue Protector*`;
 
-                await this.octokit.rest.issues.createComment({
-                    owner: this.owner,
-                    repo: this.repo,
-                    issue_number: issue.number,
-                    body: protectionComment
-                });
-                commentSuccess = true;
-            } catch (commentError) {
-                if (isPermissionError(commentError)) {
-                    console.warn(`⚠️  Cannot add protection comment to issue #${issue.number}: Insufficient permissions`);
-                } else {
-                    console.warn(`⚠️  Failed to add protection comment to issue #${issue.number}: ${commentError.message}`);
-                }
-            }
+            const commentResult = await executeWithPermissionHandling(
+                async () => {
+                    await this.octokit.rest.issues.createComment({
+                        owner: this.owner,
+                        repo: this.repo,
+                        issue_number: issue.number,
+                        body: protectionComment
+                    });
+                },
+                'add protection comment',
+                `issue #${issue.number}`
+            );
 
             // Report overall success
-            if (labelSuccess || commentSuccess) {
+            if (labelResult.success || commentResult.success) {
                 const actions = [];
-                if (labelSuccess) {
+                if (labelResult.success) {
                     actions.push('labeled');
                 }
-                if (commentSuccess) {
+                if (commentResult.success) {
                     actions.push('commented');
                 }
                 console.log(`✅ Protected manual issue #${issue.number} (${actions.join(' + ')}): ${issue.title}`);

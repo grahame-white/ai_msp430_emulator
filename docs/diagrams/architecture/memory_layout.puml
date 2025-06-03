@@ -1,0 +1,49 @@
+@startuml memory_layout
+!theme plain
+title MSP430FR2355 Memory Layout (16-bit Address Space)
+
+scale 800 width
+
+rectangle "MSP430FR2355 Memory Map\n(0x0000 - 0xFFFF)" as MEMORY {
+    
+    rectangle "Special Function Registers\n0x0000 - 0x00FF\n256 bytes" as SFR #lightblue
+    note right of SFR : Read/Write\nSystem control registers
+    
+    rectangle "8-bit Peripherals\n0x0100 - 0x01FF\n256 bytes" as PER8 #lightgreen
+    note right of PER8 : Read/Write\nMemory-mapped 8-bit peripherals
+    
+    rectangle "16-bit Peripherals\n0x0200 - 0x027F\n128 bytes" as PER16 #lightgreen
+    note right of PER16 : Read/Write\nMemory-mapped 16-bit peripherals
+    
+    rectangle "Bootstrap Loader FRAM\n0x1000 - 0x17FF\n2048 bytes" as BSL #orange
+    note right of BSL : Read/Execute\nBootstrap loader FRAM
+    
+    rectangle "Information Memory FRAM\n0x1800 - 0x19FF\n512 bytes" as INFO #yellow
+    note right of INFO : Read/Write\nDevice calibration data
+    
+    rectangle "SRAM\n0x2000 - 0x2FFF\n4096 bytes" as RAM #lightpink
+    note right of RAM : Read/Write/Execute\nHigh-speed volatile memory
+    
+    rectangle "FRAM Memory\n0x4000 - 0xBFFF\n32768 bytes" as FRAM #lightyellow
+    note right of FRAM : Read/Write/Execute\nNon-volatile unified code/data
+    
+    rectangle "Interrupt Vector Table\n0xFFE0 - 0xFFFF\n32 bytes" as IVT #red
+    note right of IVT : Read/Execute\nInterrupt service routine addresses
+}
+
+' Add address labels
+note top of MEMORY : MSP430FR2355 Address Space: 64KB (65536 bytes)\nFRAM-based Architecture
+
+' Color legend
+legend bottom
+    |Color |Region Type |Permissions |
+    |<#lightblue>| Registers | Read/Write |
+    |<#lightgreen>| Peripherals | Read/Write |
+    |<#orange>| Bootstrap Loader | Read/Execute |
+    |<#yellow>| Information Memory | Read/Write |
+    |<#lightpink>| SRAM | Read/Write/Execute |
+    |<#lightyellow>| FRAM Memory | Read/Write/Execute |
+    |<#red>| Interrupt Vectors | Read/Execute |
+endlegend
+
+@enduml

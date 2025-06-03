@@ -9,28 +9,26 @@ The MSP430 CPU contains a 16-register file, where each register is 16 bits wide.
 ### MSP430 Register Layout
 
 ```mermaid
-graph TB
+graph LR
     subgraph special["Special Purpose Registers"]
-        R0["R0 - PC<br/>Program Counter<br/>🔴"]
+        direction LR
+        R0["R0 - PC<br/>Program Counter<br/>🔴"] 
         R1["R1 - SP<br/>Stack Pointer<br/>🔵"]
-        R2["R2 - SR<br/>Status Register<br/>🟢"]
+        R2["R2 - SR<br/>Status Register<br/>🟢"] 
         R3["R3 - CG1<br/>Constant Generator<br/>🟡"]
+        R0 --- R1
+        R1 --- R2 
+        R2 --- R3
     end
     
     subgraph general["General Purpose Registers"]
-        R4["R4"] 
-        R5["R5"]
-        R6["R6"] 
-        R7["R7"]
-        R8["R8"] 
-        R9["R9"]
-        R10["R10"] 
-        R11["R11"]
-        R12["R12"] 
-        R13["R13"]
-        R14["R14"] 
-        R15["R15"]
+        direction LR
+        R4["R4"] --- R5["R5"] --- R6["R6"] --- R7["R7"]
+        R8["R8"] --- R9["R9"] --- R10["R10"] --- R11["R11"] 
+        R12["R12"] --- R13["R13"] --- R14["R14"] --- R15["R15"]
     end
+    
+    special --- general
 ```
 
 ### Register Access Modes
@@ -50,31 +48,25 @@ graph LR
 
 ```mermaid
 graph LR
-    subgraph reg["16-bit Register Layout"]
-        B15["Bit 15<br/>MSB"] 
-        B14["Bit 14"] 
-        DOTS1["..."]
-        B8["Bit 8<br/>High Byte"]
-        DOTS2["..."]
-        B7["Bit 7<br/>Low Byte"] 
-        DOTS3["..."]
-        B1["Bit 1"] 
-        B0["Bit 0<br/>LSB"]
+    subgraph reg["16-bit Register Structure"]
+        direction LR
+        MSB["Bit 15<br/>MSB"] 
+        UPPER["Bits 14-8<br/>Upper Byte"]
+        LOWER["Bits 7-1<br/>Lower Byte"] 
+        LSB["Bit 0<br/>LSB"]
         
-        B15 --- B14
-        B14 --- DOTS1
-        DOTS1 --- B8
-        B8 --- DOTS2
-        DOTS2 --- B7
-        B7 --- DOTS3
-        DOTS3 --- B1
-        B1 --- B0
-        
-        subgraph bytes["Byte Access"]
-            HIGH["High Byte<br/>Bits 15-8"]
-            LOW["Low Byte<br/>Bits 7-0"]
-        end
+        MSB --- UPPER
+        UPPER --- LOWER
+        LOWER --- LSB
     end
+    
+    subgraph access["Byte Access Options"]
+        direction TB
+        HIGH["High Byte Access<br/>Bits 15-8<br/>Upper portion"]
+        LOW["Low Byte Access<br/>Bits 7-0<br/>Lower portion"]
+    end
+    
+    reg --- access
 ```
 
 ### Register Color Legend
@@ -90,44 +82,39 @@ The Status Register contains CPU flags and system control bits that affect proce
 
 ### Status Register Bit Map
 
+The Status Register is organized into functional groups:
+
 ```mermaid
 graph LR
-    subgraph sr["Status Register (R2/SR) - 16 bits"]
+    subgraph sr["Status Register Layout (MSB → LSB)"]
         direction LR
-        B15["Bit 15<br/>Reserved"] 
-        B14["Bit 14<br/>Reserved"] 
-        B13["Bit 13<br/>Reserved"] 
-        B12["Bit 12<br/>Reserved"]
-        B11["Bit 11<br/>Reserved"] 
-        B10["Bit 10<br/>Reserved"] 
-        B9["Bit 9<br/>Reserved"] 
-        B8["Bit 8<br/>V Flag<br/>🔴"]
-        B7["Bit 7<br/>SCG1<br/>🟡"] 
-        B6["Bit 6<br/>SCG0<br/>🟡"] 
-        B5["Bit 5<br/>OSCOFF<br/>🔵"]
-        B4["Bit 4<br/>CPUOFF<br/>🔵"] 
-        B3["Bit 3<br/>GIE<br/>🟢"] 
-        B2["Bit 2<br/>N Flag<br/>🟣"] 
-        B1["Bit 1<br/>Z Flag<br/>🟣"] 
-        B0["Bit 0<br/>C Flag<br/>🟣"]
+        RESERVED["Bits 15-9<br/>RESERVED<br/>⚪"] 
+        VFLAG["Bit 8<br/>V FLAG<br/>🔴"]
+        POWER["Bits 7-4<br/>POWER MGMT<br/>🟡🔵"] 
+        GIE["Bit 3<br/>GIE<br/>🟢"]
+        COND["Bits 2-0<br/>CONDITION<br/>🟣"]
         
-        B15 --- B14
-        B14 --- B13
-        B13 --- B12
-        B12 --- B11
-        B11 --- B10
-        B10 --- B9
-        B9 --- B8
-        B8 --- B7
-        B7 --- B6
-        B6 --- B5
-        B5 --- B4
-        B4 --- B3
-        B3 --- B2
-        B2 --- B1
-        B1 --- B0
+        RESERVED --- VFLAG
+        VFLAG --- POWER
+        POWER --- GIE  
+        GIE --- COND
     end
 ```
+
+### Detailed Bit Assignments
+
+| Bit | Name | Function | Flag Color |
+|-----|------|----------|------------|
+| 15-9 | Reserved | Unused bits | ⚪ |
+| 8 | V | Overflow Flag | 🔴 |
+| 7 | SCG1 | System Clock Generator 1 | 🟡 |
+| 6 | SCG0 | System Clock Generator 0 | 🟡 |
+| 5 | OSCOFF | Oscillator Off | 🔵 |
+| 4 | CPUOFF | CPU Off | 🔵 |
+| 3 | GIE | Global Interrupt Enable | 🟢 |
+| 2 | N | Negative Flag | 🟣 |
+| 1 | Z | Zero Flag | 🟣 |
+| 0 | C | Carry Flag | 🟣 |
 
 ### Condition Code Flags (Bits 0-2)
 

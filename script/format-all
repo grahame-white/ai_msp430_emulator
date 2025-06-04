@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # script/format-all
 # Format all code in the repository using appropriate tools
+#
+# Tools used:
+# - dotnet format: C# code formatting
+# - prettier: JavaScript, JSON, YAML, and Markdown formatting
 
 set -e
 

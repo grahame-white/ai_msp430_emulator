@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # script/lint
 # Run code analysis and formatting checks
+#
+# Tools used:
+# - dotnet format: C# code formatting verification
+# - dotnet build: Static analysis via compiler warnings/errors
+# - markdownlint-cli2: Markdown linting for documentation
 
 set -e
 

@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 # script/check-format-all
 # Check code formatting across the entire repository
+#
+# Tools used:
+# - dotnet format: C# formatting verification
+# - prettier: JavaScript, JSON, YAML, and Markdown formatting check
+# - eslint: JavaScript code linting and formatting check
+# - yamllint: YAML file linting (via npm scripts)
+# - actionlint: GitHub Actions workflow linting (via npm scripts)
 
 set -e
 

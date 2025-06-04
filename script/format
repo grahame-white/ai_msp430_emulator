@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # script/format
 # Auto-format code to ensure consistency
+#
+# Tools used:
+# - dotnet format: C# code formatting (modifies files in place)
 
 set -e
 

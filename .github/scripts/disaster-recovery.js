@@ -117,6 +117,9 @@ class DisasterRecovery {
      */
     async backupExistingState(backup) {
         try {
+            // Add delay to respect rate limits
+            await this.delay(1000);
+            
             // Backup existing task issues
             const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task"`;
             const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
@@ -329,6 +332,9 @@ class DisasterRecovery {
      */
     async verifyRecovery(tasks) {
         try {
+            // Add delay to respect rate limits
+            await this.delay(1000);
+            
             // Re-fetch issues to verify
             const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
             const searchResults = await this.octokit.rest.search.issuesAndPullRequests({

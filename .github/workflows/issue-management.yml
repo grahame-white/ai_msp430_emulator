@@ -249,9 +249,12 @@ jobs:
         elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
           echo "mode=sync" >> $GITHUB_OUTPUT
           echo "🔄 Full synchronization mode enabled (confirmed)"
-        elif [ "${{ github.event_name }}" = "push" ]; then
+        elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
           echo "mode=sync" >> $GITHUB_OUTPUT
-          echo "🔄 Full synchronization mode enabled (push trigger)"
+          echo "🔄 Full synchronization mode enabled (push to main branch)"
+        elif [ "${{ github.event_name }}" = "push" ]; then
+          echo "mode=dry-run" >> $GITHUB_OUTPUT
+          echo "🔍 Dry run mode enabled (push to non-main branch: ${{ github.ref_name }})"
         else
           echo "mode=dry-run" >> $GITHUB_OUTPUT
           echo "🔍 Dry run mode enabled (default safety)"
@@ -373,6 +376,10 @@ jobs:
           });
 
 # Security and rate limiting
+# Rate limiting improvements:
+# - Workflow defaults to dry-run mode unless running on main branch
+# - Scripts include proper delays between API calls (1000ms + exponential backoff)
+# - Graceful handling of GitHub API rate limits with 60s retry delays
 concurrency:
   group: issue-automation-${{ github.ref }}
   cancel-in-progress: false

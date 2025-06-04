@@ -134,6 +134,9 @@ class GitHubIssuesUpdater {
      */
     async getAllTaskIssues() {
         try {
+            // Add delay to respect rate limits
+            await this.delay(1000);
+            
             const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
             const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
                 q: searchQuery,
@@ -145,6 +148,11 @@ class GitHubIssuesUpdater {
             return searchResults.data.items;
         } catch (error) {
             console.warn(`Warning: Could not search for task issues: ${error.message}`);
+            // If rate limited, wait longer and return empty array
+            if (error.status === 403 && error.message.includes('rate limit')) {
+                console.log('Rate limited, waiting 60 seconds before continuing...');
+                await this.delay(60000);
+            }
             return [];
         }
     }

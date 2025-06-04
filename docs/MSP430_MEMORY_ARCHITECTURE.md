@@ -21,18 +21,21 @@ The MSP430FR2355 was chosen as the reference implementation for several key reas
 - **FRAM Write Access**: Unlike traditional Flash, FRAM supports byte-level write operations
 - **16-bit Address Space**: Complete 0x0000-0xFFFF addressing with optimized layout
 
+For a detailed comparison of FRAM vs traditional Flash memory benefits, see the
+[FRAM Technology Benefits section](diagrams/architecture/memory_layout.md#fram-technology-benefits).
+
 ### Memory Layout (MSP430FR2355)
 
-| Region | Address Range | Size | Permissions | Description |
-|--------|---------------|------|-------------|-------------|
-| Special Function Registers | 0x0000-0x00FF | 256B | Read/Write | System control registers |
-| 8-bit Peripherals | 0x0100-0x01FF | 256B | Read/Write | Memory-mapped 8-bit peripherals |
-| 16-bit Peripherals | 0x0200-0x027F | 128B | Read/Write | Memory-mapped 16-bit peripherals |
-| Bootstrap Loader FRAM | 0x1000-0x17FF | 2KB | Read/Execute | Bootstrap loader in FRAM |
-| Information Memory FRAM | 0x1800-0x19FF | 512B | Read/Write | Device calibration data |
-| SRAM | 0x2000-0x2FFF | 4KB | Read/Write/Execute | High-speed volatile memory |
-| FRAM Memory | 0x4000-0xBFFF | 32KB | Read/Write/Execute | Non-volatile unified code/data |
-| Interrupt Vector Table | 0xFFE0-0xFFFF | 32B | Read/Execute | Interrupt service routine addresses |
+The MSP430FR2355 uses a unified 16-bit address space with the following key memory regions:
+
+- **32KB FRAM** (0x4000-0xBFFF): Non-volatile unified code/data storage
+- **4KB SRAM** (0x2000-0x2FFF): High-speed volatile memory  
+- **System Registers** (0x0000-0x027F): Special function and peripheral registers
+- **Information Memory** (0x1800-0x19FF): Device calibration data
+- **Interrupt Vectors** (0xFFE0-0xFFFF): ISR addresses
+
+For complete memory region details including unmapped areas and precise address boundaries,
+see the [comprehensive memory layout documentation](diagrams/architecture/memory_layout.md).
 
 ### Supporting Other MSP430 Variants
 
@@ -56,11 +59,12 @@ var customMemoryMap = new MemoryMap(customRegions);
 3. **Validation**: All memory access is validated against region permissions and boundaries
 4. **Extensibility**: The interface-based design allows for other MSP430 variants through custom memory maps
 
-For detailed technical specifications, refer to the official Texas Instruments documentation:
+## References
 
-**Primary References:**
+This implementation is based on official Texas Instruments documentation:
 
 - **MSP430FR2355 Mixed-Signal Microcontroller Datasheet** (SLAS847G, October 2016 - Revised December 2019)
 - **MSP430FR2xx and FR4xx Family User's Guide** (SLAU445I, June 2015 - Revised October 2019)
 
-These documents provide comprehensive technical specifications, memory maps, and implementation details used in this emulator.
+For detailed section and table references used in the implementation, see the
+[comprehensive memory layout documentation](diagrams/architecture/memory_layout.md#references).

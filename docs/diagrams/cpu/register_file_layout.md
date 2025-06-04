@@ -36,6 +36,7 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │    R14     │   -    │ General Purpose       │ Read/Write       │
 │    R15     │   -    │ General Purpose       │ Read/Write       │
 └────────────┴────────┴───────────────────────┴─────────────────┘
+```
 
 *CG1 is typically read-only but writes are allowed for testing
 
@@ -75,6 +76,7 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │ └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘            │
 │                Word Address (Bit 0 = 0)                       │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### Stack Pointer (R1/SP)
 
@@ -90,6 +92,7 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │ └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘            │
 │                Stack Address (Bit 0 = 0)                      │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### Status Register (R2/SR)
 
@@ -108,6 +111,7 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │ └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘            │
 │   Reserved                │Individual Flag Control│           │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### Constant Generator (R3/CG1)
 
@@ -123,6 +127,7 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │ - 10: Indirect mode (generates +1)                            │
 │ - 11: Indirect auto-increment (generates +2)                  │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ## Register File Memory Map
 
@@ -151,15 +156,18 @@ Memory Address Space: Register File Internal
 │   [14]           │   R14            │   General Use   │
 │   [15]           │   R15            │   General Use   │
 └──────────────────┴──────────────────┴─────────────────┘
+```
 
 ## Register Access Validation
 
 ### Valid Register Range
+
 - **Valid**: R0 through R15 (RegisterName enum values 0-15)
 - **Invalid**: Any value outside 0-15 range
 - **Validation**: Automatic validation with `ArgumentException` for invalid registers
 
 ### Access Logging
+
 - **Debug Level**: Individual register read/write operations
 - **Info Level**: Reset operations and major state changes
 - **Error Level**: Invalid register access attempts

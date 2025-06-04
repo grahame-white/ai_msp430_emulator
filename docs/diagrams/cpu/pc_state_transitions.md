@@ -66,7 +66,7 @@ stateDiagram-v2
         
         CheckCondition : Evaluate branch condition
         SetTarget : PC = target address
-        AlignPC : PC &= 0xFFFE
+        AlignPC : PC bitwise AND 0xFFFE
         NoAction : Continue with next instruction
     }
     
@@ -128,9 +128,9 @@ flowchart TD
     D --> E[Execute Instruction]
     E --> F[Increment PC by 2]
     F --> G[PC Word Alignment Check]
-    G --> H{PC & 1 == 0?}
+    G --> H{PC is word aligned?}
     H -->|Yes| A
-    H -->|No| I[Force PC &= 0xFFFE]
+    H -->|No| I[Force PC word alignment]
     I --> A
     
     subgraph "PC Increment Details"
@@ -158,7 +158,7 @@ flowchart TD
     D --> F
     F --> H[Set PC = Target]
     H --> I[Force Word Alignment]
-    I --> J[PC &= 0xFFFE]
+    I --> J[PC word aligned]
     J --> K[Validate Address Range]
     K --> L{Valid Address?}
     L -->|Yes| M[Continue Execution]
@@ -183,7 +183,7 @@ flowchart TD
     B --> C[Return = PC + 2]
     C --> D[Push Return to Stack]
     D --> E[SP -= 2]
-    E --> F[Memory(SP) = Return]
+    E --> F[Memory at SP gets Return]
     F --> G[Set PC = Call Target]
     G --> H[Word Align PC]
     H --> I[Enter Subroutine]
@@ -191,7 +191,7 @@ flowchart TD
     I --> J[Execute Subroutine]
     J --> K[RET Instruction]
     K --> L[Pop Return Address]
-    L --> M[Return = Memory(SP)]
+    L --> M[Return from Memory at SP]
     M --> N[SP += 2]
     N --> O[PC = Return Address]
     O --> P[Word Align PC]
@@ -234,10 +234,10 @@ flowchart TD
     C --> R[Continue Normal Execution]
     
     subgraph "Context Save/Restore"
-        F --> F1[SP -= 2, Memory(SP) = PC]
-        G --> G1[SP -= 2, Memory(SP) = SR]
-        N --> N1[SR = Memory(SP), SP += 2]
-        O --> O1[PC = Memory(SP), SP += 2]
+        F --> F1[SP -= 2, Memory at SP gets PC]
+        G --> G1[SP -= 2, Memory at SP gets SR]
+        N --> N1[SR from Memory at SP, SP += 2]
+        O --> O1[PC from Memory at SP, SP += 2]
     end
 
 ```
@@ -255,7 +255,7 @@ flowchart TD
     B -->|RETI| F[RETI Process]
     
     C --> C1[SP Alignment Check]
-    C1 --> C2[SP &= 0xFFFE]
+    C1 --> C2[SP word aligned]
     C2 --> C3[SP -= 2]
     C3 --> C4[Push Return Address]
     C4 --> C5[Set PC = Target]
@@ -277,8 +277,8 @@ flowchart TD
     subgraph "SP Validation"
         C1 --> V1[Check SP is even]
         D1 --> V1
-        V1 --> V2{SP & 1 == 0?}
-        V2 -->|No| V3[Force SP &= 0xFFFE]
+        V1 --> V2{SP is word aligned?}
+        V2 -->|No| V3[Force SP word alignment]
         V2 -->|Yes| V4[Continue]
         V3 --> V4
     end
@@ -293,10 +293,10 @@ flowchart TD
 flowchart TD
     A[PC Value Assignment] --> B[New PC Value]
     B --> C{Alignment Check}
-    C -->|PC & 1 == 0| D[Already Aligned]
-    C -->|PC & 1 == 1| E[Force Alignment]
+    C -->|PC is word aligned| D[Already Aligned]
+    C -->|PC not word aligned| E[Force Alignment]
     
-    E --> F[PC = PC & 0xFFFE]
+    E --> F[PC bitwise AND with 0xFFFE]
     F --> G[Log Alignment Warning]
     G --> D
     
@@ -363,7 +363,7 @@ flowchart TD
     B -->|Invalid Range| D[Check if correctable]
     B -->|Stack Overflow| E[Stack pointer recovery]
     
-    C --> F[PC &= 0xFFFE]
+    C --> F[PC word alignment]
     F --> G[Log Warning]
     G --> H[Continue Operation]
     

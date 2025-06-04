@@ -2,7 +2,9 @@
 
 ## Overview
 
-The MSP430 CPU contains a 16-register file, where each register is 16 bits wide. This provides a total of 256 bits of register storage for the CPU. The register file includes four special-purpose registers and twelve general-purpose registers.
+The MSP430 CPU contains a 16-register file, where each register is 16 bits wide. This provides a total of 256 bits
+of register storage for the CPU. The register file includes four special-purpose registers and twelve
+general-purpose registers.
 
 ## Register File Organization
 
@@ -20,14 +22,15 @@ The MSP430 CPU contains 16 registers organized as follows:
 | R3 | CG1 | Constant Generator | Hardware constant generation |
 
 #### General Purpose Registers (R4-R15)
-```
+
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  R4    R5    R6    R7    R8    R9   R10   R11   R12   R13   R14   R15   │
 │ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ │
 │ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │16b│ │
 │ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ │
 └─────────────────────────────────────────────────────────────────────────┘
-```
+```text
 
 **Total Register File:** 16 registers × 16 bits = 256 bits of register storage
 
@@ -36,7 +39,8 @@ The MSP430 CPU contains 16 registers organized as follows:
 Each register supports multiple access patterns:
 
 #### Access Mode Summary
-```
+
+```text
 Register (R0-R15) supports:
 ├── 16-bit Full Access
 │   ├── Read entire 16-bit value
@@ -47,9 +51,10 @@ Register (R0-R15) supports:
 └── 8-bit High Byte Access (Bits 8-15)
     ├── Read upper 8 bits only
     └── Write upper 8 bits only
-```
+```text
 
 #### Access Pattern Details
+
 | Access Type | Bit Range | Operation | Usage |
 |-------------|-----------|-----------|-------|
 | 16-bit Full | 15-0 | Read/Write complete register | Standard operations |
@@ -61,26 +66,30 @@ Register (R0-R15) supports:
 Each MSP430 register is organized as a 16-bit word:
 
 #### Bit Organization
-```
+
+```text
 MSP430 Register (16-bit):
 ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
 │15 │14 │13 │12 │11 │10 │ 9 │ 8 │ 7 │ 6 │ 5 │ 4 │ 3 │ 2 │ 1 │ 0 │
 ├───┴───┴───┴───┴───┴───┴───┴───┼───┴───┴───┴───┴───┴───┴───┴───┤
 │        High Byte (15-8)       │        Low Byte (7-0)         │
 └───────────────────────────────┴───────────────────────────────┘
-```
+```text
 
 #### Byte Access Mapping
+
 - **High Byte Access**: Reads/writes bits 15-8 (upper portion)
 - **Low Byte Access**: Reads/writes bits 7-0 (lower portion)
 - **Full Access**: Reads/writes all 16 bits simultaneously
 
 #### Bit Significance
+
 - **MSB (Most Significant Bit)**: Bit 15
 - **LSB (Least Significant Bit)**: Bit 0
 - **Word Boundary**: All registers aligned on 16-bit boundaries
 
 ### Register Function Legend
+
 - **🔴 Program Counter**: Word-aligned addressing for instruction fetch
 - **🔵 Stack Pointer**: Word-aligned, handles stack operations  
 - **🟢 Status Register**: Individual flag management and system control
@@ -95,7 +104,7 @@ The Status Register contains CPU flags and system control bits that affect proce
 
 The Status Register is organized into functional groups with specific bit assignments:
 
-```
+```text
 Status Register (R2) - 16-bit Layout:
 ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
 │15 │14 │13 │12 │11 │10 │ 9 │ 8 │ 7 │ 6 │ 5 │ 4 │ 3 │ 2 │ 1 │ 0 │
@@ -109,22 +118,25 @@ Status Register (R2) - 16-bit Layout:
 │ E │ E │ E │ E │ E │ E │ E │   │   │   │   │   │   │   │   │   │
 │ D │ D │ D │ D │ D │ D │ D │   │   │   │   │   │   │   │   │   │
 └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
-```
+```text
 
 ### Functional Groupings
 
 #### Reserved Bits (15-9) ⚪
+
 - **Purpose**: Unused by hardware
 - **Software Use**: Should be written as 0, ignored on read
 - **Count**: 7 bits reserved for future expansion
 
 #### Arithmetic Flags (8, 2-0) 🔴🟣  
+
 - **V (Bit 8)**: Overflow Flag - signed arithmetic overflow detection
 - **N (Bit 2)**: Negative Flag - result sign indication  
 - **Z (Bit 1)**: Zero Flag - zero result detection
 - **C (Bit 0)**: Carry Flag - arithmetic carry/borrow indication
 
 #### System Control (7-3) 🟡🔵🟢
+
 - **SCG1 (Bit 7)**: System Clock Generator 1 control
 - **SCG0 (Bit 6)**: System Clock Generator 0 control  
 - **OSCOFF (Bit 5)**: Oscillator control
@@ -151,16 +163,19 @@ Status Register (R2) - 16-bit Layout:
 The condition code flags are updated by arithmetic and logical operations:
 
 #### Carry Flag (C - Bit 0)
+
 - **Set When**: Arithmetic operation produces carry out or borrow in
 - **Usage**: Multi-precision arithmetic, unsigned comparison results
 - **Instructions**: ADD, SUB, CMP operations and their variants
 
 #### Zero Flag (Z - Bit 1)  
+
 - **Set When**: Result of operation equals zero
 - **Usage**: Conditional branches, equality testing
 - **Instructions**: Any operation that produces a zero result
 
 #### Negative Flag (N - Bit 2)
+
 - **Set When**: Result has MSB set (negative in two's complement)
 - **Usage**: Signed comparisons, conditional branches
 - **Instructions**: Operations that affect the sign bit
@@ -183,36 +198,42 @@ The condition code flags are updated by arithmetic and logical operations:
 The system control flags manage CPU operation modes and interrupt handling:
 
 #### Global Interrupt Enable (GIE - Bit 3) 🟢
+
 - **Function**: Enables/disables maskable interrupts
 - **Set By**: Software (BIS instruction) or RETI instruction
 - **Cleared By**: Hardware on interrupt acceptance or software (BIC instruction)
 - **Usage**: Interrupt system control
 
 #### CPU Power Control (CPUOFF - Bit 4) 🔵  
+
 - **Function**: Disables CPU core while leaving peripherals active
 - **Power Mode**: LPM0 and higher low power modes
 - **Wake**: Any enabled interrupt or reset
 - **Usage**: Power management, LPM0-LPM4 modes
 
 #### Oscillator Control (OSCOFF - Bit 5) 🔵
+
 - **Function**: Turns off LFXT1 crystal oscillator  
 - **Power Mode**: LPM4 mode
 - **Effect**: Disables low-frequency clock source
 - **Usage**: Maximum power savings
 
 #### System Clock Generator 0 (SCG0 - Bit 6) 🟡
+
 - **Function**: Turns off SMCLK (sub-main clock)
 - **Power Mode**: LPM1 and higher modes
 - **Effect**: Disables sub-main clock to peripherals
 - **Usage**: Intermediate power savings
 
 #### System Clock Generator 1 (SCG1 - Bit 7) 🟡  
+
 - **Function**: Turns off DCO (digitally controlled oscillator)
 - **Power Mode**: LPM3 and higher modes
 - **Effect**: Disables high-frequency clock source
 - **Usage**: Significant power savings
 
 #### Overflow Flag (V - Bit 8) 🔴
+
 - **Function**: Indicates signed arithmetic overflow
 - **Set When**: Two's complement overflow occurs
 - **Usage**: Signed arithmetic validation
@@ -248,7 +269,8 @@ The Program Counter controls instruction execution flow and has several operatio
 The PC operates in distinct states with specific transition conditions:
 
 #### State Overview
-```
+
+```text
 PC State Management:
 ├── Reset State
 │   ├── Condition: System startup/reset
@@ -270,7 +292,7 @@ PC State Management:
     ├── Triggers: Invalid address, misalignment
     ├── PC Behavior: Error handling/auto-correction
     └── Transition: → Reset State | → Normal State
-```
+```text
 
 ### Basic PC Operation States
 
@@ -311,12 +333,13 @@ stateDiagram-v2
         InvalidAddress : PC points to invalid memory
         Misalignment : PC has odd value (auto-corrected)
     }
-```
+```text
 
 ### Interrupt Handling States
 
 #### Interrupt Processing Flow
-```
+
+```text
 Interrupt Handling Sequence:
 1. Normal Execution
    ├── Check: GIE flag status each instruction cycle
@@ -350,7 +373,7 @@ Interrupt Handling Sequence:
    ├── Pop SR from stack (SP += 2, restore GIE)
    ├── Pop PC from stack (SP += 2)
    └── Resume: Normal execution at saved PC
-```
+```text
 
 ```mermaid
 stateDiagram-v2
@@ -388,12 +411,13 @@ stateDiagram-v2
         RETI_State : Pop SR and PC from stack
         RETI_State : Restore execution context
     }
-```
+```text
 
 ### Subroutine Call States
 
 #### Call/Return Flow Sequence
-```
+
+```text
 Subroutine Management:
 
 CALL Instruction Flow:
@@ -431,7 +455,7 @@ Stack Frame Management:
 ├── RET:  SP increases (pop return address)
 ├── Nested calls: Multiple stack entries
 └── Stack overflow: Potential error condition
-```
+```text
 
 ```mermaid
 stateDiagram-v2
@@ -479,26 +503,30 @@ stateDiagram-v2
         Pop_State : Pop return address from stack
         Pop_State : SP incremented by 2
     }
-```
+```text
 
 ### PC Alignment and Addressing Rules
 
 #### PC Alignment Rules
+
 - **Always word-aligned**: PC must point to even addresses
 - **Odd addresses**: Automatically rounded down to maintain alignment
 - **Instruction fetch**: Always increments PC by 2 (word boundary)
 
 #### Branch Target Rules
+
 - **Branch offset**: Must be word-aligned
 - **Jump targets**: Must be even addresses
 - **Invalid addresses**: Cause undefined behavior
 
 #### Interrupt Vector Rules
+
 - **Vector storage**: Located in high memory (0xFFE0-0xFFFF)
 - **Vector size**: Each vector is 2 bytes (word-aligned)
 - **Hardware behavior**: Automatically pushes PC and SR to stack
 
 #### PC Modification Rules
+
 - **Direct writes**: Writing to R0 directly affects PC
 - **Stack operations**: May indirectly affect PC through subroutine calls/returns
 - **Address calculations**: PC-relative addressing preserves alignment
@@ -526,7 +554,7 @@ Console.WriteLine(registerFile.StatusRegister); // "SR: 0x0003 [C, Z]"
 // 8-bit access modes
 registerFile.WriteRegisterLowByte(RegisterName.R5, 0xAB);
 byte lowByte = registerFile.ReadRegisterLowByte(RegisterName.R5);
-```
+```text
 
 ### Register Access Patterns
 
@@ -564,6 +592,7 @@ byte lowByte = registerFile.ReadRegisterLowByte(RegisterName.R5);
 ### Validation and Error Handling
 
 The register file implementation includes comprehensive validation:
+
 - Range checking for register numbers
 - Value validation for special registers
 - Proper error messages with context

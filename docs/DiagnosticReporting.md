@@ -1,6 +1,8 @@
 # Diagnostic Report Generation for GitHub Issues
 
-The MSP430 Emulator includes built-in diagnostic reporting functionality to streamline the process of reporting issues on GitHub. Instead of custom defect management, this system generates comprehensive diagnostic reports that can be easily attached to GitHub issues.
+The MSP430 Emulator includes built-in diagnostic reporting functionality to streamline the process of reporting
+issues on GitHub. Instead of custom defect management, this system generates comprehensive diagnostic reports that
+can be easily attached to GitHub issues.
 
 ## Features
 
@@ -58,6 +60,7 @@ string reportPath = reportGenerator.GenerateReportToFile();
 When users encounter problems with the emulator:
 
 1. **Enable Diagnostic Logging** (if not already enabled):
+
    ```csharp
    var logger = new DiagnosticLogger(new FileLogger("emulator.log"));
    ```
@@ -65,6 +68,7 @@ When users encounter problems with the emulator:
 2. **Reproduce the Issue** while logging is active
 
 3. **Generate Diagnostic Report**:
+
    ```csharp
    var reportGenerator = new DiagnosticReportGenerator(logger);
    string reportPath = reportGenerator.GenerateReportToFile();
@@ -110,10 +114,12 @@ Generated: 2025-06-02 22:55:39 UTC
 
 Recent Log Entries (last 25 entries):
 ```
+
 [2025-06-02T22:55:39.751Z] [INFO] Emulator starting up
 [2025-06-02T22:55:39.751Z] [WARNING] Some issue occurred  
 [2025-06-02T22:55:39.751Z] [ERROR] Error that user might report
-```
+
+```text
 
 ---
 
@@ -132,6 +138,7 @@ Recent Log Entries (last 25 entries):
 Main class for generating diagnostic reports.
 
 **Methods:**
+
 - `GenerateReport()` - Returns report as string
 - `GenerateReportToFile(string? filePath = null)` - Saves report to file
 
@@ -140,9 +147,11 @@ Main class for generating diagnostic reports.
 Logger wrapper that maintains a buffer of recent log entries.
 
 **Constructor:**
+
 - `DiagnosticLogger(ILogger innerLogger, int maxRecentEntries = 100)`
 
 **Additional Methods:**
+
 - `GetRecentEntries(int maxEntries = 0)` - Get recent log entries
 - `FormatRecentEntries(int maxEntries = 50)` - Format entries for reports
 

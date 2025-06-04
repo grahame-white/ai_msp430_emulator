@@ -15,10 +15,10 @@ Section 3.2.2: "Stack Pointer (SP)"*
 ┌─────────────────────────────────────────────────────────────────┐
 │                    MSP430 Register File                        │
 │                     (16 x 16-bit)                              │
-├─────────────────────────────────────────────────────────────────┤
+├────────────┬────────┬───────────────────────┬──────────────────┤
 │  Register  │  Name  │      Function         │    Special       │
 │   Number   │        │                       │   Behavior       │
-├─────────────────────────────────────────────────────────────────┤
+├────────────┼────────┼───────────────────────┼──────────────────┤
 │    R0      │   PC   │ Program Counter       │  Word Aligned    │
 │    R1      │   SP   │ Stack Pointer         │  Word Aligned    │
 │    R2      │   SR   │ Status Register       │  Flag Management │
@@ -35,7 +35,7 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │    R13     │   -    │ General Purpose       │  Read/Write      │
 │    R14     │   -    │ General Purpose       │  Read/Write      │
 │    R15     │   -    │ General Purpose       │  Read/Write      │
-└─────────────────────────────────────────────────────────────────┘
+└────────────┴────────┴───────────────────────┴──────────────────┘
 
 ```text
 

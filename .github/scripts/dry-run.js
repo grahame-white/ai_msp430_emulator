@@ -44,7 +44,9 @@ class DryRunPreview {
             const parser = new TaskParser(tasksFile);
             const allTasks = await parser.parse();
             const tasks = this.filterIncludedTasks(allTasks);
-            console.log(`Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} included)\n`);
+            console.log(
+                `Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} included)\n`
+            );
 
             // Generate preview sections
             await this.previewTaskAnalysis(tasks);
@@ -62,7 +64,6 @@ class DryRunPreview {
             this.generateHumanReadableReport();
 
             return this.changes;
-
         } catch (error) {
             console.error('❌ Preview generation failed:', error.message);
             throw error;
@@ -144,7 +145,9 @@ class DryRunPreview {
         this.changes.milestones = Array.from(phases);
 
         console.log(`   Labels to ensure exist: ${this.changes.labels.length}`);
-        console.log(`     ${this.changes.labels.slice(0, 5).join(', ')}${this.changes.labels.length > 5 ? '...' : ''}`);
+        console.log(
+            `     ${this.changes.labels.slice(0, 5).join(', ')}${this.changes.labels.length > 5 ? '...' : ''}`
+        );
         console.log(`   Milestones to create: ${this.changes.milestones.length}`);
         console.log(`     ${this.changes.milestones.join(', ')}`);
         console.log('');
@@ -267,7 +270,9 @@ class DryRunPreview {
         if (this.changes.closedIssues.length > 0) {
             console.log('\n✅ ISSUES TO CLOSE:');
             this.changes.closedIssues.forEach((issue, index) => {
-                console.log(`   ${index + 1}. Issue #${issue.issueNumber} (Task ${issue.taskId}) - Completed`);
+                console.log(
+                    `   ${index + 1}. Issue #${issue.issueNumber} (Task ${issue.taskId}) - Completed`
+                );
             });
         }
 
@@ -283,16 +288,19 @@ class DryRunPreview {
         if (this.changes.obsoleteIssues.length > 0) {
             console.log('\n🗑️  OBSOLETE ISSUES TO CLEAN:');
             this.changes.obsoleteIssues.forEach((issue, index) => {
-                console.log(`   ${index + 1}. Issue #${issue.issueNumber} (Task ${issue.taskId}) - No longer exists`);
+                console.log(
+                    `   ${index + 1}. Issue #${issue.issueNumber} (Task ${issue.taskId}) - No longer exists`
+                );
             });
         }
 
         // Risk assessment
         console.log('\n⚠️  RISK ASSESSMENT:');
-        const totalChanges = this.changes.newIssues.length +
-                           this.changes.updatedIssues.length +
-                           this.changes.closedIssues.length +
-                           this.changes.obsoleteIssues.length;
+        const totalChanges =
+            this.changes.newIssues.length +
+            this.changes.updatedIssues.length +
+            this.changes.closedIssues.length +
+            this.changes.obsoleteIssues.length;
 
         if (totalChanges === 0) {
             console.log('   ✅ No changes detected - safe to run');
@@ -339,7 +347,6 @@ async function main() {
         if (jsonOutput) {
             console.log(preview.generateJsonOutput());
         }
-
     } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);

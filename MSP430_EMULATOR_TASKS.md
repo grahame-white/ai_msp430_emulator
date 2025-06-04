@@ -306,10 +306,10 @@ Implement the MSP430's unified memory address space with proper segmentation, ac
 - [ ] Include memory segmentation flowcharts
 
 **Visual Documentation Requirements**:
-- Memory map diagram showing all address ranges and regions
-- Access permission flowchart for validation logic
-- Memory hierarchy diagram showing relationship between components
-- Visual representation of memory access patterns
+- Memory map diagram showing all address ranges and regions (using Mermaid or markdown tables)
+- Access permission flowchart for validation logic (using Mermaid flowcharts)
+- Memory hierarchy diagram showing relationship between components (ASCII art or Mermaid)
+- Visual representation of memory access patterns (inline markdown tables)
 
 **Files to Create**:
 ```
@@ -320,8 +320,8 @@ src/MSP430.Emulator/Memory/MemoryAccessValidator.cs
 src/MSP430.Emulator/Memory/MemoryAccessException.cs
 tests/MSP430.Emulator.Tests/Memory/MemoryMapTests.cs
 tests/MSP430.Emulator.Tests/Memory/MemoryAccessValidatorTests.cs
-docs/diagrams/architecture/memory_layout.puml
-docs/diagrams/architecture/memory_access_flow.puml
+docs/diagrams/architecture/memory_layout.md
+docs/diagrams/architecture/memory_access_flow.md
 ```
 
 **Testing Strategy**:
@@ -353,10 +353,10 @@ Implement the MSP430's register file including general purpose and special funct
 - [ ] Include visual representation of register interactions
 
 **Visual Documentation Requirements**:
-- Register file organization diagram
-- Status register bit field layout
-- Program counter state transition diagram
-- Stack pointer behavior flowchart
+- Register file organization diagram (using markdown tables or ASCII art)
+- Status register bit field layout (using markdown tables with bit positions)
+- Program counter state transition diagram (using Mermaid state diagrams)
+- Stack pointer behavior flowchart (using Mermaid flowcharts)
 
 **Files to Create**:
 ```
@@ -366,9 +366,9 @@ src/MSP430.Emulator/Cpu/RegisterName.cs
 src/MSP430.Emulator/Cpu/StatusRegister.cs
 tests/MSP430.Emulator.Tests/Cpu/RegisterFileTests.cs
 tests/MSP430.Emulator.Tests/Cpu/StatusRegisterTests.cs
-docs/diagrams/cpu/register_file_layout.puml
-docs/diagrams/cpu/status_register_bits.puml
-docs/diagrams/cpu/pc_state_transitions.puml
+docs/diagrams/cpu/register_file_layout.md
+docs/diagrams/cpu/status_register_bits.md
+docs/diagrams/cpu/pc_state_transitions.md
 ```
 
 **Testing Strategy**:
@@ -400,10 +400,10 @@ Create the instruction decoding framework to parse MSP430 machine code into exec
 - [ ] Include addressing mode decision flowcharts
 
 **Visual Documentation Requirements**:
-- Instruction format bit field diagrams
-- Decoding algorithm flowcharts
-- Addressing mode selection decision trees
-- Error handling flow diagrams
+- Instruction format bit field diagrams (using markdown tables with bit layouts)
+- Decoding algorithm flowcharts (using Mermaid flowcharts)
+- Addressing mode selection decision trees (using Mermaid decision diagrams)
+- Error handling flow diagrams (using Mermaid flowcharts)
 
 **Files to Create**:
 ```
@@ -415,9 +415,9 @@ src/MSP430.Emulator/Instructions/AddressingModeDecoder.cs
 src/MSP430.Emulator/Instructions/AddressingMode.cs
 tests/MSP430.Emulator.Tests/Instructions/InstructionDecoderTests.cs
 tests/MSP430.Emulator.Tests/Instructions/AddressingModeDecoderTests.cs
-docs/diagrams/instructions/format_layouts.puml
-docs/diagrams/instructions/decoding_flow.puml
-docs/diagrams/instructions/addressing_modes.puml
+docs/diagrams/instructions/format_layouts.md
+docs/diagrams/instructions/decoding_flow.md
+docs/diagrams/instructions/addressing_modes.md
 ```
 
 **Testing Strategy**:
@@ -1380,24 +1380,33 @@ Generate comprehensive API documentation with clear and consistent visual diagra
 - [ ] Set up automated documentation publishing
 
 **Visual Documentation Standards**:
-- Use consistent color coding across all diagrams
-- Standardize symbols and notation (IEEE/UML standards)
-- Include diagram legends and annotations
-- Ensure diagrams are accessible (colorblind-friendly)
-- Version control all diagram source files
-- Use professional diagramming tools (PlantUML, Mermaid, or Visio)
+- Use consistent color coding across all diagrams (ensure colorblind accessibility)
+- Standardize symbols and notation (IEEE/UML standards where applicable)
+- Include diagram legends and annotations inline within markdown
+- Ensure diagrams are accessible and render properly in GitHub's markdown viewer
+- Version control all diagram source files as markdown with embedded Mermaid/ASCII
+- Use GitHub-native markdown visualizations (Mermaid diagrams, markdown tables, ASCII art)
+- Design diagrams for GitHub's content width constraints (not full screen width)
+- Prefer inline visualizations over external image files when possible
+
+**GitHub-Native Visualization Options**:
+- **Mermaid diagrams**: Flowcharts, sequence diagrams, state diagrams, system architecture
+- **Markdown tables**: Memory layouts, register bit fields, instruction formats
+- **ASCII art**: Simple block diagrams, timing charts, visual separators
+- **Code blocks with comments**: Annotated data structures, configuration examples
+- **Nested lists with symbols**: Decision trees, hierarchical relationships
 
 **Files to Create**:
 ```
 docs/API_Reference.md
 docs/Getting_Started.md
 docs/Architecture.md
-docs/diagrams/system_architecture.puml
-docs/diagrams/cpu_state_machine.puml
-docs/diagrams/memory_layout.puml
-docs/diagrams/instruction_flow.puml
-docs/diagrams/component_interaction.puml
-docs/diagrams/debugging_workflow.puml
+docs/diagrams/system_architecture.md
+docs/diagrams/cpu_state_machine.md
+docs/diagrams/memory_layout.md
+docs/diagrams/instruction_flow.md
+docs/diagrams/component_interaction.md
+docs/diagrams/debugging_workflow.md
 docs/Examples/
 docs/visual_standards/DiagramGuidelines.md
 .github/workflows/docs.yml
@@ -1435,12 +1444,12 @@ Create comprehensive user documentation with examples, tutorials, and visual lea
 - [ ] Create user journey maps for different use cases
 
 **Visual Learning Materials**:
-- Step-by-step installation flowcharts
-- Debugging workflow decision trees
-- MSP430 conceptual architecture diagrams
-- Instruction execution timing diagrams
-- User interface navigation guides
-- Error resolution flowcharts
+- Step-by-step installation flowcharts (using Mermaid sequence diagrams)
+- Debugging workflow decision trees (using Mermaid decision trees)
+- MSP430 conceptual architecture diagrams (using Mermaid system diagrams)
+- Instruction execution timing diagrams (using markdown tables or ASCII art)
+- User interface navigation guides (using markdown lists with ASCII arrows)
+- Error resolution flowcharts (using Mermaid flowcharts)
 
 **Files to Create**:
 ```
@@ -1450,11 +1459,11 @@ docs/Tutorials/Debugging.md
 docs/Tutorials/Programming_Examples.md
 docs/Troubleshooting.md
 docs/Performance_Guide.md
-docs/diagrams/user_workflows/installation_flow.puml
-docs/diagrams/user_workflows/debugging_decision_tree.puml
-docs/diagrams/user_workflows/troubleshooting_flow.puml
-docs/diagrams/conceptual/msp430_overview.puml
-docs/diagrams/timing/instruction_execution.puml
+docs/diagrams/user_workflows/installation_flow.md
+docs/diagrams/user_workflows/debugging_decision_tree.md
+docs/diagrams/user_workflows/troubleshooting_flow.md
+docs/diagrams/conceptual/msp430_overview.md
+docs/diagrams/timing/instruction_execution.md
 docs/visual_guides/screenshots/
 ```
 

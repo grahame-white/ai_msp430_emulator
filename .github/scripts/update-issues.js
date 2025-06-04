@@ -90,9 +90,18 @@ class GitHubIssuesUpdater {
 
                 // Apply updates
                 if (this.dryRun) {
-                    console.log(`[DRY RUN] Would update issue #${issue.number} for Task ${task.id}:`);
-                    changes.forEach(change => console.log(`  - ${change.field}: ${change.description}`));
-                    results.updated.push({ task, issueNumber: issue.number, changes, dryRun: true });
+                    console.log(
+                        `[DRY RUN] Would update issue #${issue.number} for Task ${task.id}:`
+                    );
+                    changes.forEach(change =>
+                        console.log(`  - ${change.field}: ${change.description}`)
+                    );
+                    results.updated.push({
+                        task,
+                        issueNumber: issue.number,
+                        changes,
+                        dryRun: true
+                    });
                 } else {
                     await this.applyUpdates(issue, task, changes);
                     results.updated.push({ task, issueNumber: issue.number, changes });
@@ -117,7 +126,6 @@ class GitHubIssuesUpdater {
                         await this.reopenIssue(issue.number);
                     }
                 }
-
             } catch (error) {
                 results.errors.push({
                     task: task,
@@ -134,17 +142,31 @@ class GitHubIssuesUpdater {
      */
     async getAllTaskIssues() {
         try {
-            const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
-            const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
-                q: searchQuery,
+            // Add delay to respect rate limits
+            await this.delay(1000);
+
+            // Use the regular issues list API instead of deprecated search API
+            const issues = await this.octokit.rest.issues.listForRepo({
+                owner: this.owner,
+                repo: this.repo,
+                state: 'all',
+                labels: 'task',
+                per_page: 100,
                 sort: 'created',
-                order: 'desc',
-                per_page: 100
+                direction: 'desc'
             });
 
-            return searchResults.data.items;
+            // Filter to only issues that have "Task" in the title (to match the previous search behavior)
+            return issues.data.filter(
+                issue => issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+:/)
+            );
         } catch (error) {
-            console.warn(`Warning: Could not search for task issues: ${error.message}`);
+            console.warn(`Warning: Could not fetch task issues: ${error.message}`);
+            // If rate limited, wait longer and return empty array
+            if (error.status === 403 && error.message.includes('rate limit')) {
+                console.log('Rate limited, waiting 60 seconds before continuing...');
+                await this.delay(60000);
+            }
             return [];
         }
     }
@@ -198,12 +220,13 @@ class GitHubIssuesUpdater {
 
         // Check label changes
         const expectedLabels = this.generateLabels(task);
-        const currentLabels = issue.labels.map(label => typeof label === 'string' ? label : label.name);
+        const currentLabels = issue.labels.map(label =>
+            typeof label === 'string' ? label : label.name
+        );
 
         const missingLabels = expectedLabels.filter(label => !currentLabels.includes(label));
-        const extraLabels = currentLabels.filter(label =>
-            !expectedLabels.includes(label) &&
-            !label.startsWith('automated-') // Keep automation-related labels
+        const extraLabels = currentLabels.filter(
+            label => !expectedLabels.includes(label) && !label.startsWith('automated-') // Keep automation-related labels
         );
 
         if (missingLabels.length > 0 || extraLabels.length > 0) {
@@ -226,15 +249,15 @@ class GitHubIssuesUpdater {
 
         for (const change of changes) {
             switch (change.field) {
-            case 'title':
-                updateData.title = change.expected;
-                break;
-            case 'body':
-                updateData.body = this.generateIssueBody(task);
-                break;
-            case 'labels':
-                updateData.labels = change.expected;
-                break;
+                case 'title':
+                    updateData.title = change.expected;
+                    break;
+                case 'body':
+                    updateData.body = this.generateIssueBody(task);
+                    break;
+                case 'labels':
+                    updateData.labels = change.expected;
+                    break;
             }
         }
 
@@ -441,7 +464,6 @@ async function main() {
             });
             process.exit(1);
         }
-
     } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);

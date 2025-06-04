@@ -2,40 +2,40 @@ name: GitHub Issues Automation
 
 on:
   push:
-    branches: [ main, develop ]
-    paths: 
-      - 'MSP430_EMULATOR_TASKS.md'
-      - '.github/scripts/**'
-      - '.github/config/issue-templates.json'
-  
-  pull_request:
-    branches: [ main ]
+    branches: [main, develop]
     paths:
-      - 'MSP430_EMULATOR_TASKS.md'
-      - '.github/scripts/**'
-      - '.github/config/issue-templates.json'
-  
+      - "MSP430_EMULATOR_TASKS.md"
+      - ".github/scripts/**"
+      - ".github/config/issue-templates.json"
+
+  pull_request:
+    branches: [main]
+    paths:
+      - "MSP430_EMULATOR_TASKS.md"
+      - ".github/scripts/**"
+      - ".github/config/issue-templates.json"
+
   workflow_dispatch:
     inputs:
       confirm_execution:
-        description: '⚠️ I understand this will create/update GitHub issues (MUST be checked for real execution)'
+        description: "⚠️ I understand this will create/update GitHub issues (MUST be checked for real execution)"
         required: true
         default: false
         type: boolean
       dry_run:
-        description: 'Run in dry-run mode (preview only) - ignored if confirmation is unchecked'
+        description: "Run in dry-run mode (preview only) - ignored if confirmation is unchecked"
         required: false
-        default: 'true'
+        default: "true"
         type: boolean
       force_recovery:
-        description: 'Force disaster recovery mode'
+        description: "Force disaster recovery mode"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
       protect_manual:
-        description: 'Scan and protect manual issues'
+        description: "Scan and protect manual issues"
         required: false
-        default: 'true'
+        default: "true"
         type: boolean
 
 jobs:
@@ -45,98 +45,98 @@ jobs:
     outputs:
       tasks-valid: ${{ steps.validate.outputs.valid }}
       tasks-count: ${{ steps.validate.outputs.count }}
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: '.github/scripts/package*.json'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ".github/scripts/package*.json"
 
-    - name: Install dependencies
-      run: |
-        cd .github/scripts
-        if [ ! -f package.json ]; then
-          npm init -y
-          npm install @octokit/rest
-        else
-          npm install
-        fi
+      - name: Install dependencies
+        run: |
+          cd .github/scripts
+          if [ ! -f package.json ]; then
+            npm init -y
+            npm install @octokit/rest
+          else
+            npm install
+          fi
 
-    - name: Validate task parsing
-      id: validate
-      run: |
-        cd .github/scripts
-        
-        # Check if parsing was successful
-        if node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > /tmp/tasks.json; then
-          echo "valid=true" >> $GITHUB_OUTPUT
-          TASK_COUNT=$(jq '.totalTasks' /tmp/tasks.json)
-          echo "count=$TASK_COUNT" >> $GITHUB_OUTPUT
-          echo "✅ Successfully parsed $TASK_COUNT tasks"
-        else
-          echo "valid=false" >> $GITHUB_OUTPUT
-          echo "count=0" >> $GITHUB_OUTPUT
-          echo "❌ Task parsing failed"
-          exit 1
-        fi
+      - name: Validate task parsing
+        id: validate
+        run: |
+          cd .github/scripts
 
-    - name: Upload parsed tasks
-      uses: actions/upload-artifact@v4
-      with:
-        name: parsed-tasks
-        path: /tmp/tasks.json
-        retention-days: 7
+          # Check if parsing was successful
+          if node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > /tmp/tasks.json; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+            TASK_COUNT=$(jq '.totalTasks' /tmp/tasks.json)
+            echo "count=$TASK_COUNT" >> $GITHUB_OUTPUT
+            echo "✅ Successfully parsed $TASK_COUNT tasks"
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "count=0" >> $GITHUB_OUTPUT
+            echo "❌ Task parsing failed"
+            exit 1
+          fi
+
+      - name: Upload parsed tasks
+        uses: actions/upload-artifact@v4
+        with:
+          name: parsed-tasks
+          path: /tmp/tasks.json
+          retention-days: 7
 
   dry-run-preview:
     name: Generate Preview
     runs-on: ubuntu-latest
     needs: validate-tasks
     if: needs.validate-tasks.outputs.tasks-valid == 'true'
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-    - name: Install dependencies
-      run: |
-        cd .github/scripts
-        npm init -y
-        npm install @octokit/rest
+      - name: Install dependencies
+        run: |
+          cd .github/scripts
+          npm init -y
+          npm install @octokit/rest
 
-    - name: Generate dry run preview
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        cd .github/scripts
-        echo "🔍 Generating preview of changes..."
-        node dry-run.js ../../MSP430_EMULATOR_TASKS.md > /tmp/preview.txt
-        
-        {
-          echo "## 📋 Issue Automation Preview"
-          echo "Found **${{ needs.validate-tasks.outputs.tasks-count }}** tasks to process"
-          echo ""
-          echo "### Preview Details"
-          echo '```'
-          cat /tmp/preview.txt
-          echo '```'
-        } >> $GITHUB_STEP_SUMMARY
+      - name: Generate dry run preview
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          echo "🔍 Generating preview of changes..."
+          node dry-run.js ../../MSP430_EMULATOR_TASKS.md > /tmp/preview.txt
 
-    - name: Upload preview
-      uses: actions/upload-artifact@v4
-      with:
-        name: automation-preview
-        path: /tmp/preview.txt
-        retention-days: 30
+          {
+            echo "## 📋 Issue Automation Preview"
+            echo "Found **${{ needs.validate-tasks.outputs.tasks-count }}** tasks to process"
+            echo ""
+            echo "### Preview Details"
+            echo '```'
+            cat /tmp/preview.txt
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-preview
+          path: /tmp/preview.txt
+          retention-days: 30
 
   protect-manual-issues:
     name: Protect Manual Issues
@@ -147,37 +147,37 @@ jobs:
       (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main') &&
       (github.event.inputs.protect_manual != 'false') &&
       (github.event_name != 'workflow_dispatch' || github.event.inputs.confirm_execution == 'true')
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-    - name: Install dependencies
-      run: |
-        cd .github/scripts
-        npm init -y
-        npm install @octokit/rest
+      - name: Install dependencies
+        run: |
+          cd .github/scripts
+          npm init -y
+          npm install @octokit/rest
 
-    - name: Protect manual issues
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        cd .github/scripts
-        DRY_RUN_FLAG=""
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
-          DRY_RUN_FLAG="--dry-run"
-          echo "⚠️ Running in dry-run mode - confirmation not checked"
-        elif [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
-          DRY_RUN_FLAG="--dry-run"
-        fi
-        
-        echo "🛡️ Scanning for manual issues to protect..."
-        node manual-issue-protector.js $DRY_RUN_FLAG
+      - name: Protect manual issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+            echo "⚠️ Running in dry-run mode - confirmation not checked"
+          elif [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+
+          echo "🛡️ Scanning for manual issues to protect..."
+          node manual-issue-protector.js $DRY_RUN_FLAG
 
   synchronize-issues:
     name: Synchronize Issues
@@ -187,141 +187,144 @@ jobs:
       always() && 
       needs.validate-tasks.outputs.tasks-valid == 'true' &&
       (needs.protect-manual-issues.result == 'success' || needs.protect-manual-issues.result == 'skipped')
-    
+
     steps:
-    - name: Safety check for manual trigger
-      if: github.event_name == 'workflow_dispatch'
-      run: |
-        if [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
-          echo "⚠️ SAFETY MODE ACTIVATED ⚠️"
-          echo ""
-          echo "The confirmation checkbox was not checked."
-          echo "This workflow will run in DRY-RUN mode only."
-          echo "No GitHub issues will be created or modified."
-          echo ""
-          echo "To perform real synchronization:"
-          echo "1. Re-run this workflow manually"
-          echo "2. Check the confirmation checkbox: '⚠️ I understand this will create/update GitHub issues'"
-          echo "3. Optionally uncheck 'dry_run' if you want full execution"
-          echo ""
-          echo "Current mode: DRY-RUN (safe preview only)"
-        else
-          echo "✅ CONFIRMATION RECEIVED ✅"
-          echo ""
-          echo "The confirmation checkbox was checked."
-          echo "This workflow is authorized to create/update GitHub issues."
-          echo ""
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "Current mode: DRY-RUN (preview mode requested)"
+      - name: Safety check for manual trigger
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
+            echo "⚠️ SAFETY MODE ACTIVATED ⚠️"
+            echo ""
+            echo "The confirmation checkbox was not checked."
+            echo "This workflow will run in DRY-RUN mode only."
+            echo "No GitHub issues will be created or modified."
+            echo ""
+            echo "To perform real synchronization:"
+            echo "1. Re-run this workflow manually"
+            echo "2. Check the confirmation checkbox: '⚠️ I understand this will create/update GitHub issues'"
+            echo "3. Optionally uncheck 'dry_run' if you want full execution"
+            echo ""
+            echo "Current mode: DRY-RUN (safe preview only)"
           else
-            echo "Current mode: FULL SYNCHRONIZATION"
+            echo "✅ CONFIRMATION RECEIVED ✅"
+            echo ""
+            echo "The confirmation checkbox was checked."
+            echo "This workflow is authorized to create/update GitHub issues."
+            echo ""
+            if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+              echo "Current mode: DRY-RUN (preview mode requested)"
+            else
+              echo "Current mode: FULL SYNCHRONIZATION"
+            fi
           fi
-        fi
 
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-    - name: Install dependencies
-      run: |
-        cd .github/scripts
-        npm init -y
-        npm install @octokit/rest
+      - name: Install dependencies
+        run: |
+          cd .github/scripts
+          npm init -y
+          npm install @octokit/rest
 
-    - name: Determine operation mode
-      id: mode
-      run: |
-        # Check if confirmation is provided for manual dispatch
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
-          echo "mode=dry-run" >> $GITHUB_OUTPUT
-          echo "⚠️ Confirmation not checked - forcing dry run mode for safety"
-          echo "To perform real execution, please check the confirmation checkbox when triggering the workflow"
-        elif [ "${{ github.event.inputs.force_recovery }}" = "true" ] && [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
-          echo "mode=recovery" >> $GITHUB_OUTPUT
-          echo "🚨 Disaster recovery mode enabled (confirmed)"
-        elif [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
-          echo "mode=dry-run" >> $GITHUB_OUTPUT
-          echo "🔍 Dry run mode enabled"
-        elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
-          echo "mode=sync" >> $GITHUB_OUTPUT
-          echo "🔄 Full synchronization mode enabled (confirmed)"
-        elif [ "${{ github.event_name }}" = "push" ]; then
-          echo "mode=sync" >> $GITHUB_OUTPUT
-          echo "🔄 Full synchronization mode enabled (push trigger)"
-        else
-          echo "mode=dry-run" >> $GITHUB_OUTPUT
-          echo "🔍 Dry run mode enabled (default safety)"
-        fi
-
-    - name: Run disaster recovery
-      if: steps.mode.outputs.mode == 'recovery'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        cd .github/scripts
-        echo "🚨 Running disaster recovery..."
-        node disaster-recovery.js ../../MSP430_EMULATOR_TASKS.md --force
-
-    - name: Run synchronization
-      if: steps.mode.outputs.mode == 'sync'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        cd .github/scripts
-        echo "🔄 Running full synchronization..."
-        node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md
-
-    - name: Run dry run
-      if: steps.mode.outputs.mode == 'dry-run'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        cd .github/scripts
-        echo "🔍 Running dry run synchronization..."
-        node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md --dry-run
-
-    - name: Generate summary report
-      if: always()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        cd .github/scripts
-        echo "📊 Generating summary report..."
-        
-        {
-          echo "## 🔄 Issue Synchronization Summary"
-          echo "**Mode:** ${{ steps.mode.outputs.mode }}"
-          echo "**Tasks Processed:** ${{ needs.validate-tasks.outputs.tasks-count }}"
-          echo "**Trigger:** ${{ github.event_name }}"
-        } >> $GITHUB_STEP_SUMMARY
-        
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          if [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
-            echo "**Confirmation:** ✅ Confirmed - Real execution authorized" >> $GITHUB_STEP_SUMMARY
+      - name: Determine operation mode
+        id: mode
+        run: |
+          # Check if confirmation is provided for manual dispatch
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" != "true" ]; then
+            echo "mode=dry-run" >> $GITHUB_OUTPUT
+            echo "⚠️ Confirmation not checked - forcing dry run mode for safety"
+            echo "To perform real execution, please check the confirmation checkbox when triggering the workflow"
+          elif [ "${{ github.event.inputs.force_recovery }}" = "true" ] && [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
+            echo "mode=recovery" >> $GITHUB_OUTPUT
+            echo "🚨 Disaster recovery mode enabled (confirmed)"
+          elif [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "mode=dry-run" >> $GITHUB_OUTPUT
+            echo "🔍 Dry run mode enabled"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
+            echo "mode=sync" >> $GITHUB_OUTPUT
+            echo "🔄 Full synchronization mode enabled (confirmed)"
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "mode=sync" >> $GITHUB_OUTPUT
+            echo "🔄 Full synchronization mode enabled (push to main branch)"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "mode=dry-run" >> $GITHUB_OUTPUT
+            echo "🔍 Dry run mode enabled (push to non-main branch: ${{ github.ref_name }})"
           else
-            echo "**Confirmation:** ⚠️ Not confirmed - Safety mode (dry-run only)" >> $GITHUB_STEP_SUMMARY
+            echo "mode=dry-run" >> $GITHUB_OUTPUT
+            echo "🔍 Dry run mode enabled (default safety)"
           fi
-        fi
-        
-        if [ "${{ steps.mode.outputs.mode }}" != "dry-run" ]; then
+
+      - name: Run disaster recovery
+        if: steps.mode.outputs.mode == 'recovery'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          echo "🚨 Running disaster recovery..."
+          node disaster-recovery.js ../../MSP430_EMULATOR_TASKS.md --force
+
+      - name: Run synchronization
+        if: steps.mode.outputs.mode == 'sync'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          echo "🔄 Running full synchronization..."
+          node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md
+
+      - name: Run dry run
+        if: steps.mode.outputs.mode == 'dry-run'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          echo "🔍 Running dry run synchronization..."
+          node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md --dry-run
+
+      - name: Generate summary report
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          echo "📊 Generating summary report..."
+
           {
-            echo ""
-            echo "### ✅ Synchronization Complete"
-            echo "Issues have been synchronized with the task list."
-            echo ""
-            echo "📋 [View Issues](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+label%3Atask)"
+            echo "## 🔄 Issue Synchronization Summary"
+            echo "**Mode:** ${{ steps.mode.outputs.mode }}"
+            echo "**Tasks Processed:** ${{ needs.validate-tasks.outputs.tasks-count }}"
+            echo "**Trigger:** ${{ github.event_name }}"
           } >> $GITHUB_STEP_SUMMARY
-        else
-          {
-            echo ""
-            echo "### 🔍 Dry Run Complete"
-            echo "No changes were made. Check the preview above for planned changes."
-          } >> $GITHUB_STEP_SUMMARY
-        fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.confirm_execution }}" = "true" ]; then
+              echo "**Confirmation:** ✅ Confirmed - Real execution authorized" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "**Confirmation:** ⚠️ Not confirmed - Safety mode (dry-run only)" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          if [ "${{ steps.mode.outputs.mode }}" != "dry-run" ]; then
+            {
+              echo ""
+              echo "### ✅ Synchronization Complete"
+              echo "Issues have been synchronized with the task list."
+              echo ""
+              echo "📋 [View Issues](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+label%3Atask)"
+            } >> $GITHUB_STEP_SUMMARY
+          else
+            {
+              echo ""
+              echo "### 🔍 Dry Run Complete"
+              echo "No changes were made. Check the preview above for planned changes."
+            } >> $GITHUB_STEP_SUMMARY
+          fi
 
   notify-completion:
     name: Notify Completion
@@ -331,48 +334,52 @@ jobs:
       always() && 
       github.event_name != 'pull_request' &&
       (needs.synchronize-issues.result == 'success' || needs.synchronize-issues.result == 'failure')
-    
+
     steps:
-    - name: Create completion issue comment
-      if: needs.synchronize-issues.result == 'success'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const { owner, repo } = context.repo;
-          
-          // Find recent issues automation-related issues to comment on
-          const { data: issues } = await github.rest.search.issuesAndPullRequests({
-            q: `repo:${owner}/${repo} is:issue label:task is:open`,
-            sort: 'updated',
-            order: 'desc',
-            per_page: 1
-          });
-          
-          if (issues.items.length > 0) {
-            await github.rest.issues.createComment({
+      - name: Create completion issue comment
+        if: needs.synchronize-issues.result == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            // Find recent issues automation-related issues to comment on
+            const { data: issues } = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:issue label:task is:open`,
+              sort: 'updated',
+              order: 'desc',
+              per_page: 1
+            });
+
+            if (issues.items.length > 0) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issues.items[0].number,
+                body: `🤖 **Issues Automation Update**\n\nThe task list has been synchronized with GitHub issues.\n\n**Summary:**\n- Tasks processed: ${{ needs.validate-tasks.outputs.tasks-count }}\n- Workflow: [View run](https://github.com/${owner}/${repo}/actions/runs/${{ github.run_id }})\n- Trigger: ${context.eventName}\n\n*Automated by GitHub Issues Automation*`
+              });
+            }
+
+      - name: Create error notification
+        if: needs.synchronize-issues.result == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            await github.rest.issues.create({
               owner,
               repo,
-              issue_number: issues.items[0].number,
-              body: `🤖 **Issues Automation Update**\n\nThe task list has been synchronized with GitHub issues.\n\n**Summary:**\n- Tasks processed: ${{ needs.validate-tasks.outputs.tasks-count }}\n- Workflow: [View run](https://github.com/${owner}/${repo}/actions/runs/${{ github.run_id }})\n- Trigger: ${context.eventName}\n\n*Automated by GitHub Issues Automation*`
+              title: '🚨 Issues Automation Error',
+              body: `**Error in GitHub Issues Automation**\n\nThe automation workflow failed during execution.\n\n**Details:**\n- Run ID: ${{ github.run_id }}\n- Trigger: ${context.eventName}\n- Tasks to process: ${{ needs.validate-tasks.outputs.tasks-count }}\n\n**Action Required:**\n1. Check the [workflow logs](https://github.com/${owner}/${repo}/actions/runs/${{ github.run_id }})\n2. Review any parsing or API errors\n3. Consider running disaster recovery if issues are corrupted\n\n*Automatically created by GitHub Issues Automation*`,
+              labels: ['bug', 'automation', 'high-priority']
             });
-          }
-
-    - name: Create error notification
-      if: needs.synchronize-issues.result == 'failure'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const { owner, repo } = context.repo;
-          
-          await github.rest.issues.create({
-            owner,
-            repo,
-            title: '🚨 Issues Automation Error',
-            body: `**Error in GitHub Issues Automation**\n\nThe automation workflow failed during execution.\n\n**Details:**\n- Run ID: ${{ github.run_id }}\n- Trigger: ${context.eventName}\n- Tasks to process: ${{ needs.validate-tasks.outputs.tasks-count }}\n\n**Action Required:**\n1. Check the [workflow logs](https://github.com/${owner}/${repo}/actions/runs/${{ github.run_id }})\n2. Review any parsing or API errors\n3. Consider running disaster recovery if issues are corrupted\n\n*Automatically created by GitHub Issues Automation*`,
-            labels: ['bug', 'automation', 'high-priority']
-          });
 
 # Security and rate limiting
+# Rate limiting improvements:
+# - Workflow defaults to dry-run mode unless running on main branch
+# - Scripts include proper delays between API calls (1000ms + exponential backoff)
+# - Graceful handling of GitHub API rate limits with 60s retry delays
 concurrency:
   group: issue-automation-${{ github.ref }}
   cancel-in-progress: false

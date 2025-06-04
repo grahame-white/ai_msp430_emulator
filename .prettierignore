@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+**/node_modules/
+package-lock.json
+**/package-lock.json
+
+# Build outputs
+**/bin/
+**/obj/
+**/dist/
+**/build/
+TestResults/
+coverage/
+
+# Git files
+.git/
+
+# Files with specific formatting requirements handled by other tools
+**/*.cs
+**/*.csproj
+**/*.sln
+**/*.csx
+**/*.vb
+**/*.vbx
+**/*.vcxproj
+**/*.vcxproj.filters
+**/*.proj
+**/*.projitems
+**/*.shproj
+**/*.props
+**/*.targets
+**/*.ruleset
+**/*.config
+**/*.nuspec
+**/*.resx
+**/*.vsixmanifest
+**/*.vsct
+
+# Generated files
+licenses.json
+vulnerability-report.txt
+
+# EditorConfig handles these
+.editorconfig
+
+# Files that should not be formatted
+examples/**/*.bin
+examples/**/*.hex
+**/*.lock

@@ -65,7 +65,9 @@ class ManualIssueProtector {
                         // Protect if not already protected
                         if (!analysis.isProtected) {
                             if (this.dryRun) {
-                                console.log(`[DRY RUN] Would protect manual issue #${issue.number}: ${issue.title}`);
+                                console.log(
+                                    `[DRY RUN] Would protect manual issue #${issue.number}: ${issue.title}`
+                                );
                                 results.protected.push({
                                     number: issue.number,
                                     dryRun: true
@@ -87,7 +89,6 @@ class ManualIssueProtector {
                             confidence: analysis.confidence
                         });
                     }
-
                 } catch (error) {
                     results.errors.push({
                         issue: issue.number,
@@ -98,7 +99,6 @@ class ManualIssueProtector {
 
             this.printProtectionSummary(results);
             return results;
-
         } catch (error) {
             console.error('❌ Protection scan failed:', error.message);
             results.errors.push({ error: error.message });
@@ -166,8 +166,8 @@ class ManualIssueProtector {
             'Automatically created by'
         ];
 
-        const hasAutomationMarker = automationMarkers.some(marker =>
-            issue.body && issue.body.includes(marker)
+        const hasAutomationMarker = automationMarkers.some(
+            marker => issue.body && issue.body.includes(marker)
         );
 
         // Check for protection markers
@@ -177,11 +177,13 @@ class ManualIssueProtector {
             'MANUAL_ISSUE_DO_NOT_MODIFY'
         ];
 
-        const hasProtectionMarker = protectionMarkers.some(marker =>
-            (issue.body && issue.body.includes(marker)) ||
-            (issue.labels && issue.labels.some(label =>
-                (typeof label === 'string' ? label : label.name) === marker
-            ))
+        const hasProtectionMarker = protectionMarkers.some(
+            marker =>
+                (issue.body && issue.body.includes(marker)) ||
+                (issue.labels &&
+                    issue.labels.some(
+                        label => (typeof label === 'string' ? label : label.name) === marker
+                    ))
         );
 
         analysis.isProtected = hasProtectionMarker;
@@ -246,9 +248,10 @@ class ManualIssueProtector {
 
         // Check body structure
         if (issue.body) {
-            const hasStructuredSections = issue.body.includes('## Acceptance Criteria') ||
-                                        issue.body.includes('## Files to Create') ||
-                                        issue.body.includes('## Testing Strategy');
+            const hasStructuredSections =
+                issue.body.includes('## Acceptance Criteria') ||
+                issue.body.includes('## Files to Create') ||
+                issue.body.includes('## Testing Strategy');
 
             if (!hasStructuredSections) {
                 indicators.score += 0.3;
@@ -267,9 +270,11 @@ class ManualIssueProtector {
                 'suggestion'
             ];
 
-            if (manualPatterns.some(pattern =>
-                issue.body.toLowerCase().includes(pattern.toLowerCase())
-            )) {
+            if (
+                manualPatterns.some(pattern =>
+                    issue.body.toLowerCase().includes(pattern.toLowerCase())
+                )
+            ) {
                 indicators.score += 0.2;
                 indicators.reasons.push('contains manual language patterns');
             }
@@ -309,7 +314,7 @@ class ManualIssueProtector {
         try {
             // Add protection label
             const labelResult = await executeWithPermissionHandling(
-                async() => {
+                async () => {
                     await this.octokit.rest.issues.addLabels({
                         owner: this.owner,
                         repo: this.repo,
@@ -325,7 +330,7 @@ class ManualIssueProtector {
             const protectionComment = `🛡️ **Manual Issue Protection Activated**\n\nThis issue has been identified as manually created and is now protected from automated modifications.\n\n**Detection Reason:** ${reason}\n\n**Protection Details:**\n- This issue will not be modified by GitHub Issues Automation\n- The automation system will preserve this issue's content and state\n- If you need to remove this protection, remove the \`manual-issue-protected\` label\n\n*Automatically protected by Manual Issue Protector*`;
 
             const commentResult = await executeWithPermissionHandling(
-                async() => {
+                async () => {
                     await this.octokit.rest.issues.createComment({
                         owner: this.owner,
                         repo: this.repo,
@@ -346,14 +351,19 @@ class ManualIssueProtector {
                 if (commentResult.success) {
                     actions.push('commented');
                 }
-                console.log(`✅ Protected manual issue #${issue.number} (${actions.join(' + ')}): ${issue.title}`);
+                console.log(
+                    `✅ Protected manual issue #${issue.number} (${actions.join(' + ')}): ${issue.title}`
+                );
             } else {
-                console.log(`⚠️  Issue #${issue.number} identified as manual but could not be fully protected due to permissions: ${issue.title}`);
+                console.log(
+                    `⚠️  Issue #${issue.number} identified as manual but could not be fully protected due to permissions: ${issue.title}`
+                );
             }
-
         } catch (error) {
             if (isPermissionError(error)) {
-                console.warn(`⚠️  Cannot protect issue #${issue.number} due to insufficient permissions: ${issue.title}`);
+                console.warn(
+                    `⚠️  Cannot protect issue #${issue.number} due to insufficient permissions: ${issue.title}`
+                );
             } else {
                 throw new Error(`Failed to protect issue #${issue.number}: ${error.message}`);
             }
@@ -374,7 +384,8 @@ class ManualIssueProtector {
             });
 
             // Add unprotection comment
-            const unprotectionComment = '🔓 **Manual Issue Protection Removed**\n\nThis issue is no longer protected from automated modifications.\n\n*Protection removed by Manual Issue Protector*';
+            const unprotectionComment =
+                '🔓 **Manual Issue Protection Removed**\n\nThis issue is no longer protected from automated modifications.\n\n*Protection removed by Manual Issue Protector*';
 
             await this.octokit.rest.issues.createComment({
                 owner: this.owner,
@@ -384,7 +395,6 @@ class ManualIssueProtector {
             });
 
             console.log(`Removed protection from issue #${issueNumber}`);
-
         } catch (error) {
             throw new Error(`Failed to unprotect issue #${issueNumber}: ${error.message}`);
         }
@@ -432,9 +442,13 @@ class ManualIssueProtector {
                         console.log('✅ Created protection label: manual-issue-protected');
                     } catch (createError) {
                         if (isPermissionError(createError)) {
-                            console.warn('⚠️  Cannot create protection label due to insufficient permissions');
+                            console.warn(
+                                '⚠️  Cannot create protection label due to insufficient permissions'
+                            );
                         } else {
-                            console.warn(`⚠️  Could not create protection label: ${createError.message}`);
+                            console.warn(
+                                `⚠️  Could not create protection label: ${createError.message}`
+                            );
                         }
                     }
                 } else {
@@ -471,12 +485,12 @@ class ManualIssueProtector {
         if (results.errors.length > 0) {
             console.log('\n❌ Errors encountered:');
             results.errors.forEach((error, index) => {
-                console.log(`   ${index + 1}. ${error.issue ? `Issue #${error.issue}: ` : ''}${error.error}`);
+                console.log(
+                    `   ${index + 1}. ${error.issue ? `Issue #${error.issue}: ` : ''}${error.error}`
+                );
             });
         }
     }
-
-
 
     /**
      * Utility function for delays
@@ -532,7 +546,6 @@ async function main() {
                 process.exit(1);
             }
         }
-
     } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);

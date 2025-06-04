@@ -2,12 +2,12 @@ name: Security Scanning
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Run security scans daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
 
 permissions:
   actions: read
@@ -22,168 +22,168 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'csharp', 'javascript' ]
+        language: ["csharp", "javascript"]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
-        queries: security-extended,security-and-quality
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
 
-    - name: Setup .NET
-      if: matrix.language == 'csharp'
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+      - name: Setup .NET
+        if: matrix.language == 'csharp'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
 
-    - name: Setup Node.js
-      if: matrix.language == 'javascript'
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: '.github/scripts/package*.json'
+      - name: Setup Node.js
+        if: matrix.language == 'javascript'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ".github/scripts/package*.json"
 
-    - name: Bootstrap dependencies (.NET)
-      if: matrix.language == 'csharp'
-      run: ./script/bootstrap
+      - name: Bootstrap dependencies (.NET)
+        if: matrix.language == 'csharp'
+        run: ./script/bootstrap
 
-    - name: Install Node.js dependencies
-      if: matrix.language == 'javascript'
-      run: |
-        cd .github/scripts
-        npm install
+      - name: Install Node.js dependencies
+        if: matrix.language == 'javascript'
+        run: |
+          cd .github/scripts
+          npm install
 
-    - name: Build for analysis (.NET)
-      if: matrix.language == 'csharp'
-      run: ./script/build
+      - name: Build for analysis (.NET)
+        if: matrix.language == 'csharp'
+        run: ./script/build
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        category: "/language:${{matrix.language}}"
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
 
   dependency-scan:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: '.github/scripts/package*.json'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ".github/scripts/package*.json"
 
-    - name: Run dependency security scan
-      run: |
-        echo "==> Running dependency vulnerability scan..."
-        SCAN_FAILED=false
-        ./script/security --skip-licenses || SCAN_FAILED=true
-        
-        if [ "$SCAN_FAILED" = true ]; then
-          echo "❌ Security vulnerabilities detected"
-          exit 1
-        else
-          echo "✅ No security vulnerabilities found"
-        fi
+      - name: Run dependency security scan
+        run: |
+          echo "==> Running dependency vulnerability scan..."
+          SCAN_FAILED=false
+          ./script/security --skip-licenses || SCAN_FAILED=true
 
-    - name: Upload vulnerability report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: vulnerability-report
-        path: |
-          vulnerability-report.txt
-          /tmp/npm-audit.json
-        retention-days: 30
+          if [ "$SCAN_FAILED" = true ]; then
+            echo "❌ Security vulnerabilities detected"
+            exit 1
+          else
+            echo "✅ No security vulnerabilities found"
+          fi
+
+      - name: Upload vulnerability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerability-report
+          path: |
+            vulnerability-report.txt
+            /tmp/npm-audit.json
+          retention-days: 30
 
   secret-scan:
     name: Secret Scanning
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Run Trivy secret scanner
-      uses: aquasecurity/trivy-action@0.30.0
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        scanners: 'secret'
-        # Include automation scripts in secret scanning
-        skip-dirs: 'node_modules'
+      - name: Run Trivy secret scanner
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          scanners: "secret"
+          # Include automation scripts in secret scanning
+          skip-dirs: "node_modules"
 
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
 
   license-check:
     name: License Compliance Check
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: '.github/scripts/package*.json'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ".github/scripts/package*.json"
 
-    - name: Install license check tools
-      run: |
-        # Install .NET license tool
-        dotnet tool install --global nuget-license || echo "nuget-license installation skipped"
-        
-        # Install Node.js license tool if scripts exist
-        if [ -d ".github/scripts" ]; then
-          npm install -g license-checker || echo "license-checker installation skipped"
-        fi
+      - name: Install license check tools
+        run: |
+          # Install .NET license tool
+          dotnet tool install --global nuget-license || echo "nuget-license installation skipped"
 
-    - name: Run license compliance check
-      run: |
-        echo "==> Running license compliance check..."
-        LICENSE_FAILED=false
-        ./script/security --skip-dotnet --skip-nodejs || LICENSE_FAILED=true
-        
-        if [ "$LICENSE_FAILED" = true ]; then
-          echo "❌ License compliance issues detected"
-          exit 1
-        else
-          echo "✅ License compliance check passed"
-        fi
+          # Install Node.js license tool if scripts exist
+          if [ -d ".github/scripts" ]; then
+            npm install -g license-checker || echo "license-checker installation skipped"
+          fi
 
-    - name: Upload license reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: license-reports
-        path: |
-          licenses.json
-          /tmp/nodejs-licenses.json
-        retention-days: 30
+      - name: Run license compliance check
+        run: |
+          echo "==> Running license compliance check..."
+          LICENSE_FAILED=false
+          ./script/security --skip-dotnet --skip-nodejs || LICENSE_FAILED=true
+
+          if [ "$LICENSE_FAILED" = true ]; then
+            echo "❌ License compliance issues detected"
+            exit 1
+          else
+            echo "✅ License compliance check passed"
+          fi
+
+      - name: Upload license reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-reports
+          path: |
+            licenses.json
+            /tmp/nodejs-licenses.json
+          retention-days: 30

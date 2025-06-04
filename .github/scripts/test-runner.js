@@ -97,7 +97,10 @@ runner.test('TaskParser class is properly structured', () => {
     runner.assert(content.includes('class TaskParser'), 'TaskParser class not found');
     runner.assert(content.includes('extractDescription'), 'extractDescription method not found');
     runner.assert(content.includes('extractDependencies'), 'extractDependencies method not found');
-    runner.assert(content.includes('extractAcceptanceCriteria'), 'extractAcceptanceCriteria method not found');
+    runner.assert(
+        content.includes('extractAcceptanceCriteria'),
+        'extractAcceptanceCriteria method not found'
+    );
 });
 
 // Test: Validate ESLint configuration
@@ -115,7 +118,10 @@ runner.test('Tasks file path can be resolved', () => {
     runner.assertExists(tasksPath, 'MSP430_EMULATOR_TASKS.md not found at expected location');
 
     const content = fs.readFileSync(tasksPath, 'utf8');
-    runner.assert(content.includes('MSP430 Emulator Development Task List'), 'Tasks file content invalid');
+    runner.assert(
+        content.includes('MSP430 Emulator Development Task List'),
+        'Tasks file content invalid'
+    );
     runner.assert(content.includes('### Task'), 'No tasks found in tasks file');
 });
 
@@ -139,7 +145,10 @@ This is a test task description.
 - test.js`;
 
     const description = parser.extractDescription(mockTaskContent);
-    runner.assert(description.includes('This is a test task description'), 'Description extraction failed');
+    runner.assert(
+        description.includes('This is a test task description'),
+        'Description extraction failed'
+    );
 
     const criteria = parser.extractAcceptanceCriteria(mockTaskContent);
     runner.assertEqual(criteria.length, 2, 'Should extract 2 acceptance criteria');
@@ -163,8 +172,10 @@ This is a description without dependencies section.
 - [ ] Test criterion`;
 
     const description = parser.extractDescription(mockTaskWithoutDeps);
-    runner.assert(description.includes('This is a description without dependencies section'),
-        'Fallback description extraction failed');
+    runner.assert(
+        description.includes('This is a description without dependencies section'),
+        'Fallback description extraction failed'
+    );
 });
 
 // Test: Sync-tasks module structure
@@ -173,7 +184,10 @@ runner.test('sync-tasks.js has required exports', () => {
     runner.assertExists(syncTasksPath);
 
     const content = fs.readFileSync(syncTasksPath, 'utf8');
-    runner.assert(content.includes('class GitHubIssuesSynchronizer'), 'GitHubIssuesSynchronizer class not found');
+    runner.assert(
+        content.includes('class GitHubIssuesSynchronizer'),
+        'GitHubIssuesSynchronizer class not found'
+    );
     runner.assert(content.includes('synchronize'), 'synchronize method not found');
     runner.assert(content.includes('module.exports'), 'module.exports not found');
 });
@@ -184,7 +198,10 @@ runner.test('create-issues.js has required exports', () => {
     runner.assertExists(createIssuesPath);
 
     const content = fs.readFileSync(createIssuesPath, 'utf8');
-    runner.assert(content.includes('class GitHubIssuesCreator'), 'GitHubIssuesCreator class not found');
+    runner.assert(
+        content.includes('class GitHubIssuesCreator'),
+        'GitHubIssuesCreator class not found'
+    );
     runner.assert(content.includes('createIssue'), 'createIssue method not found');
     runner.assert(content.includes('module.exports'), 'module.exports not found');
 });
@@ -195,7 +212,10 @@ runner.test('update-issues.js has required exports', () => {
     runner.assertExists(updateIssuesPath);
 
     const content = fs.readFileSync(updateIssuesPath, 'utf8');
-    runner.assert(content.includes('class GitHubIssuesUpdater'), 'GitHubIssuesUpdater class not found');
+    runner.assert(
+        content.includes('class GitHubIssuesUpdater'),
+        'GitHubIssuesUpdater class not found'
+    );
     runner.assert(content.includes('updateIssue'), 'updateIssue method not found');
     runner.assert(content.includes('module.exports'), 'module.exports not found');
 });
@@ -206,7 +226,10 @@ runner.test('manual-issue-protector.js has required exports', () => {
     runner.assertExists(protectorPath);
 
     const content = fs.readFileSync(protectorPath, 'utf8');
-    runner.assert(content.includes('class ManualIssueProtector'), 'ManualIssueProtector class not found');
+    runner.assert(
+        content.includes('class ManualIssueProtector'),
+        'ManualIssueProtector class not found'
+    );
     runner.assert(content.includes('protectManualIssues'), 'protectManualIssues method not found');
     runner.assert(content.includes('module.exports'), 'module.exports not found');
 });
@@ -248,7 +271,10 @@ runner.test('All automation modules have proper exports', () => {
     for (const { name, export: exportName } of moduleFiles) {
         const content = fs.readFileSync(name, 'utf8');
         runner.assert(content.includes('module.exports'), `${name} missing module.exports`);
-        runner.assert(content.includes(`class ${exportName}`), `${name} missing ${exportName} class`);
+        runner.assert(
+            content.includes(`class ${exportName}`),
+            `${name} missing ${exportName} class`
+        );
     }
 });
 
@@ -256,12 +282,24 @@ runner.test('All automation modules have proper exports', () => {
 runner.test('TaskParser can be imported and instantiated', () => {
     try {
         const { TaskParser } = require('./parse-tasks.js');
-        runner.assert(typeof TaskParser === 'function', 'TaskParser should be a constructor function');
+        runner.assert(
+            typeof TaskParser === 'function',
+            'TaskParser should be a constructor function'
+        );
 
         const parser = new TaskParser();
-        runner.assert(typeof parser.extractDescription === 'function', 'extractDescription method should exist');
-        runner.assert(typeof parser.extractAcceptanceCriteria === 'function', 'extractAcceptanceCriteria method should exist');
-        runner.assert(typeof parser.extractDependencies === 'function', 'extractDependencies method should exist');
+        runner.assert(
+            typeof parser.extractDescription === 'function',
+            'extractDescription method should exist'
+        );
+        runner.assert(
+            typeof parser.extractAcceptanceCriteria === 'function',
+            'extractAcceptanceCriteria method should exist'
+        );
+        runner.assert(
+            typeof parser.extractDependencies === 'function',
+            'extractDependencies method should exist'
+        );
     } catch (error) {
         throw new Error(`TaskParser import/instantiation failed: ${error.message}`);
     }

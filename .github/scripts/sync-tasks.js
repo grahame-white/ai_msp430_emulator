@@ -11,6 +11,7 @@ const { Octokit } = require('@octokit/rest');
 const { TaskParser } = require('./parse-tasks.js');
 const { GitHubIssuesCreator } = require('./create-issues.js');
 const { GitHubIssuesUpdater } = require('./update-issues.js');
+const { executeWithRateLimit, smartDelay } = require('./github-utils.js');
 
 class GitHubIssuesSynchronizer {
     constructor(token, owner, repo) {
@@ -65,7 +66,9 @@ class GitHubIssuesSynchronizer {
             const parser = new TaskParser(tasksFile);
             const allTasks = await parser.parse();
             const tasks = this.filterIncludedTasks(allTasks);
-            console.log(`Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} included)`);
+            console.log(
+                `Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} included)`
+            );
 
             // Step 2: Ensure labels and milestones exist
             console.log('\n🏷️  Setting up labels and milestones...');
@@ -106,7 +109,6 @@ class GitHubIssuesSynchronizer {
             this.printSummary(results);
 
             return results;
-
         } catch (error) {
             console.error('❌ Synchronization failed:', error.message);
             results.errors.push({ error: error.message });
@@ -134,12 +136,16 @@ class GitHubIssuesSynchronizer {
      */
     async findOrCreateMilestone(phase) {
         try {
-            // Try to find existing milestone
-            const milestones = await this.octokit.rest.issues.listMilestones({
-                owner: this.owner,
-                repo: this.repo,
-                state: 'all'
-            });
+            // Try to find existing milestone with proper rate limiting
+            const milestones = await executeWithRateLimit(
+                () =>
+                    this.octokit.rest.issues.listMilestones({
+                        owner: this.owner,
+                        repo: this.repo,
+                        state: 'all'
+                    }),
+                `find milestone for ${phase}`
+            );
 
             const existingMilestone = milestones.data.find(m => m.title === phase);
             if (existingMilestone) {
@@ -148,12 +154,16 @@ class GitHubIssuesSynchronizer {
 
             // Create new milestone if it doesn't exist
             if (!this.dryRun) {
-                const response = await this.octokit.rest.issues.createMilestone({
-                    owner: this.owner,
-                    repo: this.repo,
-                    title: phase,
-                    description: `Tasks for ${phase} of MSP430 Emulator development`
-                });
+                const response = await executeWithRateLimit(
+                    () =>
+                        this.octokit.rest.issues.createMilestone({
+                            owner: this.owner,
+                            repo: this.repo,
+                            title: phase,
+                            description: `Tasks for ${phase} of MSP430 Emulator development`
+                        }),
+                    `create milestone for ${phase}`
+                );
                 console.log(`Created milestone: ${phase}`);
                 return response.data;
             } else {
@@ -206,14 +216,16 @@ class GitHubIssuesSynchronizer {
 
                     // Add dependency comment
                     if (this.dryRun) {
-                        console.log(`[DRY RUN] Would link issue #${taskIssue.number} -> #${depIssue.number}`);
+                        console.log(
+                            `[DRY RUN] Would link issue #${taskIssue.number} -> #${depIssue.number}`
+                        );
                         results.linked.push({ task: task.id, dependency: depTaskId, dryRun: true });
                     } else {
                         await this.createDependencyLink(taskIssue, depIssue, depTask);
                         results.linked.push({ task: task.id, dependency: depTaskId });
 
-                        // Small delay to respect rate limits
-                        await this.delay(300);
+                        // Smart delay to respect rate limits
+                        await smartDelay(1000);
                     }
                 }
             } catch (error) {
@@ -232,16 +244,22 @@ class GitHubIssuesSynchronizer {
      */
     async checkDependencyLinkExists(taskIssue, depIssue) {
         try {
-            const comments = await this.octokit.rest.issues.listComments({
-                owner: this.owner,
-                repo: this.repo,
-                issue_number: taskIssue.number,
-                per_page: 100
-            });
+            const comments = await executeWithRateLimit(
+                () =>
+                    this.octokit.rest.issues.listComments({
+                        owner: this.owner,
+                        repo: this.repo,
+                        issue_number: taskIssue.number,
+                        per_page: 100
+                    }),
+                `check comments for issue #${taskIssue.number}`
+            );
 
-            return comments.data.some(comment =>
-                comment.body && comment.body.includes(`#${depIssue.number}`) &&
-                comment.body.includes('depends on')
+            return comments.data.some(
+                comment =>
+                    comment.body &&
+                    comment.body.includes(`#${depIssue.number}`) &&
+                    comment.body.includes('depends on')
             );
         } catch (error) {
             console.warn(`Warning: Could not check existing dependency links: ${error.message}`);
@@ -255,12 +273,16 @@ class GitHubIssuesSynchronizer {
     async createDependencyLink(taskIssue, depIssue, depTask) {
         const comment = `🔗 **Dependency Link**\n\nThis task depends on:\n- #${depIssue.number} (Task ${depTask.id}: ${depTask.title})\n\n*Automatically linked by GitHub Issues Automation*`;
 
-        await this.octokit.rest.issues.createComment({
-            owner: this.owner,
-            repo: this.repo,
-            issue_number: taskIssue.number,
-            body: comment
-        });
+        await executeWithRateLimit(
+            () =>
+                this.octokit.rest.issues.createComment({
+                    owner: this.owner,
+                    repo: this.repo,
+                    issue_number: taskIssue.number,
+                    body: comment
+                }),
+            `create dependency comment for issue #${taskIssue.number}`
+        );
     }
 
     /**
@@ -284,8 +306,14 @@ class GitHubIssuesSynchronizer {
                     // This issue corresponds to a task that no longer exists
 
                     if (this.dryRun) {
-                        console.log(`[DRY RUN] Would mark obsolete issue #${issue.number} for Task ${issueTaskId}`);
-                        results.cleaned.push({ issueNumber: issue.number, taskId: issueTaskId, dryRun: true });
+                        console.log(
+                            `[DRY RUN] Would mark obsolete issue #${issue.number} for Task ${issueTaskId}`
+                        );
+                        results.cleaned.push({
+                            issueNumber: issue.number,
+                            taskId: issueTaskId,
+                            dryRun: true
+                        });
                     } else {
                         await this.markIssueObsolete(issue, issueTaskId);
                         results.cleaned.push({ issueNumber: issue.number, taskId: issueTaskId });
@@ -311,31 +339,43 @@ class GitHubIssuesSynchronizer {
         );
 
         if (!currentLabels.includes('obsolete')) {
-            await this.octokit.rest.issues.addLabels({
-                owner: this.owner,
-                repo: this.repo,
-                issue_number: issue.number,
-                labels: ['obsolete']
-            });
+            await executeWithRateLimit(
+                () =>
+                    this.octokit.rest.issues.addLabels({
+                        owner: this.owner,
+                        repo: this.repo,
+                        issue_number: issue.number,
+                        labels: ['obsolete']
+                    }),
+                `add obsolete label to issue #${issue.number}`
+            );
         }
 
         // Add comment explaining obsolescence
         const comment = `⚠️ **Task Obsolete**\n\nTask ${taskId} is no longer present in MSP430_EMULATOR_TASKS.md.\n\nThis issue has been marked as obsolete and will be closed.\n\n*Automatically detected by GitHub Issues Automation*`;
 
-        await this.octokit.rest.issues.createComment({
-            owner: this.owner,
-            repo: this.repo,
-            issue_number: issue.number,
-            body: comment
-        });
+        await executeWithRateLimit(
+            () =>
+                this.octokit.rest.issues.createComment({
+                    owner: this.owner,
+                    repo: this.repo,
+                    issue_number: issue.number,
+                    body: comment
+                }),
+            `add obsolete comment to issue #${issue.number}`
+        );
 
         // Close the issue
-        await this.octokit.rest.issues.update({
-            owner: this.owner,
-            repo: this.repo,
-            issue_number: issue.number,
-            state: 'closed'
-        });
+        await executeWithRateLimit(
+            () =>
+                this.octokit.rest.issues.update({
+                    owner: this.owner,
+                    repo: this.repo,
+                    issue_number: issue.number,
+                    state: 'closed'
+                }),
+            `close obsolete issue #${issue.number}`
+        );
     }
 
     /**
@@ -368,12 +408,16 @@ class GitHubIssuesSynchronizer {
                 const description = `Tasks for ${phase} of MSP430 Emulator development\n\n📊 Progress: ${completedTasks}/${totalTasks} tasks completed (${progressPercent}%)`;
 
                 if (!this.dryRun) {
-                    await this.octokit.rest.issues.updateMilestone({
-                        owner: this.owner,
-                        repo: this.repo,
-                        milestone_number: milestone.number,
-                        description: description
-                    });
+                    await executeWithRateLimit(
+                        () =>
+                            this.octokit.rest.issues.updateMilestone({
+                                owner: this.owner,
+                                repo: this.repo,
+                                milestone_number: milestone.number,
+                                description: description
+                            }),
+                        `update milestone for ${phase}`
+                    );
                 }
             } catch (error) {
                 console.warn(`Warning: Could not update milestone for ${phase}: ${error.message}`);
@@ -386,17 +430,38 @@ class GitHubIssuesSynchronizer {
      */
     async getAllTaskIssues() {
         try {
-            const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
-            const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
-                q: searchQuery,
-                sort: 'created',
-                order: 'desc',
-                per_page: 100
-            });
+            // In dry-run mode without token, return empty array
+            if (
+                this.dryRun &&
+                (!process.env.GITHUB_TOKEN ||
+                    process.env.GITHUB_TOKEN === 'dummy-token-for-dry-run')
+            ) {
+                console.log(`[DRY RUN] Would fetch all task issues`);
+                return [];
+            }
 
-            return searchResults.data.items;
+            // Use the regular issues list API instead of deprecated search API
+            const issues = await executeWithRateLimit(
+                () =>
+                    this.octokit.rest.issues.listForRepo({
+                        owner: this.owner,
+                        repo: this.repo,
+                        state: 'all',
+                        labels: 'task',
+                        per_page: 100,
+                        sort: 'created',
+                        direction: 'desc'
+                    }),
+                'list all task issues',
+                3
+            );
+
+            // Filter to only issues that have "Task" in the title (to match the previous search behavior)
+            return issues.data.filter(
+                issue => issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+:/)
+            );
         } catch (error) {
-            console.warn(`Warning: Could not search for task issues: ${error.message}`);
+            console.warn(`Warning: Could not fetch task issues: ${error.message}`);
             return [];
         }
     }
@@ -426,16 +491,11 @@ class GitHubIssuesSynchronizer {
         if (results.errors.length > 0) {
             console.log('\n❌ Errors encountered:');
             results.errors.forEach((error, index) => {
-                console.log(`   ${index + 1}. ${error.task ? `Task ${error.task}: ` : ''}${error.error}`);
+                console.log(
+                    `   ${index + 1}. ${error.task ? `Task ${error.task}: ` : ''}${error.error}`
+                );
             });
         }
-    }
-
-    /**
-     * Utility function for delays
-     */
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
@@ -450,25 +510,44 @@ async function main() {
     const tasksFile = process.argv[2] || '../../MSP430_EMULATOR_TASKS.md';
     const dryRun = process.argv.includes('--dry-run');
 
-    if (!token) {
-        console.error('Error: GITHUB_TOKEN environment variable is required');
+    // For dry-run mode, we can operate with a dummy token since no API calls will be made
+    if (!token && !dryRun) {
+        console.error('Error: GITHUB_TOKEN environment variable is required for live operations');
+        console.error('Hint: Use --dry-run flag to preview changes without authentication');
         process.exit(1);
     }
 
     try {
-        const synchronizer = new GitHubIssuesSynchronizer(token, owner, repo);
+        // Use dummy token for dry-run mode if no real token is provided
+        const effectiveToken = token || (dryRun ? 'dummy-token-for-dry-run' : null);
+
+        if (!effectiveToken) {
+            console.error('Error: GITHUB_TOKEN environment variable is required');
+            process.exit(1);
+        }
+
+        const synchronizer = new GitHubIssuesSynchronizer(effectiveToken, owner, repo);
         if (dryRun) {
             synchronizer.enableDryRun();
             console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
+            if (!token) {
+                console.log('ℹ️  No GITHUB_TOKEN provided - running in offline preview mode\n');
+            }
         }
 
         const results = await synchronizer.synchronize(tasksFile);
 
-        // Exit with error code if there were errors
+        // Exit with error code if there were errors (but ignore API errors in dry-run mode without token)
         if (results.errors.length > 0) {
-            process.exit(1);
+            const hasNonApiErrors = results.errors.some(
+                error =>
+                    !dryRun ||
+                    (!error.error.includes('API') && !error.error.includes('authentication'))
+            );
+            if (hasNonApiErrors || !dryRun) {
+                process.exit(1);
+            }
         }
-
     } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);

@@ -183,7 +183,7 @@ flowchart TD
     B --> C[Return = PC + 2]
     C --> D[Push Return to Stack]
     D --> E[SP -= 2]
-    E --> F[Memory[SP] = Return]
+    E --> F[Memory(SP) = Return]
     F --> G[Set PC = Call Target]
     G --> H[Word Align PC]
     H --> I[Enter Subroutine]
@@ -191,7 +191,7 @@ flowchart TD
     I --> J[Execute Subroutine]
     J --> K[RET Instruction]
     K --> L[Pop Return Address]
-    L --> M[Return = Memory[SP]]
+    L --> M[Return = Memory(SP)]
     M --> N[SP += 2]
     N --> O[PC = Return Address]
     O --> P[Word Align PC]
@@ -234,10 +234,10 @@ flowchart TD
     C --> R[Continue Normal Execution]
     
     subgraph "Context Save/Restore"
-        F --> F1[SP -= 2, Memory[SP] = PC]
-        G --> G1[SP -= 2, Memory[SP] = SR]
-        N --> N1[SR = Memory[SP], SP += 2]
-        O --> O1[PC = Memory[SP], SP += 2]
+        F --> F1[SP -= 2, Memory(SP) = PC]
+        G --> G1[SP -= 2, Memory(SP) = SR]
+        N --> N1[SR = Memory(SP), SP += 2]
+        O --> O1[PC = Memory(SP), SP += 2]
     end
 
 ```

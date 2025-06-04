@@ -213,7 +213,7 @@ Table 3-2*
 |------|--------|-----|------|------|-------------|
 | LPM0 | 1 | 0 | 0 | 0 | CPU off, all clocks active |
 | LPM1 | 1 | 0 | 1 | 0 | CPU off, SMCLK off |
-| LPM2 | 1 | 1 | 0 | 1 | CPU off, SMCLK off, DCO off |
+| LPM2 | 1 | 1 | 1 | 1 | CPU off, SMCLK off, DCO off |
 | LPM3 | 1 | 1 | 1 | 1 | CPU off, all clocks off except ACLK |
 | LPM4 | 1 | 1 | 1 | 1 | All clocks off (with additional control) |
 

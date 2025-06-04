@@ -80,7 +80,7 @@ updates:
         patterns:
           - "eslint*"
           - "prettier*"
-          - "yaml-lint*"
+          - "yamllint*"
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"

@@ -16,4 +16,12 @@ dotnet format --verify-no-changes --verbosity diagnostic
 echo "==> Running static analysis..."
 dotnet build --configuration Release --verbosity quiet
 
+# Lint Markdown documentation
+echo "==> Linting Markdown documentation..."
+if command -v markdownlint-cli2 >/dev/null 2>&1; then
+    markdownlint-cli2 "docs/**/*.md" "*.md"
+else
+    echo "Warning: markdownlint-cli2 not found. Install with: npm install -g markdownlint-cli2"
+fi
+
 echo "==> Code analysis completed successfully!"

@@ -140,6 +140,72 @@ EOF
 chmod +x .git/hooks/pre-commit
 ```
 
+## Documentation Standards
+
+### Technical Documentation Requirements
+
+All technical documentation for the MSP430 emulator must adhere to the following standards to ensure accuracy and traceability:
+
+#### Texas Instruments Documentation Referencing Policy
+
+**Primary Source Requirements:**
+- All MSP430FR2355 implementation details **must** reference official Texas Instruments documentation
+- Include the **exact document title**, **revision/version number**, and **publication date**
+- Provide **specific section numbers, table numbers, and/or figure numbers** for referenced material
+- Use the format: `Document Title (Document Number, Date) - Section X.Y: "Title" - Table/Figure reference`
+
+**Example Reference Format:**
+```
+MSP430FR2355 Mixed-Signal Microcontroller Datasheet (SLAS847G, October 2016 - Revised December 2019)
+- Section 6: "Specifications" - Memory organization (Table 6-4, p. 20)
+- Section 7.3: "Memory Map" - Address space layout (Figure 7-1)
+```
+
+**Required Primary Documents:**
+- **MSP430FR2355 Datasheet** (SLAS847G): Hardware specifications and electrical characteristics
+- **MSP430FR2xx/FR4xx Family User's Guide** (SLAU445I): Programming model and architecture details
+- **MSP430 Assembly Language Tools User's Guide** (SLAU131): Instruction set and assembly syntax
+
+**Secondary Source Usage:**
+- Third-party sources may **only** be used when official TI documentation is insufficient
+- Include a **footnote explaining** why the third-party source supersedes or supplements TI documentation
+- Still provide the TI reference when available, noting any discrepancies
+
+**Documentation Verification:**
+- Contributors **must** verify that referenced sections exist in the specified document versions
+- Reviewers **must** validate that implementation matches the referenced TI specifications
+- Any conflicts between TI documentation versions should be noted and resolved using the latest revision
+
+#### Markdown Standards
+
+**Formatting Requirements:**
+- Use consistent markdown formatting validated by markdownlint
+- Maximum line length: 120 characters (configurable in `.markdownlint.jsonc`)
+- Use proper heading hierarchy (no skipped levels)
+- Include blank lines around headings, lists, and code blocks
+
+**Code Examples:**
+- Specify language for all code blocks (```csharp, ```text, etc.)
+- Use consistent indentation (4 spaces)
+- Include inline comments explaining TI specification compliance
+
+**Visual Documentation:**
+- Use GitHub-native Mermaid diagrams instead of external tools when possible
+- Include alt text for all images and diagrams
+- Ensure diagrams are accessible and maintain readability in both light and dark themes
+
+### Documentation Validation
+
+Run the following commands to validate documentation changes:
+
+```bash
+# Lint all markdown files
+markdownlint-cli2 "docs/**/*.md" "*.md"
+
+# Full validation (includes markdown linting)
+./script/lint
+```
+
 ## Code Style Guidelines
 
 ### .NET Code

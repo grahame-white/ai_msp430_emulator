@@ -1,6 +1,7 @@
 # MSP430 Memory Access Flow
 
-This document provides comprehensive visual documentation of the memory access validation flow in the MSP430 emulator, showing how memory operations are validated against the memory map and access permissions.
+This document provides comprehensive visual documentation of the memory access validation flow in
+the MSP430 emulator, showing how memory operations are validated against the memory map and access permissions.
 
 ## Memory Access Validation Flowchart
 
@@ -191,7 +192,8 @@ sequenceDiagram
 ## Error Handling and Logging
 
 ### Exception Types
-```
+
+```text
 MemoryAccessException
 ├── Invalid Address Exceptions
 │   ├── Address not mapped to any region
@@ -205,6 +207,7 @@ MemoryAccessException
 ```
 
 ### Logging Levels
+
 | Level | Usage | Information Logged |
 |-------|-------|-------------------|
 | **Debug** | Successful access validation | Address, region, access type, validation success |
@@ -212,6 +215,7 @@ MemoryAccessException
 | **Error** | System-level memory errors | Critical memory system failures |
 
 ### Context Information in Logs
+
 ```json
 {
   "Address": "0x2000",
@@ -225,11 +229,13 @@ MemoryAccessException
 ## Performance Characteristics
 
 ### Address Lookup Performance
+
 - **Time Complexity**: O(1) - Constant time lookup using pre-built address table
 - **Space Complexity**: O(n) - Linear space proportional to address space (64KB)
 - **Memory Usage**: 65,536 × sizeof(MemoryRegionInfo) bytes for lookup table
 
 ### Validation Steps
+
 1. **Address Bounds Check**: Verify address is within 16-bit range
 2. **Region Lookup**: O(1) array access to get region info
 3. **Permission Check**: Bitwise AND operation on permission flags
@@ -242,6 +248,7 @@ MemoryAccessException
 This documentation is based on official Texas Instruments documentation:
 
 **Primary References:**
+
 - **MSP430FR2xx and FR4xx Family User's Guide** (SLAU445I, June 2015 - Revised October 2019)
   - Section 2.2.1: "Memory Protection and Access Permissions" - Access control mechanisms
   - Section 6.3: "FRAM Access and Write Protection" - Memory access validation procedures
@@ -250,6 +257,7 @@ This documentation is based on official Texas Instruments documentation:
   - Section 6: "Memory Organization" - Access permission specifications
 
 **Access Permission Implementation:**
+
 - Based on SLAU445I Section 6.3.1 "FRAM Write Protection" for write access control
 - Read/Execute permissions derived from SLAU445I Table 1-1 "Memory Map Summary"
 - Exception handling follows TI recommended error reporting patterns

@@ -1,10 +1,12 @@
 # MSP430FR2355 Memory Layout
 
-This document provides comprehensive visual documentation of the MSP430FR2355 memory address space architecture, showing the 16-bit unified memory model with detailed address ranges and access permissions.
+This document provides comprehensive visual documentation of the MSP430FR2355 memory address space
+architecture, showing the 16-bit unified memory model with detailed address ranges and access permissions.
 
 ## Memory Address Space Overview
 
-The MSP430FR2355 uses a unified 16-bit address space (0x0000-0xFFFF) with FRAM-based architecture for modern non-volatile memory capabilities.
+The MSP430FR2355 uses a unified 16-bit address space (0x0000-0xFFFF) with FRAM-based architecture
+for modern non-volatile memory capabilities.
 
 ```mermaid
 block-beta
@@ -93,18 +95,14 @@ block-beta
 
 ### FRAM Technology Benefits
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ FRAM (Ferroelectric RAM) vs Traditional Flash Memory        │
-├─────────────────────────────────────────────────────────────┤
-│ ✓ Byte-level write operations (no erase cycles required)   │
-│ ✓ Fast write speeds (comparable to SRAM)                   │
-│ ✓ Low power consumption                                     │
-│ ✓ High endurance (10^15 write cycles)                      │
-│ ✓ Unified code/data memory model                           │
-│ ✓ Instant-on capability (no boot delay)                    │
-└─────────────────────────────────────────────────────────────┘
-```
+| Feature | FRAM (Ferroelectric RAM) | Traditional Flash Memory |
+|---------|---------------------------|---------------------------|
+| **Write Operation** | ✅ Byte-level writes (no erase cycles) | ❌ Block erase required before write |
+| **Write Speed** | ✅ Fast (comparable to SRAM) | ❌ Slow erase/program cycles |
+| **Power Consumption** | ✅ Ultra-low power | ❌ Higher power for write operations |
+| **Endurance** | ✅ 10^15 write cycles | ❌ ~10^5 write cycles |
+| **Memory Model** | ✅ Unified code/data storage | ❌ Separate code/data regions |
+| **Boot Time** | ✅ Instant-on capability | ❌ Boot delay due to initialization |
 
 ### Memory Segmentation Summary
 
@@ -136,7 +134,11 @@ Total Address Space: 64KB (65,536 bytes)
 
 ### Important Note on Terminology
 
-The main memory region (0x4000-0xBFFF) is internally labeled as `Flash` in the `MemoryRegion` enum for legacy compatibility, but this region represents **FRAM (Ferroelectric RAM)** technology in the MSP430FR2355. FRAM provides significant advantages over traditional Flash memory including byte-level write operations, faster write speeds, and higher endurance. All documentation and comments correctly reference this as FRAM memory.
+The main memory region (0x4000-0xBFFF) is internally labeled as `Flash` in the `MemoryRegion` enum
+for legacy compatibility, but this region represents **FRAM (Ferroelectric RAM)** technology in the
+MSP430FR2355. FRAM provides significant advantages over traditional Flash memory including byte-level
+write operations, faster write speeds, and higher endurance. All documentation and comments correctly
+reference this as FRAM memory.
 
 ---
 

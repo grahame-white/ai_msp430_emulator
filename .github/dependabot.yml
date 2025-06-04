@@ -30,12 +30,64 @@ updates:
         patterns:
           - "System.*"
 
+  # Enable version updates for npm packages (root)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "grahame-white"
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Group related dependency updates
+    groups:
+      documentation-tools:
+        patterns:
+          - "markdownlint*"
+          - "prettier*"
+          - "eslint*"
+
+  # Enable version updates for npm packages (.github/scripts)
+  - package-ecosystem: "npm"
+    directory: "/.github/scripts"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "grahame-white"
+    labels:
+      - "dependencies"
+      - "npm"
+      - "automation"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    # Group related dependency updates
+    groups:
+      github-automation:
+        patterns:
+          - "@octokit/*"
+      linting-tools:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "yaml-lint*"
+
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"  
+      day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
     reviewers:

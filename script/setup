@@ -20,6 +20,18 @@ dotnet build --configuration Debug
 echo "==> Setting up git hooks..."
 git config core.hooksPath .githooks
 
+# Verify hooks are executable
+chmod +x .githooks/pre-commit
+
+# Test the pre-commit hook setup
+if [ -f ".githooks/pre-commit" ]; then
+    echo "✅ Pre-commit hook installed and configured"
+    echo "   Hook will check C# and JavaScript formatting before commits"
+    echo "   Hook will reject commits with ANSI escape sequences"
+else
+    echo "⚠️  Warning: Pre-commit hook not found"
+fi
+
 echo "==> Setup completed successfully!"
 echo ""
 echo "The following git hooks are now active:"

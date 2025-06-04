@@ -129,6 +129,17 @@ jobs:
         cd .github/scripts
         npm install
 
+    - name: Check for formatting issues
+      run: |
+        echo "Checking for ANSI escape sequences in source files..."
+        if find . -name "*.js" -o -name "*.cs" -o -name "*.md" | grep -v node_modules | grep -v bin | grep -v obj | xargs grep -l $'\033\[' 2>/dev/null; then
+          echo "❌ ANSI escape sequences found in source files!"
+          echo "   This indicates formatting issues or terminal output in code."
+          find . -name "*.js" -o -name "*.cs" -o -name "*.md" | grep -v node_modules | grep -v bin | grep -v obj | xargs grep -n $'\033\[' 2>/dev/null || true
+          exit 1
+        fi
+        echo "✅ No ANSI escape sequences detected"
+
     - name: Lint automation scripts
       run: |
         cd .github/scripts

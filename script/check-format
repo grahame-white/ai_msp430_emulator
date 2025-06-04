@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# script/check-format
+# Comprehensive formatting check for all file types
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Running comprehensive formatting check..."
+
+# Check for ANSI escape sequences
+echo "==> Checking for ANSI escape sequences..."
+ANSI_FILES=$(find . -name "*.js" -o -name "*.cs" -o -name "*.md" | grep -v node_modules | grep -v bin | grep -v obj | xargs grep -l $'\033\[' 2>/dev/null || true)
+if [ -n "$ANSI_FILES" ]; then
+    echo "❌ ANSI escape sequences found in:"
+    echo "$ANSI_FILES" | sed 's/^/  - /'
+    echo ""
+    echo "To fix, remove all ANSI color codes and escape sequences from these files."
+    exit 1
+fi
+echo "✅ No ANSI escape sequences detected"
+
+# Check C# formatting
+echo "==> Checking C# code formatting..."
+if ! ./script/lint 2>/dev/null; then
+    echo "❌ C# formatting issues detected"
+    echo "   Run './script/format' to fix automatically"
+    exit 1
+fi
+echo "✅ C# code formatting check passed"
+
+# Check JavaScript formatting
+if [ -f ".github/scripts/package.json" ]; then
+    echo "==> Checking JavaScript code formatting..."
+    cd .github/scripts
+    
+    # Ensure dependencies are installed
+    if [ ! -d "node_modules" ]; then
+        echo "Installing JavaScript dependencies..."
+        npm install > /dev/null 2>&1
+    fi
+    
+    if ! npm run lint > /dev/null 2>&1; then
+        echo "❌ JavaScript formatting issues detected"
+        echo "   Run 'cd .github/scripts && npm run lint:fix' to fix automatically"
+        exit 1
+    fi
+    echo "✅ JavaScript code formatting check passed"
+    cd - > /dev/null
+fi
+
+echo "✅ All formatting checks passed!"

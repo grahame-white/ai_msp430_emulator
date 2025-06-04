@@ -12,40 +12,84 @@ fi
 
 echo "==> Running pre-commit formatting check..."
 
-# Check if we have staged files that need formatting
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cs|csproj|sln)$' || true)
+# Check for ANSI escape sequences in staged files (prevents terminal codes in source)
+STAGED_ALL_FILES=$(git diff --cached --name-only --diff-filter=ACM || true)
+if [ -n "$STAGED_ALL_FILES" ]; then
+    echo "==> Checking for ANSI escape sequences..."
+    if echo "$STAGED_ALL_FILES" | xargs git show --cached | grep -q $'\033\['; then
+        echo "❌ ANSI escape sequences detected in staged files!"
+        echo "   This usually means terminal output was copied into source code."
+        echo "   Please remove all ANSI color codes and escape sequences."
+        exit 1
+    fi
+fi
 
-if [ -z "$STAGED_FILES" ]; then
-    echo "✅ No C# files staged, skipping formatting check"
+# Check if we have staged C# files that need formatting
+STAGED_CSHARP_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cs|csproj|sln)$' || true)
+STAGED_JS_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.js$' || true)
+
+if [ -z "$STAGED_CSHARP_FILES" ] && [ -z "$STAGED_JS_FILES" ]; then
+    echo "✅ No C# or JavaScript files staged, skipping formatting check"
     exit 0
 fi
 
-echo "Checking formatting for staged files:"
-echo "$STAGED_FILES" | sed 's/^/  - /'
+# Handle C# files
+if [ -n "$STAGED_CSHARP_FILES" ]; then
+    echo "Checking C# formatting for staged files:"
+    echo "$STAGED_CSHARP_FILES" | sed 's/^/  - /'
 
-# Run formatter in verification mode first
-if ./script/lint 2>/dev/null; then
-    echo "✅ Code formatting check passed"
-    exit 0
+    # Run C# formatter in verification mode first
+    if ! ./script/lint 2>/dev/null; then
+        # If verification fails, run full formatter
+        echo "⚠️  C# formatting issues detected, running formatter..."
+        ./script/format
+
+        # Check if any files were modified by the formatter
+        if ! git diff --quiet; then
+            echo ""
+            echo "⚠️  C# code formatting changes were applied!"
+            echo "    Please review the changes and commit them:"
+            echo ""
+            git diff --name-only | sed 's/^/      /'
+            echo ""
+            echo "    Run the following commands to include formatting changes:"
+            echo "      git add ."
+            echo "      git commit --amend --no-edit"
+            echo ""
+            exit 1
+        fi
+    fi
+    echo "✅ C# code formatting check passed"
 fi
 
-# If verification fails, run full formatter
-echo "⚠️  Formatting issues detected, running formatter..."
-./script/format
+# Handle JavaScript files
+if [ -n "$STAGED_JS_FILES" ]; then
+    echo "Checking JavaScript formatting for staged files:"
+    echo "$STAGED_JS_FILES" | sed 's/^/  - /'
 
-# Check if any files were modified by the formatter
-if ! git diff --quiet; then
-    echo ""
-    echo "⚠️  Code formatting changes were applied!"
-    echo "    Please review the changes and commit them:"
-    echo ""
-    git diff --name-only | sed 's/^/      /'
-    echo ""
-    echo "    Run the following commands to include formatting changes:"
-    echo "      git add ."
-    echo "      git commit --amend --no-edit"
-    echo ""
-    exit 1
+    # Check if ESLint is available
+    if [ ! -f ".github/scripts/package.json" ]; then
+        echo "⚠️  No JavaScript linting configuration found"
+    else
+        cd .github/scripts
+        
+        # Ensure dependencies are installed
+        if [ ! -d "node_modules" ]; then
+            echo "==> Installing JavaScript dependencies..."
+            npm install > /dev/null 2>&1
+        fi
+
+        # Run ESLint on the staged JavaScript files
+        if ! npm run lint > /dev/null 2>&1; then
+            echo "❌ JavaScript linting failed!"
+            echo "   Run 'cd .github/scripts && npm run lint' to see details"
+            echo "   Fix the issues or run 'npm run lint:fix' to auto-fix"
+            exit 1
+        fi
+        
+        cd - > /dev/null
+    fi
+    echo "✅ JavaScript code formatting check passed"
 fi
 
-echo "✅ Code formatting check passed"
+echo "✅ All code formatting checks passed"

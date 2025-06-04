@@ -90,7 +90,7 @@ stateDiagram-v2
         LoadVector : PC = interrupt vector
     }
 
-```text
+```
 
 ## Detailed State Behaviors
 
@@ -116,7 +116,7 @@ flowchart TD
         C2 --> C3[Validate address range]
     end
 
-```text
+```
 
 ### Normal Execution Cycle
 
@@ -139,7 +139,7 @@ flowchart TD
         F2 --> F3[Check bounds]
     end
 
-```text
+```
 
 ### Branch/Jump Operations
 
@@ -173,7 +173,7 @@ flowchart TD
         F2 --> F3[Apply Addressing Mode]
     end
 
-```text
+```
 
 ### Subroutine Call/Return Flow
 
@@ -204,7 +204,7 @@ flowchart TD
         L1 --> L2[Verify SP Alignment]
     end
 
-```text
+```
 
 ### Interrupt Processing
 
@@ -240,7 +240,7 @@ flowchart TD
         O --> O1[PC = Memory[SP], SP += 2]
     end
 
-```text
+```
 
 ## Stack Pointer Interaction
 
@@ -283,7 +283,7 @@ flowchart TD
         V3 --> V4
     end
 
-```text
+```
 
 ## PC Word Alignment Enforcement
 
@@ -317,7 +317,7 @@ flowchart TD
         A5[PC = 0x8000] --> A6[Remains 0x8000]
     end
 
-```text
+```
 
 ## Error Conditions and Recovery
 
@@ -352,7 +352,7 @@ stateDiagram-v2
     
     NormalOperation --> NormalOperation : Valid operations
 
-```text
+```
 
 ### Error Recovery Flowchart
 
@@ -384,7 +384,7 @@ flowchart TD
     N --> R
     Q --> S[Complete System Restart]
 
-```text
+```
 
 ## Implementation Notes
 

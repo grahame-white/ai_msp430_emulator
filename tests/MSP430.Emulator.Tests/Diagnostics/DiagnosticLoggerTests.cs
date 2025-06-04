@@ -115,8 +115,8 @@ public class DiagnosticLoggerTests
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         diagnosticLogger.Info("Test message 1");
-        diagnosticLogger.Warning("Test warning");
-        diagnosticLogger.Error("Test error");
+        diagnosticLogger.Warning("Sample warning log");
+        diagnosticLogger.Error("Sample error log");
 
         // Act
         string formatted = diagnosticLogger.FormatRecentEntries();
@@ -124,8 +124,8 @@ public class DiagnosticLoggerTests
         // Assert
         Assert.Contains("Recent Log Entries", formatted);
         Assert.Contains("Test message 1", formatted);
-        Assert.Contains("Test warning", formatted);
-        Assert.Contains("Test error", formatted);
+        Assert.Contains("Sample warning log", formatted);
+        Assert.Contains("Sample error log", formatted);
         Assert.Contains("[INFO]", formatted);
         Assert.Contains("[WARNING]", formatted);
         Assert.Contains("[ERROR]", formatted);
@@ -155,8 +155,8 @@ public class DiagnosticLoggerTests
         // Act
         diagnosticLogger.Debug("Debug message");
         diagnosticLogger.Info("Info message");
-        diagnosticLogger.Warning("Warning message");
-        diagnosticLogger.Error("Error message");
+        diagnosticLogger.Warning("Sample warning");
+        diagnosticLogger.Error("Sample error");
         diagnosticLogger.Fatal("Fatal message");
 
         // Assert

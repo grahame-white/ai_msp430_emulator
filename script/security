@@ -201,25 +201,25 @@ done
 # Run security checks
 if [ "$SKIP_DOTNET" = false ]; then
   if check_dotnet_vulnerabilities; then
-    ((SECURITY_CHECKS_PASSED++))
+    SECURITY_CHECKS_PASSED=$((SECURITY_CHECKS_PASSED + 1))
   else
-    ((SECURITY_CHECKS_FAILED++))
+    SECURITY_CHECKS_FAILED=$((SECURITY_CHECKS_FAILED + 1))
   fi
 fi
 
 if [ "$SKIP_NODEJS" = false ]; then
   if check_nodejs_vulnerabilities; then
-    ((SECURITY_CHECKS_PASSED++))
+    SECURITY_CHECKS_PASSED=$((SECURITY_CHECKS_PASSED + 1))
   else
-    ((SECURITY_CHECKS_FAILED++))
+    SECURITY_CHECKS_FAILED=$((SECURITY_CHECKS_FAILED + 1))
   fi
 fi
 
 if [ "$SKIP_LICENSES" = false ]; then
   if check_licenses; then
-    ((SECURITY_CHECKS_PASSED++))
+    SECURITY_CHECKS_PASSED=$((SECURITY_CHECKS_PASSED + 1))
   else
-    ((SECURITY_CHECKS_FAILED++))
+    SECURITY_CHECKS_FAILED=$((SECURITY_CHECKS_FAILED + 1))
   fi
 fi
 

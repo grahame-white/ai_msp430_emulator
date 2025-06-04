@@ -37,8 +37,6 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │    R15     │   -    │ General Purpose       │ Read/Write       │
 └────────────┴────────┴───────────────────────┴─────────────────┘
 
-```text
-
 *CG1 is typically read-only but writes are allowed for testing
 
 ## Register Access Modes
@@ -78,8 +76,6 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │                Word Address (Bit 0 = 0)                       │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
 ### Stack Pointer (R1/SP)
 
 *Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.2: "Stack Pointer (SP)"*
@@ -94,8 +90,6 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │ └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘            │
 │                Stack Address (Bit 0 = 0)                      │
 └───────────────────────────────────────────────────────────────┘
-
-```text
 
 ### Status Register (R2/SR)
 
@@ -115,8 +109,6 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │   Reserved                │Individual Flag Control│           │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
 ### Constant Generator (R3/CG1)
 
 *Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.4: "Constant Generator Registers (CG1 and CG2)"*
@@ -131,8 +123,6 @@ Section 3.2.2: "Stack Pointer (SP)"*
 │ - 10: Indirect mode (generates +1)                            │
 │ - 11: Indirect auto-increment (generates +2)                  │
 └───────────────────────────────────────────────────────────────┘
-
-```text
 
 ## Register File Memory Map
 
@@ -162,8 +152,6 @@ Memory Address Space: Register File Internal
 │   [15]           │   R15            │   General Use   │
 └──────────────────┴──────────────────┴─────────────────┘
 
-```text
-
 ## Register Access Validation
 
 ### Valid Register Range
@@ -190,8 +178,7 @@ ushort value = registerFile.ReadRegister(RegisterName.R4);
 // Byte-level access
 registerFile.WriteRegisterLowByte(RegisterName.R5, 0xAB);
 byte lowByte = registerFile.ReadRegisterLowByte(RegisterName.R5);
-
-```text
+```
 
 ### Special Register Operations
 

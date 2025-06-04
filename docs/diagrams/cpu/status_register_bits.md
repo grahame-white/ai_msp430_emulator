@@ -26,8 +26,6 @@ Status Register (R2/SR) - 16 bits
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 
-```text
-
 ### Bit Field Table
 
 *Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.3: "Status Register (SR)" -
@@ -50,7 +48,6 @@ Table 3-2*
 
 ### Arithmetic Flags (Bits 0-2, 8)
 
-#
 ### Carry Flag (C) - Bit 0
 
 ```text
@@ -66,9 +63,6 @@ Table 3-2*
 │ Property: StatusRegister.Carry                                │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
-#
 ### Zero Flag (Z) - Bit 1
 
 ```text
@@ -84,9 +78,6 @@ Table 3-2*
 │ Property: StatusRegister.Zero                                 │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
-#
 ### Negative Flag (N) - Bit 2
 
 ```text
@@ -102,9 +93,6 @@ Table 3-2*
 │ Property: StatusRegister.Negative                             │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
-#
 ### Overflow Flag (V) - Bit 8
 
 ```text
@@ -120,11 +108,8 @@ Table 3-2*
 │ Property: StatusRegister.Overflow                             │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
 ### Control Flags (Bits 3-7)
 
-#
 ### General Interrupt Enable (GIE) - Bit 3
 
 ```text
@@ -142,9 +127,6 @@ Table 3-2*
 │ Property: StatusRegister.GeneralInterruptEnable              │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
-#
 ### CPU Off (CPUOFF) - Bit 4
 
 ```text
@@ -162,9 +144,6 @@ Table 3-2*
 │ Property: StatusRegister.CpuOff                              │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
-#
 ### Oscillator Off (OSC) - Bit 5
 
 ```text
@@ -182,9 +161,6 @@ Table 3-2*
 │ Property: StatusRegister.OscillatorOff                       │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
-#
 ### System Clock Generator 0 (SCG0) - Bit 6
 
 ```text
@@ -202,9 +178,6 @@ Table 3-2*
 │ Property: StatusRegister.SystemClockGenerator0               │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
-#
 ### System Clock Generator 1 (SCG1) - Bit 7
 
 ```text
@@ -222,8 +195,6 @@ Table 3-2*
 │ Property: StatusRegister.SystemClockGenerator1               │
 └───────────────────────────────────────────────────────────────┘
 
-```text
-
 ## Flag Combinations and Power Modes
 
 ### Low Power Mode Combinations
@@ -238,7 +209,6 @@ Table 3-2*
 
 ### Common Flag Patterns
 
-#
 ### After Reset
 
 ```text
@@ -248,9 +218,6 @@ Status Register = 0x0000
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
   All flags clear
 
-```text
-
-#
 ### After Addition with Carry
 
 ```text
@@ -260,9 +227,6 @@ Status Register = 0x0001 (Carry set)
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
                                               C=1
 
-```text
-
-#
 ### After Zero Result
 
 ```text
@@ -272,9 +236,6 @@ Status Register = 0x0002 (Zero set)
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
                                            Z=1
 
-```text
-
-#
 ### Interrupts Enabled
 
 ```text
@@ -284,13 +245,10 @@ Status Register = 0x0008 (GIE set)
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
                                      GIE=1
 
-```text
-
 ## Programming Interface
 
 ### Bit Manipulation Methods
 
-#
 ### Individual Flag Access
 
 ```csharp
@@ -303,10 +261,8 @@ bool interruptsEnabled = statusRegister.GeneralInterruptEnable;
 statusRegister.Carry = true;
 statusRegister.Zero = false;
 statusRegister.GeneralInterruptEnable = true;
+```
 
-```text
-
-#
 ### Direct Value Access
 
 ```csharp
@@ -318,10 +274,8 @@ statusRegister.Value = 0x000F; // Set C, Z, N, GIE flags
 
 // Reset all flags
 statusRegister.Reset(); // Sets value to 0x0000
+```
 
-```text
-
-#
 ### Conditional Flag Updates
 
 ```csharp
@@ -332,8 +286,7 @@ statusRegister.UpdateFlags(result, updateCarry: true, updateOverflow: true);
 // Check resulting flags
 Console.WriteLine(statusRegister.ToString());
 // Output: "SR: 0x0004 [N]"
-
-```text
+```
 
 ## Flag Interaction Examples
 
@@ -350,8 +303,7 @@ statusRegister.Carry = (result & 0x10000) != 0;  // Carry out of bit 15
 statusRegister.Zero = (result & 0xFFFF) == 0;    // Result is zero
 statusRegister.Negative = (result & 0x8000) != 0; // MSB set
 // Result: C=1, Z=1, N=0 (0xFFFF + 0x0001 = 0x0000 with carry)
-
-```text
+```
 
 ### Power Mode Configuration
 

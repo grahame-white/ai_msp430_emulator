@@ -21,7 +21,8 @@ echo "==> Linting Markdown documentation..."
 if command -v markdownlint-cli2 >/dev/null 2>&1; then
     markdownlint-cli2 "docs/**/*.md" "*.md"
 else
-    echo "Warning: markdownlint-cli2 not found. Install with: npm install -g markdownlint-cli2"
+    echo "Error: markdownlint-cli2 not found. Run './script/bootstrap' to install all required tools."
+    exit 1
 fi
 
 echo "==> Code analysis completed successfully!"

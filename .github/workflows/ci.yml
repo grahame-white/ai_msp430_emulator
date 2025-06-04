@@ -30,20 +30,20 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: CI Build and Test
-      run: |
-        if ! ./script/cibuild; then
-          echo ""
-          echo "❌ CI build failed!"
-          echo ""
-          echo "To fix issues locally:"
-          echo "  1. Run: ./script/cibuild"
-          echo "  2. Fix any reported issues"
-          echo "  3. For formatting: ./script/format"
-          echo "  4. For setup: ./script/setup"
-          echo ""
-          exit 1
-        fi
+    - name: Bootstrap dependencies
+      run: ./script/bootstrap
+
+    - name: Lint code
+      run: ./script/lint
+
+    - name: Build project
+      run: ./script/build
+
+    - name: Run tests with coverage
+      run: ./script/test --coverage
+
+    - name: Run security checks
+      run: ./script/security
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5

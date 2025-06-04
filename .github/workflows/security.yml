@@ -90,6 +90,7 @@ jobs:
     - name: Run dependency security scan
       run: |
         echo "==> Running dependency vulnerability scan..."
+        SCAN_FAILED=false
         ./script/security --skip-licenses || SCAN_FAILED=true
         
         if [ "$SCAN_FAILED" = true ]; then
@@ -167,6 +168,7 @@ jobs:
     - name: Run license compliance check
       run: |
         echo "==> Running license compliance check..."
+        LICENSE_FAILED=false
         ./script/security --skip-dotnet --skip-nodejs || LICENSE_FAILED=true
         
         if [ "$LICENSE_FAILED" = true ]; then

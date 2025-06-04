@@ -8,9 +8,12 @@ cd "$(dirname "$0")/.."
 
 echo "==> Starting MSP430 Emulator..."
 
-# Check if the project is built
-if [ ! -d "src/MSP430.Emulator/bin" ]; then
+# Check if the project is built with proper output directories
+if [ ! -d "src/MSP430.Emulator/bin/Release" ] && [ ! -d "src/MSP430.Emulator/bin/Debug" ]; then
     echo "==> Project not built, building first..."
+    ./script/build
+elif [ ! -f "src/MSP430.Emulator/bin/Release/net8.0/MSP430.Emulator.dll" ] && [ ! -f "src/MSP430.Emulator/bin/Debug/net8.0/MSP430.Emulator.dll" ]; then
+    echo "==> Project output missing, rebuilding..."
     ./script/build
 fi
 

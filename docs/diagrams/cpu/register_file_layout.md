@@ -2,11 +2,16 @@
 
 ## Register File Organization
 
-The MSP430 CPU contains 16 16-bit registers organized as follows:
+The MSP430 CPU contains 16 16-bit registers organized as follows according to the
+MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, December 2016 - Revised December 2020) -
+Section 3.2: "CPU Registers" - Figure 3-1.
 
 ### Register File Layout
 
-```
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.1: "Program Counter (PC)" and
+Section 3.2.2: "Stack Pointer (SP)"*
+
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                    MSP430 Register File                        │
 │                     (16 x 16-bit)                              │
@@ -31,7 +36,8 @@ The MSP430 CPU contains 16 16-bit registers organized as follows:
 │    R14     │   -    │ General Purpose       │  Read/Write      │
 │    R15     │   -    │ General Purpose       │  Read/Write      │
 └─────────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 *CG1 is typically read-only but writes are allowed for testing
 
@@ -55,8 +61,13 @@ The MSP430 CPU contains 16 16-bit registers organized as follows:
 
 ## Special Register Organization
 
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2: "CPU Registers" - Table 3-1*
+
 ### Program Counter (R0/PC)
-```
+
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.1: "Program Counter (PC)"*
+
+```text
 ┌───────────────────────────────────────────────────────────────┐
 │                    R0 (Program Counter)                      │
 ├───────────────────────────────────────────────────────────────┤
@@ -66,10 +77,14 @@ The MSP430 CPU contains 16 16-bit registers organized as follows:
 │ └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘               │
 │                Word Address (Bit 0 = 0)         │
 └───────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ### Stack Pointer (R1/SP)
-```
+
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.2: "Stack Pointer (SP)"*
+
+```text
 ┌───────────────────────────────────────────────────────────────┐
 │                    R1 (Stack Pointer)                        │
 ├───────────────────────────────────────────────────────────────┤
@@ -79,10 +94,14 @@ The MSP430 CPU contains 16 16-bit registers organized as follows:
 │ └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘               │
 │                Stack Address (Bit 0 = 0)        │
 └───────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ### Status Register (R2/SR)
-```
+
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.3: "Status Register (SR)"*
+
+```text
 ┌───────────────────────────────────────────────────────────────┐
 │                    R2 (Status Register)                      │
 ├───────────────────────────────────────────────────────────────┤
@@ -95,10 +114,14 @@ The MSP430 CPU contains 16 16-bit registers organized as follows:
 │ └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘               │
 │   Reserved    │Individual Flag Control│         │
 └───────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ### Constant Generator (R3/CG1)
-```
+
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.4: "Constant Generator Registers (CG1 and CG2)"*
+
+```text
 ┌───────────────────────────────────────────────────────────────┐
 │                    R3 (Constant Generator)                   │
 ├───────────────────────────────────────────────────────────────┤
@@ -108,12 +131,14 @@ The MSP430 CPU contains 16 16-bit registers organized as follows:
 │ - 10: Indirect mode (generates +1)                          │
 │ - 11: Indirect auto-increment (generates +2)                │
 └───────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ## Register File Memory Map
 
 ### Physical Layout
-```
+
+```text
 Memory Address Space: Register File Internal
 ┌──────────────────┬──────────────────┬─────────────────┐
 │   Internal       │     Register     │    Physical     │
@@ -136,7 +161,8 @@ Memory Address Space: Register File Internal
 │   [14]           │   R14            │   General Use   │
 │   [15]           │   R15            │   General Use   │
 └──────────────────┴──────────────────┴─────────────────┘
-```
+
+```text
 
 ## Register Access Validation
 
@@ -153,6 +179,7 @@ Memory Address Space: Register File Internal
 ## Usage Examples
 
 ### Basic Register Operations
+
 ```csharp
 var registerFile = new RegisterFile(logger);
 
@@ -163,9 +190,11 @@ ushort value = registerFile.ReadRegister(RegisterName.R4);
 // Byte-level access
 registerFile.WriteRegisterLowByte(RegisterName.R5, 0xAB);
 byte lowByte = registerFile.ReadRegisterLowByte(RegisterName.R5);
-```
+
+```text
 
 ### Special Register Operations
+
 ```csharp
 // Program Counter operations
 registerFile.SetProgramCounter(0x8000);
@@ -179,4 +208,5 @@ ushort sp = registerFile.GetStackPointer();
 // Status Register operations
 registerFile.StatusRegister.Carry = true;
 registerFile.StatusRegister.Zero = true;
+
 ```

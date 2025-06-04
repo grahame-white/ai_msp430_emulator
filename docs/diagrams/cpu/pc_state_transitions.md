@@ -2,7 +2,11 @@
 
 ## Program Counter (PC/R0) State Management
 
-The Program Counter (PC) operates in distinct states with specific transition conditions. This document provides comprehensive state diagrams and flowcharts for PC behavior.
+The Program Counter (PC) operates in distinct states with specific transition conditions. This document provides
+comprehensive state diagrams and flowcharts for PC behavior.
+
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, December 2016 - Revised December 2020) -
+Section 3.2.1: "Program Counter (PC)" and Section 4: "CPU"*
 
 ## PC State Overview
 
@@ -85,11 +89,15 @@ stateDiagram-v2
         PushContext : Push PC and SR to stack
         LoadVector : PC = interrupt vector
     }
-```
+
+```text
 
 ## Detailed State Behaviors
 
 ### Reset State Operations
+
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 4.1: "CPU Introduction" -
+Reset behavior*
 
 ```mermaid
 flowchart TD
@@ -107,7 +115,8 @@ flowchart TD
         C1 --> C2[Combine low/high bytes]
         C2 --> C3[Validate address range]
     end
-```
+
+```text
 
 ### Normal Execution Cycle
 
@@ -129,9 +138,12 @@ flowchart TD
         F1 --> F2[Handle overflow]
         F2 --> F3[Check bounds]
     end
-```
+
+```text
 
 ### Branch/Jump Operations
+
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 4.3: "Instruction Set" - Jump and branch instructions*
 
 ```mermaid
 flowchart TD
@@ -160,7 +172,8 @@ flowchart TD
         F1 --> F2[Add Offset]
         F2 --> F3[Apply Addressing Mode]
     end
-```
+
+```text
 
 ### Subroutine Call/Return Flow
 
@@ -190,9 +203,12 @@ flowchart TD
         L --> L1[Check Stack Bounds]
         L1 --> L2[Verify SP Alignment]
     end
-```
+
+```text
 
 ### Interrupt Processing
+
+*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 5: "Interrupts" - Interrupt processing behavior*
 
 ```mermaid
 flowchart TD
@@ -223,7 +239,8 @@ flowchart TD
         N --> N1[SR = Memory[SP], SP += 2]
         O --> O1[PC = Memory[SP], SP += 2]
     end
-```
+
+```text
 
 ## Stack Pointer Interaction
 
@@ -265,7 +282,8 @@ flowchart TD
         V2 -->|Yes| V4[Continue]
         V3 --> V4
     end
-```
+
+```text
 
 ## PC Word Alignment Enforcement
 
@@ -298,7 +316,8 @@ flowchart TD
         A3[PC = 0x8003] --> A4[Becomes 0x8002]
         A5[PC = 0x8000] --> A6[Remains 0x8000]
     end
-```
+
+```text
 
 ## Error Conditions and Recovery
 
@@ -332,7 +351,8 @@ stateDiagram-v2
     SystemReset --> [*] : System restart required
     
     NormalOperation --> NormalOperation : Valid operations
-```
+
+```text
 
 ### Error Recovery Flowchart
 
@@ -363,7 +383,8 @@ flowchart TD
     H --> R[Resume Normal Operation]
     N --> R
     Q --> S[Complete System Restart]
-```
+
+```text
 
 ## Implementation Notes
 
@@ -398,4 +419,5 @@ registerFile.SetProgramCounter(0x8001); // Becomes 0x8000
 ushort returnAddress = registerFile.GetProgramCounter() + 2;
 // Push returnAddress to stack via SP operations
 registerFile.SetProgramCounter(callTarget);
+
 ```

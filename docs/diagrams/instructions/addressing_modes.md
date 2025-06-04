@@ -20,7 +20,7 @@ flowchart TD
     CheckR2_01 -->|No| Indexed[Indexed Mode<br/>Rn + Offset]
     
     CheckR0_10 -->|Yes| Indirect_R0[Indirect Mode<br/>@R0]
-    CheckR0_10 -->|No| Indirect[Indirect Mode<br/>@Rn]
+    CheckR0_10 -->|No| IndirectSrc[Indirect Mode<br/>@Rn]
     
     CheckR0_11 -->|Yes| Immediate[Immediate Mode<br/>#Value]
     CheckR0_11 -->|No| CheckR2_11{Register == R2?}
@@ -36,7 +36,7 @@ flowchart TD
     style Symbolic fill:#fff3e0
     style Absolute fill:#f3e5f5
     style Indexed fill:#e1f5fe
-    style Indirect fill:#fce4ec
+    style IndirectSrc fill:#fce4ec
     style Indirect_R0 fill:#fce4ec
     style Immediate fill:#e8f5e8
     style Const4 fill:#e8f5e8
@@ -101,14 +101,14 @@ flowchart TD
     
     CheckMode --> Register[Register]
     CheckMode --> Indexed[Indexed]
-    CheckMode --> Indirect[Indirect]
+    CheckMode --> IndirectExt[Indirect]
     CheckMode --> IndirectInc[Indirect Auto-increment]
     CheckMode --> Immediate[Immediate]
     CheckMode --> Absolute[Absolute]
     CheckMode --> Symbolic[Symbolic]
     
     Register --> NoExtension[No Extension Word]
-    Indirect --> NoExtension
+    IndirectExt --> NoExtension
     IndirectInc --> NoExtension
     
     Indexed --> NeedsExtension[Needs Extension Word<br/>Contains Offset]
@@ -153,7 +153,7 @@ flowchart TD
     As01 --> R2 --> Absolute[Absolute<br/>Direct address]
     As01 --> RN --> Indexed[Indexed<br/>Rn+offset]
     
-    As10 --> Indirect[Indirect<br/>@Rn]
+    As10 --> IndirectMatrix[Indirect<br/>@Rn]
     
     As11 --> R0_Imm[R0: Immediate<br/>#constant]
     As11 --> R2_C4[R2: Constant #4]

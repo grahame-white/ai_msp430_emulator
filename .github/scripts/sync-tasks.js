@@ -430,22 +430,38 @@ class GitHubIssuesSynchronizer {
      */
     async getAllTaskIssues() {
         try {
-            const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
-            const searchResults = await executeWithRateLimit(
+            // In dry-run mode without token, return empty array
+            if (
+                this.dryRun &&
+                (!process.env.GITHUB_TOKEN ||
+                    process.env.GITHUB_TOKEN === 'dummy-token-for-dry-run')
+            ) {
+                console.log(`[DRY RUN] Would fetch all task issues`);
+                return [];
+            }
+
+            // Use the regular issues list API instead of deprecated search API
+            const issues = await executeWithRateLimit(
                 () =>
-                    this.octokit.rest.search.issuesAndPullRequests({
-                        q: searchQuery,
+                    this.octokit.rest.issues.listForRepo({
+                        owner: this.owner,
+                        repo: this.repo,
+                        state: 'all',
+                        labels: 'task',
+                        per_page: 100,
                         sort: 'created',
-                        order: 'desc',
-                        per_page: 100
+                        direction: 'desc'
                     }),
-                'search for task issues',
-                5 // More retries for search API
+                'list all task issues',
+                3
             );
 
-            return searchResults.data.items;
+            // Filter to only issues that have "Task" in the title (to match the previous search behavior)
+            return issues.data.filter(
+                issue => issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+:/)
+            );
         } catch (error) {
-            console.warn(`Warning: Could not search for task issues: ${error.message}`);
+            console.warn(`Warning: Could not fetch task issues: ${error.message}`);
             return [];
         }
     }
@@ -494,23 +510,43 @@ async function main() {
     const tasksFile = process.argv[2] || '../../MSP430_EMULATOR_TASKS.md';
     const dryRun = process.argv.includes('--dry-run');
 
-    if (!token) {
-        console.error('Error: GITHUB_TOKEN environment variable is required');
+    // For dry-run mode, we can operate with a dummy token since no API calls will be made
+    if (!token && !dryRun) {
+        console.error('Error: GITHUB_TOKEN environment variable is required for live operations');
+        console.error('Hint: Use --dry-run flag to preview changes without authentication');
         process.exit(1);
     }
 
     try {
-        const synchronizer = new GitHubIssuesSynchronizer(token, owner, repo);
+        // Use dummy token for dry-run mode if no real token is provided
+        const effectiveToken = token || (dryRun ? 'dummy-token-for-dry-run' : null);
+
+        if (!effectiveToken) {
+            console.error('Error: GITHUB_TOKEN environment variable is required');
+            process.exit(1);
+        }
+
+        const synchronizer = new GitHubIssuesSynchronizer(effectiveToken, owner, repo);
         if (dryRun) {
             synchronizer.enableDryRun();
             console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
+            if (!token) {
+                console.log('ℹ️  No GITHUB_TOKEN provided - running in offline preview mode\n');
+            }
         }
 
         const results = await synchronizer.synchronize(tasksFile);
 
-        // Exit with error code if there were errors
+        // Exit with error code if there were errors (but ignore API errors in dry-run mode without token)
         if (results.errors.length > 0) {
-            process.exit(1);
+            const hasNonApiErrors = results.errors.some(
+                error =>
+                    !dryRun ||
+                    (!error.error.includes('API') && !error.error.includes('authentication'))
+            );
+            if (hasNonApiErrors || !dryRun) {
+                process.exit(1);
+            }
         }
     } catch (error) {
         console.error('Error:', error.message);

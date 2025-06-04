@@ -145,17 +145,23 @@ class GitHubIssuesUpdater {
             // Add delay to respect rate limits
             await this.delay(1000);
 
-            const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
-            const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
-                q: searchQuery,
+            // Use the regular issues list API instead of deprecated search API
+            const issues = await this.octokit.rest.issues.listForRepo({
+                owner: this.owner,
+                repo: this.repo,
+                state: 'all',
+                labels: 'task',
+                per_page: 100,
                 sort: 'created',
-                order: 'desc',
-                per_page: 100
+                direction: 'desc'
             });
 
-            return searchResults.data.items;
+            // Filter to only issues that have "Task" in the title (to match the previous search behavior)
+            return issues.data.filter(
+                issue => issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+:/)
+            );
         } catch (error) {
-            console.warn(`Warning: Could not search for task issues: ${error.message}`);
+            console.warn(`Warning: Could not fetch task issues: ${error.message}`);
             // If rate limited, wait longer and return empty array
             if (error.status === 403 && error.message.includes('rate limit')) {
                 console.log('Rate limited, waiting 60 seconds before continuing...');

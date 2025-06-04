@@ -122,15 +122,19 @@ class DisasterRecovery {
             await this.delay(1000);
 
             // Backup existing task issues
-            const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task"`;
-            const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
-                q: searchQuery,
+            const issues = await this.octokit.rest.issues.listForRepo({
+                owner: this.owner,
+                repo: this.repo,
+                state: 'all',
+                per_page: 100,
                 sort: 'created',
-                order: 'desc',
-                per_page: 100
+                direction: 'desc'
             });
 
-            backup.issues = searchResults.data.items.map(issue => ({
+            // Filter to only issues that have "Task" in the title
+            const taskIssues = issues.data.filter(issue => issue.title.includes('Task'));
+
+            backup.issues = taskIssues.map(issue => ({
                 number: issue.number,
                 title: issue.title,
                 body: issue.body,
@@ -339,15 +343,20 @@ class DisasterRecovery {
             await this.delay(1000);
 
             // Re-fetch issues to verify
-            const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
-            const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
-                q: searchQuery,
+            const issues = await this.octokit.rest.issues.listForRepo({
+                owner: this.owner,
+                repo: this.repo,
+                state: 'all',
+                labels: 'task',
+                per_page: 100,
                 sort: 'created',
-                order: 'desc',
-                per_page: 100
+                direction: 'desc'
             });
 
-            const recoveredIssues = searchResults.data.items;
+            // Filter to only issues that have "Task" in the title
+            const recoveredIssues = issues.data.filter(
+                issue => issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+:/)
+            );
             const taskIds = new Set(tasks.map(task => task.id));
             const recoveredTaskIds = new Set();
 

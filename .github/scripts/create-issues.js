@@ -102,20 +102,35 @@ class GitHubIssuesCreator {
      */
     async findExistingIssue(task) {
         try {
-            const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task ${task.id}:"`;
-            const searchResults = await executeWithRateLimit(
+            // In dry-run mode without token, skip API calls
+            if (
+                this.dryRun &&
+                (!process.env.GITHUB_TOKEN ||
+                    process.env.GITHUB_TOKEN === 'dummy-token-for-dry-run')
+            ) {
+                console.log(`[DRY RUN] Would check for existing issue for task ${task.id}`);
+                return null;
+            }
+
+            // Use the regular issues list API instead of deprecated search API
+            // This is more reliable and doesn't have the deprecation warnings
+            const issues = await executeWithRateLimit(
                 () =>
-                    this.octokit.rest.search.issuesAndPullRequests({
-                        q: searchQuery,
+                    this.octokit.rest.issues.listForRepo({
+                        owner: this.owner,
+                        repo: this.repo,
+                        state: 'all',
+                        labels: 'task',
+                        per_page: 100,
                         sort: 'created',
-                        order: 'desc'
+                        direction: 'desc'
                     }),
-                `search for existing issue for task ${task.id}`,
-                5 // More retries for search API
+                `list issues for task ${task.id}`,
+                3
             );
 
-            // Check if any result matches our exact task ID
-            for (const issue of searchResults.data.items) {
+            // Check if any issue matches our exact task ID
+            for (const issue of issues.data) {
                 const titleMatch = issue.title.match(/Task (\d+\.\d+):/);
                 if (titleMatch && titleMatch[1] === task.id) {
                     return issue;
@@ -125,7 +140,7 @@ class GitHubIssuesCreator {
             return null;
         } catch (error) {
             console.warn(
-                `Warning: Could not search for existing issue for task ${task.id}: ${error.message}`
+                `Warning: Could not check for existing issue for task ${task.id}: ${error.message}`
             );
             return null;
         }

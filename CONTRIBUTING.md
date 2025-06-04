@@ -198,6 +198,71 @@ Our CI pipeline runs the following checks:
 
 **All of these checks must pass for your PR to be merged.**
 
+## Scripts Reference
+
+This project follows the ["Scripts to Rule Them All"](https://github.com/github/scripts-to-rule-them-all) pattern for consistent development workflows.
+
+### Core Scripts
+
+- **`script/setup`** - Set up the development environment (includes git hooks)
+- **`script/bootstrap`** - Install dependencies only
+- **`script/update`** - Update dependencies and packages
+- **`script/build`** - Build the project
+- **`script/test`** - Run all tests (with coverage by default)
+- **`script/server`** - Start the MSP430 emulator application
+- **`script/console`** - Interactive C# console with emulator libraries
+
+### Quality Assurance Scripts
+
+- **`script/format`** - Auto-format code (fixes formatting issues)
+- **`script/lint`** - Check code formatting and style
+- **`script/coverage`** - Generate test coverage reports
+- **`script/security`** - Run security vulnerability scans
+
+### CI/CD Scripts
+
+- **`script/cibuild`** - Complete CI pipeline (bootstrap → lint → build → test → security)
+
+### Script Options
+
+Most scripts support helpful options:
+
+```bash
+# Test with different modes
+script/test --coverage     # Explicit coverage (default)
+script/test --fast         # Skip coverage for faster testing
+
+# CI build with different modes  
+script/cibuild             # Full CI pipeline
+script/cibuild --fast      # Skip security and coverage
+script/cibuild --skip-security  # Skip only security checks
+
+# Security scanning options
+script/security            # Run all security checks
+script/security --skip-dotnet    # Skip .NET vulnerability scan
+script/security --skip-nodejs    # Skip Node.js vulnerability scan
+script/security --skip-licenses  # Skip license compliance check
+```
+
+### Development Workflow with Scripts
+
+```bash
+# First time setup
+script/setup
+
+# Daily development
+script/test --fast    # Quick test
+script/format         # Fix formatting
+script/build          # Build project
+
+# Full validation (like CI)
+script/cibuild
+
+# Before committing
+script/lint           # Check formatting
+script/test           # Run tests with coverage
+```
+
 ## Quick Reference
 
 ### Most Common Commands

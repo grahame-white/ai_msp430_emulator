@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# script/coverage
+# Generate and validate test coverage reports
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Generating MSP430 Emulator test coverage..."
+
+# Ensure we have a clean test environment
+rm -rf TestResults
+
+# Run tests with coverage collection
+echo "==> Running unit tests with coverage..."
+dotnet test tests/MSP430.Emulator.Tests/MSP430.Emulator.Tests.csproj \
+  --configuration Release \
+  --no-build \
+  --verbosity normal \
+  --collect:"XPlat Code Coverage" \
+  --results-directory TestResults/Unit
+
+echo "==> Running integration tests with coverage..."
+dotnet test tests/MSP430.Emulator.IntegrationTests/MSP430.Emulator.IntegrationTests.csproj \
+  --configuration Release \
+  --no-build \
+  --verbosity normal \
+  --collect:"XPlat Code Coverage" \
+  --results-directory TestResults/Integration
+
+# Check if we have coverage files
+if ! find TestResults -name "coverage.cobertura.xml" | grep -q .; then
+  echo "⚠️  No coverage files found. Coverage reporting may not be available."
+  exit 0
+fi
+
+# Install coverage reporting tool if not available
+if ! command -v reportgenerator >/dev/null 2>&1; then
+  echo "==> Installing coverage report generator..."
+  dotnet tool install -g dotnet-reportgenerator-globaltool
+fi
+
+# Generate consolidated coverage report
+echo "==> Generating coverage report..."
+reportgenerator \
+  -reports:"TestResults/**/coverage.cobertura.xml" \
+  -targetdir:"TestResults/CoverageReport" \
+  -reporttypes:"HtmlInline_AzurePipelines;Cobertura;JsonSummary"
+
+# Check coverage threshold
+if [ -f "TestResults/CoverageReport/Summary.json" ]; then
+  COVERAGE=$(grep -o '"linecoverage": [0-9.]*' TestResults/CoverageReport/Summary.json | grep -o '[0-9.]*' || echo "0")
+  if [ -n "$COVERAGE" ] && [ "$COVERAGE" != "null" ] && [ "$COVERAGE" != "0" ]; then
+    echo "==> Line coverage: $COVERAGE%"
+    
+    # Check against threshold (default 80%)
+    THRESHOLD=${COVERAGE_THRESHOLD:-80}
+    if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+      echo "❌ Coverage $COVERAGE% is below minimum threshold of $THRESHOLD%"
+      exit 1
+    fi
+    echo "✅ Coverage $COVERAGE% meets minimum threshold of $THRESHOLD%"
+  else
+    echo "⚠️  No coverage data available in summary."
+  fi
+else
+  echo "⚠️  No coverage summary found."
+fi
+
+echo "==> Coverage analysis completed successfully!"
+echo "    Report available at: TestResults/CoverageReport/index.html"

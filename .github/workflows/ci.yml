@@ -30,72 +30,20 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Code formatting check
+    - name: CI Build and Test
       run: |
-        if ! ./script/lint; then
+        if ! ./script/cibuild; then
           echo ""
-          echo "❌ Code formatting check failed!"
+          echo "❌ CI build failed!"
           echo ""
-          echo "To fix formatting issues locally:"
-          echo "  1. Run: ./script/format"
-          echo "  2. Review and commit the changes"
-          echo "  3. Push the updated code"
-          echo ""
-          echo "To prevent future formatting issues:"
-          echo "  - Run: ./script/setup (sets up automatic formatting)"
+          echo "To fix issues locally:"
+          echo "  1. Run: ./script/cibuild"
+          echo "  2. Fix any reported issues"
+          echo "  3. For formatting: ./script/format"
+          echo "  4. For setup: ./script/setup"
           echo ""
           exit 1
         fi
-
-    - name: Build
-      run: ./script/build
-
-    - name: Run unit tests with coverage
-      run: |
-        dotnet test tests/MSP430.Emulator.Tests/MSP430.Emulator.Tests.csproj \
-          --configuration Release \
-          --no-build \
-          --verbosity normal \
-          --collect:"XPlat Code Coverage" \
-          --results-directory TestResults/Unit
-
-    - name: Run integration tests with coverage
-      run: |
-        dotnet test tests/MSP430.Emulator.IntegrationTests/MSP430.Emulator.IntegrationTests.csproj \
-          --configuration Release \
-          --no-build \
-          --verbosity normal \
-          --collect:"XPlat Code Coverage" \
-          --results-directory TestResults/Integration
-
-    - name: Generate coverage report
-      run: |
-        dotnet tool install -g dotnet-reportgenerator-globaltool
-        reportgenerator \
-          -reports:"TestResults/**/coverage.cobertura.xml" \
-          -targetdir:"TestResults/CoverageReport" \
-          -reporttypes:"HtmlInline_AzurePipelines;Cobertura;JsonSummary"
-
-    - name: Check coverage threshold
-      run: |
-        if [ ! -f "TestResults/CoverageReport/Summary.json" ]; then
-          echo "No coverage report found. Skipping coverage check."
-          exit 0
-        fi
-        COVERAGE=$(grep -o '"linecoverage": [0-9.]*' TestResults/CoverageReport/Summary.json | grep -o '[0-9.]*')
-        if [ -z "$COVERAGE" ] || [ "$COVERAGE" = "null" ]; then
-          echo "No coverage data available. Skipping coverage check."
-          exit 0
-        fi
-        echo "Line coverage: $COVERAGE%"
-        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-          echo "Coverage $COVERAGE% is below minimum threshold of 80%"
-          exit 1
-        fi
-        echo "Coverage $COVERAGE% meets minimum threshold of 80%"
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5

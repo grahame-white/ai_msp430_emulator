@@ -25,6 +25,7 @@ Status Register (R2/SR) - 16 bits
 │D │D │D │D │D │D │D │  │  │  │  │  │  │  │  │  │
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+```
 
 ### Bit Field Table
 
@@ -62,6 +63,7 @@ Table 3-2*
 │ Mask: 0x0001                                                  │
 │ Property: StatusRegister.Carry                                │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### Zero Flag (Z) - Bit 1
 
@@ -77,6 +79,7 @@ Table 3-2*
 │ Mask: 0x0002                                                  │
 │ Property: StatusRegister.Zero                                 │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### Negative Flag (N) - Bit 2
 
@@ -92,6 +95,7 @@ Table 3-2*
 │ Mask: 0x0004                                                  │
 │ Property: StatusRegister.Negative                             │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### Overflow Flag (V) - Bit 8
 
@@ -107,6 +111,7 @@ Table 3-2*
 │ Mask: 0x0100                                                  │
 │ Property: StatusRegister.Overflow                             │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### Control Flags (Bits 3-7)
 
@@ -126,6 +131,7 @@ Table 3-2*
 │ Mask: 0x0008                                                  │
 │ Property: StatusRegister.GeneralInterruptEnable              │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### CPU Off (CPUOFF) - Bit 4
 
@@ -143,6 +149,7 @@ Table 3-2*
 │ Mask: 0x0010                                                  │
 │ Property: StatusRegister.CpuOff                              │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### Oscillator Off (OSC) - Bit 5
 
@@ -160,6 +167,7 @@ Table 3-2*
 │ Mask: 0x0020                                                  │
 │ Property: StatusRegister.OscillatorOff                       │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### System Clock Generator 0 (SCG0) - Bit 6
 
@@ -177,6 +185,7 @@ Table 3-2*
 │ Mask: 0x0040                                                  │
 │ Property: StatusRegister.SystemClockGenerator0               │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ### System Clock Generator 1 (SCG1) - Bit 7
 
@@ -194,6 +203,7 @@ Table 3-2*
 │ Mask: 0x0080                                                  │
 │ Property: StatusRegister.SystemClockGenerator1               │
 └───────────────────────────────────────────────────────────────┘
+```
 
 ## Flag Combinations and Power Modes
 
@@ -217,6 +227,7 @@ Status Register = 0x0000
 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
   All flags clear
+```
 
 ### After Addition with Carry
 
@@ -226,6 +237,7 @@ Status Register = 0x0001 (Carry set)
 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │1 │
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
                                               C=1
+```
 
 ### After Zero Result
 
@@ -235,6 +247,7 @@ Status Register = 0x0002 (Zero set)
 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │1 │0 │
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
                                            Z=1
+```
 
 ### Interrupts Enabled
 
@@ -244,6 +257,7 @@ Status Register = 0x0008 (GIE set)
 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │1 │0 │0 │0 │
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
                                      GIE=1
+```
 
 ## Programming Interface
 

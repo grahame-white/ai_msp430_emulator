@@ -6,7 +6,7 @@
     "test": "node test-runner.js",
     "lint": "eslint *.js",
     "lint:fix": "eslint *.js --fix",
-    "lint:yaml": "yamllint ../**/*.yml ../**/*.yaml",
+    "lint:yaml": "yamllint -c .yamllint.yml ../**/*.yml ../**/*.yaml",
     "lint:workflows": "find ../workflows -name '*.yml' -o -name '*.yaml' | xargs -r actionlint",
     "validate:workflows": "npm run lint:workflows",
     "validate:all": "npm run lint && npm run lint:yaml && npm run lint:workflows",

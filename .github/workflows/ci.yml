@@ -1,10 +1,11 @@
+---
 name: CI/CD Pipeline
 
-on:
+'on':
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -14,78 +15,78 @@ jobs:
         dotnet-version: ['8.0.x']
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
 
-    - name: Cache dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-    - name: Bootstrap dependencies
-      run: ./script/bootstrap
+      - name: Bootstrap dependencies
+        run: ./script/bootstrap
 
-    - name: Lint code
-      run: ./script/lint
+      - name: Lint code
+        run: ./script/lint
 
-    - name: Build project
-      run: ./script/build
+      - name: Build project
+        run: ./script/build
 
-    - name: Run tests with coverage
-      run: ./script/test --coverage
+      - name: Run tests with coverage
+        run: ./script/test --coverage
 
-    - name: Run security checks
-      run: ./script/security
+      - name: Run security checks
+        run: ./script/security
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        directory: TestResults
-        files: "*/coverage.cobertura.xml"
-        fail_ci_if_error: false
-        verbose: true
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: TestResults
+          files: "*/coverage.cobertura.xml"
+          fail_ci_if_error: false
+          verbose: true
 
-    - name: Upload coverage to GitHub
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: TestResults/CoverageReport
-        retention-days: 30
+      - name: Upload coverage to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: TestResults/CoverageReport
+          retention-days: 30
 
   script-tests:
     runs-on: ubuntu-latest
     name: Script Tests
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    - name: Test core scripts
-      run: |
-        if ! ./script/test-scripts; then
-          echo ""
-          echo "❌ Script tests failed!"
-          echo ""
-          echo "To fix issues locally:"
-          echo "  1. Run: ./script/test-scripts"
-          echo "  2. Fix any reported issues"
-          echo ""
-          exit 1
-        fi
+      - name: Test core scripts
+        run: |
+          if ! ./script/test-scripts; then
+            echo ""
+            echo "❌ Script tests failed!"
+            echo ""
+            echo "To fix issues locally:"
+            echo "  1. Run: ./script/test-scripts"
+            echo "  2. Fix any reported issues"
+            echo ""
+            exit 1
+          fi
 
   quality-gates:
     runs-on: ubuntu-latest
@@ -93,120 +94,126 @@ jobs:
     if: always()
 
     steps:
-    - name: Check build status
-      run: |
-        if [ "${{ needs.build-and-test.result }}" != "success" ]; then
-          echo "Build and test job failed"
-          exit 1
-        fi
-        if [ "${{ needs.automation-scripts.result }}" != "success" ]; then
-          echo "Automation scripts job failed"
-          exit 1
-        fi
-        if [ "${{ needs.script-tests.result }}" != "success" ]; then
-          echo "Script tests job failed"
-          exit 1
-        fi
-        echo "All quality gates passed"
+      - name: Check build status
+        run: |
+          if [ "${{ needs.build-and-test.result }}" != "success" ]; then
+            echo "Build and test job failed"
+            exit 1
+          fi
+          if [ "${{ needs.automation-scripts.result }}" != "success" ]; then
+            echo "Automation scripts job failed"
+            exit 1
+          fi
+          if [ "${{ needs.script-tests.result }}" != "success" ]; then
+            echo "Script tests job failed"
+            exit 1
+          fi
+          echo "All quality gates passed"
 
   automation-scripts:
     runs-on: ubuntu-latest
     name: Automation Scripts CI
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: '.github/scripts/package*.json'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '.github/scripts/package*.json'
 
-    - name: Install dependencies
-      run: |
-        cd .github/scripts
-        npm install
+      - name: Install dependencies
+        run: |
+          cd .github/scripts
+          npm install
 
-    - name: Check for formatting issues
-      run: |
-        echo "Checking for ANSI escape sequences in source files..."
-        if find . -name "*.js" -o -name "*.cs" -o -name "*.md" | grep -v node_modules | grep -v bin | grep -v obj | xargs grep -l $'\033\[' 2>/dev/null; then
-          echo "❌ ANSI escape sequences found in source files!"
-          echo "   This indicates formatting issues or terminal output in code."
-          find . -name "*.js" -o -name "*.cs" -o -name "*.md" | grep -v node_modules | grep -v bin | grep -v obj | xargs grep -n $'\033\[' 2>/dev/null || true
-          exit 1
-        fi
-        echo "✅ No ANSI escape sequences detected"
+      - name: Check for formatting issues
+        run: |
+          echo "Checking for ANSI escape sequences in source files..."
+          if find . -name "*.js" -o -name "*.cs" -o -name "*.md" | \
+             grep -v node_modules | grep -v bin | grep -v obj | \
+             xargs grep -l $'\033\[' 2>/dev/null; then
+            echo "❌ ANSI escape sequences found in source files!"
+            echo "   This indicates formatting issues or terminal output in code."
+            find . -name "*.js" -o -name "*.cs" -o -name "*.md" | \
+               grep -v node_modules | grep -v bin | grep -v obj | \
+               xargs grep -n $'\033\[' 2>/dev/null || true
+            exit 1
+          fi
+          echo "✅ No ANSI escape sequences detected"
 
-    - name: Lint automation scripts
-      run: |
-        cd .github/scripts
-        echo "Installing ESLint..."
-        npm install
-        echo "Running ESLint..."
-        npm run lint
+      - name: Lint automation scripts
+        run: |
+          cd .github/scripts
+          echo "Installing ESLint..."
+          npm install
+          echo "Running ESLint..."
+          npm run lint
 
-    - name: Validate YAML files
-      run: |
-        cd .github/scripts
-        echo "Running YAML linting..."
-        npm run lint:yaml
+      - name: Validate YAML files
+        run: |
+          cd .github/scripts
+          echo "Running YAML linting..."
+          npm run lint:yaml
 
-    - name: Setup Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: 'stable'
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
 
-    - name: Install actionlint
-      run: go install github.com/rhysd/actionlint/cmd/actionlint@latest
+      - name: Install actionlint
+        run: go install github.com/rhymd/actionlint/cmd/actionlint@latest
 
-    - name: Run actionlint
-      run: |
-        GOPATH_BIN=$(go env GOPATH)/bin
-        export PATH=$PATH:$GOPATH_BIN
-        actionlint .github/workflows/*.yml
+      - name: Run actionlint
+        run: |
+          GOPATH_BIN=$(go env GOPATH)/bin
+          export PATH=$PATH:$GOPATH_BIN
+          actionlint .github/workflows/*.yml
 
-    - name: Validate package.json
-      run: |
-        cd .github/scripts
-        npm audit --audit-level=high
-        npm outdated || true  # Don't fail on outdated packages, just report
+      - name: Validate package.json
+        run: |
+          cd .github/scripts
+          npm audit --audit-level=high
+          npm outdated || true
 
-    - name: Test task parsing
-      run: |
-        cd .github/scripts
-        echo "Testing task parsing functionality..."
-        if node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > /tmp/parse-test.json; then
-          echo "✅ Parse test passed"
-          # Validate JSON output
-          jq empty /tmp/parse-test.json
-          echo "✅ Generated valid JSON"
-        else
-          echo "❌ Parse test failed"
-          exit 1
-        fi
+      - name: Test task parsing
+        run: |
+          cd .github/scripts
+          echo "Testing task parsing functionality..."
+          if node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > \
+             /tmp/parse-test.json; then
+            echo "✅ Parse test passed"
+            # Validate JSON output
+            jq empty /tmp/parse-test.json
+            echo "✅ Generated valid JSON"
+          else
+            echo "❌ Parse test failed"
+            exit 1
+          fi
 
-    - name: Test dry-run functionality
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        cd .github/scripts
-        echo "Testing dry-run functionality..."
-        if timeout 30s node dry-run.js ../../MSP430_EMULATOR_TASKS.md > /tmp/dry-run-test.txt; then
-          echo "✅ Dry-run test passed"
-        else
-          echo "❌ Dry-run test failed or timed out"
-          exit 1
-        fi
+      - name: Test dry-run functionality
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          echo "Testing dry-run functionality..."
+          if timeout 30s node dry-run.js ../../MSP430_EMULATOR_TASKS.md > \
+             /tmp/dry-run-test.txt; then
+            echo "✅ Dry-run test passed"
+          else
+            echo "❌ Dry-run test failed or timed out"
+            exit 1
+          fi
 
-    - name: Upload test artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: automation-test-results
-        path: |
-          /tmp/parse-test.json
-          /tmp/dry-run-test.txt
-        retention-days: 7
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-test-results
+          path: |
+            /tmp/parse-test.json
+            /tmp/dry-run-test.txt
+          retention-days: 7

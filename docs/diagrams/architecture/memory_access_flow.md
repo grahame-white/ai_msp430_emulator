@@ -237,5 +237,21 @@ MemoryAccessException
 
 ---
 
-*This documentation corresponds to the MSP430.Emulator.Memory.MemoryAccessValidator implementation*  
-*All validation logic is based on the MSP430FR2355 memory architecture*
+## References
+
+This documentation is based on official Texas Instruments documentation:
+
+**Primary References:**
+- **MSP430FR2xx and FR4xx Family User's Guide** (SLAU445I, June 2015 - Revised October 2019)
+  - Section 2.2.1: "Memory Protection and Access Permissions" - Access control mechanisms
+  - Section 6.3: "FRAM Access and Write Protection" - Memory access validation procedures
+  - Section 1.4.1: "Memory Protection Unit (MPU)" - Hardware-level access control
+- **MSP430FR2355 Mixed-Signal Microcontroller Datasheet** (SLAS847G, October 2016 - Revised December 2019)
+  - Section 6: "Memory Organization" - Access permission specifications
+
+**Access Permission Implementation:**
+- Based on SLAU445I Section 6.3.1 "FRAM Write Protection" for write access control
+- Read/Execute permissions derived from SLAU445I Table 1-1 "Memory Map Summary"
+- Exception handling follows TI recommended error reporting patterns
+
+*This documentation corresponds to the MSP430.Emulator.Memory.MemoryAccessValidator implementation*

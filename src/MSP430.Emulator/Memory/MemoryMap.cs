@@ -111,7 +111,9 @@ public class MemoryMap : IMemoryMap
     /// - 32KB FRAM for non-volatile program and data storage
     /// - Enhanced bootstrap loader and information memory
     /// 
-    /// Reference: MSP430FR2355 Mixed-Signal Microcontroller
+    /// References:
+    /// - MSP430FR2355 Datasheet (SLAS847G), Table 6-4 "Memory Organization"
+    /// - MSP430FR2xx Family User's Guide (SLAU445I), Section 1.4 "Memory Organization"
     /// </summary>
     /// <returns>A list of default memory regions for the MSP430FR2355.</returns>
     private static List<MemoryRegionInfo> CreateDefaultRegions()

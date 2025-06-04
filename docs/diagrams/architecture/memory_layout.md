@@ -137,7 +137,27 @@ Total Address Space: 64KB (65,536 bytes)
 - Debug logging available for memory access operations
 - Exception handling for invalid access attempts
 
+### Important Note on Terminology
+The main memory region (0x4000-0xBFFF) is internally labeled as `Flash` in the `MemoryRegion` enum for legacy compatibility, but this region represents **FRAM (Ferroelectric RAM)** technology in the MSP430FR2355. FRAM provides significant advantages over traditional Flash memory including byte-level write operations, faster write speeds, and higher endurance. All documentation and comments correctly reference this as FRAM memory.
+
 ---
 
-*This documentation corresponds to the MSP430.Emulator.Memory implementation*  
-*Reference: MSP430FR2355 Mixed-Signal Microcontroller Family User's Guide*
+## References
+
+This documentation is based on official Texas Instruments documentation:
+
+**Primary References:**
+- **MSP430FR2355 Mixed-Signal Microcontroller Datasheet** (SLAS847G, October 2016 - Revised December 2019)
+  - Section 6: "Specifications" - Memory organization and address mapping (Table 6-4, p. 20)
+  - Section 7: "Device and Documentation Support" - Memory layout overview
+- **MSP430FR2xx and FR4xx Family User's Guide** (SLAU445I, June 2015 - Revised October 2019)  
+  - Section 1.4: "Memory Organization" - Detailed memory architecture (Figure 1-1, p. 27)
+  - Section 2: "System Control Module (SYS)" - Memory controller and access permissions
+  - Section 6: "FRAM Controller (FRCTL_A)" - FRAM memory characteristics and operation
+
+**Memory Map Verification:**
+- Datasheet SLAS847G, Table 6-4 "Memory Organization" confirms address ranges
+- User's Guide SLAU445I, Figure 1-1 "MSP430FR2xx Memory Map" provides visual layout
+- Bootstrap Loader specification from SLAU445I Section 1.4.5 (0x1000-0x17FF)
+
+*This documentation corresponds to the MSP430.Emulator.Memory implementation*

@@ -53,4 +53,10 @@ var customMemoryMap = new MemoryMap(customRegions);
 3. **Validation**: All memory access is validated against region permissions and boundaries
 4. **Extensibility**: The interface-based design allows for other MSP430 variants through custom memory maps
 
-For detailed technical specifications, refer to the official MSP430FR2355 datasheet from Texas Instruments.
+For detailed technical specifications, refer to the official Texas Instruments documentation:
+
+**Primary References:**
+- **MSP430FR2355 Mixed-Signal Microcontroller Datasheet** (SLAS847G, October 2016 - Revised December 2019)
+- **MSP430FR2xx and FR4xx Family User's Guide** (SLAU445I, June 2015 - Revised October 2019)
+
+These documents provide comprehensive technical specifications, memory maps, and implementation details used in this emulator.

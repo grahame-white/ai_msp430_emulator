@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# script/setup
+# Set up the project in an initial state after cloning, or reset to initial state
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Setting up MSP430 Emulator development environment..."
+
+# Bootstrap dependencies first
+echo "==> Ensuring all dependencies are installed..."
+script/bootstrap
+
+# Build the solution
+echo "==> Building solution..."
+dotnet build --configuration Debug
+
+# Setup git hooks for automatic formatting
+echo "==> Setting up git hooks..."
+git config core.hooksPath .githooks
+
+echo "==> Setup completed successfully!"
+echo ""
+echo "The following git hooks are now active:"
+echo "  - pre-commit: Automatically formats code before commits"
+echo ""
+echo "Available commands:"
+echo "  script/bootstrap - Install all dependencies"
+echo "  script/build     - Build the project"
+echo "  script/test      - Run all tests"
+echo "  script/format    - Format code"
+echo "  script/lint      - Check code formatting"
+echo "  script/update    - Update dependencies"
+echo "  script/server    - Run the emulator"
+echo "  script/console   - Start interactive console"

@@ -48,9 +48,9 @@ jobs:
         cache: 'npm'
         cache-dependency-path: '.github/scripts/package*.json'
 
-    - name: Restore .NET dependencies
+    - name: Bootstrap dependencies (.NET)
       if: matrix.language == 'csharp'
-      run: dotnet restore
+      run: ./script/bootstrap
 
     - name: Install Node.js dependencies
       if: matrix.language == 'javascript'
@@ -60,7 +60,7 @@ jobs:
 
     - name: Build for analysis (.NET)
       if: matrix.language == 'csharp'
-      run: dotnet build --configuration Release --no-restore
+      run: ./script/build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
@@ -80,54 +80,6 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Check for vulnerable packages
-      run: |
-        dotnet list package --vulnerable --include-transitive > vulnerability-report.txt 2>&1
-        echo "Vulnerability scan results:"
-        cat vulnerability-report.txt
-        
-        if grep -q "has the following vulnerable packages" vulnerability-report.txt; then
-          echo "Vulnerable packages found - checking for known false positives..."
-          
-          # Check if only known .NET 8 false positives are present
-          if grep -q "System.Net.Http.*4.3.0" vulnerability-report.txt && grep -q "System.Text.RegularExpressions.*4.3.0" vulnerability-report.txt; then
-            # Count total vulnerability lines
-            TOTAL_VULNS=$(grep -c "^   > " vulnerability-report.txt || echo "0")
-            # Count false positive lines
-            FALSE_POSITIVES=$(grep -c "System.Net.Http.*4.3.0\|System.Text.RegularExpressions.*4.3.0" vulnerability-report.txt || echo "0")
-            
-            if [ "$TOTAL_VULNS" -eq "$FALSE_POSITIVES" ]; then
-              echo "Only known .NET 8 false positive vulnerabilities found - these are resolved by the .NET 8 runtime"
-              exit 0
-            fi
-          fi
-          
-          echo "Genuine security vulnerabilities detected:"
-          cat vulnerability-report.txt
-          exit 1
-        else
-          echo "No vulnerable packages found"
-        fi
-
-    - name: Upload vulnerability report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: vulnerability-report
-        path: vulnerability-report.txt
-        retention-days: 30
-
-  nodejs-dependency-scan:
-    name: Node.js Dependency Vulnerability Scan
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -135,44 +87,27 @@ jobs:
         cache: 'npm'
         cache-dependency-path: '.github/scripts/package*.json'
 
-    - name: Install dependencies
+    - name: Run dependency security scan
       run: |
-        cd .github/scripts
-        npm install
-
-    - name: Run npm audit
-      run: |
-        cd .github/scripts
-        echo "Running npm audit for automation scripts..."
-        npm audit --json > /tmp/npm-audit.json 2>&1 || true
+        echo "==> Running dependency vulnerability scan..."
+        SCAN_FAILED=false
+        ./script/security --skip-licenses || SCAN_FAILED=true
         
-        # Check audit results
-        if [ -f "/tmp/npm-audit.json" ]; then
-          echo "npm audit results:"
-          cat /tmp/npm-audit.json
-          
-          # Parse vulnerabilities
-          HIGH_VULNS=$(jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "high" or .value.severity == "critical") | .key' /tmp/npm-audit.json 2>/dev/null | wc -l || echo "0")
-          
-          if [ "$HIGH_VULNS" -gt 0 ]; then
-            echo "❌ Found $HIGH_VULNS high/critical vulnerabilities in Node.js dependencies"
-            echo "High/Critical vulnerabilities found:"
-            jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "high" or .value.severity == "critical") | "\(.key): \(.value.severity)"' /tmp/npm-audit.json 2>/dev/null || true
-            exit 1
-          else
-            echo "✅ No high/critical vulnerabilities found in Node.js dependencies"
-          fi
+        if [ "$SCAN_FAILED" = true ]; then
+          echo "❌ Security vulnerabilities detected"
+          exit 1
         else
-          echo "⚠️ npm audit output not found, running direct command"
-          npm audit --audit-level=high
+          echo "✅ No security vulnerabilities found"
         fi
 
-    - name: Upload npm audit report
+    - name: Upload vulnerability report
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: npm-audit-report
-        path: /tmp/npm-audit.json
+        name: vulnerability-report
+        path: |
+          vulnerability-report.txt
+          /tmp/npm-audit.json
         retention-days: 30
 
   secret-scan:
@@ -213,47 +148,6 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Install license check tool
-      run: dotnet tool install --global nuget-license
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Check licenses
-      run: |
-        echo "Attempting to generate license report..."
-        if nuget-license -i MSP430.Emulator.sln -o Json -fo licenses.json; then
-          echo "License information generated in licenses.json"
-          echo "License scan results:"
-          nuget-license -i MSP430.Emulator.sln || echo "License display failed, but JSON report was generated"
-        else
-          echo "License scanning tool failed - this may be due to .NET version compatibility"
-          echo "Creating basic license report from project files..."
-          
-          # Fallback: Extract package references from project files
-          echo '{"licenses": []}' > licenses.json
-          echo "Basic license check - scanning for package references:"
-          find . -name "*.csproj" -exec echo "Project: {}" \; -exec grep -H "PackageReference" {} \; || echo "No package references found"
-          
-          echo "License check completed with fallback method"
-        fi
-
-    - name: Upload license report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: license-report
-        path: licenses.json
-        retention-days: 30
-
-  nodejs-license-check:
-    name: Node.js License Compliance Check
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -261,44 +155,35 @@ jobs:
         cache: 'npm'
         cache-dependency-path: '.github/scripts/package*.json'
 
-    - name: Install dependencies
+    - name: Install license check tools
       run: |
-        cd .github/scripts
-        npm install
-
-    - name: Install license checker
-      run: npm install -g license-checker
-
-    - name: Check Node.js licenses
-      run: |
-        cd .github/scripts
-        echo "Checking licenses for Node.js automation scripts..."
+        # Install .NET license tool
+        dotnet tool install --global nuget-license || echo "nuget-license installation skipped"
         
-        # Generate license report
-        license-checker --json --out /tmp/nodejs-licenses.json || echo "License checker failed, generating basic report..."
-        
-        if [ -f "/tmp/nodejs-licenses.json" ]; then
-          echo "✅ Node.js license report generated"
-          echo "License summary:"
-          license-checker --summary || true
-          
-          # Check for problematic licenses
-          if ! license-checker --failOn 'GPL' --json > /dev/null 2>&1; then
-            echo "❌ Found GPL or other restricted licenses"
-            license-checker --failOn 'GPL'
-            exit 1
-          else
-            echo "✅ No restricted licenses found"
-          fi
-        else
-          echo "⚠️ Creating fallback license report..."
-          echo '{"fallback": "License checker not available"}' > /tmp/nodejs-licenses.json
+        # Install Node.js license tool if scripts exist
+        if [ -d ".github/scripts" ]; then
+          npm install -g license-checker || echo "license-checker installation skipped"
         fi
 
-    - name: Upload Node.js license report
+    - name: Run license compliance check
+      run: |
+        echo "==> Running license compliance check..."
+        LICENSE_FAILED=false
+        ./script/security --skip-dotnet --skip-nodejs || LICENSE_FAILED=true
+        
+        if [ "$LICENSE_FAILED" = true ]; then
+          echo "❌ License compliance issues detected"
+          exit 1
+        else
+          echo "✅ License compliance check passed"
+        fi
+
+    - name: Upload license reports
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: nodejs-license-report
-        path: /tmp/nodejs-licenses.json
+        name: license-reports
+        path: |
+          licenses.json
+          /tmp/nodejs-licenses.json
         retention-days: 30

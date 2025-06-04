@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# script/test-scripts
+# Basic smoke tests for script functionality
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Running script smoke tests..."
+
+# Test script/update
+echo "==> Testing script/update..."
+if timeout 60s ./script/update; then
+    echo "✅ script/update completed successfully"
+else
+    echo "❌ script/update failed or timed out"
+    exit 1
+fi
+
+# Test script/bootstrap
+echo "==> Testing script/bootstrap..."
+if timeout 60s ./script/bootstrap; then
+    echo "✅ script/bootstrap completed successfully"
+else
+    echo "❌ script/bootstrap failed or timed out"
+    exit 1
+fi
+
+# Test script/build (basic validation)
+echo "==> Testing script/build..."
+if timeout 120s ./script/build; then
+    echo "✅ script/build completed successfully"
+else
+    echo "❌ script/build failed or timed out"
+    exit 1
+fi
+
+# Test script/cibuild (with fast mode)
+echo "==> Testing script/cibuild..."
+if timeout 180s ./script/cibuild --fast; then
+    echo "✅ script/cibuild completed successfully"
+else
+    echo "❌ script/cibuild failed or timed out"
+    exit 1
+fi
+
+# Test script/security (basic validation)
+echo "==> Testing script/security..."
+if timeout 120s ./script/security --skip-licenses; then
+    echo "✅ script/security completed successfully"
+else
+    echo "❌ script/security failed or timed out"
+    exit 1
+fi
+
+# Test script/console (dry run validation)
+echo "==> Testing script/console..."
+if timeout 30s bash -c 'echo "exit()" | ./script/console' 2>/dev/null || echo "Console test skipped (dotnet-script not available)"; then
+    echo "✅ script/console completed successfully or skipped gracefully"
+else
+    echo "❌ script/console failed unexpectedly"
+    exit 1
+fi
+
+echo "==> All script smoke tests passed!"

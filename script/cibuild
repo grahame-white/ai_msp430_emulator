@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# script/cibuild
+# CI-specific build and test script
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Running MSP430 Emulator CI build..."
+
+# Parse command line arguments
+SKIP_SECURITY=false
+SKIP_COVERAGE=false
+FAST_MODE=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --skip-security)
+      SKIP_SECURITY=true
+      shift
+      ;;
+    --skip-coverage)
+      SKIP_COVERAGE=true
+      shift
+      ;;
+    --fast)
+      FAST_MODE=true
+      SKIP_SECURITY=true
+      SKIP_COVERAGE=true
+      shift
+      ;;
+    --help)
+      echo "Usage: $0 [options]"
+      echo "Options:"
+      echo "  --skip-security Skip security scanning"
+      echo "  --skip-coverage Skip coverage reporting"
+      echo "  --fast          Fast mode (skip security and coverage)"
+      echo "  --help          Show this help message"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use --help for usage information"
+      exit 1
+      ;;
+  esac
+done
+
+# Bootstrap dependencies
+echo "==> Bootstrapping dependencies..."
+./script/bootstrap
+
+# Check code formatting
+echo "==> Checking code formatting..."
+./script/lint
+
+# Build the project
+echo "==> Building project..."
+./script/build
+
+# Run tests
+if [ "$SKIP_COVERAGE" = true ] || [ "$FAST_MODE" = true ]; then
+  echo "==> Running tests (fast mode)..."
+  ./script/test --fast
+else
+  echo "==> Running tests with coverage..."
+  ./script/test --coverage
+fi
+
+# Run security checks (unless skipped)
+if [ "$SKIP_SECURITY" = false ]; then
+  echo "==> Running security checks..."
+  ./script/security
+else
+  echo "==> Skipping security checks (fast mode)"
+fi
+
+echo "==> CI build completed successfully!"
+
+# Summary
+echo ""
+echo "==> Build Summary:"
+echo "    ✅ Dependencies bootstrapped"
+echo "    ✅ Code formatting validated"
+echo "    ✅ Project built successfully"
+if [ "$SKIP_COVERAGE" = false ] && [ "$FAST_MODE" = false ]; then
+  echo "    ✅ Tests passed with coverage"
+else
+  echo "    ✅ Tests passed (fast mode)"
+fi
+if [ "$SKIP_SECURITY" = false ]; then
+  echo "    ✅ Security checks passed"
+else
+  echo "    ⏭️  Security checks skipped"
+fi

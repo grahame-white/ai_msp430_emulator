@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# script/format
+# Auto-format code to ensure consistency
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Auto-formatting MSP430 Emulator code..."
+
+# Format code (modify files in place)
+echo "==> Running code formatter..."
+dotnet format --verbosity minimal
+
+# Check if any files were modified
+if git diff --quiet; then
+    echo "==> No formatting changes needed"
+else
+    echo "==> Code formatting applied - please review and commit changes"
+    echo "    Modified files:"
+    git diff --name-only | sed 's/^/      /'
+fi
+
+echo "==> Code formatting completed successfully!"

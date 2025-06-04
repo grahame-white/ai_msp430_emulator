@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/lint
+# script/lint
 # Run code analysis and formatting checks
 
 set -e

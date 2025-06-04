@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# script/test
+# Run all tests
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Running MSP430 Emulator tests..."
+
+# Parse command line arguments
+WITH_COVERAGE=false
+FAST_MODE=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --coverage)
+      WITH_COVERAGE=true
+      shift
+      ;;
+    --fast)
+      FAST_MODE=true
+      shift
+      ;;
+    --help)
+      echo "Usage: $0 [options]"
+      echo "Options:"
+      echo "  --coverage      Run tests with coverage collection and reporting"
+      echo "  --fast          Run tests without coverage (faster execution)"
+      echo "  --help          Show this help message"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use --help for usage information"
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$WITH_COVERAGE" = true ]; then
+  echo "==> Running tests with coverage..."
+  ./script/coverage
+elif [ "$FAST_MODE" = true ]; then
+  echo "==> Running tests in fast mode (no coverage)..."
+  
+  # Run unit tests
+  echo "==> Running unit tests..."
+  dotnet test tests/MSP430.Emulator.Tests/MSP430.Emulator.Tests.csproj --configuration Release --no-build --verbosity normal
+
+  # Run integration tests
+  echo "==> Running integration tests..."
+  dotnet test tests/MSP430.Emulator.IntegrationTests/MSP430.Emulator.IntegrationTests.csproj --configuration Release --no-build --verbosity normal
+
+  echo "==> All tests completed successfully!"
+else
+  # Default behavior: run with coverage for comprehensive testing
+  echo "==> Running tests with coverage (default)..."
+  echo "    Use --fast to skip coverage for quicker testing"
+  ./script/coverage
+fi

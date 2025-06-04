@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# script/console
+# Start an interactive console for debugging and experimentation
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Starting MSP430 Emulator interactive console..."
+
+# Check if the project is built
+if [ ! -d "src/MSP430.Emulator/bin" ]; then
+    echo "==> Project not built, building first..."
+    ./script/build
+fi
+
+# Start an interactive C# REPL with the emulator libraries loaded
+echo "==> Starting C# interactive console..."
+echo "==> The MSP430.Emulator assembly is available for experimentation"
+echo "==> Type #help for available commands"
+echo ""
+
+dotnet-script init temp-console.csx 2>/dev/null || true
+cat > temp-console.csx << 'EOF'
+#r "src/MSP430.Emulator/bin/Release/net8.0/MSP430.Emulator.dll"
+
+using MSP430.Emulator.Core;
+using MSP430.Emulator.Memory;
+using MSP430.Emulator.Registers;
+using Microsoft.Extensions.Logging;
+
+Console.WriteLine("MSP430 Emulator Interactive Console");
+Console.WriteLine("Available namespaces: MSP430.Emulator.Core, MSP430.Emulator.Memory, MSP430.Emulator.Registers");
+Console.WriteLine("Example: var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger(\"Console\");");
+Console.WriteLine("");
+EOF
+
+if command -v dotnet-script &> /dev/null; then
+    dotnet-script temp-console.csx -i
+else
+    echo "==> dotnet-script not found, using basic dotnet CLI..."
+    echo "==> Install dotnet-script for better interactive experience: dotnet tool install -g dotnet-script"
+    dotnet build --configuration Release --no-restore
+    echo "==> Project built. You can now use the assemblies in your preferred C# REPL"
+fi
+
+# Cleanup
+rm -f temp-console.csx 2>/dev/null || true

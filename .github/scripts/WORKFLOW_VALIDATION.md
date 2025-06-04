@@ -9,7 +9,7 @@ actionlint is a static checker for GitHub Actions workflow files that catches:
 - **Syntax errors**: Invalid YAML, missing required fields
 - **Type errors**: Wrong types in expressions, invalid contexts
 - **Logic errors**: Unreachable jobs, invalid dependencies
-- **Action validation**: Invalid action references, wrong input/output usage  
+- **Action validation**: Invalid action references, wrong input/output usage
 - **Shell script validation**: Integration with shellcheck for run steps
 - **Security issues**: Potentially dangerous patterns
 

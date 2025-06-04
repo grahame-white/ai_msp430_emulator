@@ -82,7 +82,9 @@ class DisasterRecovery {
             const allTasks = await parser.parse();
             const tasks = this.filterIncludedTasks(allTasks);
             results.analyzed = tasks.length;
-            console.log(`Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} to recover)`);
+            console.log(
+                `Found ${allTasks.length} tasks (${allTasks.length - tasks.length} excluded, ${tasks.length} to recover)`
+            );
 
             // Step 2: Backup existing state
             console.log('\n💾 Backing up existing state...');
@@ -104,7 +106,6 @@ class DisasterRecovery {
             this.printRecoverySummary(results);
 
             return results;
-
         } catch (error) {
             console.error('❌ Disaster recovery failed:', error.message);
             results.errors.push({ error: error.message });
@@ -134,11 +135,13 @@ class DisasterRecovery {
                 title: issue.title,
                 body: issue.body,
                 state: issue.state,
-                labels: issue.labels.map(label => typeof label === 'string' ? label : label.name),
-                milestone: issue.milestone ? {
-                    number: issue.milestone.number,
-                    title: issue.milestone.title
-                } : null,
+                labels: issue.labels.map(label => (typeof label === 'string' ? label : label.name)),
+                milestone: issue.milestone
+                    ? {
+                          number: issue.milestone.number,
+                          title: issue.milestone.title
+                      }
+                    : null,
                 created_at: issue.created_at,
                 updated_at: issue.updated_at,
                 taskId: this.extractTaskId(issue.title),
@@ -180,7 +183,6 @@ class DisasterRecovery {
             }));
 
             console.log(`   Backed up ${backup.milestones.length} milestones`);
-
         } catch (error) {
             throw new Error(`Failed to backup existing state: ${error.message}`);
         }
@@ -238,9 +240,11 @@ class DisasterRecovery {
      */
     needsRecreation(task, issue) {
         // Check for significant corruption or missing automation markers
-        return !issue.body ||
-               !issue.body.includes('🤖 Managed by GitHub Issues Automation') ||
-               issue.title !== `Task ${task.id}: ${task.title}`;
+        return (
+            !issue.body ||
+            !issue.body.includes('🤖 Managed by GitHub Issues Automation') ||
+            issue.title !== `Task ${task.id}: ${task.title}`
+        );
     }
 
     /**
@@ -284,7 +288,6 @@ class DisasterRecovery {
                         results.recovered.created.push(createResults.created[0]);
                     }
                     results.errors.push(...createResults.errors);
-
                 } catch (error) {
                     results.errors.push({
                         task: task.id,
@@ -358,11 +361,12 @@ class DisasterRecovery {
             const missingTasks = Array.from(taskIds).filter(id => !recoveredTaskIds.has(id));
 
             if (missingTasks.length > 0) {
-                console.log(`   ⚠️  ${missingTasks.length} tasks still missing issues: ${missingTasks.join(', ')}`);
+                console.log(
+                    `   ⚠️  ${missingTasks.length} tasks still missing issues: ${missingTasks.join(', ')}`
+                );
             } else {
                 console.log('   ✅ All tasks have corresponding issues');
             }
-
         } catch (error) {
             console.warn(`Warning: Could not verify recovery: ${error.message}`);
         }
@@ -392,13 +396,17 @@ class DisasterRecovery {
         console.log(`   Issues created: ${results.recovered.created.length}`);
         console.log(`   Issues updated: ${results.recovered.updated.length}`);
         console.log(`   Issues preserved: ${results.recovered.preserved.length}`);
-        console.log(`   Backup created: ${results.backup.issues.length} issues, ${results.backup.labels.length} labels, ${results.backup.milestones.length} milestones`);
+        console.log(
+            `   Backup created: ${results.backup.issues.length} issues, ${results.backup.labels.length} labels, ${results.backup.milestones.length} milestones`
+        );
         console.log(`   Errors: ${results.errors.length}`);
 
         if (results.errors.length > 0) {
             console.log('\n❌ Errors encountered:');
             results.errors.forEach((error, index) => {
-                console.log(`   ${index + 1}. ${error.task ? `Task ${error.task}: ` : ''}${error.error}`);
+                console.log(
+                    `   ${index + 1}. ${error.task ? `Task ${error.task}: ` : ''}${error.error}`
+                );
             });
         }
     }
@@ -446,7 +454,6 @@ async function main() {
         if (results.errors.length > 0) {
             process.exit(1);
         }
-
     } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);

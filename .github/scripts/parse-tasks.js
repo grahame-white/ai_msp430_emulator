@@ -107,10 +107,13 @@ class TaskParser {
 
         // Parse dependencies like "Task 1.1" or "Task 1.1, Task 1.2"
         const depString = match[1].trim();
-        const deps = depString.split(',').map(dep => {
-            const taskMatch = dep.trim().match(/Task (\d+\.\d+)/);
-            return taskMatch ? taskMatch[1] : null;
-        }).filter(Boolean);
+        const deps = depString
+            .split(',')
+            .map(dep => {
+                const taskMatch = dep.trim().match(/Task (\d+\.\d+)/);
+                return taskMatch ? taskMatch[1] : null;
+            })
+            .filter(Boolean);
 
         return deps;
     }
@@ -136,16 +139,17 @@ class TaskParser {
             }
 
             // Start fallback capture after task metadata (Priority, Effort, Dependencies)
-            if (trimmed.startsWith('**Priority**') ||
-                trimmed.startsWith('**Estimated Effort**')) {
+            if (trimmed.startsWith('**Priority**') || trimmed.startsWith('**Estimated Effort**')) {
                 inFallbackCapture = false;
                 continue;
             }
 
             // Stop at acceptance criteria or other sections
-            if (trimmed.startsWith('**Acceptance Criteria**') ||
+            if (
+                trimmed.startsWith('**Acceptance Criteria**') ||
                 trimmed.startsWith('**Files to Create**') ||
-                trimmed.startsWith('**Testing Strategy**')) {
+                trimmed.startsWith('**Testing Strategy**')
+            ) {
                 break;
             }
 
@@ -155,8 +159,13 @@ class TaskParser {
             }
 
             // Fallback: capture content that looks like description
-            if (!foundDependencies && !inFallbackCapture &&
-                trimmed && !trimmed.startsWith('**') && !trimmed.startsWith('#')) {
+            if (
+                !foundDependencies &&
+                !inFallbackCapture &&
+                trimmed &&
+                !trimmed.startsWith('**') &&
+                !trimmed.startsWith('#')
+            ) {
                 inFallbackCapture = true;
             }
 
@@ -175,7 +184,9 @@ class TaskParser {
      */
     extractAcceptanceCriteria(content) {
         const criteria = [];
-        const criteriaMatch = content.match(/\*\*Acceptance Criteria\*\*:\s*([\s\S]*?)(?=\*\*Files to Create\*\*|\*\*Testing Strategy\*\*|$)/);
+        const criteriaMatch = content.match(
+            /\*\*Acceptance Criteria\*\*:\s*([\s\S]*?)(?=\*\*Files to Create\*\*|\*\*Testing Strategy\*\*|$)/
+        );
 
         if (criteriaMatch) {
             const criteriaText = criteriaMatch[1];
@@ -222,7 +233,9 @@ class TaskParser {
      */
     extractTestingStrategy(content) {
         const strategy = [];
-        const strategyMatch = content.match(/\*\*Testing Strategy\*\*:\s*([\s\S]*?)(?=\*\*Script-Specific Test Steps\*\*|---|\n## |$)/);
+        const strategyMatch = content.match(
+            /\*\*Testing Strategy\*\*:\s*([\s\S]*?)(?=\*\*Script-Specific Test Steps\*\*|---|\n## |$)/
+        );
 
         if (strategyMatch) {
             const strategyText = strategyMatch[1];
@@ -300,13 +313,19 @@ async function main() {
         const parser = new TaskParser(filePath);
         const tasks = await parser.parse();
 
-        console.log(JSON.stringify({
-            totalTasks: tasks.length,
-            completedTasks: parser.getCompletedTasks().length,
-            incompleteTasks: parser.getIncompleteTasks().length,
-            tasksByPhase: parser.getTasksByPhase(),
-            tasks: tasks
-        }, null, 2));
+        console.log(
+            JSON.stringify(
+                {
+                    totalTasks: tasks.length,
+                    completedTasks: parser.getCompletedTasks().length,
+                    incompleteTasks: parser.getIncompleteTasks().length,
+                    tasksByPhase: parser.getTasksByPhase(),
+                    tasks: tasks
+                },
+                null,
+                2
+            )
+        );
     } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);

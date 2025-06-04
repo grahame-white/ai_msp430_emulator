@@ -1,7 +1,7 @@
 ---
 name: CI/CD Pipeline
 
-'on':
+"on":
   push:
     branches: [main]
   pull_request:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['8.0.x']
+        dotnet-version: ["8.0.x"]
 
     steps:
       - name: Checkout code
@@ -73,7 +73,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "8.0.x"
 
       - name: Test core scripts
         run: |
@@ -121,9 +121,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: '.github/scripts/package*.json'
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ".github/scripts/package*.json"
 
       - name: Install dependencies
         run: |
@@ -148,10 +148,12 @@ jobs:
       - name: Lint automation scripts
         run: |
           cd .github/scripts
-          echo "Installing ESLint..."
+          echo "Installing dependencies..."
           npm install
           echo "Running ESLint..."
           npm run lint
+          echo "Running Prettier check..."
+          npm run format:check
 
       - name: Validate YAML files
         run: |
@@ -162,7 +164,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: 'stable'
+          go-version: "stable"
 
       - name: Install actionlint
         run: go install github.com/rhymd/actionlint/cmd/actionlint@latest

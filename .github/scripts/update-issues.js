@@ -90,9 +90,18 @@ class GitHubIssuesUpdater {
 
                 // Apply updates
                 if (this.dryRun) {
-                    console.log(`[DRY RUN] Would update issue #${issue.number} for Task ${task.id}:`);
-                    changes.forEach(change => console.log(`  - ${change.field}: ${change.description}`));
-                    results.updated.push({ task, issueNumber: issue.number, changes, dryRun: true });
+                    console.log(
+                        `[DRY RUN] Would update issue #${issue.number} for Task ${task.id}:`
+                    );
+                    changes.forEach(change =>
+                        console.log(`  - ${change.field}: ${change.description}`)
+                    );
+                    results.updated.push({
+                        task,
+                        issueNumber: issue.number,
+                        changes,
+                        dryRun: true
+                    });
                 } else {
                     await this.applyUpdates(issue, task, changes);
                     results.updated.push({ task, issueNumber: issue.number, changes });
@@ -117,7 +126,6 @@ class GitHubIssuesUpdater {
                         await this.reopenIssue(issue.number);
                     }
                 }
-
             } catch (error) {
                 results.errors.push({
                     task: task,
@@ -206,12 +214,13 @@ class GitHubIssuesUpdater {
 
         // Check label changes
         const expectedLabels = this.generateLabels(task);
-        const currentLabels = issue.labels.map(label => typeof label === 'string' ? label : label.name);
+        const currentLabels = issue.labels.map(label =>
+            typeof label === 'string' ? label : label.name
+        );
 
         const missingLabels = expectedLabels.filter(label => !currentLabels.includes(label));
-        const extraLabels = currentLabels.filter(label =>
-            !expectedLabels.includes(label) &&
-            !label.startsWith('automated-') // Keep automation-related labels
+        const extraLabels = currentLabels.filter(
+            label => !expectedLabels.includes(label) && !label.startsWith('automated-') // Keep automation-related labels
         );
 
         if (missingLabels.length > 0 || extraLabels.length > 0) {
@@ -234,15 +243,15 @@ class GitHubIssuesUpdater {
 
         for (const change of changes) {
             switch (change.field) {
-            case 'title':
-                updateData.title = change.expected;
-                break;
-            case 'body':
-                updateData.body = this.generateIssueBody(task);
-                break;
-            case 'labels':
-                updateData.labels = change.expected;
-                break;
+                case 'title':
+                    updateData.title = change.expected;
+                    break;
+                case 'body':
+                    updateData.body = this.generateIssueBody(task);
+                    break;
+                case 'labels':
+                    updateData.labels = change.expected;
+                    break;
             }
         }
 
@@ -449,7 +458,6 @@ async function main() {
             });
             process.exit(1);
         }
-
     } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);

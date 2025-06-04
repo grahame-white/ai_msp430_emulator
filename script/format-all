@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# script/format-all
+# Format all code in the repository using appropriate tools
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Formatting MSP430 Emulator codebase..."
+
+# Format C# code
+echo "==> Formatting C# code with dotnet format..."
+dotnet format --verbosity minimal
+
+# Format JavaScript, JSON, YAML, and Markdown with Prettier
+echo "==> Formatting JavaScript, JSON, YAML, and Markdown with Prettier..."
+cd .github/scripts
+
+# Ensure dependencies are installed
+if [ ! -d "node_modules" ]; then
+    echo "==> Installing formatting dependencies..."
+    npm install > /dev/null 2>&1
+fi
+
+# Run Prettier on repository files
+npm run format
+
+cd - > /dev/null
+
+# Check if any files were modified
+if git diff --quiet; then
+    echo "==> No formatting changes needed"
+else
+    echo "==> Code formatting applied - please review and commit changes"
+    echo "    Modified files:"
+    git diff --name-only | sed 's/^/      /'
+fi
+
+echo "==> All code formatting completed successfully!"

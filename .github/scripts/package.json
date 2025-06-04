@@ -6,10 +6,12 @@
     "test": "node test-runner.js",
     "lint": "eslint *.js",
     "lint:fix": "eslint *.js --fix",
+    "format": "prettier --write *.js *.json *.md ../**/*.yml ../**/*.yaml",
+    "format:check": "prettier --check *.js *.json *.md ../**/*.yml ../**/*.yaml",
     "lint:yaml": "yamllint -c .yamllint.yml ../**/*.yml ../**/*.yaml",
     "lint:workflows": "find ../workflows -name '*.yml' -o -name '*.yaml' | xargs -r actionlint",
     "validate:workflows": "npm run lint:workflows",
-    "validate:all": "npm run lint && npm run lint:yaml && npm run lint:workflows",
+    "validate:all": "npm run lint && npm run format:check && npm run lint:yaml && npm run lint:workflows",
     "parse": "node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md",
     "dry-run": "node dry-run.js ../../MSP430_EMULATOR_TASKS.md",
     "sync": "node sync-tasks.js ../../MSP430_EMULATOR_TASKS.md --dry-run",
@@ -21,7 +23,8 @@
   },
   "devDependencies": {
     "eslint": "^8.56.0",
-    "yaml-lint": "^1.7.0"
+    "yaml-lint": "^1.7.0",
+    "prettier": "^3.2.5"
   },
   "engines": {
     "node": ">=18.0.0"

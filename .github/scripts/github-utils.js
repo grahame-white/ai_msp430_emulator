@@ -54,7 +54,9 @@ async function executeWithPermissionHandling(operation, operationDescription, co
         return { success: true };
     } catch (error) {
         if (isPermissionError(error)) {
-            console.warn(`⚠️  Cannot ${operationDescription} for ${context}: Insufficient permissions`);
+            console.warn(
+                `⚠️  Cannot ${operationDescription} for ${context}: Insufficient permissions`
+            );
         } else {
             console.warn(`⚠️  Failed to ${operationDescription} for ${context}: ${error.message}`);
         }
@@ -103,7 +105,9 @@ async function handleRateLimit(error, response, attempt = 1) {
         const maxDelay = 900000; // 15 minutes max
         const waitTime = Math.min(exponentialDelay, maxDelay);
 
-        console.log(`⏳ Using exponential backoff: waiting ${Math.ceil(waitTime / 1000)} seconds (attempt ${attempt})`);
+        console.log(
+            `⏳ Using exponential backoff: waiting ${Math.ceil(waitTime / 1000)} seconds (attempt ${attempt})`
+        );
         return waitTime;
     }
 
@@ -142,7 +146,9 @@ async function executeWithRateLimit(apiCall, operationName = 'API call', maxRetr
 
             if (waitTime > 0) {
                 if (attempt <= maxRetries) {
-                    console.log(`⏳ ${operationName}: Rate limited, waiting ${Math.ceil(waitTime / 1000)}s before retry ${attempt}/${maxRetries}`);
+                    console.log(
+                        `⏳ ${operationName}: Rate limited, waiting ${Math.ceil(waitTime / 1000)}s before retry ${attempt}/${maxRetries}`
+                    );
                     await delay(waitTime);
                     continue;
                 } else {
@@ -174,7 +180,9 @@ async function smartDelay(baseDelay = 1000, lastResponse = null) {
         // If we have less than 10% of our rate limit remaining, be more cautious
         if (remaining < limit * 0.1) {
             const cautionDelay = Math.max(baseDelay * 3, 3000);
-            console.log(`⏳ Low rate limit (${remaining}/${limit}), using cautious delay: ${cautionDelay}ms`);
+            console.log(
+                `⏳ Low rate limit (${remaining}/${limit}), using cautious delay: ${cautionDelay}ms`
+            );
             await delay(cautionDelay);
             return;
         }

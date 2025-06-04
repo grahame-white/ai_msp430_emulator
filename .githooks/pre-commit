@@ -27,9 +27,10 @@ fi
 # Check if we have staged C# files that need formatting
 STAGED_CSHARP_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cs|csproj|sln)$' || true)
 STAGED_JS_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.js$' || true)
+STAGED_FORMAT_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|json|md|yml|yaml)$' || true)
 
-if [ -z "$STAGED_CSHARP_FILES" ] && [ -z "$STAGED_JS_FILES" ]; then
-    echo "✅ No C# or JavaScript files staged, skipping formatting check"
+if [ -z "$STAGED_CSHARP_FILES" ] && [ -z "$STAGED_JS_FILES" ] && [ -z "$STAGED_FORMAT_FILES" ]; then
+    echo "✅ No files that need formatting staged, skipping formatting check"
     exit 0
 fi
 
@@ -90,6 +91,36 @@ if [ -n "$STAGED_JS_FILES" ]; then
         cd - > /dev/null
     fi
     echo "✅ JavaScript code formatting check passed"
+fi
+
+# Handle Prettier-formatted files
+if [ -n "$STAGED_FORMAT_FILES" ]; then
+    echo "Checking Prettier formatting for staged files:"
+    echo "$STAGED_FORMAT_FILES" | sed 's/^/  - /'
+
+    # Check if Prettier is available
+    if [ ! -f ".github/scripts/package.json" ]; then
+        echo "⚠️  No Prettier configuration found"
+    else
+        cd .github/scripts
+        
+        # Ensure dependencies are installed
+        if [ ! -d "node_modules" ]; then
+            echo "==> Installing formatting dependencies..."
+            npm install > /dev/null 2>&1
+        fi
+
+        # Run Prettier check on the staged files
+        if ! npm run format:check > /dev/null 2>&1; then
+            echo "❌ Prettier formatting check failed!"
+            echo "   Run 'cd .github/scripts && npm run format:check' to see details"
+            echo "   Fix the issues by running 'npm run format' to auto-format"
+            exit 1
+        fi
+        
+        cd - > /dev/null
+    fi
+    echo "✅ Prettier formatting check passed"
 fi
 
 echo "✅ All code formatting checks passed"

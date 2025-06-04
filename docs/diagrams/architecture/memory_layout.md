@@ -65,27 +65,23 @@ block-beta
 
 ## Memory Access Permissions Matrix
 
-```mermaid
-gitgraph
-    commit id: "0x0000: SFR Start (RW)"
-    commit id: "0x00FF: SFR End"
-    commit id: "0x0100: 8-bit Peripherals (RW)"
-    commit id: "0x01FF: 8-bit End"
-    commit id: "0x0200: 16-bit Peripherals (RW)"
-    commit id: "0x027F: 16-bit End"
-    commit id: "0x1000: Bootstrap Loader (RX)"
-    commit id: "0x17FF: BSL End"
-    commit id: "0x1800: Info Memory (RW)"
-    commit id: "0x19FF: Info End"
-    commit id: "0x2000: SRAM Start (RWX)"
-    commit id: "0x2FFF: SRAM End"
-    commit id: "0x4000: FRAM Start (RWX)"
-    commit id: "0xBFFF: FRAM End"
-    commit id: "0xFFE0: IVT Start (RX)"
-    commit id: "0xFFFF: IVT End"
-```
+| Address Range | Region Name | Read | Write | Execute | Permission Code |
+|---------------|-------------|------|-------|---------|-----------------|
+| 0x0000-0x00FF | Special Function Registers | ✅ | ✅ | ❌ | RW |
+| 0x0100-0x01FF | 8-bit Peripherals | ✅ | ✅ | ❌ | RW |
+| 0x0200-0x027F | 16-bit Peripherals | ✅ | ✅ | ❌ | RW |
+| 0x0280-0x0FFF | *Unmapped* | ❌ | ❌ | ❌ | None |
+| 0x1000-0x17FF | Bootstrap Loader FRAM | ✅ | ❌ | ✅ | RX |
+| 0x1800-0x19FF | Information Memory FRAM | ✅ | ✅ | ❌ | RW |
+| 0x1A00-0x1FFF | *Unmapped* | ❌ | ❌ | ❌ | None |
+| 0x2000-0x2FFF | SRAM | ✅ | ✅ | ✅ | RWX |
+| 0x3000-0x3FFF | *Unmapped* | ❌ | ❌ | ❌ | None |
+| 0x4000-0xBFFF | FRAM Memory | ✅ | ✅ | ✅ | RWX |
+| 0xC000-0xFFDF | *Unmapped* | ❌ | ❌ | ❌ | None |
+| 0xFFE0-0xFFFF | Interrupt Vector Table | ✅ | ❌ | ✅ | RX |
 
 ### Permission Legend
+
 - **R** = Read Access Allowed
 - **W** = Write Access Allowed  
 - **X** = Execute Access Allowed
@@ -96,7 +92,8 @@ gitgraph
 ## Memory Architecture Characteristics
 
 ### FRAM Technology Benefits
-```
+
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │ FRAM (Ferroelectric RAM) vs Traditional Flash Memory        │
 ├─────────────────────────────────────────────────────────────┤
@@ -111,7 +108,7 @@ gitgraph
 
 ### Memory Segmentation Summary
 
-```
+```text
 Total Address Space: 64KB (65,536 bytes)
 ├── Mapped Regions: 39,936 bytes (61.0%)
 │   ├── System/Peripherals: 640 bytes (1.0%)
@@ -138,6 +135,7 @@ Total Address Space: 64KB (65,536 bytes)
 - Exception handling for invalid access attempts
 
 ### Important Note on Terminology
+
 The main memory region (0x4000-0xBFFF) is internally labeled as `Flash` in the `MemoryRegion` enum for legacy compatibility, but this region represents **FRAM (Ferroelectric RAM)** technology in the MSP430FR2355. FRAM provides significant advantages over traditional Flash memory including byte-level write operations, faster write speeds, and higher endurance. All documentation and comments correctly reference this as FRAM memory.
 
 ---
@@ -147,6 +145,7 @@ The main memory region (0x4000-0xBFFF) is internally labeled as `Flash` in the `
 This documentation is based on official Texas Instruments documentation:
 
 **Primary References:**
+
 - **MSP430FR2355 Mixed-Signal Microcontroller Datasheet** (SLAS847G, October 2016 - Revised December 2019)
   - Section 6: "Specifications" - Memory organization and address mapping (Table 6-4, p. 20)
   - Section 7: "Device and Documentation Support" - Memory layout overview
@@ -156,6 +155,7 @@ This documentation is based on official Texas Instruments documentation:
   - Section 6: "FRAM Controller (FRCTL_A)" - FRAM memory characteristics and operation
 
 **Memory Map Verification:**
+
 - Datasheet SLAS847G, Table 6-4 "Memory Organization" confirms address ranges
 - User's Guide SLAU445I, Figure 1-1 "MSP430FR2xx Memory Map" provides visual layout
 - Bootstrap Loader specification from SLAU445I Section 1.4.5 (0x1000-0x17FF)

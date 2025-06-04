@@ -14,17 +14,17 @@ Section 3.2.3: "Status Register (SR)" - Figure 3-2*
 
 ```text
 Status Register (R2/SR) - 16 bits
-┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
-│R│R│R│R│R│R│R│V│S│S│O│C│G│N│Z│C│  Bit Position
-│E│E│E│E│E│E│E│ │C│C│S│P│I│ │ │ │
-│S│S│S│S│S│S│S│ │G│G│C│U│E│ │ │ │  Flag Name
-│E│E│E│E│E│E│E│ │1│0│ │ │ │ │ │ │
-│R│R│R│R│R│R│R│ │ │ │ │ │ │ │ │ │
-│V│V│V│V│V│V│V│ │ │ │ │ │ │ │ │ │
-│E│E│E│E│E│E│E│ │ │ │ │ │ │ │ │ │
-│D│D│D│D│D│D│D│ │ │ │ │ │ │ │ │ │
-└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
-15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+│R │R │R │R │R │R │R │V │S │S │O │C │G │N │Z │C │  Bit Position
+│E │E │E │E │E │E │E │  │C │C │S │P │I │  │  │  │
+│S │S │S │S │S │S │S │  │G │G │C │U │E │  │  │  │  Flag Name
+│E │E │E │E │E │E │E │  │1 │0 │  │  │  │  │  │  │
+│R │R │R │R │R │R │R │  │  │  │  │  │  │  │  │  │
+│V │V │V │V │V │V │V │  │  │  │  │  │  │  │  │  │
+│E │E │E │E │E │E │E │  │  │  │  │  │  │  │  │  │
+│D │D │D │D │D │D │D │  │  │  │  │  │  │  │  │  │
+└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
+15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
 
 ```text
 
@@ -54,17 +54,17 @@ Table 3-2*
 ### Carry Flag (C) - Bit 0
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ Carry Flag (C) - Bit 0                                   │
-├───────────────────────────────────────────────────────────┤
-│ Set when:                                                 │
-│ • Addition generates a carry from bit 15                  │
-│ • Subtraction requires a borrow to bit 15                 │
-│ • Shift/rotate operations shift a 1 out of MSB/LSB       │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0001                                             │
-│ Property: StatusRegister.Carry                           │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ Carry Flag (C) - Bit 0                                        │
+├───────────────────────────────────────────────────────────────┤
+│ Set when:                                                     │
+│ • Addition generates a carry from bit 15                      │
+│ • Subtraction requires a borrow to bit 15                     │
+│ • Shift/rotate operations shift a 1 out of MSB/LSB           │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0001                                                  │
+│ Property: StatusRegister.Carry                                │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -72,17 +72,17 @@ Table 3-2*
 ### Zero Flag (Z) - Bit 1
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ Zero Flag (Z) - Bit 1                                    │
-├───────────────────────────────────────────────────────────┤
-│ Set when:                                                 │
-│ • Arithmetic or logical operation result equals zero      │
-│ • Compare operation finds equal values                    │
-│ • Test operation finds all tested bits are zero          │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0002                                             │
-│ Property: StatusRegister.Zero                            │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ Zero Flag (Z) - Bit 1                                         │
+├───────────────────────────────────────────────────────────────┤
+│ Set when:                                                     │
+│ • Arithmetic or logical operation result equals zero          │
+│ • Compare operation finds equal values                        │
+│ • Test operation finds all tested bits are zero              │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0002                                                  │
+│ Property: StatusRegister.Zero                                 │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -90,17 +90,17 @@ Table 3-2*
 ### Negative Flag (N) - Bit 2
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ Negative Flag (N) - Bit 2                                │
-├───────────────────────────────────────────────────────────┤
-│ Set when:                                                 │
-│ • Arithmetic or logical operation result is negative      │
-│ • Most significant bit (bit 15) of result is 1           │
-│ • Signed comparison finds first operand less than second  │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0004                                             │
-│ Property: StatusRegister.Negative                        │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ Negative Flag (N) - Bit 2                                     │
+├───────────────────────────────────────────────────────────────┤
+│ Set when:                                                     │
+│ • Arithmetic or logical operation result is negative          │
+│ • Most significant bit (bit 15) of result is 1               │
+│ • Signed comparison finds first operand less than second      │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0004                                                  │
+│ Property: StatusRegister.Negative                             │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -108,17 +108,17 @@ Table 3-2*
 ### Overflow Flag (V) - Bit 8
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ Overflow Flag (V) - Bit 8                                │
-├───────────────────────────────────────────────────────────┤
-│ Set when:                                                 │
-│ • Signed arithmetic operation result exceeds range        │
-│ • Addition of same sign operands produces opposite sign   │
-│ • Subtraction causes sign change when it shouldn't        │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0100                                             │
-│ Property: StatusRegister.Overflow                        │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ Overflow Flag (V) - Bit 8                                     │
+├───────────────────────────────────────────────────────────────┤
+│ Set when:                                                     │
+│ • Signed arithmetic operation result exceeds range            │
+│ • Addition of same sign operands produces opposite sign       │
+│ • Subtraction causes sign change when it shouldn't            │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0100                                                  │
+│ Property: StatusRegister.Overflow                             │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -128,19 +128,19 @@ Table 3-2*
 ### General Interrupt Enable (GIE) - Bit 3
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ General Interrupt Enable (GIE) - Bit 3                   │
-├───────────────────────────────────────────────────────────┤
-│ When set (1):                                             │
-│ • Maskable interrupts are enabled                         │
-│ • CPU will respond to interrupt requests                  │
-│ When clear (0):                                           │
-│ • Maskable interrupts are disabled                        │
-│ • Only non-maskable interrupts are processed              │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0008                                             │
-│ Property: StatusRegister.GeneralInterruptEnable         │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ General Interrupt Enable (GIE) - Bit 3                       │
+├───────────────────────────────────────────────────────────────┤
+│ When set (1):                                                 │
+│ • Maskable interrupts are enabled                             │
+│ • CPU will respond to interrupt requests                      │
+│ When clear (0):                                               │
+│ • Maskable interrupts are disabled                            │
+│ • Only non-maskable interrupts are processed                  │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0008                                                  │
+│ Property: StatusRegister.GeneralInterruptEnable              │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -148,19 +148,19 @@ Table 3-2*
 ### CPU Off (CPUOFF) - Bit 4
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ CPU Off (CPUOFF) - Bit 4                                 │
-├───────────────────────────────────────────────────────────┤
-│ When set (1):                                             │
-│ • CPU is turned off (low power mode)                      │
-│ • CPU stops executing instructions                        │
-│ • System clocks continue running                          │
-│ When clear (0):                                           │
-│ • CPU is active and executing instructions                │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0010                                             │
-│ Property: StatusRegister.CpuOff                         │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ CPU Off (CPUOFF) - Bit 4                                      │
+├───────────────────────────────────────────────────────────────┤
+│ When set (1):                                                 │
+│ • CPU is turned off (low power mode)                          │
+│ • CPU stops executing instructions                            │
+│ • System clocks continue running                              │
+│ When clear (0):                                               │
+│ • CPU is active and executing instructions                    │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0010                                                  │
+│ Property: StatusRegister.CpuOff                              │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -168,19 +168,19 @@ Table 3-2*
 ### Oscillator Off (OSC) - Bit 5
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ Oscillator Off (OSC) - Bit 5                            │
-├───────────────────────────────────────────────────────────┤
-│ When set (1):                                             │
-│ • LFXT1 oscillator is turned off                         │
-│ • Reduces power consumption                               │
-│ • Affects timer and peripheral clocks                     │
-│ When clear (0):                                           │
-│ • LFXT1 oscillator is active                             │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0020                                             │
-│ Property: StatusRegister.OscillatorOff                  │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ Oscillator Off (OSC) - Bit 5                                 │
+├───────────────────────────────────────────────────────────────┤
+│ When set (1):                                                 │
+│ • LFXT1 oscillator is turned off                             │
+│ • Reduces power consumption                                   │
+│ • Affects timer and peripheral clocks                         │
+│ When clear (0):                                               │
+│ • LFXT1 oscillator is active                                 │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0020                                                  │
+│ Property: StatusRegister.OscillatorOff                       │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -188,19 +188,19 @@ Table 3-2*
 ### System Clock Generator 0 (SCG0) - Bit 6
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ System Clock Generator 0 (SCG0) - Bit 6                 │
-├───────────────────────────────────────────────────────────┤
-│ When set (1):                                             │
-│ • Turns off SMCLK (sub-main clock)                       │
-│ • Reduces power consumption                               │
-│ • Affects peripheral operation                            │
-│ When clear (0):                                           │
-│ • SMCLK is active                                         │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0040                                             │
-│ Property: StatusRegister.SystemClockGenerator0          │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ System Clock Generator 0 (SCG0) - Bit 6                      │
+├───────────────────────────────────────────────────────────────┤
+│ When set (1):                                                 │
+│ • Turns off SMCLK (sub-main clock)                           │
+│ • Reduces power consumption                                   │
+│ • Affects peripheral operation                                │
+│ When clear (0):                                               │
+│ • SMCLK is active                                             │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0040                                                  │
+│ Property: StatusRegister.SystemClockGenerator0               │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -208,19 +208,19 @@ Table 3-2*
 ### System Clock Generator 1 (SCG1) - Bit 7
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ System Clock Generator 1 (SCG1) - Bit 7                 │
-├───────────────────────────────────────────────────────────┤
-│ When set (1):                                             │
-│ • Turns off DCO (digitally controlled oscillator)        │
-│ • Affects MCLK and SMCLK sources                         │
-│ • Enables low power mode                                  │
-│ When clear (0):                                           │
-│ • DCO is active                                           │
-├───────────────────────────────────────────────────────────┤
-│ Mask: 0x0040                                             │
-│ Property: StatusRegister.SystemClockGenerator1          │
-└───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ System Clock Generator 1 (SCG1) - Bit 7                      │
+├───────────────────────────────────────────────────────────────┤
+│ When set (1):                                                 │
+│ • Turns off DCO (digitally controlled oscillator)            │
+│ • Affects MCLK and SMCLK sources                             │
+│ • Enables low power mode                                      │
+│ When clear (0):                                               │
+│ • DCO is active                                               │
+├───────────────────────────────────────────────────────────────┤
+│ Mask: 0x0080                                                  │
+│ Property: StatusRegister.SystemClockGenerator1               │
+└───────────────────────────────────────────────────────────────┘
 
 ```text
 
@@ -243,9 +243,9 @@ Table 3-2*
 
 ```text
 Status Register = 0x0000
-┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
-│0│0│0│0│0│0│0│0│0│0│0│0│0│0│0│0│
-└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
+┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+│0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │
+└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
   All flags clear
 
 ```text
@@ -255,10 +255,10 @@ Status Register = 0x0000
 
 ```text
 Status Register = 0x0001 (Carry set)
-┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
-│0│0│0│0│0│0│0│0│0│0│0│0│0│0│0│1│
-└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
-                              C=1
+┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+│0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │1 │
+└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
+                                              C=1
 
 ```text
 
@@ -267,10 +267,10 @@ Status Register = 0x0001 (Carry set)
 
 ```text
 Status Register = 0x0002 (Zero set)
-┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
-│0│0│0│0│0│0│0│0│0│0│0│0│0│0│1│0│
-└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
-                            Z=1
+┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+│0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │1 │0 │
+└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
+                                           Z=1
 
 ```text
 
@@ -279,10 +279,10 @@ Status Register = 0x0002 (Zero set)
 
 ```text
 Status Register = 0x0008 (GIE set)
-┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
-│0│0│0│0│0│0│0│0│0│0│0│0│1│0│0│0│
-└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
-                      GIE=1
+┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+│0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │1 │0 │0 │0 │
+└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
+                                     GIE=1
 
 ```text
 

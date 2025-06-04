@@ -12,30 +12,30 @@ Section 3.2: "CPU Registers" - Figure 3-1.
 Section 3.2.2: "Stack Pointer (SP)"*
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│                    MSP430 Register File                        │
-│                     (16 x 16-bit)                              │
-├────────────┬────────┬───────────────────────┬──────────────────┤
-│  Register  │  Name  │      Function         │    Special       │
-│   Number   │        │                       │   Behavior       │
-├────────────┼────────┼───────────────────────┼──────────────────┤
-│    R0      │   PC   │ Program Counter       │  Word Aligned    │
-│    R1      │   SP   │ Stack Pointer         │  Word Aligned    │
-│    R2      │   SR   │ Status Register       │  Flag Management │
-│    R3      │  CG1   │ Constant Generator #1 │  Read-Only*      │
-│    R4      │   -    │ General Purpose       │  Read/Write      │
-│    R5      │   -    │ General Purpose       │  Read/Write      │
-│    R6      │   -    │ General Purpose       │  Read/Write      │
-│    R7      │   -    │ General Purpose       │  Read/Write      │
-│    R8      │   -    │ General Purpose       │  Read/Write      │
-│    R9      │   -    │ General Purpose       │  Read/Write      │
-│    R10     │   -    │ General Purpose       │  Read/Write      │
-│    R11     │   -    │ General Purpose       │  Read/Write      │
-│    R12     │   -    │ General Purpose       │  Read/Write      │
-│    R13     │   -    │ General Purpose       │  Read/Write      │
-│    R14     │   -    │ General Purpose       │  Read/Write      │
-│    R15     │   -    │ General Purpose       │  Read/Write      │
-└────────────┴────────┴───────────────────────┴──────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│                    MSP430 Register File                       │
+│                     (16 x 16-bit)                             │
+├────────────┬────────┬───────────────────────┬─────────────────┤
+│  Register  │  Name  │      Function         │   Special        │
+│   Number   │        │                       │  Behavior        │
+├────────────┼────────┼───────────────────────┼─────────────────┤
+│    R0      │   PC   │ Program Counter       │ Word Aligned     │
+│    R1      │   SP   │ Stack Pointer         │ Word Aligned     │
+│    R2      │   SR   │ Status Register       │ Flag Management  │
+│    R3      │  CG1   │ Constant Generator #1 │ Read-Only*       │
+│    R4      │   -    │ General Purpose       │ Read/Write       │
+│    R5      │   -    │ General Purpose       │ Read/Write       │
+│    R6      │   -    │ General Purpose       │ Read/Write       │
+│    R7      │   -    │ General Purpose       │ Read/Write       │
+│    R8      │   -    │ General Purpose       │ Read/Write       │
+│    R9      │   -    │ General Purpose       │ Read/Write       │
+│    R10     │   -    │ General Purpose       │ Read/Write       │
+│    R11     │   -    │ General Purpose       │ Read/Write       │
+│    R12     │   -    │ General Purpose       │ Read/Write       │
+│    R13     │   -    │ General Purpose       │ Read/Write       │
+│    R14     │   -    │ General Purpose       │ Read/Write       │
+│    R15     │   -    │ General Purpose       │ Read/Write       │
+└────────────┴────────┴───────────────────────┴─────────────────┘
 
 ```text
 
@@ -69,13 +69,13 @@ Section 3.2.2: "Stack Pointer (SP)"*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│                    R0 (Program Counter)                      │
+│                    R0 (Program Counter)                       │
 ├───────────────────────────────────────────────────────────────┤
-│ 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0 │
-│ ┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐               │
-│ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │0│ ← Always 0    │
-│ └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘               │
-│                Word Address (Bit 0 = 0)         │
+│  15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0             │
+│ ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐            │
+│ │  │  │  │  │  │  │  │  │  │  │  │  │  │  │  │0 │ ← Always 0 │
+│ └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘            │
+│                Word Address (Bit 0 = 0)                       │
 └───────────────────────────────────────────────────────────────┘
 
 ```text
@@ -88,11 +88,11 @@ Section 3.2.2: "Stack Pointer (SP)"*
 ┌───────────────────────────────────────────────────────────────┐
 │                    R1 (Stack Pointer)                        │
 ├───────────────────────────────────────────────────────────────┤
-│ 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0 │
-│ ┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐               │
-│ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │0│ ← Always 0    │
-│ └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘               │
-│                Stack Address (Bit 0 = 0)        │
+│  15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0             │
+│ ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐            │
+│ │  │  │  │  │  │  │  │  │  │  │  │  │  │  │  │0 │ ← Always 0 │
+│ └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘            │
+│                Stack Address (Bit 0 = 0)                      │
 └───────────────────────────────────────────────────────────────┘
 
 ```text
@@ -103,16 +103,16 @@ Section 3.2.2: "Stack Pointer (SP)"*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│                    R2 (Status Register)                      │
+│                    R2 (Status Register)                       │
 ├───────────────────────────────────────────────────────────────┤
-│ 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0 │
-│ ┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐               │
-│ │ │ │ │ │ │ │ │V│S│S│O│C│G│N│Z│C│               │
-│ │ │ │ │ │ │ │ │ │C│C│S│P│I│ │ │ │               │
-│ │ │ │ │ │ │ │ │ │G│G│C│U│E│ │ │ │               │
-│ │ │ │ │ │ │ │ │ │1│0│ │ │ │ │ │ │               │
-│ └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘               │
-│   Reserved    │Individual Flag Control│         │
+│  15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0             │
+│ ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐            │
+│ │  │  │  │  │  │  │  │V │S │S │O │C │G │N │Z │C │            │
+│ │  │  │  │  │  │  │  │  │C │C │S │P │I │  │  │  │            │
+│ │  │  │  │  │  │  │  │  │G │G │C │U │E │  │  │  │            │
+│ │  │  │  │  │  │  │  │  │1 │0 │  │  │  │  │  │  │            │
+│ └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘            │
+│   Reserved                │Individual Flag Control│           │
 └───────────────────────────────────────────────────────────────┘
 
 ```text
@@ -123,13 +123,13 @@ Section 3.2.2: "Stack Pointer (SP)"*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│                    R3 (Constant Generator)                   │
+│                    R3 (Constant Generator)                    │
 ├───────────────────────────────────────────────────────────────┤
-│ Addressing Mode Dependent Constants:                         │
-│ - 00: Register mode (read stored value)                      │
-│ - 01: Indexed mode (generates 0)                            │
-│ - 10: Indirect mode (generates +1)                          │
-│ - 11: Indirect auto-increment (generates +2)                │
+│ Addressing Mode Dependent Constants:                          │
+│ - 00: Register mode (read stored value)                       │
+│ - 01: Indexed mode (generates 0)                              │
+│ - 10: Indirect mode (generates +1)                            │
+│ - 11: Indirect auto-increment (generates +2)                  │
 └───────────────────────────────────────────────────────────────┘
 
 ```text

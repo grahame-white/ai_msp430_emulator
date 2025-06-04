@@ -58,7 +58,7 @@ Table 3-2*
 │ Set when:                                                     │
 │ • Addition generates a carry from bit 15                      │
 │ • Subtraction requires a borrow to bit 15                     │
-│ • Shift/rotate operations shift a 1 out of MSB/LSB           │
+│ • Shift/rotate operations shift a 1 out of MSB/LSB            │
 ├───────────────────────────────────────────────────────────────┤
 │ Mask: 0x0001                                                  │
 │ Property: StatusRegister.Carry                                │
@@ -74,7 +74,7 @@ Table 3-2*
 │ Set when:                                                     │
 │ • Arithmetic or logical operation result equals zero          │
 │ • Compare operation finds equal values                        │
-│ • Test operation finds all tested bits are zero              │
+│ • Test operation finds all tested bits are zero               │
 ├───────────────────────────────────────────────────────────────┤
 │ Mask: 0x0002                                                  │
 │ Property: StatusRegister.Zero                                 │
@@ -89,7 +89,7 @@ Table 3-2*
 ├───────────────────────────────────────────────────────────────┤
 │ Set when:                                                     │
 │ • Arithmetic or logical operation result is negative          │
-│ • Most significant bit (bit 15) of result is 1               │
+│ • Most significant bit (bit 15) of result is 1                │
 │ • Signed comparison finds first operand less than second      │
 ├───────────────────────────────────────────────────────────────┤
 │ Mask: 0x0004                                                  │
@@ -119,7 +119,7 @@ Table 3-2*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│ General Interrupt Enable (GIE) - Bit 3                       │
+│ General Interrupt Enable (GIE) - Bit 3                        │
 ├───────────────────────────────────────────────────────────────┤
 │ When set (1):                                                 │
 │ • Maskable interrupts are enabled                             │
@@ -129,7 +129,7 @@ Table 3-2*
 │ • Only non-maskable interrupts are processed                  │
 ├───────────────────────────────────────────────────────────────┤
 │ Mask: 0x0008                                                  │
-│ Property: StatusRegister.GeneralInterruptEnable              │
+│ Property: StatusRegister.GeneralInterruptEnable               │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -147,7 +147,7 @@ Table 3-2*
 │ • CPU is active and executing instructions                    │
 ├───────────────────────────────────────────────────────────────┤
 │ Mask: 0x0010                                                  │
-│ Property: StatusRegister.CpuOff                              │
+│ Property: StatusRegister.CpuOff                               │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -155,17 +155,17 @@ Table 3-2*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│ Oscillator Off (OSC) - Bit 5                                 │
+│ Oscillator Off (OSC) - Bit 5                                  │
 ├───────────────────────────────────────────────────────────────┤
 │ When set (1):                                                 │
-│ • LFXT1 oscillator is turned off                             │
+│ • LFXT1 oscillator is turned off                              │
 │ • Reduces power consumption                                   │
 │ • Affects timer and peripheral clocks                         │
 │ When clear (0):                                               │
-│ • LFXT1 oscillator is active                                 │
+│ • LFXT1 oscillator is active                                  │
 ├───────────────────────────────────────────────────────────────┤
 │ Mask: 0x0020                                                  │
-│ Property: StatusRegister.OscillatorOff                       │
+│ Property: StatusRegister.OscillatorOff                        │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -173,17 +173,17 @@ Table 3-2*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│ System Clock Generator 0 (SCG0) - Bit 6                      │
+│ System Clock Generator 0 (SCG0) - Bit 6                       │
 ├───────────────────────────────────────────────────────────────┤
 │ When set (1):                                                 │
-│ • Turns off SMCLK (sub-main clock)                           │
+│ • Turns off SMCLK (sub-main clock)                            │
 │ • Reduces power consumption                                   │
 │ • Affects peripheral operation                                │
 │ When clear (0):                                               │
 │ • SMCLK is active                                             │
 ├───────────────────────────────────────────────────────────────┤
 │ Mask: 0x0040                                                  │
-│ Property: StatusRegister.SystemClockGenerator0               │
+│ Property: StatusRegister.SystemClockGenerator0                │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -191,17 +191,17 @@ Table 3-2*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│ System Clock Generator 1 (SCG1) - Bit 7                      │
+│ System Clock Generator 1 (SCG1) - Bit 7                       │
 ├───────────────────────────────────────────────────────────────┤
 │ When set (1):                                                 │
-│ • Turns off DCO (digitally controlled oscillator)            │
-│ • Affects MCLK and SMCLK sources                             │
+│ • Turns off DCO (digitally controlled oscillator)             │
+│ • Affects MCLK and SMCLK sources                              │
 │ • Enables low power mode                                      │
 │ When clear (0):                                               │
 │ • DCO is active                                               │
 ├───────────────────────────────────────────────────────────────┤
 │ Mask: 0x0080                                                  │
-│ Property: StatusRegister.SystemClockGenerator1               │
+│ Property: StatusRegister.SystemClockGenerator1                │
 └───────────────────────────────────────────────────────────────┘
 ```
 

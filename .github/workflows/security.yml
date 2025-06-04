@@ -93,6 +93,15 @@ jobs:
           SCAN_FAILED=false
           ./script/security --skip-licenses || SCAN_FAILED=true
 
+          # Additional check for documentation dependencies
+          echo "==> Checking documentation tooling for vulnerabilities..."
+          if npm audit --audit-level=moderate; then
+            echo "✅ Documentation dependencies are secure"
+          else
+            echo "❌ Documentation dependencies have vulnerabilities"
+            SCAN_FAILED=true
+          fi
+
           if [ "$SCAN_FAILED" = true ]; then
             echo "❌ Security vulnerabilities detected"
             exit 1
@@ -119,14 +128,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Trivy secret scanner
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.31.0
         with:
           scan-type: "fs"
           scan-ref: "."
           format: "sarif"
           output: "trivy-results.sarif"
           scanners: "secret"
-          # Include automation scripts in secret scanning
+          # Include automation scripts and documentation dependencies in secret scanning
           skip-dirs: "node_modules"
 
       - name: Upload Trivy scan results to GitHub Security tab

@@ -9,7 +9,7 @@
 
 const { Octokit } = require('@octokit/rest');
 const { TaskParser } = require('./parse-tasks.js');
-const { isPermissionError, executeWithPermissionHandling } = require('./github-utils.js');
+const { isPermissionError, executeWithPermissionHandling, executeWithRateLimit, smartDelay } = require('./github-utils.js');
 
 class GitHubIssuesCreator {
     constructor(token, owner, repo) {
@@ -78,8 +78,8 @@ class GitHubIssuesCreator {
                     // Add labels and milestone
                     await this.applyMetadata(issue.number, task);
 
-                    // Small delay to respect rate limits
-                    await this.delay(500);
+                    // Smart delay to respect rate limits
+                    await smartDelay(1000);
                 }
             } catch (error) {
                 results.errors.push({
@@ -97,15 +97,16 @@ class GitHubIssuesCreator {
      */
     async findExistingIssue(task) {
         try {
-            // Add delay to respect rate limits
-            await this.delay(1000);
-            
             const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task ${task.id}:"`;
-            const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
-                q: searchQuery,
-                sort: 'created',
-                order: 'desc'
-            });
+            const searchResults = await executeWithRateLimit(
+                () => this.octokit.rest.search.issuesAndPullRequests({
+                    q: searchQuery,
+                    sort: 'created',
+                    order: 'desc'
+                }),
+                `search for existing issue for task ${task.id}`,
+                5 // More retries for search API
+            );
 
             // Check if any result matches our exact task ID
             for (const issue of searchResults.data.items) {
@@ -118,11 +119,6 @@ class GitHubIssuesCreator {
             return null;
         } catch (error) {
             console.warn(`Warning: Could not search for existing issue for task ${task.id}: ${error.message}`);
-            // If rate limited, wait longer
-            if (error.status === 403 && error.message.includes('rate limit')) {
-                console.log('Rate limited, waiting 60 seconds...');
-                await this.delay(60000);
-            }
             return null;
         }
     }
@@ -245,13 +241,16 @@ class GitHubIssuesCreator {
      * Create the issue via GitHub API
      */
     async createIssue(issueData) {
-        const response = await this.octokit.rest.issues.create({
-            owner: this.owner,
-            repo: this.repo,
-            title: issueData.title,
-            body: issueData.body,
-            labels: issueData.labels
-        });
+        const response = await executeWithRateLimit(
+            () => this.octokit.rest.issues.create({
+                owner: this.owner,
+                repo: this.repo,
+                title: issueData.title,
+                body: issueData.body,
+                labels: issueData.labels
+            }),
+            `create issue: ${issueData.title}`
+        );
 
         return response.data;
     }
@@ -264,12 +263,15 @@ class GitHubIssuesCreator {
         const milestone = await this.findOrCreateMilestone(task.phase);
         if (milestone) {
             try {
-                await this.octokit.rest.issues.update({
-                    owner: this.owner,
-                    repo: this.repo,
-                    issue_number: issueNumber,
-                    milestone: milestone.number
-                });
+                await executeWithRateLimit(
+                    () => this.octokit.rest.issues.update({
+                        owner: this.owner,
+                        repo: this.repo,
+                        issue_number: issueNumber,
+                        milestone: milestone.number
+                    }),
+                    `assign milestone to issue #${issueNumber}`
+                );
             } catch (error) {
                 console.warn(`Warning: Could not assign milestone to issue ${issueNumber}: ${error.message}`);
             }
@@ -282,11 +284,14 @@ class GitHubIssuesCreator {
     async findOrCreateMilestone(phase) {
         try {
             // Try to find existing milestone
-            const milestones = await this.octokit.rest.issues.listMilestones({
-                owner: this.owner,
-                repo: this.repo,
-                state: 'all'
-            });
+            const milestones = await executeWithRateLimit(
+                () => this.octokit.rest.issues.listMilestones({
+                    owner: this.owner,
+                    repo: this.repo,
+                    state: 'all'
+                }),
+                `list milestones for ${phase}`
+            );
 
             const existingMilestone = milestones.data.find(m => m.title === phase);
             if (existingMilestone) {
@@ -295,13 +300,18 @@ class GitHubIssuesCreator {
 
             // Create new milestone if it doesn't exist
             if (!this.dryRun) {
-                const response = await this.octokit.rest.issues.createMilestone({
-                    owner: this.owner,
-                    repo: this.repo,
-                    title: phase,
-                    description: `Tasks for ${phase} of MSP430 Emulator development`
-                });
+                const response = await executeWithRateLimit(
+                    () => this.octokit.rest.issues.createMilestone({
+                        owner: this.owner,
+                        repo: this.repo,
+                        title: phase,
+                        description: `Tasks for ${phase} of MSP430 Emulator development`
+                    }),
+                    `create milestone for ${phase}`
+                );
                 return response.data;
+            } else {
+                console.log(`[DRY RUN] Would create milestone: ${phase}`);
             }
 
             return null;
@@ -333,24 +343,30 @@ class GitHubIssuesCreator {
 
         for (const labelData of requiredLabels) {
             try {
-                await this.octokit.rest.issues.getLabel({
-                    owner: this.owner,
-                    repo: this.repo,
-                    name: labelData.name
-                });
+                await executeWithRateLimit(
+                    () => this.octokit.rest.issues.getLabel({
+                        owner: this.owner,
+                        repo: this.repo,
+                        name: labelData.name
+                    }),
+                    `get label ${labelData.name}`
+                );
             } catch (error) {
                 if (error.status === 404) {
                     // Label doesn't exist, create it
                     if (!this.dryRun) {
                         const createResult = await executeWithPermissionHandling(
                             async() => {
-                                await this.octokit.rest.issues.createLabel({
-                                    owner: this.owner,
-                                    repo: this.repo,
-                                    name: labelData.name,
-                                    color: labelData.color,
-                                    description: labelData.description
-                                });
+                                await executeWithRateLimit(
+                                    () => this.octokit.rest.issues.createLabel({
+                                        owner: this.owner,
+                                        repo: this.repo,
+                                        name: labelData.name,
+                                        color: labelData.color,
+                                        description: labelData.description
+                                    }),
+                                    `create label ${labelData.name}`
+                                );
                             },
                             `create label ${labelData.name}`,
                             'repository'
@@ -371,13 +387,6 @@ class GitHubIssuesCreator {
     }
 
 
-
-    /**
-     * Utility function for delays
-     */
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
 }
 
 // Export for use as module

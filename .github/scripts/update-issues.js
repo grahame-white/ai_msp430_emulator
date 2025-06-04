@@ -136,7 +136,7 @@ class GitHubIssuesUpdater {
         try {
             // Add delay to respect rate limits
             await this.delay(1000);
-            
+
             const searchQuery = `repo:${this.owner}/${this.repo} in:title "Task" label:task`;
             const searchResults = await this.octokit.rest.search.issuesAndPullRequests({
                 q: searchQuery,

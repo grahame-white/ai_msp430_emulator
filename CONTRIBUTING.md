@@ -207,6 +207,40 @@ MSP430FR2355 Mixed-Signal Microcontroller Datasheet (SLAS847G, October 2016 - Re
 - Include alt text for all images and diagrams
 - Ensure diagrams are accessible and maintain readability in both light and dark themes
 
+#### Information Duplication Management
+
+**Avoiding Unnecessary Duplication:**
+
+To maintain consistency and reduce maintenance overhead, follow these guidelines:
+
+- **Centralize detailed information** in specialized documentation files
+- **Use cross-references** instead of duplicating content across multiple files
+- **Maintain a single source of truth** for each type of information
+- **Create overview documents** that reference detailed specifications rather than repeating them
+
+**Content Organization Guidelines:**
+
+- **High-level overviews** should summarize and link to detailed documentation
+- **Technical specifications** should exist in dedicated technical documents
+- **Implementation details** should reference official specifications with specific document citations
+- **API documentation** should be generated from code comments when possible
+
+**Examples of Good Organization:**
+
+```text
+README.md                     → Brief overview + links to detailed docs
+docs/architecture/           → Detailed technical specifications
+docs/api/                   → API reference documentation  
+CONTRIBUTING.md             → Development guidelines + cross-references
+```
+
+**Review Process:**
+
+- Before adding new documentation, check if similar information already exists
+- When updating documentation, verify that related documents don't need updates
+- Use `grep -r "keyword" docs/` to find potential duplications
+- Consolidate overlapping content and add cross-references
+
 ### Documentation Validation
 
 Run the following commands to validate documentation changes:

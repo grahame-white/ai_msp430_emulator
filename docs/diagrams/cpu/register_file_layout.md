@@ -13,29 +13,29 @@ Section 3.2.2: "Stack Pointer (SP)"*
 
 ```text
 ┌────────────────────────────────────────────────────────────────┐
-│                    MSP430 Register File                       │
-│                     (16 x 16-bit)                             │
-├────────────┬────────┬───────────────────────┬─────────────────┤
-│  Register  │  Name  │      Function         │   Special        │
-│   Number   │        │                       │  Behavior        │
-├────────────┼────────┼───────────────────────┼─────────────────┤
-│    R0      │   PC   │ Program Counter       │ Word Aligned     │
-│    R1      │   SP   │ Stack Pointer         │ Word Aligned     │
-│    R2      │   SR   │ Status Register       │ Flag Management  │
-│    R3      │  CG1   │ Constant Generator #1 │ Read-Only*       │
-│    R4      │   -    │ General Purpose       │ Read/Write       │
-│    R5      │   -    │ General Purpose       │ Read/Write       │
-│    R6      │   -    │ General Purpose       │ Read/Write       │
-│    R7      │   -    │ General Purpose       │ Read/Write       │
-│    R8      │   -    │ General Purpose       │ Read/Write       │
-│    R9      │   -    │ General Purpose       │ Read/Write       │
-│    R10     │   -    │ General Purpose       │ Read/Write       │
-│    R11     │   -    │ General Purpose       │ Read/Write       │
-│    R12     │   -    │ General Purpose       │ Read/Write       │
-│    R13     │   -    │ General Purpose       │ Read/Write       │
-│    R14     │   -    │ General Purpose       │ Read/Write       │
-│    R15     │   -    │ General Purpose       │ Read/Write       │
-└────────────┴────────┴───────────────────────┴──────────────────┘
+│                    MSP430 Register File                        │
+│                     (16 x 16-bit)                              │
+├────────────┬────────┬───────────────────────┬──────────────────┤
+│  Register  │  Name  │      Function         │   Special         │
+│   Number   │        │                       │  Behavior         │
+├────────────┼────────┼───────────────────────┼──────────────────┤
+│    R0      │   PC   │ Program Counter       │ Word Aligned      │
+│    R1      │   SP   │ Stack Pointer         │ Word Aligned      │
+│    R2      │   SR   │ Status Register       │ Flag Management   │
+│    R3      │  CG1   │ Constant Generator #1 │ Read-Only*        │
+│    R4      │   -    │ General Purpose       │ Read/Write        │
+│    R5      │   -    │ General Purpose       │ Read/Write        │
+│    R6      │   -    │ General Purpose       │ Read/Write        │
+│    R7      │   -    │ General Purpose       │ Read/Write        │
+│    R8      │   -    │ General Purpose       │ Read/Write        │
+│    R9      │   -    │ General Purpose       │ Read/Write        │
+│    R10     │   -    │ General Purpose       │ Read/Write        │
+│    R11     │   -    │ General Purpose       │ Read/Write        │
+│    R12     │   -    │ General Purpose       │ Read/Write        │
+│    R13     │   -    │ General Purpose       │ Read/Write        │
+│    R14     │   -    │ General Purpose       │ Read/Write        │
+│    R15     │   -    │ General Purpose       │ Read/Write        │
+└────────────┴────────┴───────────────────────┴───────────────────┘
 ```
 
 *CG1 is typically read-only but writes are allowed for testing

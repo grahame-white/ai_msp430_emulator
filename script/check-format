@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # script/check-format
 # Comprehensive formatting check for all file types
+#
+# Tools used:
+# - ANSI escape sequence detection: Custom grep-based check
+# - dotnet format: C# formatting verification (via ./script/lint)
+# - eslint: JavaScript code linting and formatting check
 
 set -e
 

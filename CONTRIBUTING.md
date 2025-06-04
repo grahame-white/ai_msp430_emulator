@@ -170,6 +170,8 @@ npm run lint:docs
 
 ## Code Style Guidelines
 
+📋 **See [Linting and Formatting Tools](docs/LINTING_AND_FORMATTING.md) for comprehensive tool reference**
+
 ### .NET Code
 
 - Follow the existing code formatting (enforced by `dotnet format`)

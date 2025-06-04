@@ -245,7 +245,7 @@ The system control flags manage CPU operation modes and interrupt handling:
 |------|---------|-------|-------|---------|-------------|
 | LPM0 | 1 | 0 | 0 | 0 | CPU off, all clocks active |
 | LPM1 | 1 | 1 | 0 | 0 | CPU off, SMCLK off |
-| LPM2 | 1 | 0 | 1 | 0 | CPU off, DCO off |
+| LPM2 | 1 | 1 | 1 | 0 | CPU off, SMCLK off, DCO off |
 | LPM3 | 1 | 1 | 1 | 0 | CPU off, SMCLK and DCO off |
 | LPM4 | 1 | 1 | 1 | 1 | CPU off, all clocks off |
 

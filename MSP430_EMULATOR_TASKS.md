@@ -1,6 +1,7 @@
 # MSP430 Emulator Development Task List
 
-This document provides a comprehensive, ordered list of tasks for implementing an extremely accurate MSP430 emulator in C# using .NET Core 8.0 with xUnit testing. Each task is designed to be:
+This document provides a comprehensive, ordered list of tasks for implementing an extremely accurate MSP430 emulator
+in C# using .NET Core 8.0 with xUnit testing. Each task is designed to be:
 
 - Sized for AI copilot agents within 70,000 token context windows
 - Formatted for easy GitHub issue creation
@@ -15,6 +16,7 @@ This document provides a comprehensive, ordered list of tasks for implementing a
 AI developers working on this project should regularly reassess and update this task list based on:
 
 **New Information Sources**:
+
 - MSP430 family datasheets and errata documents
 - Real hardware testing results and behavioral discoveries
 - Community feedback and bug reports
@@ -22,6 +24,7 @@ AI developers working on this project should regularly reassess and update this 
 - Security vulnerability assessments
 
 **Task List Update Triggers**:
+
 - When discovering MSP430 behavioral edge cases not covered in current tasks
 - When identifying more efficient implementation approaches
 - When encountering technical blockers requiring task restructuring
@@ -29,6 +32,7 @@ AI developers working on this project should regularly reassess and update this 
 - When defects indicate missing validation steps
 
 **Update Process**:
+
 1. **Document Discovery**: Log new information source and key findings
 2. **Impact Assessment**: Evaluate which existing tasks need modification
 3. **Task Revision**: Update acceptance criteria, dependencies, or effort estimates
@@ -46,6 +50,7 @@ AI developers working on this project should regularly reassess and update this 
 ## Task Ordering Philosophy
 
 Tasks are ordered to establish a solid foundation first, then build complexity incrementally:
+
 1. **Infrastructure & Setup** - Essential project foundation including defect management and automation
 2. **Core Architecture** - Basic emulator framework with visual documentation
 3. **CPU Core** - Fundamental processing unit with state diagrams
@@ -60,6 +65,7 @@ Tasks are ordered to establish a solid foundation first, then build complexity i
 ## Phase 1: Project Infrastructure & Setup
 
 ### Task 1.1: Project Structure and Build System Setup
+
 **Priority**: Critical
 **Estimated Effort**: 2-4 hours
 **Dependencies**: None
@@ -67,6 +73,7 @@ Tasks are ordered to establish a solid foundation first, then build complexity i
 Create the foundational project structure following C# best practices and the "Scripts to Rule Them All" pattern.
 
 **Acceptance Criteria**:
+
 - [ ] Create .NET Core 8.0 solution with proper structure
 - [ ] Implement main emulator project (`MSP430.Emulator`)
 - [ ] Implement unit test project (`MSP430.Emulator.Tests`)
@@ -77,7 +84,8 @@ Create the foundational project structure following C# best practices and the "S
 - [ ] Verify build succeeds with `dotnet build`
 
 **Files to Create**:
-```
+
+```text
 MSP430.Emulator.sln
 src/MSP430.Emulator/MSP430.Emulator.csproj
 tests/MSP430.Emulator.Tests/MSP430.Emulator.Tests.csproj
@@ -88,9 +96,10 @@ scripts/setup
 scripts/lint
 Directory.Build.props
 .gitignore
-```
+```text
 
 **Testing Strategy**:
+
 - Verify solution builds successfully
 - Verify test projects reference main project correctly
 - Verify scripts execute without errors
@@ -98,6 +107,7 @@ Directory.Build.props
 ---
 
 ### Task 1.2: CI/CD Pipeline and Quality Gates
+
 **Priority**: Critical
 **Estimated Effort**: 3-5 hours
 **Dependencies**: Task 1.1
@@ -105,6 +115,7 @@ Directory.Build.props
 Implement automated workflows to maintain code quality and catch defects early.
 
 **Acceptance Criteria**:
+
 - [ ] Create GitHub Actions workflow for CI/CD
 - [ ] Add automated build verification
 - [ ] Add automated test execution
@@ -115,14 +126,16 @@ Implement automated workflows to maintain code quality and catch defects early.
 - [ ] Add automated dependency updates
 
 **Files to Create**:
-```
+
+```text
 .github/workflows/ci.yml
 .github/workflows/security.yml
 .github/dependabot.yml
 .editorconfig
-```
+```text
 
 **Testing Strategy**:
+
 - Verify CI pipeline executes on pull requests
 - Verify quality gates prevent merging failing builds
 - Verify security scans complete successfully
@@ -130,6 +143,7 @@ Implement automated workflows to maintain code quality and catch defects early.
 ---
 
 ### Task 1.3: Logging and Configuration Infrastructure
+
 **Priority**: High
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 1.1
@@ -137,6 +151,7 @@ Implement automated workflows to maintain code quality and catch defects early.
 Establish structured logging and configuration management for debugging and operational visibility.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `ILogger` abstraction in `src/MSP430.Emulator/Logging/ILogger.cs`
 - [ ] Implement console logger in `src/MSP430.Emulator/Logging/ConsoleLogger.cs`
 - [ ] Implement file logger in `src/MSP430.Emulator/Logging/FileLogger.cs`
@@ -146,7 +161,8 @@ Establish structured logging and configuration management for debugging and oper
 - [ ] Create comprehensive unit tests for all logging components
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Logging/ILogger.cs
 src/MSP430.Emulator/Logging/ConsoleLogger.cs
 src/MSP430.Emulator/Logging/FileLogger.cs
@@ -155,9 +171,10 @@ src/MSP430.Emulator/Configuration/EmulatorConfig.cs
 tests/MSP430.Emulator.Tests/Logging/ConsoleLoggerTests.cs
 tests/MSP430.Emulator.Tests/Logging/FileLoggerTests.cs
 tests/MSP430.Emulator.Tests/Configuration/EmulatorConfigTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Unit test each logger implementation with one test per assertion
 - Verify log level filtering works correctly
 - Verify configuration loading from multiple sources
@@ -165,13 +182,16 @@ tests/MSP430.Emulator.Tests/Configuration/EmulatorConfigTests.cs
 ---
 
 ### Task 1.4: Defect Management and Quality Assurance Infrastructure
+
 **Priority**: High
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 1.2
 
-Establish comprehensive defect tracking, triage, and resolution processes to maintain high code quality and systematic bug management.
+Establish comprehensive defect tracking, triage, and resolution processes to maintain high code quality and
+systematic bug management.
 
 **Acceptance Criteria**:
+
 - [ ] Create defect classification system with severity levels (Critical, High, Medium, Low)
 - [ ] Implement bug report template with reproduction steps and environment details
 - [ ] Create defect triage workflow with assignment and prioritization rules
@@ -182,7 +202,8 @@ Establish comprehensive defect tracking, triage, and resolution processes to mai
 - [ ] Add defect prevention guidelines and code review checklists
 
 **Files to Create**:
-```
+
+```text
 .github/ISSUE_TEMPLATE/bug_report.md
 .github/ISSUE_TEMPLATE/defect_triage.md
 docs/defect_management/DefectClassification.md
@@ -191,9 +212,10 @@ docs/defect_management/ResolutionProcess.md
 scripts/defect-analysis
 src/MSP430.Emulator/Quality/DefectTracker.cs
 tests/MSP430.Emulator.Tests/Quality/DefectTrackerTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Verify defect classification correctly prioritizes issues
 - Test automated defect detection rules
 - Validate defect lifecycle state transitions
@@ -202,13 +224,16 @@ tests/MSP430.Emulator.Tests/Quality/DefectTrackerTests.cs
 ---
 
 ### Task 1.5: GitHub Issues Automation with GraphQL
+
 **Priority**: Medium
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 1.1
 
-Create automated GitHub workflow to populate and update GitHub issues from the task list using GraphQL API for streamlined project management.
+Create automated GitHub workflow to populate and update GitHub issues from the task list using GraphQL API for
+streamlined project management.
 
 **Acceptance Criteria**:
+
 - [ ] Create GitHub workflow for automated issue management
 - [ ] Implement task parsing logic in workflow to extract tasks from MSP430_EMULATOR_TASKS.md
 - [ ] Create automated issue creation with proper formatting and metadata
@@ -222,7 +247,8 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
 - [ ] Add protection mechanism to prevent modification of manually created issues
 
 **Files to Create**:
-```
+
+```text
 .github/workflows/issue-management.yml
 .github/scripts/parse-tasks.js
 .github/scripts/create-issues.js
@@ -232,9 +258,10 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
 .github/scripts/disaster-recovery.js
 .github/scripts/manual-issue-protector.js
 .github/config/issue-templates.json
-```
+```text
 
 **Testing Strategy**:
+
 - Test workflow execution with sample task list changes
 - Verify task parsing correctly extracts all task details from markdown
 - Test issue creation with proper formatting and metadata
@@ -245,6 +272,7 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
 - Test manual issue protection prevents automated modification of manually created issues
 
 **Script-Specific Test Steps**:
+
 - **parse-tasks.js**:
   - Unit test parsing of various task formats (different priorities, efforts, dependencies)
   - Test extraction of task metadata (acceptance criteria, files to create, testing strategy)
@@ -286,13 +314,16 @@ Create automated GitHub workflow to populate and update GitHub issues from the t
 ## Phase 2: Core Architecture Foundation
 
 ### Task 2.1: Memory Address Space Architecture with Visual Documentation
+
 **Priority**: Critical
 **Estimated Effort**: 4-6 hours
 **Dependencies**: Task 1.5
 
-Implement the MSP430's unified memory address space with proper segmentation, access control, and comprehensive visual documentation.
+Implement the MSP430's unified memory address space with proper segmentation, access control, and comprehensive
+visual documentation.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IMemoryMap` interface in `src/MSP430.Emulator/Memory/IMemoryMap.cs`
 - [ ] Implement `MemoryMap` class in `src/MSP430.Emulator/Memory/MemoryMap.cs`
 - [ ] Define memory regions enum in `src/MSP430.Emulator/Memory/MemoryRegion.cs`
@@ -306,13 +337,15 @@ Implement the MSP430's unified memory address space with proper segmentation, ac
 - [ ] Include memory segmentation flowcharts
 
 **Visual Documentation Requirements**:
+
 - Memory map diagram showing all address ranges and regions (using Mermaid or markdown tables)
 - Access permission flowchart for validation logic (using Mermaid flowcharts)
 - Memory hierarchy diagram showing relationship between components (ASCII art or Mermaid)
 - Visual representation of memory access patterns (inline markdown tables)
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Memory/IMemoryMap.cs
 src/MSP430.Emulator/Memory/MemoryMap.cs
 src/MSP430.Emulator/Memory/MemoryRegion.cs
@@ -322,9 +355,10 @@ tests/MSP430.Emulator.Tests/Memory/MemoryMapTests.cs
 tests/MSP430.Emulator.Tests/Memory/MemoryAccessValidatorTests.cs
 docs/diagrams/architecture/memory_layout.md
 docs/diagrams/architecture/memory_access_flow.md
-```
+```text
 
 **Testing Strategy**:
+
 - Test memory region boundaries and access permissions
 - Test invalid memory access handling
 - Test memory mapping consistency
@@ -333,13 +367,16 @@ docs/diagrams/architecture/memory_access_flow.md
 ---
 
 ### Task 2.2: CPU Register File Implementation with State Diagrams
+
 **Priority**: Critical
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 2.1
 
-Implement the MSP430's register file including general purpose and special function registers with comprehensive state documentation.
+Implement the MSP430's register file including general purpose and special function registers with comprehensive
+state documentation.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IRegisterFile` interface in `src/MSP430.Emulator/Cpu/IRegisterFile.cs`
 - [ ] Implement `RegisterFile` class in `src/MSP430.Emulator/Cpu/RegisterFile.cs`
 - [ ] Define register names enum in `src/MSP430.Emulator/Cpu/RegisterName.cs`
@@ -353,13 +390,15 @@ Implement the MSP430's register file including general purpose and special funct
 - [ ] Include visual representation of register interactions
 
 **Visual Documentation Requirements**:
+
 - Register file organization diagram (using markdown tables or ASCII art)
 - Status register bit field layout (using markdown tables with bit positions)
 - Program counter state transition diagram (using Mermaid state diagrams)
 - Stack pointer behavior flowchart (using Mermaid flowcharts)
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Cpu/IRegisterFile.cs
 src/MSP430.Emulator/Cpu/RegisterFile.cs
 src/MSP430.Emulator/Cpu/RegisterName.cs
@@ -369,9 +408,10 @@ tests/MSP430.Emulator.Tests/Cpu/StatusRegisterTests.cs
 docs/diagrams/cpu/register_file_layout.md
 docs/diagrams/cpu/status_register_bits.md
 docs/diagrams/cpu/pc_state_transitions.md
-```
+```text
 
 **Testing Strategy**:
+
 - Test each register's read/write operations individually
 - Test special register behavior (PC increment, SP alignment)
 - Test status register flag operations
@@ -380,13 +420,16 @@ docs/diagrams/cpu/pc_state_transitions.md
 ---
 
 ### Task 2.3: Instruction Decoder Framework with Flow Diagrams
+
 **Priority**: Critical
 **Estimated Effort**: 5-7 hours
 **Dependencies**: Task 2.2
 
-Create the instruction decoding framework to parse MSP430 machine code into executable operations with comprehensive flow documentation.
+Create the instruction decoding framework to parse MSP430 machine code into executable operations with
+comprehensive flow documentation.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IInstructionDecoder` interface in `src/MSP430.Emulator/Instructions/IInstructionDecoder.cs`
 - [ ] Implement `InstructionDecoder` class in `src/MSP430.Emulator/Instructions/InstructionDecoder.cs`
 - [ ] Define instruction format enum in `src/MSP430.Emulator/Instructions/InstructionFormat.cs`
@@ -400,13 +443,15 @@ Create the instruction decoding framework to parse MSP430 machine code into exec
 - [ ] Include addressing mode decision flowcharts
 
 **Visual Documentation Requirements**:
+
 - Instruction format bit field diagrams (using markdown tables with bit layouts)
 - Decoding algorithm flowcharts (using Mermaid flowcharts)
 - Addressing mode selection decision trees (using Mermaid decision diagrams)
 - Error handling flow diagrams (using Mermaid flowcharts)
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/IInstructionDecoder.cs
 src/MSP430.Emulator/Instructions/InstructionDecoder.cs
 src/MSP430.Emulator/Instructions/InstructionFormat.cs
@@ -418,9 +463,10 @@ tests/MSP430.Emulator.Tests/Instructions/AddressingModeDecoderTests.cs
 docs/diagrams/instructions/format_layouts.md
 docs/diagrams/instructions/decoding_flow.md
 docs/diagrams/instructions/addressing_modes.md
-```
+```text
 
 **Testing Strategy**:
+
 - Test decoding of each instruction format with valid opcodes
 - Test invalid instruction handling
 - Test addressing mode detection accuracy
@@ -429,6 +475,7 @@ docs/diagrams/instructions/addressing_modes.md
 ---
 
 ### Task 2.4: Emulator Core Engine
+
 **Priority**: Critical
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 2.3
@@ -436,6 +483,7 @@ docs/diagrams/instructions/addressing_modes.md
 Implement the main emulator engine that coordinates CPU execution, memory access, and system state.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IEmulatorCore` interface in `src/MSP430.Emulator/Core/IEmulatorCore.cs`
 - [ ] Implement `EmulatorCore` class in `src/MSP430.Emulator/Core/EmulatorCore.cs`
 - [ ] Implement execution state management in `src/MSP430.Emulator/Core/ExecutionState.cs`
@@ -446,16 +494,18 @@ Implement the main emulator engine that coordinates CPU execution, memory access
 - [ ] Create comprehensive unit tests for core engine
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Core/IEmulatorCore.cs
 src/MSP430.Emulator/Core/EmulatorCore.cs
 src/MSP430.Emulator/Core/ExecutionState.cs
 src/MSP430.Emulator/Core/ExecutionStatistics.cs
 tests/MSP430.Emulator.Tests/Core/EmulatorCoreTests.cs
 tests/MSP430.Emulator.Tests/Core/ExecutionStateTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test single instruction execution
 - Test execution state transitions
 - Test reset and halt operations
@@ -465,6 +515,7 @@ tests/MSP430.Emulator.Tests/Core/ExecutionStateTests.cs
 ## Phase 3: Memory System Implementation
 
 ### Task 3.1: RAM Memory Implementation
+
 **Priority**: High
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 2.1
@@ -472,6 +523,7 @@ tests/MSP430.Emulator.Tests/Core/ExecutionStateTests.cs
 Implement random access memory with proper read/write operations and timing characteristics.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IRandomAccessMemory` interface in `src/MSP430.Emulator/Memory/IRandomAccessMemory.cs`
 - [ ] Implement `RandomAccessMemory` class in `src/MSP430.Emulator/Memory/RandomAccessMemory.cs`
 - [ ] Support configurable memory size (typically 512B-10KB)
@@ -481,13 +533,15 @@ Implement random access memory with proper read/write operations and timing char
 - [ ] Create comprehensive unit tests for RAM operations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Memory/IRandomAccessMemory.cs
 src/MSP430.Emulator/Memory/RandomAccessMemory.cs
 tests/MSP430.Emulator.Tests/Memory/RandomAccessMemoryTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test memory read/write operations at various addresses
 - Test memory boundary conditions
 - Test access timing accuracy
@@ -495,6 +549,7 @@ tests/MSP430.Emulator.Tests/Memory/RandomAccessMemoryTests.cs
 ---
 
 ### Task 3.2: Flash Memory Implementation
+
 **Priority**: High
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 3.1
@@ -502,6 +557,7 @@ tests/MSP430.Emulator.Tests/Memory/RandomAccessMemoryTests.cs
 Implement flash memory with programming, erasing, and protection features typical of MSP430 devices.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IFlashMemory` interface in `src/MSP430.Emulator/Memory/IFlashMemory.cs`
 - [ ] Implement `FlashMemory` class in `src/MSP430.Emulator/Memory/FlashMemory.cs`
 - [ ] Support flash programming operations
@@ -512,16 +568,18 @@ Implement flash memory with programming, erasing, and protection features typica
 - [ ] Create comprehensive unit tests for flash operations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Memory/IFlashMemory.cs
 src/MSP430.Emulator/Memory/FlashMemory.cs
 src/MSP430.Emulator/Memory/FlashController.cs
 src/MSP430.Emulator/Memory/FlashOperation.cs
 tests/MSP430.Emulator.Tests/Memory/FlashMemoryTests.cs
 tests/MSP430.Emulator.Tests/Memory/FlashControllerTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test flash programming operations
 - Test erase operations
 - Test protection mechanisms
@@ -529,6 +587,7 @@ tests/MSP430.Emulator.Tests/Memory/FlashControllerTests.cs
 ---
 
 ### Task 3.3: Information Memory Implementation
+
 **Priority**: Medium
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 3.2
@@ -536,6 +595,7 @@ tests/MSP430.Emulator.Tests/Memory/FlashControllerTests.cs
 Implement information memory segments for device calibration data and user information storage.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IInformationMemory` interface in `src/MSP430.Emulator/Memory/IInformationMemory.cs`
 - [ ] Implement `InformationMemory` class in `src/MSP430.Emulator/Memory/InformationMemory.cs`
 - [ ] Support segments A, B, C, and D
@@ -545,14 +605,16 @@ Implement information memory segments for device calibration data and user infor
 - [ ] Create comprehensive unit tests for information memory
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Memory/IInformationMemory.cs
 src/MSP430.Emulator/Memory/InformationMemory.cs
 src/MSP430.Emulator/Memory/InformationSegment.cs
 tests/MSP430.Emulator.Tests/Memory/InformationMemoryTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test segment access and protection
 - Test calibration data storage
 - Test write protection enforcement
@@ -560,6 +622,7 @@ tests/MSP430.Emulator.Tests/Memory/InformationMemoryTests.cs
 ---
 
 ### Task 3.4: Memory Controller Integration
+
 **Priority**: High
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 3.3
@@ -567,6 +630,7 @@ tests/MSP430.Emulator.Tests/Memory/InformationMemoryTests.cs
 Integrate all memory types into a unified memory controller with proper address decoding and access arbitration.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IMemoryController` interface in `src/MSP430.Emulator/Memory/IMemoryController.cs`
 - [ ] Implement `MemoryController` class in `src/MSP430.Emulator/Memory/MemoryController.cs`
 - [ ] Integrate RAM, Flash, and Information memory
@@ -577,14 +641,16 @@ Integrate all memory types into a unified memory controller with proper address 
 - [ ] Create comprehensive unit tests for memory controller
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Memory/IMemoryController.cs
 src/MSP430.Emulator/Memory/MemoryController.cs
 src/MSP430.Emulator/Memory/MemoryAccessContext.cs
 tests/MSP430.Emulator.Tests/Memory/MemoryControllerTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test address decoding accuracy
 - Test memory type routing
 - Test access arbitration
@@ -594,6 +660,7 @@ tests/MSP430.Emulator.Tests/Memory/MemoryControllerTests.cs
 ## Phase 4: CPU Instruction Set - Arithmetic and Logic
 
 ### Task 4.1: Basic Arithmetic Instructions
+
 **Priority**: Critical
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 2.4
@@ -601,6 +668,7 @@ tests/MSP430.Emulator.Tests/Memory/MemoryControllerTests.cs
 Implement fundamental arithmetic operations (ADD, SUB, CMP) with proper flag handling.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `AddInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/AddInstruction.cs`
 - [ ] Implement `SubInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/SubInstruction.cs`
 - [ ] Implement `CmpInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/CmpInstruction.cs`
@@ -611,16 +679,18 @@ Implement fundamental arithmetic operations (ADD, SUB, CMP) with proper flag han
 - [ ] Create comprehensive unit tests for each instruction
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/Arithmetic/AddInstruction.cs
 src/MSP430.Emulator/Instructions/Arithmetic/SubInstruction.cs
 src/MSP430.Emulator/Instructions/Arithmetic/CmpInstruction.cs
 tests/MSP430.Emulator.Tests/Instructions/Arithmetic/AddInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Arithmetic/SubInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Arithmetic/CmpInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test each instruction with all addressing modes
 - Test flag setting for all possible outcomes
 - Test edge cases (overflow, underflow, zero results)
@@ -628,6 +698,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/CmpInstructionTests.cs
 ---
 
 ### Task 4.2: Increment and Decrement Instructions
+
 **Priority**: High
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 4.1
@@ -635,6 +706,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/CmpInstructionTests.cs
 Implement increment/decrement operations with proper addressing mode support.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `IncInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/IncInstruction.cs`
 - [ ] Implement `DecInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/DecInstruction.cs`
 - [ ] Support all applicable addressing modes
@@ -643,14 +715,16 @@ Implement increment/decrement operations with proper addressing mode support.
 - [ ] Add comprehensive unit tests for both instructions
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/Arithmetic/IncInstruction.cs
 src/MSP430.Emulator/Instructions/Arithmetic/DecInstruction.cs
 tests/MSP430.Emulator.Tests/Instructions/Arithmetic/IncInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DecInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test increment/decrement on registers and memory
 - Test flag behavior at boundaries (0xFFFF to 0x0000)
 - Test addressing mode combinations
@@ -658,6 +732,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DecInstructionTests.cs
 ---
 
 ### Task 4.3: Logical Operation Instructions
+
 **Priority**: High
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 4.2
@@ -665,6 +740,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DecInstructionTests.cs
 Implement bitwise logical operations (AND, OR, XOR, BIT) with comprehensive addressing mode support.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `AndInstruction` class in `src/MSP430.Emulator/Instructions/Logic/AndInstruction.cs`
 - [ ] Implement `BisInstruction` class in `src/MSP430.Emulator/Instructions/Logic/BisInstruction.cs`
 - [ ] Implement `XorInstruction` class in `src/MSP430.Emulator/Instructions/Logic/XorInstruction.cs`
@@ -675,7 +751,8 @@ Implement bitwise logical operations (AND, OR, XOR, BIT) with comprehensive addr
 - [ ] Create comprehensive unit tests for each instruction
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/Logic/AndInstruction.cs
 src/MSP430.Emulator/Instructions/Logic/BisInstruction.cs
 src/MSP430.Emulator/Instructions/Logic/XorInstruction.cs
@@ -684,9 +761,10 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/AndInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Logic/BisInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Logic/XorInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Logic/BitInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test logical operations with various bit patterns
 - Test flag setting behavior
 - Test addressing mode combinations
@@ -694,6 +772,7 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/BitInstructionTests.cs
 ---
 
 ### Task 4.4: Bit Manipulation Instructions
+
 **Priority**: Medium
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 4.3
@@ -701,6 +780,7 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/BitInstructionTests.cs
 Implement individual bit manipulation operations (BIC, SETC, CLRC, etc.).
 
 **Acceptance Criteria**:
+
 - [ ] Implement `BicInstruction` class in `src/MSP430.Emulator/Instructions/Logic/BicInstruction.cs`
 - [ ] Implement status bit manipulation in `src/MSP430.Emulator/Instructions/Logic/StatusBitInstructions.cs`
 - [ ] Support bit clearing and setting operations
@@ -708,14 +788,16 @@ Implement individual bit manipulation operations (BIC, SETC, CLRC, etc.).
 - [ ] Add comprehensive unit tests for bit operations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/Logic/BicInstruction.cs
 src/MSP430.Emulator/Instructions/Logic/StatusBitInstructions.cs
 tests/MSP430.Emulator.Tests/Instructions/Logic/BicInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Logic/StatusBitInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test bit clearing with various masks
 - Test status flag manipulation
 - Test addressing mode support
@@ -725,6 +807,7 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/StatusBitInstructionTests.cs
 ## Phase 5: CPU Instruction Set - Data Movement
 
 ### Task 5.1: Move and Load Instructions
+
 **Priority**: Critical
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 4.1
@@ -732,6 +815,7 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/StatusBitInstructionTests.cs
 Implement data movement instructions (MOV) with all addressing modes and size variations.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `MovInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/MovInstruction.cs`
 - [ ] Support all source addressing modes (register, indexed, indirect, immediate, absolute, symbolic)
 - [ ] Support all destination addressing modes
@@ -740,12 +824,14 @@ Implement data movement instructions (MOV) with all addressing modes and size va
 - [ ] Add comprehensive unit tests for all addressing mode combinations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/DataMovement/MovInstruction.cs
 tests/MSP430.Emulator.Tests/Instructions/DataMovement/MovInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test all source-destination addressing mode combinations
 - Test 8-bit and 16-bit data movement
 - Test edge cases and boundary conditions
@@ -753,6 +839,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/MovInstructionTests.cs
 ---
 
 ### Task 5.2: Stack Operation Instructions
+
 **Priority**: High
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 5.1
@@ -760,6 +847,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/MovInstructionTests.cs
 Implement stack manipulation instructions (PUSH, POP) with proper stack pointer management.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `PushInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/PushInstruction.cs`
 - [ ] Implement `PopInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/PopInstruction.cs`
 - [ ] Support all addressing modes for PUSH
@@ -768,14 +856,16 @@ Implement stack manipulation instructions (PUSH, POP) with proper stack pointer 
 - [ ] Add comprehensive unit tests for stack operations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/DataMovement/PushInstruction.cs
 src/MSP430.Emulator/Instructions/DataMovement/PopInstruction.cs
 tests/MSP430.Emulator.Tests/Instructions/DataMovement/PushInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/DataMovement/PopInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test stack operations with various data types
 - Test stack pointer behavior
 - Test stack overflow/underflow conditions
@@ -783,6 +873,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/PopInstructionTests.cs
 ---
 
 ### Task 5.3: Swap and Rotate Instructions
+
 **Priority**: Medium
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 5.2
@@ -790,6 +881,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/PopInstructionTests.cs
 Implement data manipulation instructions (SWPB, SXT) for byte and sign operations.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `SwpbInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/SwpbInstruction.cs`
 - [ ] Implement `SxtInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/SxtInstruction.cs`
 - [ ] Support byte swapping operations
@@ -797,14 +889,16 @@ Implement data manipulation instructions (SWPB, SXT) for byte and sign operation
 - [ ] Add comprehensive unit tests for both instructions
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/DataMovement/SwpbInstruction.cs
 src/MSP430.Emulator/Instructions/DataMovement/SxtInstruction.cs
 tests/MSP430.Emulator.Tests/Instructions/DataMovement/SwpbInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/DataMovement/SxtInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test byte swapping with various values
 - Test sign extension behavior
 - Test flag setting
@@ -814,6 +908,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/SxtInstructionTests.cs
 ## Phase 6: CPU Instruction Set - Control Flow
 
 ### Task 6.1: Unconditional Jump Instructions
+
 **Priority**: Critical
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 5.1
@@ -821,6 +916,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/SxtInstructionTests.cs
 Implement unconditional program flow control (JMP, BR).
 
 **Acceptance Criteria**:
+
 - [ ] Implement `JmpInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/JmpInstruction.cs`
 - [ ] Implement branch instruction variants in `src/MSP430.Emulator/Instructions/ControlFlow/BranchInstruction.cs`
 - [ ] Support relative and absolute addressing
@@ -828,14 +924,16 @@ Implement unconditional program flow control (JMP, BR).
 - [ ] Add comprehensive unit tests for jump instructions
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/ControlFlow/JmpInstruction.cs
 src/MSP430.Emulator/Instructions/ControlFlow/BranchInstruction.cs
 tests/MSP430.Emulator.Tests/Instructions/ControlFlow/JmpInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/ControlFlow/BranchInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test jump to various memory locations
 - Test relative offset calculations
 - Test program counter behavior
@@ -843,6 +941,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/BranchInstructionTests.cs
 ---
 
 ### Task 6.2: Conditional Jump Instructions
+
 **Priority**: Critical
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 6.1
@@ -850,14 +949,17 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/BranchInstructionTests.cs
 Implement conditional branch instructions based on status register flags.
 
 **Acceptance Criteria**:
-- [ ] Implement conditional jump base class in `src/MSP430.Emulator/Instructions/ControlFlow/ConditionalJumpInstruction.cs`
+
+- [ ] Implement conditional jump base class in
+      `src/MSP430.Emulator/Instructions/ControlFlow/ConditionalJumpInstruction.cs`
 - [ ] Implement all conditional jumps (JZ, JNZ, JC, JNC, JN, JGE, JL) in separate files
 - [ ] Support 10-bit signed offset range
 - [ ] Implement proper flag condition evaluation
 - [ ] Add comprehensive unit tests for each conditional jump
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/ControlFlow/ConditionalJumpInstruction.cs
 src/MSP430.Emulator/Instructions/ControlFlow/JzInstruction.cs
 src/MSP430.Emulator/Instructions/ControlFlow/JnzInstruction.cs
@@ -867,9 +969,10 @@ src/MSP430.Emulator/Instructions/ControlFlow/JnInstruction.cs
 src/MSP430.Emulator/Instructions/ControlFlow/JgeInstruction.cs
 src/MSP430.Emulator/Instructions/ControlFlow/JlInstruction.cs
 tests/MSP430.Emulator.Tests/Instructions/ControlFlow/ConditionalJumpTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test each conditional jump with flag combinations
 - Test offset range boundaries
 - Test flag evaluation logic
@@ -877,6 +980,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/ConditionalJumpTests.cs
 ---
 
 ### Task 6.3: Subroutine Instructions
+
 **Priority**: High
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 6.2
@@ -884,6 +988,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/ConditionalJumpTests.cs
 Implement subroutine call and return instructions (CALL, RET).
 
 **Acceptance Criteria**:
+
 - [ ] Implement `CallInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/CallInstruction.cs`
 - [ ] Implement `RetInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/RetInstruction.cs`
 - [ ] Support all addressing modes for CALL
@@ -892,14 +997,16 @@ Implement subroutine call and return instructions (CALL, RET).
 - [ ] Add comprehensive unit tests for subroutine operations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/ControlFlow/CallInstruction.cs
 src/MSP430.Emulator/Instructions/ControlFlow/RetInstruction.cs
 tests/MSP430.Emulator.Tests/Instructions/ControlFlow/CallInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test subroutine call and return sequences
 - Test nested calls and returns
 - Test stack pointer management
@@ -907,6 +1014,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetInstructionTests.cs
 ---
 
 ### Task 6.4: Interrupt and Special Instructions
+
 **Priority**: Medium
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 6.3
@@ -914,6 +1022,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetInstructionTests.cs
 Implement interrupt-related and special control instructions (RETI, NOP, etc.).
 
 **Acceptance Criteria**:
+
 - [ ] Implement `RetiInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/RetiInstruction.cs`
 - [ ] Implement `NopInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/NopInstruction.cs`
 - [ ] Implement interrupt enable/disable instructions
@@ -921,15 +1030,17 @@ Implement interrupt-related and special control instructions (RETI, NOP, etc.).
 - [ ] Add comprehensive unit tests for special instructions
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Instructions/ControlFlow/RetiInstruction.cs
 src/MSP430.Emulator/Instructions/ControlFlow/NopInstruction.cs
 src/MSP430.Emulator/Instructions/ControlFlow/InterruptControlInstructions.cs
 tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetiInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/ControlFlow/SpecialInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test interrupt return behavior
 - Test status register restoration
 - Test interrupt enable/disable
@@ -939,6 +1050,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/SpecialInstructionTests.cs
 ## Phase 7: Peripheral System Foundation
 
 ### Task 7.1: Peripheral Base Infrastructure
+
 **Priority**: High
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 3.4
@@ -946,6 +1058,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/SpecialInstructionTests.cs
 Create the foundational infrastructure for peripheral device emulation.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IPeripheral` interface in `src/MSP430.Emulator/Peripherals/IPeripheral.cs`
 - [ ] Implement `PeripheralBase` abstract class in `src/MSP430.Emulator/Peripherals/PeripheralBase.cs`
 - [ ] Create peripheral manager in `src/MSP430.Emulator/Peripherals/PeripheralManager.cs`
@@ -955,16 +1068,18 @@ Create the foundational infrastructure for peripheral device emulation.
 - [ ] Create comprehensive unit tests for peripheral infrastructure
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Peripherals/IPeripheral.cs
 src/MSP430.Emulator/Peripherals/PeripheralBase.cs
 src/MSP430.Emulator/Peripherals/PeripheralManager.cs
 src/MSP430.Emulator/Peripherals/PeripheralRegister.cs
 tests/MSP430.Emulator.Tests/Peripherals/PeripheralBaseTests.cs
 tests/MSP430.Emulator.Tests/Peripherals/PeripheralManagerTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test peripheral registration and management
 - Test memory-mapped register access
 - Test peripheral reset behavior
@@ -972,6 +1087,7 @@ tests/MSP430.Emulator.Tests/Peripherals/PeripheralManagerTests.cs
 ---
 
 ### Task 7.2: Digital I/O Port Implementation
+
 **Priority**: High
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 7.1
@@ -979,6 +1095,7 @@ tests/MSP430.Emulator.Tests/Peripherals/PeripheralManagerTests.cs
 Implement digital I/O ports with full pin control and interrupt capabilities.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `DigitalIOPort` class in `src/MSP430.Emulator/Peripherals/DigitalIO/DigitalIOPort.cs`
 - [ ] Create pin state management in `src/MSP430.Emulator/Peripherals/DigitalIO/PinState.cs`
 - [ ] Implement direction control (input/output)
@@ -988,15 +1105,17 @@ Implement digital I/O ports with full pin control and interrupt capabilities.
 - [ ] Create comprehensive unit tests for I/O operations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Peripherals/DigitalIO/DigitalIOPort.cs
 src/MSP430.Emulator/Peripherals/DigitalIO/PinState.cs
 src/MSP430.Emulator/Peripherals/DigitalIO/IODirection.cs
 src/MSP430.Emulator/Peripherals/DigitalIO/PullResistor.cs
 tests/MSP430.Emulator.Tests/Peripherals/DigitalIO/DigitalIOPortTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test pin direction control
 - Test input/output operations
 - Test interrupt generation
@@ -1004,6 +1123,7 @@ tests/MSP430.Emulator.Tests/Peripherals/DigitalIO/DigitalIOPortTests.cs
 ---
 
 ### Task 7.3: Timer A Implementation
+
 **Priority**: High
 **Estimated Effort**: 5-6 hours
 **Dependencies**: Task 7.2
@@ -1011,6 +1131,7 @@ tests/MSP430.Emulator.Tests/Peripherals/DigitalIO/DigitalIOPortTests.cs
 Implement Timer A with all operating modes and capture/compare functionality.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `TimerA` class in `src/MSP430.Emulator/Peripherals/Timers/TimerA.cs`
 - [ ] Create timer modes in `src/MSP430.Emulator/Peripherals/Timers/TimerMode.cs`
 - [ ] Implement capture/compare units
@@ -1020,15 +1141,17 @@ Implement Timer A with all operating modes and capture/compare functionality.
 - [ ] Create comprehensive unit tests for timer operations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Peripherals/Timers/TimerA.cs
 src/MSP430.Emulator/Peripherals/Timers/TimerMode.cs
 src/MSP430.Emulator/Peripherals/Timers/CaptureCompareUnit.cs
 src/MSP430.Emulator/Peripherals/Timers/TimerClock.cs
 tests/MSP430.Emulator.Tests/Peripherals/Timers/TimerATests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test timer counting modes
 - Test capture/compare functionality
 - Test PWM generation
@@ -1036,6 +1159,7 @@ tests/MSP430.Emulator.Tests/Peripherals/Timers/TimerATests.cs
 ---
 
 ### Task 7.4: Watchdog Timer Implementation
+
 **Priority**: Medium
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 7.3
@@ -1043,6 +1167,7 @@ tests/MSP430.Emulator.Tests/Peripherals/Timers/TimerATests.cs
 Implement the watchdog timer with reset and interval timer functionality.
 
 **Acceptance Criteria**:
+
 - [ ] Implement `WatchdogTimer` class in `src/MSP430.Emulator/Peripherals/Timers/WatchdogTimer.cs`
 - [ ] Add watchdog reset functionality
 - [ ] Implement interval timer mode
@@ -1051,13 +1176,15 @@ Implement the watchdog timer with reset and interval timer functionality.
 - [ ] Create comprehensive unit tests for watchdog operations
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Peripherals/Timers/WatchdogTimer.cs
 src/MSP430.Emulator/Peripherals/Timers/WatchdogMode.cs
 tests/MSP430.Emulator.Tests/Peripherals/Timers/WatchdogTimerTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test watchdog timeout and reset
 - Test interval timer mode
 - Test password protection
@@ -1067,6 +1194,7 @@ tests/MSP430.Emulator.Tests/Peripherals/Timers/WatchdogTimerTests.cs
 ## Phase 8: Interrupt System
 
 ### Task 8.1: Interrupt Controller Infrastructure
+
 **Priority**: Critical
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 7.1
@@ -1074,6 +1202,7 @@ tests/MSP430.Emulator.Tests/Peripherals/Timers/WatchdogTimerTests.cs
 Implement the interrupt controller with proper priority handling and vector management.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IInterruptController` interface in `src/MSP430.Emulator/Interrupts/IInterruptController.cs`
 - [ ] Implement `InterruptController` class in `src/MSP430.Emulator/Interrupts/InterruptController.cs`
 - [ ] Create interrupt vector table management
@@ -1083,15 +1212,17 @@ Implement the interrupt controller with proper priority handling and vector mana
 - [ ] Create comprehensive unit tests for interrupt controller
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Interrupts/IInterruptController.cs
 src/MSP430.Emulator/Interrupts/InterruptController.cs
 src/MSP430.Emulator/Interrupts/InterruptVector.cs
 src/MSP430.Emulator/Interrupts/InterruptPriority.cs
 tests/MSP430.Emulator.Tests/Interrupts/InterruptControllerTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test interrupt priority handling
 - Test vector table management
 - Test nested interrupt scenarios
@@ -1099,6 +1230,7 @@ tests/MSP430.Emulator.Tests/Interrupts/InterruptControllerTests.cs
 ---
 
 ### Task 8.2: Interrupt Service Integration
+
 **Priority**: High
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 8.1
@@ -1106,6 +1238,7 @@ tests/MSP430.Emulator.Tests/Interrupts/InterruptControllerTests.cs
 Integrate interrupt servicing with CPU execution and peripheral event generation.
 
 **Acceptance Criteria**:
+
 - [ ] Implement interrupt request handling in CPU core
 - [ ] Add interrupt service routine entry/exit
 - [ ] Implement automatic context saving/restoration
@@ -1114,13 +1247,15 @@ Integrate interrupt servicing with CPU execution and peripheral event generation
 - [ ] Create comprehensive unit tests for interrupt servicing
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Interrupts/InterruptService.cs
 src/MSP430.Emulator/Interrupts/InterruptContext.cs
 tests/MSP430.Emulator.Tests/Interrupts/InterruptServiceTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test interrupt request handling
 - Test context save/restore
 - Test interrupt latency
@@ -1130,6 +1265,7 @@ tests/MSP430.Emulator.Tests/Interrupts/InterruptServiceTests.cs
 ## Phase 9: Advanced Features
 
 ### Task 9.1: Clock System Implementation
+
 **Priority**: Medium
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 8.2
@@ -1137,6 +1273,7 @@ tests/MSP430.Emulator.Tests/Interrupts/InterruptServiceTests.cs
 Implement the clock generation system with multiple clock sources and power management.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IClockSystem` interface in `src/MSP430.Emulator/Clock/IClockSystem.cs`
 - [ ] Implement `ClockSystem` class in `src/MSP430.Emulator/Clock/ClockSystem.cs`
 - [ ] Support multiple clock sources (DCO, ACLK, SMCLK)
@@ -1145,15 +1282,17 @@ Implement the clock generation system with multiple clock sources and power mana
 - [ ] Create comprehensive unit tests for clock system
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Clock/IClockSystem.cs
 src/MSP430.Emulator/Clock/ClockSystem.cs
 src/MSP430.Emulator/Clock/ClockSource.cs
 src/MSP430.Emulator/Clock/ClockDivider.cs
 tests/MSP430.Emulator.Tests/Clock/ClockSystemTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test clock source switching
 - Test frequency generation
 - Test power mode clock behavior
@@ -1161,6 +1300,7 @@ tests/MSP430.Emulator.Tests/Clock/ClockSystemTests.cs
 ---
 
 ### Task 9.2: Power Management Implementation
+
 **Priority**: Medium
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 9.1
@@ -1168,6 +1308,7 @@ tests/MSP430.Emulator.Tests/Clock/ClockSystemTests.cs
 Implement low-power modes and power management features.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IPowerManager` interface in `src/MSP430.Emulator/Power/IPowerManager.cs`
 - [ ] Implement `PowerManager` class in `src/MSP430.Emulator/Power/PowerManager.cs`
 - [ ] Support all low-power modes (LPM0-LPM4)
@@ -1176,15 +1317,17 @@ Implement low-power modes and power management features.
 - [ ] Create comprehensive unit tests for power management
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Power/IPowerManager.cs
 src/MSP430.Emulator/Power/PowerManager.cs
 src/MSP430.Emulator/Power/LowPowerMode.cs
 src/MSP430.Emulator/Power/WakeupEvent.cs
 tests/MSP430.Emulator.Tests/Power/PowerManagerTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test low-power mode entry/exit
 - Test wake-up event handling
 - Test power consumption calculation
@@ -1192,6 +1335,7 @@ tests/MSP430.Emulator.Tests/Power/PowerManagerTests.cs
 ---
 
 ### Task 9.3: Debugging and Profiling Infrastructure
+
 **Priority**: Medium
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 9.2
@@ -1199,6 +1343,7 @@ tests/MSP430.Emulator.Tests/Power/PowerManagerTests.cs
 Implement debugging support with breakpoints, watchpoints, and execution profiling.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IDebugger` interface in `src/MSP430.Emulator/Debug/IDebugger.cs`
 - [ ] Implement `Debugger` class in `src/MSP430.Emulator/Debug/Debugger.cs`
 - [ ] Add breakpoint management
@@ -1208,16 +1353,18 @@ Implement debugging support with breakpoints, watchpoints, and execution profili
 - [ ] Create comprehensive unit tests for debugging features
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Debug/IDebugger.cs
 src/MSP430.Emulator/Debug/Debugger.cs
 src/MSP430.Emulator/Debug/Breakpoint.cs
 src/MSP430.Emulator/Debug/Watchpoint.cs
 src/MSP430.Emulator/Debug/ExecutionProfiler.cs
 tests/MSP430.Emulator.Tests/Debug/DebuggerTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test breakpoint functionality
 - Test watchpoint triggers
 - Test profiling accuracy
@@ -1225,6 +1372,7 @@ tests/MSP430.Emulator.Tests/Debug/DebuggerTests.cs
 ---
 
 ### Task 9.4: Binary Loading and ELF Support
+
 **Priority**: Medium
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 9.3
@@ -1232,6 +1380,7 @@ tests/MSP430.Emulator.Tests/Debug/DebuggerTests.cs
 Implement support for loading MSP430 binaries and ELF files into emulator memory.
 
 **Acceptance Criteria**:
+
 - [ ] Create `IBinaryLoader` interface in `src/MSP430.Emulator/Loading/IBinaryLoader.cs`
 - [ ] Implement `ElfLoader` class in `src/MSP430.Emulator/Loading/ElfLoader.cs`
 - [ ] Implement `BinaryLoader` class in `src/MSP430.Emulator/Loading/BinaryLoader.cs`
@@ -1241,16 +1390,18 @@ Implement support for loading MSP430 binaries and ELF files into emulator memory
 - [ ] Create comprehensive unit tests for loading functionality
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Loading/IBinaryLoader.cs
 src/MSP430.Emulator/Loading/ElfLoader.cs
 src/MSP430.Emulator/Loading/BinaryLoader.cs
 src/MSP430.Emulator/Loading/SymbolTable.cs
 tests/MSP430.Emulator.Tests/Loading/ElfLoaderTests.cs
 tests/MSP430.Emulator.Tests/Loading/BinaryLoaderTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test ELF file parsing
 - Test memory loading accuracy
 - Test symbol table extraction
@@ -1260,6 +1411,7 @@ tests/MSP430.Emulator.Tests/Loading/BinaryLoaderTests.cs
 ## Phase 10: Integration and Validation
 
 ### Task 10.1: End-to-End Integration Testing
+
 **Priority**: Critical
 **Estimated Effort**: 5-6 hours
 **Dependencies**: Task 9.4
@@ -1267,6 +1419,7 @@ tests/MSP430.Emulator.Tests/Loading/BinaryLoaderTests.cs
 Create comprehensive integration tests that validate complete emulator functionality.
 
 **Acceptance Criteria**:
+
 - [ ] Create integration test framework in `tests/MSP430.Emulator.IntegrationTests/Framework/`
 - [ ] Implement CPU instruction integration tests
 - [ ] Add memory system integration tests
@@ -1276,16 +1429,18 @@ Create comprehensive integration tests that validate complete emulator functiona
 - [ ] Include performance benchmarking tests
 
 **Files to Create**:
-```
+
+```text
 tests/MSP430.Emulator.IntegrationTests/Framework/IntegrationTestBase.cs
 tests/MSP430.Emulator.IntegrationTests/CpuInstructionIntegrationTests.cs
 tests/MSP430.Emulator.IntegrationTests/MemorySystemIntegrationTests.cs
 tests/MSP430.Emulator.IntegrationTests/PeripheralIntegrationTests.cs
 tests/MSP430.Emulator.IntegrationTests/InterruptSystemIntegrationTests.cs
 tests/MSP430.Emulator.IntegrationTests/ProgramExecutionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test complete instruction sequences
 - Test peripheral interactions
 - Test real program execution
@@ -1293,6 +1448,7 @@ tests/MSP430.Emulator.IntegrationTests/ProgramExecutionTests.cs
 ---
 
 ### Task 10.2: Accuracy Validation and Benchmarking
+
 **Priority**: High
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 10.1
@@ -1300,6 +1456,7 @@ tests/MSP430.Emulator.IntegrationTests/ProgramExecutionTests.cs
 Implement validation tests against real MSP430 hardware or reference implementations.
 
 **Acceptance Criteria**:
+
 - [ ] Create validation test suite in `tests/MSP430.Emulator.ValidationTests/`
 - [ ] Implement instruction timing validation
 - [ ] Add peripheral behavior validation
@@ -1308,14 +1465,16 @@ Implement validation tests against real MSP430 hardware or reference implementat
 - [ ] Add regression test capabilities
 
 **Files to Create**:
-```
+
+```text
 tests/MSP430.Emulator.ValidationTests/InstructionTimingTests.cs
 tests/MSP430.Emulator.ValidationTests/PeripheralBehaviorTests.cs
 tests/MSP430.Emulator.ValidationTests/AccuracyMeasurement.cs
 tests/MSP430.Emulator.ValidationTests/PerformanceBenchmarks.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Compare timing with hardware specifications
 - Validate peripheral behavior accuracy
 - Measure emulation performance
@@ -1323,6 +1482,7 @@ tests/MSP430.Emulator.ValidationTests/PerformanceBenchmarks.cs
 ---
 
 ### Task 10.3: Command Line Interface Implementation
+
 **Priority**: Medium
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 10.2
@@ -1330,6 +1490,7 @@ tests/MSP430.Emulator.ValidationTests/PerformanceBenchmarks.cs
 Create a command-line interface for running and debugging MSP430 programs.
 
 **Acceptance Criteria**:
+
 - [ ] Create CLI application in `src/MSP430.Emulator.CLI/`
 - [ ] Implement program loading commands
 - [ ] Add execution control commands
@@ -1339,16 +1500,18 @@ Create a command-line interface for running and debugging MSP430 programs.
 - [ ] Create comprehensive CLI tests
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator.CLI/Program.cs
 src/MSP430.Emulator.CLI/Commands/LoadCommand.cs
 src/MSP430.Emulator.CLI/Commands/RunCommand.cs
 src/MSP430.Emulator.CLI/Commands/DebugCommand.cs
 src/MSP430.Emulator.CLI/Commands/InspectCommand.cs
 tests/MSP430.Emulator.Tests/CLI/CommandTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Test command parsing and execution
 - Test program loading and execution
 - Test debugging functionality
@@ -1358,6 +1521,7 @@ tests/MSP430.Emulator.Tests/CLI/CommandTests.cs
 ## Phase 11: Documentation and Polish
 
 ### Task 11.1: API Documentation and Visual Architecture Guide
+
 **Priority**: Medium
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 10.3
@@ -1365,6 +1529,7 @@ tests/MSP430.Emulator.Tests/CLI/CommandTests.cs
 Generate comprehensive API documentation with clear and consistent visual diagrams and architecture guides.
 
 **Acceptance Criteria**:
+
 - [ ] Add XML documentation comments to all public APIs
 - [ ] Configure documentation generation in build process
 - [ ] Create API reference documentation
@@ -1380,6 +1545,7 @@ Generate comprehensive API documentation with clear and consistent visual diagra
 - [ ] Set up automated documentation publishing
 
 **Visual Documentation Standards**:
+
 - Use consistent color coding across all diagrams (ensure colorblind accessibility)
 - Standardize symbols and notation (IEEE/UML standards where applicable)
 - Include diagram legends and annotations inline within markdown
@@ -1390,6 +1556,7 @@ Generate comprehensive API documentation with clear and consistent visual diagra
 - Prefer inline visualizations over external image files when possible
 
 **GitHub-Native Visualization Options**:
+
 - **Mermaid diagrams**: Flowcharts, sequence diagrams, state diagrams, system architecture
 - **Markdown tables**: Memory layouts, register bit fields, instruction formats
 - **ASCII art**: Simple block diagrams, timing charts, visual separators
@@ -1397,7 +1564,8 @@ Generate comprehensive API documentation with clear and consistent visual diagra
 - **Nested lists with symbols**: Decision trees, hierarchical relationships
 
 **Files to Create**:
-```
+
+```text
 docs/API_Reference.md
 docs/Getting_Started.md
 docs/Architecture.md
@@ -1410,9 +1578,10 @@ docs/diagrams/debugging_workflow.md
 docs/Examples/
 docs/visual_standards/DiagramGuidelines.md
 .github/workflows/docs.yml
-```
+```text
 
 **Testing Strategy**:
+
 - Verify documentation builds without errors
 - Test code examples compile and run
 - Validate documentation completeness
@@ -1422,13 +1591,16 @@ docs/visual_standards/DiagramGuidelines.md
 ---
 
 ### Task 11.2: User Guide and Tutorials with Visual Learning Materials
+
 **Priority**: Medium
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 11.1
 
-Create comprehensive user documentation with examples, tutorials, and visual learning materials using consistent diagram standards.
+Create comprehensive user documentation with examples, tutorials, and visual learning materials using consistent
+diagram standards.
 
 **Acceptance Criteria**:
+
 - [ ] Write user guide with installation instructions
 - [ ] Create tutorial for basic emulator usage
 - [ ] Add debugging guide with examples
@@ -1444,6 +1616,7 @@ Create comprehensive user documentation with examples, tutorials, and visual lea
 - [ ] Create user journey maps for different use cases
 
 **Visual Learning Materials**:
+
 - Step-by-step installation flowcharts (using Mermaid sequence diagrams)
 - Debugging workflow decision trees (using Mermaid decision trees)
 - MSP430 conceptual architecture diagrams (using Mermaid system diagrams)
@@ -1452,7 +1625,8 @@ Create comprehensive user documentation with examples, tutorials, and visual lea
 - Error resolution flowcharts (using Mermaid flowcharts)
 
 **Files to Create**:
-```
+
+```text
 docs/User_Guide.md
 docs/Tutorials/Basic_Usage.md
 docs/Tutorials/Debugging.md
@@ -1465,9 +1639,10 @@ docs/diagrams/user_workflows/troubleshooting_flow.md
 docs/diagrams/conceptual/msp430_overview.md
 docs/diagrams/timing/instruction_execution.md
 docs/visual_guides/screenshots/
-```
+```text
 
 **Testing Strategy**:
+
 - Follow tutorials to verify accuracy
 - Test all provided examples
 - Validate installation instructions
@@ -1477,6 +1652,7 @@ docs/visual_guides/screenshots/
 ---
 
 ### Task 11.3: Performance Optimization and Profiling
+
 **Priority**: Low
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 11.2
@@ -1484,6 +1660,7 @@ docs/visual_guides/screenshots/
 Optimize emulator performance and add profiling capabilities for performance analysis.
 
 **Acceptance Criteria**:
+
 - [ ] Profile emulator performance bottlenecks
 - [ ] Implement performance optimizations
 - [ ] Add performance monitoring hooks
@@ -1492,13 +1669,15 @@ Optimize emulator performance and add profiling capabilities for performance ana
 - [ ] Add execution speed measurement
 
 **Files to Create**:
-```
+
+```text
 src/MSP430.Emulator/Performance/PerformanceMonitor.cs
 src/MSP430.Emulator/Performance/ProfilerHooks.cs
 tests/MSP430.Emulator.Tests/Performance/PerformanceRegressionTests.cs
-```
+```text
 
 **Testing Strategy**:
+
 - Measure performance improvements
 - Test performance regression detection
 - Validate memory usage optimization
@@ -1506,6 +1685,7 @@ tests/MSP430.Emulator.Tests/Performance/PerformanceRegressionTests.cs
 ---
 
 ### Task 11.4: Final Testing and Quality Assurance
+
 **Priority**: Critical
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 11.3
@@ -1513,6 +1693,7 @@ tests/MSP430.Emulator.Tests/Performance/PerformanceRegressionTests.cs
 Perform final comprehensive testing and quality assurance before release.
 
 **Acceptance Criteria**:
+
 - [ ] Run complete test suite and ensure 100% pass rate
 - [ ] Achieve minimum 80% code coverage
 - [ ] Perform security vulnerability assessment
@@ -1522,13 +1703,15 @@ Perform final comprehensive testing and quality assurance before release.
 - [ ] Create release preparation checklist
 
 **Files to Create**:
-```
+
+```text
 tests/MSP430.Emulator.Tests/QualityAssurance/FinalTestSuite.cs
 docs/Release_Checklist.md
 scripts/release-preparation
-```
+```text
 
 **Testing Strategy**:
+
 - Execute comprehensive test coverage analysis
 - Run security scans
 - Validate cross-platform compatibility
@@ -1539,6 +1722,7 @@ scripts/release-preparation
 ## Implementation Guidelines
 
 ### Code Quality Standards
+
 - **One Class Per File**: Each class, interface, or enum should be in its own file
 - **Consistent Naming**: Use PascalCase for public members, camelCase for private members
 - **Comprehensive Testing**: Minimum 80% code coverage with one assertion per test
@@ -1547,7 +1731,8 @@ scripts/release-preparation
 - **Error Handling**: Implement comprehensive exception handling with custom exceptions
 
 ### File Organization Structure
-```
+
+```text
 src/
   MSP430.Emulator/
     Core/
@@ -1574,9 +1759,10 @@ tests/
 scripts/
 docs/
 .github/workflows/
-```
+```text
 
 ### Development Workflow
+
 1. **Branch Creation**: Create feature branch for each task
 2. **Implementation**: Follow TDD approach where possible
 3. **Testing**: Write comprehensive unit tests with single assertions
@@ -1585,6 +1771,7 @@ docs/
 6. **Documentation**: Update relevant documentation with changes
 
 ### Success Metrics
+
 - **Test Coverage**: Maintain minimum 80% code coverage
 - **Build Success**: All builds must pass without warnings
 - **Performance**: Emulator should achieve reasonable execution speed
@@ -1593,4 +1780,6 @@ docs/
 
 ---
 
-This task list provides a comprehensive roadmap for implementing an extremely accurate MSP430 emulator. Each task is sized appropriately for AI development agents and ordered to minimize project failure risk while ensuring systematic, testable development practices.
+This task list provides a comprehensive roadmap for implementing an extremely accurate MSP430 emulator. Each task
+is sized appropriately for AI development agents and ordered to minimize project failure risk while ensuring
+systematic, testable development practices.

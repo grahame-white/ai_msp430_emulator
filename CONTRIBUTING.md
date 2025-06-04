@@ -1,6 +1,7 @@
 # Contributing to MSP430 Emulator
 
-Thank you for your interest in contributing to the MSP430 Emulator project! This guide will help you set up your development environment and understand our development workflow.
+Thank you for your interest in contributing to the MSP430 Emulator project!
+This guide will help you set up your development environment and understand our development workflow.
 
 ## Development Setup
 
@@ -13,17 +14,20 @@ Thank you for your interest in contributing to the MSP430 Emulator project! This
 ### Initial Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/grahame-white/ai_msp430_emulator.git
    cd ai_msp430_emulator
    ```
 
 2. Run the setup script:
+
    ```bash
    ./script/setup
    ```
 
 3. Install automation script dependencies:
+
    ```bash
    cd .github/scripts
    npm install
@@ -68,6 +72,7 @@ Automatic formatting is set up when you run the main setup script:
 ```
 
 This will:
+
 - Automatically format code before each commit
 - Prevent commits with formatting issues
 - Save time by catching formatting problems early
@@ -140,6 +145,29 @@ EOF
 chmod +x .git/hooks/pre-commit
 ```
 
+## Documentation Standards
+
+All technical documentation must follow our established standards to ensure accuracy and consistency.
+
+📖 **See [Documentation Standards](docs/DOCUMENTATION_STANDARDS.md) for complete requirements**
+
+Key requirements:
+
+- Reference official Texas Instruments documentation with specific document versions and section numbers
+- Use GitHub-native Mermaid diagrams and markdown formatting validated by markdownlint
+- Avoid unnecessary duplication of information across documents
+- Integrate new documentation tools following the "Scripts to Rule Them All" pattern
+
+### Quick Validation
+
+```bash
+# Lint all markdown files
+npm run lint:docs
+
+# Full validation (includes markdown linting)
+./script/lint
+```
+
 ## Code Style Guidelines
 
 ### .NET Code
@@ -203,7 +231,8 @@ Our CI pipeline runs the following checks:
 
 ## Scripts Reference
 
-This project follows the ["Scripts to Rule Them All"](https://github.com/github/scripts-to-rule-them-all) pattern for consistent development workflows.
+This project follows the ["Scripts to Rule Them All"](https://github.com/github/scripts-to-rule-them-all)
+pattern for consistent development workflows.
 
 ### Core Scripts
 
@@ -247,24 +276,10 @@ script/security --skip-nodejs    # Skip Node.js vulnerability scan
 script/security --skip-licenses  # Skip license compliance check
 ```
 
-### Development Workflow with Scripts
+## Scripts Reference
 
-```bash
-# First time setup
-script/setup
-
-# Daily development
-script/test --fast    # Quick test
-script/format         # Fix formatting
-script/build          # Build project
-
-# Full validation (like CI)
-script/cibuild
-
-# Before committing
-script/lint           # Check formatting
-script/test           # Run tests with coverage
-```
+This project follows the ["Scripts to Rule Them All"](https://github.com/github/scripts-to-rule-them-all)
+pattern for consistent development workflows.
 
 ## Quick Reference
 
@@ -287,15 +302,19 @@ git diff --cached --name-only
 ### Troubleshooting
 
 #### "Resource not accessible by integration" errors
+
 These are handled gracefully by the automation scripts and won't cause failures.
 
 #### ESLint failures
+
 Run `npm run lint:fix` in `.github/scripts` to auto-fix most issues.
 
 #### dotnet format failures
+
 Run `dotnet format` to auto-fix formatting issues.
 
 #### Test failures
+
 Check the specific test output and ensure your changes don't break existing functionality.
 
 ## Getting Help

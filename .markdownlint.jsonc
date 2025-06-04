@@ -1,0 +1,24 @@
+{
+  // Markdownlint configuration for MSP430 Emulator documentation
+  "default": true,
+  
+  // Allow longer lines for technical documentation with tables and addresses
+  "MD013": {
+    "line_length": 120,
+    "code_blocks": false,
+    "tables": false
+  },
+  
+  // Allow emphasis for technical notes
+  "MD036": false,
+  
+  // Allow duplicate headings in different sections
+  "MD024": false,
+  
+  // Allow raw HTML for enhanced formatting when needed
+  "MD033": false,
+  
+  // Disable rules that don't apply well to technical documentation
+  "MD034": false,  // Allow bare URLs in technical contexts
+  "MD041": false   // Allow documents without top-level heading
+}

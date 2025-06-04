@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# script/test-scripts
+# Basic smoke tests for script functionality
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Running script smoke tests..."
+
+# Test script/update
+echo "==> Testing script/update..."
+if timeout 60s ./script/update; then
+    echo "✅ script/update completed successfully"
+else
+    echo "❌ script/update failed or timed out"
+    exit 1
+fi
+
+# Test script/bootstrap
+echo "==> Testing script/bootstrap..."
+if timeout 60s ./script/bootstrap; then
+    echo "✅ script/bootstrap completed successfully"
+else
+    echo "❌ script/bootstrap failed or timed out"
+    exit 1
+fi
+
+# Test script/build (basic validation)
+echo "==> Testing script/build..."
+if timeout 120s ./script/build; then
+    echo "✅ script/build completed successfully"
+else
+    echo "❌ script/build failed or timed out"
+    exit 1
+fi
+
+echo "==> All script smoke tests passed!"

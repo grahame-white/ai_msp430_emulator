@@ -51,6 +51,9 @@ Thank you for your interest in contributing to the MSP430 Emulator project! This
 # Run all tests
 ./script/test
 
+# Test core scripts (smoke tests)
+./script/test-scripts
+
 # Build the project
 ./script/build
 ```

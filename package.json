@@ -1,0 +1,22 @@
+{
+  "name": "msp430-emulator",
+  "version": "1.0.0",
+  "description": "MSP430 Emulator - Development Dependencies",
+  "private": true,
+  "scripts": {
+    "lint:docs": "markdownlint-cli2 \"docs/**/*.md\" \"*.md\""
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.13.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "msp430",
+    "emulator",
+    "documentation"
+  ],
+  "author": "MSP430 Emulator Team",
+  "license": "MIT"
+}

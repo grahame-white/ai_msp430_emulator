@@ -363,3 +363,7 @@ FodyWeavers.xsd
 .github/scripts/node_modules/
 .github/scripts/.npm
 .github/scripts/.yarn
+
+# Root-level npm files (development tools)
+node_modules/
+package-lock.json

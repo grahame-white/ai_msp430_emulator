@@ -23,11 +23,11 @@ echo "==> Found .NET version: $DOTNET_VERSION"
 echo "==> Restoring NuGet packages..."
 dotnet restore
 
-# Install Node.js dependencies for documentation tools
+# Install Node.js development dependencies for documentation tools
 echo "==> Installing documentation tools..."
 if command -v npm >/dev/null 2>&1; then
-    # Install markdownlint-cli2 globally for documentation linting
-    npm install -g markdownlint-cli2 || echo "Warning: Failed to install markdownlint-cli2. Documentation linting may not work."
+    # Install markdownlint-cli2 as local devDependency for documentation linting
+    npm install || echo "Warning: Failed to install npm dependencies. Documentation linting may not work."
 else
     echo "Warning: npm not found. Install Node.js to enable documentation linting tools."
 fi

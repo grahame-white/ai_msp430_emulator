@@ -9,7 +9,11 @@ in C# using .NET Core 8.0 with xUnit testing. Each task is designed to be:
 - Focused on systematic, testable development
 - Adherent to C# best practices and consistent formatting
 
-## AI Developer Guidelines
+## Task List Maintenance Guidelines
+
+**For general AI developer guidance, see [AI Developer Guidelines](.github/copilot-instructions.md).**
+
+This section provides specific guidance for maintaining and evolving this task list document.
 
 ### Continuous Task List Assessment
 

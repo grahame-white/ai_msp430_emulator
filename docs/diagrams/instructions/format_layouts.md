@@ -1,10 +1,12 @@
 # MSP430 Instruction Format Layouts
 
-This document provides detailed bit-level layouts for all three MSP430 instruction formats, showing how fields are encoded within the 16-bit instruction word.
+This document provides detailed bit-level layouts for all three MSP430 instruction formats, showing how fields
+are encoded within the 16-bit instruction word.
 
 ## Format I - Two-Operand Instructions
 
-Format I instructions operate on two operands (source and destination) and include arithmetic, logical, and data movement operations.
+Format I instructions operate on two operands (source and destination) and include arithmetic, logical, and
+data movement operations.
 
 ### Bit Layout
 
@@ -80,6 +82,7 @@ Format II instructions operate on a single operand and include shifts, rotates, 
 ### Sub-Instruction Decoding
 
 For opcode 0x10, the specific instruction is determined by bits 7:6:
+
 - 0x1000-0x103F: RRC (Rotate right through carry)
 - 0x1040-0x107F: SWPB (Swap bytes)
 - 0x1080-0x10BF: RRA (Rotate right arithmetic)
@@ -101,7 +104,7 @@ Format III instructions provide conditional and unconditional jumps with PC-rela
 
 | Bits | 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 |------|----|----|----|----|----|----|---|---|---|---|---|---|---|---|---|---|
-| **Field** | **001** | | | **Condition[2:0]** | | | **10-bit Signed Offset** | | | | | | | | |
+| **Field** | **001** | | | **Condition[2:0]** | | | **10-bit Signed Offset** | | | | | | | | | |
 
 ### Field Descriptions
 
@@ -127,6 +130,7 @@ Format III instructions provide conditional and unconditional jumps with PC-rela
 ### Offset Calculation
 
 The 10-bit offset is sign-extended to 16 bits and represents the number of **words** (not bytes) to jump:
+
 - Effective address = PC + 2 + (offset × 2)
 - Range: -1024 to +1022 bytes from current instruction
 

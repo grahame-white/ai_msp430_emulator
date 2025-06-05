@@ -1,6 +1,7 @@
 # AI Developer Guidance for MSP430 Emulator Project
 
-This document contains essential guidance for AI developers working on the MSP430 emulator project. This guidance should be referenced when processing any prompt or request related to this project.
+This document contains essential guidance for AI developers working on the MSP430 emulator project. This
+guidance should be referenced when processing any prompt or request related to this project.
 
 ## Core Development Principles
 
@@ -121,4 +122,5 @@ Tasks are ordered to establish a solid foundation first, then build complexity i
 
 ---
 
-**Note**: This guidance should be consulted for every development task to ensure consistency and quality across the MSP430 emulator project.
+**Note**: This guidance should be consulted for every development task to ensure consistency and quality
+across the MSP430 emulator project.

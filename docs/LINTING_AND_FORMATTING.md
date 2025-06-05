@@ -100,19 +100,6 @@ npm run lint:workflows # actionlint on workflow files
 | `.github/scripts/.eslintrc.json` | ESLint configuration | JavaScript files |
 | `.github/scripts/.yamllint.yml` | YAML linting configuration | YAML files |
 
-## AI Developer Guidelines
-
-When making code changes:
-
-1. **Run linting early**: Use `./script/lint` before committing to catch issues early
-2. **Auto-format when possible**: Use `./script/format` or `./script/format-all` to automatically fix formatting
-3. **Check comprehensive formatting**: Use `./script/check-format-all` for complete validation
-4. **Focus on relevant tools**: Only run linters for file types you're modifying
-5. **Understand tool purposes**:
-   - Formatters (dotnet format, prettier) fix style issues automatically
-   - Linters (eslint, markdownlint-cli2, yamllint) catch syntax and style issues
-   - Static analyzers (dotnet build) catch potential code issues
-
 ## Dependencies
 
 - **.NET SDK**: Required for `dotnet format` and `dotnet build`

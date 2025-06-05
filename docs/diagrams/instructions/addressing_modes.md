@@ -149,9 +149,9 @@ flowchart TD
     
     As00 --> RegDirect5[Register Direct<br/>@Rn]
     
-    As01 --> R0_5 --> Symbolic5[Symbolic<br/>PC+offset]
-    As01 --> R2_5 --> Absolute5[Absolute<br/>Direct address]
-    As01 --> RN_5 --> Indexed5[Indexed<br/>Rn+offset]
+    As01 --> R0_5 --> Symbolic5[Symbolic Mode<br/>PC+offset]
+    As01 --> R2_5 --> Absolute5[Absolute Mode<br/>Direct address]
+    As01 --> RN_5 --> Indexed5[Indexed Mode<br/>Rn+offset]
     
     As10 --> IndirectMatrix5[Indirect Mode<br/>@Rn]
     

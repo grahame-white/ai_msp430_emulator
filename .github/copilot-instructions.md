@@ -2,6 +2,11 @@
 
 This is a C# based MSP430 microcontroller emulator project with Node.js automation scripts for GitHub Actions. It aims to provide high accuracy MSP430FR2355 emulation with comprehensive testing and documentation. Please follow these guidelines when contributing:
 
+## Prerequisites
+- .NET 8.0 SDK or later
+- Node.js 18.0 or later (for automation scripts)
+- Git
+
 ## Code Standards
 
 ### Required Before Each Commit
@@ -16,6 +21,39 @@ This is a C# based MSP430 microcontroller emulator project with Node.js automati
 - Format: `./script/format` (auto-fix C# formatting)
 - Lint: `./script/lint` (check formatting, run static analysis, validate markdown)
 - Full validation: `./script/format && ./script/lint && ./script/test`
+
+### Script Options and Modes
+Many scripts support helpful options for different scenarios:
+
+```bash
+# Test with different modes
+./script/test --coverage     # Explicit coverage (default)
+./script/test --fast         # Skip coverage for faster testing
+
+# CI build with different modes  
+./script/cibuild             # Full CI pipeline
+./script/cibuild --fast      # Skip security and coverage
+./script/cibuild --skip-security  # Skip only security checks
+
+# Security scanning options
+./script/security            # Run all security checks
+./script/security --skip-dotnet    # Skip .NET vulnerability scan
+./script/security --skip-nodejs    # Skip Node.js vulnerability scan
+./script/security --skip-licenses  # Skip license compliance check
+```
+
+### Automated Git Hooks Setup
+Git hooks are automatically configured during setup to catch issues before commit:
+
+```bash
+# Git hooks are configured when you run:
+./script/setup
+
+# This automatically:
+# - Formats code before each commit
+# - Prevents commits with formatting issues
+# - Saves time by catching formatting problems early
+```
 
 ### Auto-fix Common Issues
 - C# formatting: `./script/format` or `dotnet format`
@@ -53,6 +91,21 @@ This is a C# based MSP430 microcontroller emulator project with Node.js automati
 - Interface files must be prefixed with 'I'
 - Minimum test coverage: 80%
 
+### File Organization Rules
+**Each file must contain exactly one type** (class, interface, enum, struct, delegate, etc.):
+
+- ✅ **Correct**: `RegisterName.cs` contains only the `RegisterName` enum
+- ✅ **Correct**: `IEmulatorCore.cs` contains only the `IEmulatorCore` interface  
+- ✅ **Correct**: `EmulatorCore.cs` contains only the `EmulatorCore` class
+- ❌ **Incorrect**: One file containing both a class and an enum
+- ❌ **Incorrect**: One file containing an interface and multiple event argument classes
+
+**Additional file organization rules:**
+- Filename must match the type name exactly (e.g., `EmulatorCore.cs` for `EmulatorCore` class)
+- Interface files must be prefixed with 'I' (e.g., `IEmulatorCore.cs`)
+- Use descriptive folder structure to group related types logically
+- Place types in appropriate namespaces that match their folder structure
+
 ### Documentation Standards
 - Reference official Texas Instruments documentation with specific document versions and section numbers
 - Use GitHub-native Mermaid diagrams and markdown formatting validated by markdownlint
@@ -65,6 +118,15 @@ This is a C# based MSP430 microcontroller emulator project with Node.js automati
 - Use Prettier for consistent formatting
 - Validate YAML files with yamllint
 - Validate GitHub Actions workflows with actionlint
+
+### Common JavaScript Linting Rules
+- Use single quotes for strings
+- Use 4-space indentation
+- No trailing spaces
+- No space before function parentheses: `function()` not `function ()`
+- Always use semicolons
+- Use `const` and `let` instead of `var`
+- Remove unused variables or prefix with underscore if intentionally unused
 
 ### Tooling Integration
 - All new development tools must be integrated into the "Scripts to Rule Them All" pattern
@@ -108,3 +170,24 @@ git diff --cached --name-only
 - **dotnet format failures**: Run `dotnet format` to auto-fix formatting issues
 - **Test failures**: Check specific test output and ensure changes don't break existing functionality
 - **Missing dependencies**: Run `./script/bootstrap` to install all required tools
+
+### Pull Request Workflow
+1. Create a feature branch from `main`
+2. Make changes following the guidelines above
+3. Run all pre-commit checks locally: `./script/format && ./script/lint && ./script/test`
+4. For automation script changes: `cd .github/scripts && npm run validate:all && npm test`
+5. Submit pull request with clear description
+6. Address any feedback from code review
+7. Ensure CI passes before requesting final review
+
+### Testing Commands
+```bash
+# .NET Tests
+./script/test                           # Run all tests with coverage
+./script/test --fast                    # Skip coverage for faster testing
+dotnet test tests/MSP430.Emulator.Tests/            # Run specific test project
+dotnet test tests/MSP430.Emulator.IntegrationTests/ # Run integration tests
+
+# Automation Scripts Tests  
+cd .github/scripts && npm test         # Run JavaScript tests
+```

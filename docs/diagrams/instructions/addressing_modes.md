@@ -153,7 +153,7 @@ flowchart TD
     As01 --> R2_5 --> Absolute5[Absolute<br/>Direct address]
     As01 --> RN_5 --> Indexed5[Indexed<br/>Rn+offset]
     
-    As10 --> IndirectMatrix5[Indirect<br/>@Rn]
+    As10 --> IndirectMatrix5[Indirect Mode<br/>@Rn]
     
     As11 --> R0_Imm5[R0: Immediate<br/>#constant]
     As11 --> R2_C4_5[R2: Constant #4]

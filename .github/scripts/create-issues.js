@@ -179,7 +179,10 @@ class GitHubIssuesCreator {
         }
         body += '\n';
 
-        // Required Reading
+        // Required Reading (Legacy - now included in acceptance criteria as compliance items)
+        // NOTE: Required reading items are now part of acceptance criteria as
+        // "Review and comply with..." checkboxes. This section is maintained
+        // for backward compatibility but will be empty for new task structure.
         if (task.requiredReading && task.requiredReading.length > 0) {
             body += '## Required Reading\n\n';
             for (const reading of task.requiredReading) {

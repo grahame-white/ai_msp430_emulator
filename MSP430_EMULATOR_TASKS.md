@@ -70,15 +70,12 @@ Tasks are ordered to establish a solid foundation first, then build complexity i
 **Estimated Effort**: 2-4 hours
 **Dependencies**: None
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Create the foundational project structure following C# best practices and the "Scripts to Rule Them All" pattern.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create .NET Core 8.0 solution with proper structure
 - [ ] Implement main emulator project (`MSP430.Emulator`)
 - [ ] Implement unit test project (`MSP430.Emulator.Tests`)
@@ -117,15 +114,12 @@ Directory.Build.props
 **Estimated Effort**: 3-5 hours
 **Dependencies**: Task 1.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement automated workflows to maintain code quality and catch defects early.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create GitHub Actions workflow for CI/CD
 - [ ] Add automated build verification
 - [ ] Add automated test execution
@@ -158,15 +152,12 @@ Implement automated workflows to maintain code quality and catch defects early.
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 1.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Establish structured logging and configuration management for debugging and operational visibility.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `ILogger` abstraction in `src/MSP430.Emulator/Logging/ILogger.cs`
 - [ ] Implement console logger in `src/MSP430.Emulator/Logging/ConsoleLogger.cs`
 - [ ] Implement file logger in `src/MSP430.Emulator/Logging/FileLogger.cs`
@@ -202,16 +193,13 @@ tests/MSP430.Emulator.Tests/Configuration/EmulatorConfigTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 1.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Establish comprehensive defect tracking, triage, and resolution processes to maintain high code quality and
 systematic bug management.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create defect classification system with severity levels (Critical, High, Medium, Low)
 - [ ] Implement bug report template with reproduction steps and environment details
 - [ ] Create defect triage workflow with assignment and prioritization rules
@@ -249,16 +237,13 @@ tests/MSP430.Emulator.Tests/Quality/DefectTrackerTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 1.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Create automated GitHub workflow to populate and update GitHub issues from the task list using GraphQL API for
 streamlined project management.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create GitHub workflow for automated issue management
 - [ ] Implement task parsing logic in workflow to extract tasks from MSP430_EMULATOR_TASKS.md
 - [ ] Create automated issue creation with proper formatting and metadata
@@ -344,16 +329,13 @@ streamlined project management.
 **Estimated Effort**: 4-6 hours
 **Dependencies**: Task 1.5
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement the MSP430's unified memory address space with proper segmentation, access control, and comprehensive
 visual documentation.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IMemoryMap` interface in `src/MSP430.Emulator/Memory/IMemoryMap.cs`
 - [ ] Implement `MemoryMap` class in `src/MSP430.Emulator/Memory/MemoryMap.cs`
 - [ ] Define memory regions enum in `src/MSP430.Emulator/Memory/MemoryRegion.cs`
@@ -402,16 +384,13 @@ docs/diagrams/architecture/memory_access_flow.md
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 2.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement the MSP430's register file including general purpose and special function registers with comprehensive
 state documentation.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IRegisterFile` interface in `src/MSP430.Emulator/Cpu/IRegisterFile.cs`
 - [ ] Implement `RegisterFile` class in `src/MSP430.Emulator/Cpu/RegisterFile.cs`
 - [ ] Define register names enum in `src/MSP430.Emulator/Cpu/RegisterName.cs`
@@ -460,16 +439,13 @@ docs/diagrams/cpu/pc_state_transitions.md
 **Estimated Effort**: 5-7 hours
 **Dependencies**: Task 2.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Create the instruction decoding framework to parse MSP430 machine code into executable operations with
 comprehensive flow documentation.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IInstructionDecoder` interface in `src/MSP430.Emulator/Instructions/IInstructionDecoder.cs`
 - [ ] Implement `InstructionDecoder` class in `src/MSP430.Emulator/Instructions/InstructionDecoder.cs`
 - [ ] Define instruction format enum in `src/MSP430.Emulator/Instructions/InstructionFormat.cs`
@@ -520,15 +496,12 @@ docs/diagrams/instructions/addressing_modes.md
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 2.3
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement the main emulator engine that coordinates CPU execution, memory access, and system state.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IEmulatorCore` interface in `src/MSP430.Emulator/Core/IEmulatorCore.cs`
 - [ ] Implement `EmulatorCore` class in `src/MSP430.Emulator/Core/EmulatorCore.cs`
 - [ ] Implement execution state management in `src/MSP430.Emulator/Core/ExecutionState.cs`
@@ -565,15 +538,12 @@ tests/MSP430.Emulator.Tests/Core/ExecutionStateTests.cs
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 2.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement random access memory with proper read/write operations and timing characteristics.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IRandomAccessMemory` interface in `src/MSP430.Emulator/Memory/IRandomAccessMemory.cs`
 - [ ] Implement `RandomAccessMemory` class in `src/MSP430.Emulator/Memory/RandomAccessMemory.cs`
 - [ ] Support configurable memory size (typically 512B-10KB)
@@ -604,15 +574,12 @@ tests/MSP430.Emulator.Tests/Memory/RandomAccessMemoryTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 3.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement flash memory with programming, erasing, and protection features typical of MSP430 devices.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IFlashMemory` interface in `src/MSP430.Emulator/Memory/IFlashMemory.cs`
 - [ ] Implement `FlashMemory` class in `src/MSP430.Emulator/Memory/FlashMemory.cs`
 - [ ] Support flash programming operations
@@ -647,15 +614,12 @@ tests/MSP430.Emulator.Tests/Memory/FlashControllerTests.cs
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 3.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement information memory segments for device calibration data and user information storage.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IInformationMemory` interface in `src/MSP430.Emulator/Memory/IInformationMemory.cs`
 - [ ] Implement `InformationMemory` class in `src/MSP430.Emulator/Memory/InformationMemory.cs`
 - [ ] Support segments A, B, C, and D
@@ -687,15 +651,12 @@ tests/MSP430.Emulator.Tests/Memory/InformationMemoryTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 3.3
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Integrate all memory types into a unified memory controller with proper address decoding and access arbitration.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IMemoryController` interface in `src/MSP430.Emulator/Memory/IMemoryController.cs`
 - [ ] Implement `MemoryController` class in `src/MSP430.Emulator/Memory/MemoryController.cs`
 - [ ] Integrate RAM, Flash, and Information memory
@@ -730,15 +691,12 @@ tests/MSP430.Emulator.Tests/Memory/MemoryControllerTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 2.4
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement fundamental arithmetic operations (ADD, SUB, CMP) with proper flag handling.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `AddInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/AddInstruction.cs`
 - [ ] Implement `SubInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/SubInstruction.cs`
 - [ ] Implement `CmpInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/CmpInstruction.cs`
@@ -773,15 +731,12 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/CmpInstructionTests.cs
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 4.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement increment/decrement operations with proper addressing mode support.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `IncInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/IncInstruction.cs`
 - [ ] Implement `DecInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/DecInstruction.cs`
 - [ ] Support all applicable addressing modes
@@ -812,15 +767,12 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DecInstructionTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 4.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement bitwise logical operations (AND, OR, XOR, BIT) with comprehensive addressing mode support.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `AndInstruction` class in `src/MSP430.Emulator/Instructions/Logic/AndInstruction.cs`
 - [ ] Implement `BisInstruction` class in `src/MSP430.Emulator/Instructions/Logic/BisInstruction.cs`
 - [ ] Implement `XorInstruction` class in `src/MSP430.Emulator/Instructions/Logic/XorInstruction.cs`
@@ -857,15 +809,12 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/BitInstructionTests.cs
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 4.3
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement individual bit manipulation operations (BIC, SETC, CLRC, etc.).
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `BicInstruction` class in `src/MSP430.Emulator/Instructions/Logic/BicInstruction.cs`
 - [ ] Implement status bit manipulation in `src/MSP430.Emulator/Instructions/Logic/StatusBitInstructions.cs`
 - [ ] Support bit clearing and setting operations
@@ -897,15 +846,12 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/StatusBitInstructionTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 4.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement data movement instructions (MOV) with all addressing modes and size variations.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `MovInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/MovInstruction.cs`
 - [ ] Support all source addressing modes (register, indexed, indirect, immediate, absolute, symbolic)
 - [ ] Support all destination addressing modes
@@ -934,15 +880,12 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/MovInstructionTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 5.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement stack manipulation instructions (PUSH, POP) with proper stack pointer management.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `PushInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/PushInstruction.cs`
 - [ ] Implement `PopInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/PopInstruction.cs`
 - [ ] Support all addressing modes for PUSH
@@ -973,15 +916,12 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/PopInstructionTests.cs
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 5.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement data manipulation instructions (SWPB, SXT) for byte and sign operations.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `SwpbInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/SwpbInstruction.cs`
 - [ ] Implement `SxtInstruction` class in `src/MSP430.Emulator/Instructions/DataMovement/SxtInstruction.cs`
 - [ ] Support byte swapping operations
@@ -1013,15 +953,12 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/SxtInstructionTests.cs
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 5.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement unconditional program flow control (JMP, BR).
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `JmpInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/JmpInstruction.cs`
 - [ ] Implement branch instruction variants in `src/MSP430.Emulator/Instructions/ControlFlow/BranchInstruction.cs`
 - [ ] Support relative and absolute addressing
@@ -1051,15 +988,12 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/BranchInstructionTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 6.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement conditional branch instructions based on status register flags.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement conditional jump base class in
       `src/MSP430.Emulator/Instructions/ControlFlow/ConditionalJumpInstruction.cs`
 - [ ] Implement all conditional jumps (JZ, JNZ, JC, JNC, JN, JGE, JL) in separate files
@@ -1095,15 +1029,12 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/ConditionalJumpTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 6.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement subroutine call and return instructions (CALL, RET).
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `CallInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/CallInstruction.cs`
 - [ ] Implement `RetInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/RetInstruction.cs`
 - [ ] Support all addressing modes for CALL
@@ -1134,15 +1065,12 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetInstructionTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 6.3
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement interrupt-related and special control instructions (RETI, NOP, etc.).
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `RetiInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/RetiInstruction.cs`
 - [ ] Implement `NopInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/NopInstruction.cs`
 - [ ] Implement interrupt enable/disable instructions
@@ -1175,15 +1103,12 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/SpecialInstructionTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 3.4
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Create the foundational infrastructure for peripheral device emulation.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IPeripheral` interface in `src/MSP430.Emulator/Peripherals/IPeripheral.cs`
 - [ ] Implement `PeripheralBase` abstract class in `src/MSP430.Emulator/Peripherals/PeripheralBase.cs`
 - [ ] Create peripheral manager in `src/MSP430.Emulator/Peripherals/PeripheralManager.cs`
@@ -1217,15 +1142,12 @@ tests/MSP430.Emulator.Tests/Peripherals/PeripheralManagerTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 7.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement digital I/O ports with full pin control and interrupt capabilities.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `DigitalIOPort` class in `src/MSP430.Emulator/Peripherals/DigitalIO/DigitalIOPort.cs`
 - [ ] Create pin state management in `src/MSP430.Emulator/Peripherals/DigitalIO/PinState.cs`
 - [ ] Implement direction control (input/output)
@@ -1258,15 +1180,12 @@ tests/MSP430.Emulator.Tests/Peripherals/DigitalIO/DigitalIOPortTests.cs
 **Estimated Effort**: 5-6 hours
 **Dependencies**: Task 7.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement Timer A with all operating modes and capture/compare functionality.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `TimerA` class in `src/MSP430.Emulator/Peripherals/Timers/TimerA.cs`
 - [ ] Create timer modes in `src/MSP430.Emulator/Peripherals/Timers/TimerMode.cs`
 - [ ] Implement capture/compare units
@@ -1299,15 +1218,12 @@ tests/MSP430.Emulator.Tests/Peripherals/Timers/TimerATests.cs
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 7.3
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement the watchdog timer with reset and interval timer functionality.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `WatchdogTimer` class in `src/MSP430.Emulator/Peripherals/Timers/WatchdogTimer.cs`
 - [ ] Add watchdog reset functionality
 - [ ] Implement interval timer mode
@@ -1339,15 +1255,12 @@ tests/MSP430.Emulator.Tests/Peripherals/Timers/WatchdogTimerTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 7.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement the interrupt controller with proper priority handling and vector management.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IInterruptController` interface in `src/MSP430.Emulator/Interrupts/IInterruptController.cs`
 - [ ] Implement `InterruptController` class in `src/MSP430.Emulator/Interrupts/InterruptController.cs`
 - [ ] Create interrupt vector table management
@@ -1380,15 +1293,12 @@ tests/MSP430.Emulator.Tests/Interrupts/InterruptControllerTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 8.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Integrate interrupt servicing with CPU execution and peripheral event generation.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement interrupt request handling in CPU core
 - [ ] Add interrupt service routine entry/exit
 - [ ] Implement automatic context saving/restoration
@@ -1420,15 +1330,12 @@ tests/MSP430.Emulator.Tests/Interrupts/InterruptServiceTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 8.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement the clock generation system with multiple clock sources and power management.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IClockSystem` interface in `src/MSP430.Emulator/Clock/IClockSystem.cs`
 - [ ] Implement `ClockSystem` class in `src/MSP430.Emulator/Clock/ClockSystem.cs`
 - [ ] Support multiple clock sources (DCO, ACLK, SMCLK)
@@ -1460,15 +1367,12 @@ tests/MSP430.Emulator.Tests/Clock/ClockSystemTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 9.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement low-power modes and power management features.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IPowerManager` interface in `src/MSP430.Emulator/Power/IPowerManager.cs`
 - [ ] Implement `PowerManager` class in `src/MSP430.Emulator/Power/PowerManager.cs`
 - [ ] Support all low-power modes (LPM0-LPM4)
@@ -1500,15 +1404,12 @@ tests/MSP430.Emulator.Tests/Power/PowerManagerTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 9.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement debugging support with breakpoints, watchpoints, and execution profiling.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IDebugger` interface in `src/MSP430.Emulator/Debug/IDebugger.cs`
 - [ ] Implement `Debugger` class in `src/MSP430.Emulator/Debug/Debugger.cs`
 - [ ] Add breakpoint management
@@ -1542,15 +1443,12 @@ tests/MSP430.Emulator.Tests/Debug/DebuggerTests.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 9.3
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement support for loading MSP430 binaries and ELF files into emulator memory.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create `IBinaryLoader` interface in `src/MSP430.Emulator/Loading/IBinaryLoader.cs`
 - [ ] Implement `ElfLoader` class in `src/MSP430.Emulator/Loading/ElfLoader.cs`
 - [ ] Implement `BinaryLoader` class in `src/MSP430.Emulator/Loading/BinaryLoader.cs`
@@ -1586,15 +1484,12 @@ tests/MSP430.Emulator.Tests/Loading/BinaryLoaderTests.cs
 **Estimated Effort**: 5-6 hours
 **Dependencies**: Task 9.4
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Create comprehensive integration tests that validate complete emulator functionality.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create integration test framework in `tests/MSP430.Emulator.IntegrationTests/Framework/`
 - [ ] Implement CPU instruction integration tests
 - [ ] Add memory system integration tests
@@ -1628,15 +1523,12 @@ tests/MSP430.Emulator.IntegrationTests/ProgramExecutionTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 10.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Implement validation tests against real MSP430 hardware or reference implementations.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create validation test suite in `tests/MSP430.Emulator.ValidationTests/`
 - [ ] Implement instruction timing validation
 - [ ] Add peripheral behavior validation
@@ -1667,15 +1559,12 @@ tests/MSP430.Emulator.ValidationTests/PerformanceBenchmarks.cs
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 10.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Create a command-line interface for running and debugging MSP430 programs.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Create CLI application in `src/MSP430.Emulator.CLI/`
 - [ ] Implement program loading commands
 - [ ] Add execution control commands
@@ -1711,15 +1600,12 @@ tests/MSP430.Emulator.Tests/CLI/CommandTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 10.3
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Generate comprehensive API documentation with clear and consistent visual diagrams and architecture guides.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Add XML documentation comments to all public APIs
 - [ ] Configure documentation generation in build process
 - [ ] Create API reference documentation
@@ -1786,16 +1672,13 @@ docs/visual_standards/DiagramGuidelines.md
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 11.1
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Create comprehensive user documentation with examples, tutorials, and visual learning materials using consistent
 diagram standards.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Write user guide with installation instructions
 - [ ] Create tutorial for basic emulator usage
 - [ ] Add debugging guide with examples
@@ -1852,15 +1735,12 @@ docs/visual_guides/screenshots/
 **Estimated Effort**: 3-4 hours
 **Dependencies**: Task 11.2
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Optimize emulator performance and add profiling capabilities for performance analysis.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Profile emulator performance bottlenecks
 - [ ] Implement performance optimizations
 - [ ] Add performance monitoring hooks
@@ -1890,15 +1770,12 @@ tests/MSP430.Emulator.Tests/Performance/PerformanceRegressionTests.cs
 **Estimated Effort**: 4-5 hours
 **Dependencies**: Task 11.3
 
-**Required Reading**:
-
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
-- [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
-
 Perform final comprehensive testing and quality assurance before release.
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Run complete test suite and ensure 100% pass rate
 - [ ] Achieve minimum 80% code coverage
 - [ ] Perform security vulnerability assessment

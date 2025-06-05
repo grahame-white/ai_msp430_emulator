@@ -121,6 +121,11 @@ class TaskParser {
 
     /**
      * Extract required reading list from task content
+     *
+     * NOTE: As of the latest update, required reading items have been moved
+     * into acceptance criteria as "Review and comply with..." checkboxes.
+     * This method is maintained for backward compatibility but will return
+     * empty arrays for the new structure.
      */
     extractRequiredReading(content) {
         const requiredReading = [];

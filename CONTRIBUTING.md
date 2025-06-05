@@ -172,6 +172,23 @@ npm run lint:docs
 
 📋 **See [Linting and Formatting Tools](docs/LINTING_AND_FORMATTING.md) for comprehensive tool reference**
 
+### File Organization
+
+**Each file must contain exactly one type** (class, interface, enum, struct, delegate, etc.):
+
+- ✅ **Correct**: `RegisterName.cs` contains only the `RegisterName` enum
+- ✅ **Correct**: `IEmulatorCore.cs` contains only the `IEmulatorCore` interface  
+- ✅ **Correct**: `EmulatorCore.cs` contains only the `EmulatorCore` class
+- ❌ **Incorrect**: One file containing both a class and an enum
+- ❌ **Incorrect**: One file containing an interface and multiple event argument classes
+
+**Additional file organization rules:**
+
+- Filename must match the type name exactly (e.g., `EmulatorCore.cs` for `EmulatorCore` class)
+- Interface files must be prefixed with 'I' (e.g., `IEmulatorCore.cs`)
+- Use descriptive folder structure to group related types logically
+- Place types in appropriate namespaces that match their folder structure
+
 ### .NET Code
 
 - Follow the existing code formatting (enforced by `dotnet format`)

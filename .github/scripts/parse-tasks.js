@@ -62,7 +62,7 @@ class TaskParser {
             priority: this.extractPriority(content),
             effort: this.extractEffort(content),
             dependencies: this.extractDependencies(content),
-            requiredReading: this.extractRequiredReading(content),
+
             description: this.extractDescription(content),
             acceptanceCriteria: this.extractAcceptanceCriteria(content),
             filesToCreate: this.extractFilesToCreate(content),
@@ -120,42 +120,12 @@ class TaskParser {
     }
 
     /**
-     * Extract required reading list from task content
-     *
-     * NOTE: As of the latest update, required reading items have been moved
-     * into acceptance criteria as "Review and comply with..." checkboxes.
-     * This method is maintained for backward compatibility but will return
-     * empty arrays for the new structure.
-     */
-    extractRequiredReading(content) {
-        const requiredReading = [];
-        const requiredReadingMatch = content.match(
-            /\*\*Required Reading\*\*:\s*([\s\S]*?)(?=\n\n|$|\*\*[A-Z])/
-        );
-
-        if (requiredReadingMatch) {
-            const readingText = requiredReadingMatch[1];
-            const lines = readingText.split('\n');
-
-            for (const line of lines) {
-                const trimmed = line.trim();
-                if (trimmed.startsWith('- ')) {
-                    requiredReading.push(trimmed.substring(2).trim());
-                }
-            }
-        }
-
-        return requiredReading;
-    }
-
-    /**
      * Extract main task description (first paragraph after title)
      */
     extractDescription(content) {
         const lines = content.split('\n');
         let description = '';
         let foundDependencies = false;
-        let foundRequiredReading = false;
         let fallbackDescription = '';
         let inFallbackCapture = false;
 
@@ -169,14 +139,7 @@ class TaskParser {
                 continue;
             }
 
-            // Skip Required Reading section
-            if (trimmed.startsWith('**Required Reading**')) {
-                foundRequiredReading = true;
-                inFallbackCapture = false;
-                continue;
-            }
-
-            // Start fallback capture after task metadata (Priority, Effort, Dependencies, Required Reading)
+            // Start fallback capture after task metadata (Priority, Effort, Dependencies)
             if (trimmed.startsWith('**Priority**') || trimmed.startsWith('**Estimated Effort**')) {
                 inFallbackCapture = false;
                 continue;
@@ -191,9 +154,9 @@ class TaskParser {
                 break;
             }
 
-            // Capture description after dependencies OR required reading (primary method)
+            // Capture description after dependencies (primary method)
             if (
-                (foundDependencies || foundRequiredReading) &&
+                foundDependencies &&
                 trimmed &&
                 !trimmed.startsWith('**') &&
                 !trimmed.startsWith('- [')
@@ -204,7 +167,6 @@ class TaskParser {
             // Fallback: capture content that looks like description
             if (
                 !foundDependencies &&
-                !foundRequiredReading &&
                 !inFallbackCapture &&
                 trimmed &&
                 !trimmed.startsWith('**') &&

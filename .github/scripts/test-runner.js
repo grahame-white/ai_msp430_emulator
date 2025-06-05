@@ -178,6 +178,97 @@ This is a description without dependencies section.
     );
 });
 
+// Test: Review and comply with acceptance criteria parsing
+runner.test('TaskParser can parse "Review and comply with" acceptance criteria', () => {
+    const { TaskParser } = require('./parse-tasks.js');
+    const parser = new TaskParser();
+
+    const mockTaskWithCompliance = `### Task 1.1: Test Task
+**Priority**: High
+**Estimated Effort**: 2 hours
+**Dependencies**: None
+
+This is a test task description.
+
+**Acceptance Criteria**:
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [ ] First regular criterion
+- [x] Second regular criterion
+
+**Files to Create**:
+- test.js`;
+
+    const criteria = parser.extractAcceptanceCriteria(mockTaskWithCompliance);
+    runner.assertEqual(criteria.length, 4, 'Should extract 4 acceptance criteria');
+
+    // Check compliance criteria
+    runner.assert(
+        criteria[0].text.includes('Review and comply with') &&
+            criteria[0].text.includes('AI Developer Guidelines'),
+        'First criterion should be compliance with AI Developer Guidelines'
+    );
+    runner.assert(
+        criteria[1].text.includes('Review and comply with') &&
+            criteria[1].text.includes('CONTRIBUTING.md'),
+        'Second criterion should be compliance with CONTRIBUTING.md'
+    );
+
+    // Check regular criteria
+    runner.assert(
+        criteria[2].text === 'First regular criterion',
+        'Third criterion should be regular criterion'
+    );
+    runner.assert(
+        criteria[3].text === 'Second regular criterion',
+        'Fourth criterion should be regular criterion'
+    );
+
+    // Check completion status
+    runner.assertEqual(
+        criteria[0].completed,
+        false,
+        'First compliance criterion should be incomplete'
+    );
+    runner.assertEqual(
+        criteria[1].completed,
+        false,
+        'Second compliance criterion should be incomplete'
+    );
+    runner.assertEqual(
+        criteria[2].completed,
+        false,
+        'First regular criterion should be incomplete'
+    );
+    runner.assertEqual(criteria[3].completed, true, 'Second regular criterion should be complete');
+});
+
+// Test: Task parsing no longer includes requiredReading field
+runner.test('TaskParser no longer includes requiredReading field', () => {
+    const { TaskParser } = require('./parse-tasks.js');
+    const parser = new TaskParser();
+
+    const mockTaskContent = `### Task 1.1: Test Task
+**Priority**: High
+**Estimated Effort**: 2 hours
+**Dependencies**: None
+
+This is a test task description.
+
+**Acceptance Criteria**:
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md)
+- [ ] First criterion
+
+**Files to Create**:
+- test.js`;
+
+    const task = parser.parseTaskSection('1.1', 'Test Task', mockTaskContent);
+    runner.assert(
+        !Object.prototype.hasOwnProperty.call(task, 'requiredReading'),
+        'Task object should not contain requiredReading field'
+    );
+});
+
 // Test: Sync-tasks module structure
 runner.test('sync-tasks.js has required exports', () => {
     const syncTasksPath = path.resolve('./sync-tasks.js');

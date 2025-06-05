@@ -227,24 +227,31 @@ public class InstructionDecoder : IInstructionDecoder
 /// </summary>
 internal class FormatIInstruction : Instruction
 {
+    private readonly RegisterName _sourceRegister;
+    private readonly RegisterName _destinationRegister;
+    private readonly AddressingMode _sourceAddressingMode;
+    private readonly AddressingMode _destinationAddressingMode;
+    private readonly bool _isByteOperation;
+    private readonly int _extensionWordCount;
+
     public FormatIInstruction(ushort opcode, ushort instructionWord, RegisterName sourceReg,
         RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOperation, int extensionWordCount)
         : base(InstructionFormat.FormatI, opcode, instructionWord)
     {
-        SourceRegister = sourceReg;
-        DestinationRegister = destReg;
-        SourceAddressingMode = sourceMode;
-        DestinationAddressingMode = destMode;
-        IsByteOperation = isByteOperation;
-        ExtensionWordCount = extensionWordCount;
+        _sourceRegister = sourceReg;
+        _destinationRegister = destReg;
+        _sourceAddressingMode = sourceMode;
+        _destinationAddressingMode = destMode;
+        _isByteOperation = isByteOperation;
+        _extensionWordCount = extensionWordCount;
     }
 
-    public override RegisterName? SourceRegister { get; }
-    public override RegisterName? DestinationRegister { get; }
-    public override AddressingMode? SourceAddressingMode { get; }
-    public override AddressingMode? DestinationAddressingMode { get; }
-    public override bool IsByteOperation { get; }
-    public override int ExtensionWordCount { get; }
+    public override RegisterName? SourceRegister => _sourceRegister;
+    public override RegisterName? DestinationRegister => _destinationRegister;
+    public override AddressingMode? SourceAddressingMode => _sourceAddressingMode;
+    public override AddressingMode? DestinationAddressingMode => _destinationAddressingMode;
+    public override bool IsByteOperation => _isByteOperation;
+    public override int ExtensionWordCount => _extensionWordCount;
 
     public override string Mnemonic => $"FORMAT_I_{Opcode:X}";
 
@@ -261,20 +268,25 @@ internal class FormatIInstruction : Instruction
 /// </summary>
 internal class FormatIIInstruction : Instruction
 {
+    private readonly RegisterName _sourceRegister;
+    private readonly AddressingMode _sourceAddressingMode;
+    private readonly bool _isByteOperation;
+    private readonly int _extensionWordCount;
+
     public FormatIIInstruction(ushort opcode, ushort instructionWord, RegisterName sourceReg,
         AddressingMode sourceMode, bool isByteOperation, int extensionWordCount)
         : base(InstructionFormat.FormatII, opcode, instructionWord)
     {
-        SourceRegister = sourceReg;
-        SourceAddressingMode = sourceMode;
-        IsByteOperation = isByteOperation;
-        ExtensionWordCount = extensionWordCount;
+        _sourceRegister = sourceReg;
+        _sourceAddressingMode = sourceMode;
+        _isByteOperation = isByteOperation;
+        _extensionWordCount = extensionWordCount;
     }
 
-    public override RegisterName? SourceRegister { get; }
-    public override AddressingMode? SourceAddressingMode { get; }
-    public override bool IsByteOperation { get; }
-    public override int ExtensionWordCount { get; }
+    public override RegisterName? SourceRegister => _sourceRegister;
+    public override AddressingMode? SourceAddressingMode => _sourceAddressingMode;
+    public override bool IsByteOperation => _isByteOperation;
+    public override int ExtensionWordCount => _extensionWordCount;
 
     public override string Mnemonic => $"FORMAT_II_{Opcode:X}";
 

@@ -22,7 +22,7 @@
     "@octokit/rest": "^22.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
+    "eslint": "^9.28.0",
     "yaml-lint": "^1.7.0",
     "prettier": "^3.2.5",
     "node-actionlint": "^1.2.2"

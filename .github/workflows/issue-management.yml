@@ -60,12 +60,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd .github/scripts
-          if [ ! -f package.json ]; then
-            npm init -y
-            npm install @octokit/rest
-          else
-            npm install
-          fi
+          npm install
 
       - name: Validate task parsing
         id: validate
@@ -110,8 +105,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd .github/scripts
-          npm init -y
-          npm install @octokit/rest
+          npm install
 
       - name: Generate dry run preview
         env:
@@ -160,8 +154,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd .github/scripts
-          npm init -y
-          npm install @octokit/rest
+          npm install
 
       - name: Protect manual issues
         env:
@@ -229,8 +222,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd .github/scripts
-          npm init -y
-          npm install @octokit/rest
+          npm install
 
       - name: Determine operation mode
         id: mode

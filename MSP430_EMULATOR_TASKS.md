@@ -9,7 +9,11 @@ in C# using .NET Core 8.0 with xUnit testing. Each task is designed to be:
 - Focused on systematic, testable development
 - Adherent to C# best practices and consistent formatting
 
-## AI Developer Guidelines
+## Task List Maintenance Guidelines
+
+**For general AI developer guidance, see [AI Developer Guidelines](.github/copilot-instructions.md).**
+
+This section provides specific guidance for maintaining and evolving this task list document.
 
 ### Continuous Task List Assessment
 
@@ -72,7 +76,7 @@ Tasks are ordered to establish a solid foundation first, then build complexity i
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Create the foundational project structure following C# best practices and the "Scripts to Rule Them All" pattern.
@@ -119,7 +123,7 @@ Directory.Build.props
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement automated workflows to maintain code quality and catch defects early.
@@ -160,7 +164,7 @@ Implement automated workflows to maintain code quality and catch defects early.
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Establish structured logging and configuration management for debugging and operational visibility.
@@ -204,7 +208,7 @@ tests/MSP430.Emulator.Tests/Configuration/EmulatorConfigTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Establish comprehensive defect tracking, triage, and resolution processes to maintain high code quality and
@@ -251,7 +255,7 @@ tests/MSP430.Emulator.Tests/Quality/DefectTrackerTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Create automated GitHub workflow to populate and update GitHub issues from the task list using GraphQL API for
@@ -346,7 +350,7 @@ streamlined project management.
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement the MSP430's unified memory address space with proper segmentation, access control, and comprehensive
@@ -404,7 +408,7 @@ docs/diagrams/architecture/memory_access_flow.md
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement the MSP430's register file including general purpose and special function registers with comprehensive
@@ -462,7 +466,7 @@ docs/diagrams/cpu/pc_state_transitions.md
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Create the instruction decoding framework to parse MSP430 machine code into executable operations with
@@ -522,7 +526,7 @@ docs/diagrams/instructions/addressing_modes.md
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement the main emulator engine that coordinates CPU execution, memory access, and system state.
@@ -567,7 +571,7 @@ tests/MSP430.Emulator.Tests/Core/ExecutionStateTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement random access memory with proper read/write operations and timing characteristics.
@@ -606,7 +610,7 @@ tests/MSP430.Emulator.Tests/Memory/RandomAccessMemoryTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement flash memory with programming, erasing, and protection features typical of MSP430 devices.
@@ -649,7 +653,7 @@ tests/MSP430.Emulator.Tests/Memory/FlashControllerTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement information memory segments for device calibration data and user information storage.
@@ -689,7 +693,7 @@ tests/MSP430.Emulator.Tests/Memory/InformationMemoryTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Integrate all memory types into a unified memory controller with proper address decoding and access arbitration.
@@ -732,7 +736,7 @@ tests/MSP430.Emulator.Tests/Memory/MemoryControllerTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement fundamental arithmetic operations (ADD, SUB, CMP) with proper flag handling.
@@ -775,7 +779,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/CmpInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement increment/decrement operations with proper addressing mode support.
@@ -814,7 +818,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DecInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement bitwise logical operations (AND, OR, XOR, BIT) with comprehensive addressing mode support.
@@ -859,7 +863,7 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/BitInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement individual bit manipulation operations (BIC, SETC, CLRC, etc.).
@@ -899,7 +903,7 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/StatusBitInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement data movement instructions (MOV) with all addressing modes and size variations.
@@ -936,7 +940,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/MovInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement stack manipulation instructions (PUSH, POP) with proper stack pointer management.
@@ -975,7 +979,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/PopInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement data manipulation instructions (SWPB, SXT) for byte and sign operations.
@@ -1015,7 +1019,7 @@ tests/MSP430.Emulator.Tests/Instructions/DataMovement/SxtInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement unconditional program flow control (JMP, BR).
@@ -1053,7 +1057,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/BranchInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement conditional branch instructions based on status register flags.
@@ -1097,7 +1101,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/ConditionalJumpTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement subroutine call and return instructions (CALL, RET).
@@ -1136,7 +1140,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement interrupt-related and special control instructions (RETI, NOP, etc.).
@@ -1177,7 +1181,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/SpecialInstructionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Create the foundational infrastructure for peripheral device emulation.
@@ -1219,7 +1223,7 @@ tests/MSP430.Emulator.Tests/Peripherals/PeripheralManagerTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement digital I/O ports with full pin control and interrupt capabilities.
@@ -1260,7 +1264,7 @@ tests/MSP430.Emulator.Tests/Peripherals/DigitalIO/DigitalIOPortTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement Timer A with all operating modes and capture/compare functionality.
@@ -1301,7 +1305,7 @@ tests/MSP430.Emulator.Tests/Peripherals/Timers/TimerATests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement the watchdog timer with reset and interval timer functionality.
@@ -1341,7 +1345,7 @@ tests/MSP430.Emulator.Tests/Peripherals/Timers/WatchdogTimerTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement the interrupt controller with proper priority handling and vector management.
@@ -1382,7 +1386,7 @@ tests/MSP430.Emulator.Tests/Interrupts/InterruptControllerTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Integrate interrupt servicing with CPU execution and peripheral event generation.
@@ -1422,7 +1426,7 @@ tests/MSP430.Emulator.Tests/Interrupts/InterruptServiceTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement the clock generation system with multiple clock sources and power management.
@@ -1462,7 +1466,7 @@ tests/MSP430.Emulator.Tests/Clock/ClockSystemTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement low-power modes and power management features.
@@ -1502,7 +1506,7 @@ tests/MSP430.Emulator.Tests/Power/PowerManagerTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement debugging support with breakpoints, watchpoints, and execution profiling.
@@ -1544,7 +1548,7 @@ tests/MSP430.Emulator.Tests/Debug/DebuggerTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement support for loading MSP430 binaries and ELF files into emulator memory.
@@ -1588,7 +1592,7 @@ tests/MSP430.Emulator.Tests/Loading/BinaryLoaderTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Create comprehensive integration tests that validate complete emulator functionality.
@@ -1630,7 +1634,7 @@ tests/MSP430.Emulator.IntegrationTests/ProgramExecutionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Implement validation tests against real MSP430 hardware or reference implementations.
@@ -1669,7 +1673,7 @@ tests/MSP430.Emulator.ValidationTests/PerformanceBenchmarks.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Create a command-line interface for running and debugging MSP430 programs.
@@ -1713,7 +1717,7 @@ tests/MSP430.Emulator.Tests/CLI/CommandTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Generate comprehensive API documentation with clear and consistent visual diagrams and architecture guides.
@@ -1788,7 +1792,7 @@ docs/visual_standards/DiagramGuidelines.md
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Create comprehensive user documentation with examples, tutorials, and visual learning materials using consistent
@@ -1854,7 +1858,7 @@ docs/visual_guides/screenshots/
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Optimize emulator performance and add profiling capabilities for performance analysis.
@@ -1892,7 +1896,7 @@ tests/MSP430.Emulator.Tests/Performance/PerformanceRegressionTests.cs
 
 **Required Reading**:
 
-- [AI Developer Guidelines](MSP430_EMULATOR_TASKS.md#ai-developer-guidelines) in MSP430_EMULATOR_TASKS.md
+- [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 
 Perform final comprehensive testing and quality assurance before release.

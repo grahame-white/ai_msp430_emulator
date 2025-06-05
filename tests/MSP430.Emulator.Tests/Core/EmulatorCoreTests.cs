@@ -84,9 +84,9 @@ public class EmulatorCoreTests
         // Set PC to a valid executable address (typical MSP430 program memory starts around 0x8000)
         _registerFile.SetProgramCounter(0x8000);
 
-        // Since we don't have valid instructions in memory, this should throw an expected exception
-        // We explicitly assert the expected exception type
-        Assert.ThrowsAny<Exception>(() => _emulatorCore.Step());
+        // Since we don't have valid instructions in memory, this should throw InvalidInstructionException
+        // when the decoder tries to decode the 0x0000 instruction word
+        Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Step());
 
         Assert.Equal(ExecutionState.SingleStep, _emulatorCore.State);
     }
@@ -167,8 +167,8 @@ public class EmulatorCoreTests
         _registerFile.SetProgramCounter(0x8000);
 
         // This will transition to SingleStep state, then fail due to invalid instruction
-        // We explicitly assert the expected exception type
-        Assert.ThrowsAny<Exception>(() => _emulatorCore.Step());
+        // when the decoder tries to decode the 0x0000 instruction word
+        Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Step());
 
         // Now halt from SingleStep state
         _emulatorCore.Halt();
@@ -184,7 +184,7 @@ public class EmulatorCoreTests
         _registerFile.SetProgramCounter(0x8000);
 
         // This will fail due to invalid instructions, but we can test that it attempts to run
-        Assert.ThrowsAny<Exception>(() => _emulatorCore.Run(5));
+        Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Run(5));
         // State should transition to Error due to invalid instruction
         Assert.Equal(ExecutionState.Error, _emulatorCore.State);
     }
@@ -197,7 +197,7 @@ public class EmulatorCoreTests
         var duration = TimeSpan.FromMilliseconds(10);
 
         // This will fail due to invalid instructions, but we can test that it attempts to run
-        Assert.ThrowsAny<Exception>(() => _emulatorCore.Run(duration));
+        Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Run(duration));
         // State should transition to Error due to invalid instruction
         Assert.Equal(ExecutionState.Error, _emulatorCore.State);
     }

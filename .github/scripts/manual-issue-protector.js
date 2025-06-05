@@ -115,6 +115,7 @@ class ManualIssueProtector {
             let page = 1;
             const perPage = 100;
 
+            // eslint-disable-next-line no-constant-condition
             while (true) {
                 const response = await this.octokit.rest.issues.listForRepo({
                     owner: this.owner,

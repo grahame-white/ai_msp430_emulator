@@ -289,6 +289,15 @@ class GitHubIssuesUpdater {
         }
         body += '\n';
 
+        // Required Reading
+        if (task.requiredReading && task.requiredReading.length > 0) {
+            body += '## Required Reading\n\n';
+            for (const reading of task.requiredReading) {
+                body += `- ${reading}\n`;
+            }
+            body += '\n';
+        }
+
         // Description
         if (task.description) {
             body += `${task.description}\n\n`;

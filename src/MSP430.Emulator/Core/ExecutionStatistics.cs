@@ -13,7 +13,7 @@ public class ExecutionStatistics
     private readonly Stopwatch _executionTimer;
     private ulong _instructionsExecuted;
     private ulong _totalCycles;
-    private DateTime _startTime;
+    private readonly DateTime _startTime;
     private DateTime _lastResetTime;
 
     /// <summary>

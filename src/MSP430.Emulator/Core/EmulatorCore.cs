@@ -364,11 +364,10 @@ public class EmulatorCore : IEmulatorCore
         _memoryValidator.ValidateExecute(pc);
         ushort instructionWord = ReadMemoryWord(pc);
 
-        // Decode instruction
-        Instruction instruction;
+        // Decode instruction (validate it's decodable)
         try
         {
-            instruction = _instructionDecoder.Decode(instructionWord);
+            _instructionDecoder.Decode(instructionWord);
         }
         catch (InvalidInstructionException ex)
         {

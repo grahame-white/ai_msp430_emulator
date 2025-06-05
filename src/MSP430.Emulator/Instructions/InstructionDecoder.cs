@@ -124,8 +124,12 @@ public class InstructionDecoder : IInstructionDecoder
             throw new InvalidInstructionException(instructionWord, "Invalid addressing mode in Format I instruction");
         }
 
+        // Calculate extension word count to avoid virtual calls during construction
+        int extensionWordCount = (AddressingModeDecoder.RequiresExtensionWord(sourceMode) ? 1 : 0) +
+                               (AddressingModeDecoder.RequiresExtensionWord(destMode) ? 1 : 0);
+
         return new FormatIInstruction(opcode, instructionWord, sourceReg, destReg,
-            sourceMode, destMode, byteWord);
+            sourceMode, destMode, byteWord, extensionWordCount);
     }
 
     /// <summary>
@@ -152,7 +156,10 @@ public class InstructionDecoder : IInstructionDecoder
             throw new InvalidInstructionException(instructionWord, "Invalid addressing mode in Format II instruction");
         }
 
-        return new FormatIIInstruction(opcode, instructionWord, sourceReg, sourceMode, byteWord);
+        // Calculate extension word count to avoid virtual calls during construction
+        int extensionWordCount = AddressingModeDecoder.RequiresExtensionWord(sourceMode) ? 1 : 0;
+
+        return new FormatIIInstruction(opcode, instructionWord, sourceReg, sourceMode, byteWord, extensionWordCount);
     }
 
     /// <summary>
@@ -221,7 +228,7 @@ public class InstructionDecoder : IInstructionDecoder
 internal class FormatIInstruction : Instruction
 {
     public FormatIInstruction(ushort opcode, ushort instructionWord, RegisterName sourceReg,
-        RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOperation)
+        RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOperation, int extensionWordCount)
         : base(InstructionFormat.FormatI, opcode, instructionWord)
     {
         SourceRegister = sourceReg;
@@ -229,6 +236,7 @@ internal class FormatIInstruction : Instruction
         SourceAddressingMode = sourceMode;
         DestinationAddressingMode = destMode;
         IsByteOperation = isByteOperation;
+        ExtensionWordCount = extensionWordCount;
     }
 
     public override RegisterName? SourceRegister { get; }
@@ -236,10 +244,7 @@ internal class FormatIInstruction : Instruction
     public override AddressingMode? SourceAddressingMode { get; }
     public override AddressingMode? DestinationAddressingMode { get; }
     public override bool IsByteOperation { get; }
-
-    public override int ExtensionWordCount =>
-        (AddressingModeDecoder.RequiresExtensionWord(SourceAddressingMode!.Value) ? 1 : 0) +
-        (AddressingModeDecoder.RequiresExtensionWord(DestinationAddressingMode!.Value) ? 1 : 0);
+    public override int ExtensionWordCount { get; }
 
     public override string Mnemonic => $"FORMAT_I_{Opcode:X}";
 
@@ -257,20 +262,19 @@ internal class FormatIInstruction : Instruction
 internal class FormatIIInstruction : Instruction
 {
     public FormatIIInstruction(ushort opcode, ushort instructionWord, RegisterName sourceReg,
-        AddressingMode sourceMode, bool isByteOperation)
+        AddressingMode sourceMode, bool isByteOperation, int extensionWordCount)
         : base(InstructionFormat.FormatII, opcode, instructionWord)
     {
         SourceRegister = sourceReg;
         SourceAddressingMode = sourceMode;
         IsByteOperation = isByteOperation;
+        ExtensionWordCount = extensionWordCount;
     }
 
     public override RegisterName? SourceRegister { get; }
     public override AddressingMode? SourceAddressingMode { get; }
     public override bool IsByteOperation { get; }
-
-    public override int ExtensionWordCount =>
-        AddressingModeDecoder.RequiresExtensionWord(SourceAddressingMode!.Value) ? 1 : 0;
+    public override int ExtensionWordCount { get; }
 
     public override string Mnemonic => $"FORMAT_II_{Opcode:X}";
 

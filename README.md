@@ -10,3 +10,7 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding stan
 
 - [MSP430 Memory Architecture](docs/MSP430_MEMORY_ARCHITECTURE.md) - MSP430FR2355 memory layout and architecture details
 - [Diagnostic Reporting](docs/DiagnosticReporting.md) - Generate comprehensive diagnostic reports for GitHub issues
+
+## Special @copilot instructions
+
+@copilot it is important that your read [CONTRIBUTING.md](CONTRIBUTING.md)

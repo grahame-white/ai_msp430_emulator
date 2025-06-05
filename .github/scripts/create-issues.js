@@ -15,19 +15,20 @@ const {
     executeWithRateLimit,
     smartDelay
 } = require('./github-utils.js');
+const { BOT_USER_AGENT, EXCLUDED_TASKS } = require('./config.js');
 
 class GitHubIssuesCreator {
     constructor(token, owner, repo) {
         this.octokit = new Octokit({
             auth: token,
-            userAgent: 'MSP430-Emulator-Issues-Bot v1.0.0'
+            userAgent: BOT_USER_AGENT
         });
         this.owner = owner;
         this.repo = repo;
         this.dryRun = false;
 
         // Tasks to exclude from issue creation (already implemented or actively being developed)
-        this.excludedTasks = ['1.1', '1.2', '1.3', '1.4', '1.5'];
+        this.excludedTasks = EXCLUDED_TASKS;
     }
 
     /**
@@ -177,6 +178,15 @@ class GitHubIssuesCreator {
             body += '**Dependencies**: None\n';
         }
         body += '\n';
+
+        // Required Reading
+        if (task.requiredReading && task.requiredReading.length > 0) {
+            body += '## Required Reading\n\n';
+            for (const reading of task.requiredReading) {
+                body += `- ${reading}\n`;
+            }
+            body += '\n';
+        }
 
         // Description
         if (task.description) {

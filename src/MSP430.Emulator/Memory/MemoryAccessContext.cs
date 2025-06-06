@@ -117,14 +117,9 @@ public class MemoryAccessContext
         string accessTypeStr = AccessType.ToString();
         string sizeStr = IsWordAccess ? "Word" : "Byte";
 
-        if (IsWordAccess)
-        {
-            return $"{accessTypeStr} {sizeStr} at 0x{Address:X4}-0x{EndAddress:X4} (Op: {OperationId:D})";
-        }
-        else
-        {
-            return $"{accessTypeStr} {sizeStr} at 0x{Address:X4} (Op: {OperationId:D})";
-        }
+        return IsWordAccess
+            ? $"{accessTypeStr} {sizeStr} at 0x{Address:X4}-0x{EndAddress:X4} (Op: {OperationId:D})"
+            : $"{accessTypeStr} {sizeStr} at 0x{Address:X4} (Op: {OperationId:D})";
     }
 
     /// <summary>

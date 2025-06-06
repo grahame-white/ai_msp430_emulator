@@ -185,14 +185,7 @@ public static class InstructionHelpers
         statusRegister.Zero = result == 0;
 
         // Negative flag: Set if the sign bit is set
-        if (isByteOperation)
-        {
-            statusRegister.Negative = (result & 0x80) != 0;
-        }
-        else
-        {
-            statusRegister.Negative = (result & 0x8000) != 0;
-        }
+        statusRegister.Negative = (result & (isByteOperation ? 0x80 : 0x8000)) != 0;
 
         // Carry flag
         statusRegister.Carry = carry;

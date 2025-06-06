@@ -122,9 +122,11 @@ class GitHubIssuesUpdater {
                     }
                 } else if (!task.completed && issue.state === 'closed') {
                     if (this.dryRun) {
-                        console.log(`[DRY RUN] Would reopen issue #${issue.number}`);
+                        console.log(
+                            `[DRY RUN] Would create impact analysis for issue #${issue.number}`
+                        );
                     } else {
-                        await this.reopenIssue(issue.number);
+                        await this.createImpactAnalysis(issue, task);
                     }
                 }
             } catch (error) {
@@ -143,6 +145,12 @@ class GitHubIssuesUpdater {
      */
     async getAllTaskIssues() {
         try {
+            // In dry-run mode without token, return empty array
+            if (this.dryRun && !process.env.GITHUB_TOKEN) {
+                console.log('[DRY RUN] Would fetch task issues from GitHub API');
+                return [];
+            }
+
             // Add delay to respect rate limits
             await this.delay(1000);
 
@@ -373,6 +381,64 @@ class GitHubIssuesUpdater {
     }
 
     /**
+     * Create an impact analysis issue for a completed task that became incomplete
+     */
+    async createImpactAnalysis(originalIssue, task) {
+        const analysisTitle = `Impact Analysis: Task ${task.id} Requirements Changed`;
+        const analysisBody = this.generateImpactAnalysisBody(originalIssue, task);
+        const analysisLabels = [
+            'impact-analysis',
+            'requirements-change',
+            ...this.generateLabels(task)
+        ];
+
+        // Create the impact analysis issue
+        const result = await this.octokit.rest.issues.create({
+            owner: this.owner,
+            repo: this.repo,
+            title: analysisTitle,
+            body: analysisBody,
+            labels: analysisLabels
+        });
+
+        // Add explanatory comment to original issue without reopening
+        await this.octokit.rest.issues.createComment({
+            owner: this.owner,
+            repo: this.repo,
+            issue_number: originalIssue.number,
+            body: `📊 **Requirements Changed**: Task ${task.id} has changed from completed to incomplete.\n\nAn impact analysis has been created: #${result.data.number}\n\n*This issue remains closed. Please review the impact analysis for next steps.*`
+        });
+
+        return result.data;
+    }
+
+    /**
+     * Generate body content for impact analysis issue
+     */
+    generateImpactAnalysisBody(originalIssue, task) {
+        let body = `🔄 **Task Requirements Changed**\n\n`;
+        body += `**Original Issue**: #${originalIssue.number} - ${originalIssue.title}\n`;
+        body += `**Task**: ${task.id}\n`;
+        body += `**Status Change**: Completed → Incomplete\n\n`;
+
+        body += `## Issue Summary\n\n`;
+        body += `Task ${task.id} was previously marked as completed and issue #${originalIssue.number} was closed. `;
+        body += `However, the task requirements have changed and the task is now marked as incomplete.\n\n`;
+
+        body += `## Impact Analysis Checklist\n\n`;
+        body += `- [ ] Review changes to task requirements in MSP430_EMULATOR_TASKS.md\n`;
+        body += `- [ ] Assess if previous implementation is still valid\n`;
+        body += `- [ ] Determine if additional work is needed\n`;
+        body += `- [ ] Update or create new issue if work is required\n`;
+        body += `- [ ] Close this impact analysis once review is complete\n\n`;
+
+        body += `## Current Task Details\n\n`;
+        body += this.generateIssueBody(task);
+
+        return body;
+    }
+
+    /**
      * Close an issue with a comment
      */
     async closeIssue(issueNumber, reason) {
@@ -428,15 +494,28 @@ async function main() {
     const token = process.env.GITHUB_TOKEN;
     const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
     const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-    const tasksFile = process.argv[2] || '../../MSP430_EMULATOR_TASKS.md';
     const dryRun = process.argv.includes('--dry-run');
 
-    if (!token) {
-        console.error('Error: GITHUB_TOKEN environment variable is required');
+    // Get tasks file path from arguments, excluding flags
+    const taskFileArg = process.argv.slice(2).find(arg => !arg.startsWith('--'));
+    const tasksFile = taskFileArg || '../../MSP430_EMULATOR_TASKS.md';
+
+    // For dry-run mode, we can operate with a dummy token since no API calls will be made
+    if (!token && !dryRun) {
+        console.error('Error: GITHUB_TOKEN environment variable is required for live operations');
+        console.error('Hint: Use --dry-run flag to preview changes without authentication');
         process.exit(1);
     }
 
     try {
+        // Use dummy token for dry-run mode if no real token is provided
+        const effectiveToken = token || (dryRun ? 'dummy-token-for-dry-run' : null);
+
+        if (!effectiveToken) {
+            console.error('Error: GITHUB_TOKEN environment variable is required');
+            process.exit(1);
+        }
+
         // Parse tasks
         const parser = new TaskParser(tasksFile);
         const tasks = await parser.parse();
@@ -444,10 +523,13 @@ async function main() {
         console.log(`Found ${tasks.length} tasks to check for updates`);
 
         // Update issues
-        const updater = new GitHubIssuesUpdater(token, owner, repo);
+        const updater = new GitHubIssuesUpdater(effectiveToken, owner, repo);
         if (dryRun) {
             updater.enableDryRun();
-            console.log('Running in DRY RUN mode - no actual changes will be made');
+            console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
+            if (!token) {
+                console.log('ℹ️  No GITHUB_TOKEN provided - running in offline preview mode\n');
+            }
         }
 
         const results = await updater.updateIssuesFromTasks(tasks);
@@ -463,7 +545,16 @@ async function main() {
             results.errors.forEach(error => {
                 console.log(`- Task ${error.task.id}: ${error.error}`);
             });
-            process.exit(1);
+
+            // Exit with error code if there were errors (but ignore API errors in dry-run mode without token)
+            const hasNonApiErrors = results.errors.some(
+                error =>
+                    !dryRun ||
+                    (!error.error.includes('API') && !error.error.includes('authentication'))
+            );
+            if (hasNonApiErrors || !dryRun) {
+                process.exit(1);
+            }
         }
     } catch (error) {
         console.error('Error:', error.message);

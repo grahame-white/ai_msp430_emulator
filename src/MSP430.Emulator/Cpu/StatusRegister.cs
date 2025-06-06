@@ -153,6 +153,86 @@ public class StatusRegister
     }
 
     /// <summary>
+    /// Updates flags after an addition operation.
+    /// </summary>
+    /// <param name="operand1">The first operand (destination).</param>
+    /// <param name="operand2">The second operand (source).</param>
+    /// <param name="result">The result of the addition.</param>
+    /// <param name="isByteOperation">True if this is a byte operation.</param>
+    public void UpdateFlagsAfterAddition(ushort operand1, ushort operand2, uint result, bool isByteOperation)
+    {
+        if (isByteOperation)
+        {
+            byte byteResult = (byte)(result & 0xFF);
+            Zero = byteResult == 0;
+            Negative = (byteResult & 0x80) != 0;
+            Carry = (result & 0x100) != 0;
+
+            // Overflow occurs when adding two positive numbers gives negative result
+            // or adding two negative numbers gives positive result
+            bool op1Sign = (operand1 & 0x80) != 0;
+            bool op2Sign = (operand2 & 0x80) != 0;
+            bool resultSign = (byteResult & 0x80) != 0;
+            Overflow = (op1Sign == op2Sign) && (op1Sign != resultSign);
+        }
+        else
+        {
+            ushort wordResult = (ushort)(result & 0xFFFF);
+            Zero = wordResult == 0;
+            Negative = (wordResult & 0x8000) != 0;
+            Carry = (result & 0x10000) != 0;
+
+            // Overflow occurs when adding two positive numbers gives negative result
+            // or adding two negative numbers gives positive result
+            bool op1Sign = (operand1 & 0x8000) != 0;
+            bool op2Sign = (operand2 & 0x8000) != 0;
+            bool resultSign = (wordResult & 0x8000) != 0;
+            Overflow = (op1Sign == op2Sign) && (op1Sign != resultSign);
+        }
+    }
+
+    /// <summary>
+    /// Updates flags after a subtraction operation.
+    /// </summary>
+    /// <param name="operand1">The first operand (destination).</param>
+    /// <param name="operand2">The second operand (source).</param>
+    /// <param name="result">The result of the subtraction.</param>
+    /// <param name="isByteOperation">True if this is a byte operation.</param>
+    public void UpdateFlagsAfterSubtraction(ushort operand1, ushort operand2, uint result, bool isByteOperation)
+    {
+        if (isByteOperation)
+        {
+            byte byteResult = (byte)(result & 0xFF);
+            Zero = byteResult == 0;
+            Negative = (byteResult & 0x80) != 0;
+            // For subtraction, carry is set when no borrow is required (result >= 0)
+            Carry = operand1 >= operand2;
+
+            // Overflow occurs when subtracting negative from positive gives negative result
+            // or subtracting positive from negative gives positive result
+            bool op1Sign = (operand1 & 0x80) != 0;
+            bool op2Sign = (operand2 & 0x80) != 0;
+            bool resultSign = (byteResult & 0x80) != 0;
+            Overflow = (op1Sign != op2Sign) && (op1Sign != resultSign);
+        }
+        else
+        {
+            ushort wordResult = (ushort)(result & 0xFFFF);
+            Zero = wordResult == 0;
+            Negative = (wordResult & 0x8000) != 0;
+            // For subtraction, carry is set when no borrow is required (result >= 0)
+            Carry = operand1 >= operand2;
+
+            // Overflow occurs when subtracting negative from positive gives negative result
+            // or subtracting positive from negative gives positive result
+            bool op1Sign = (operand1 & 0x8000) != 0;
+            bool op2Sign = (operand2 & 0x8000) != 0;
+            bool resultSign = (wordResult & 0x8000) != 0;
+            Overflow = (op1Sign != op2Sign) && (op1Sign != resultSign);
+        }
+    }
+
+    /// <summary>
     /// Returns a string representation of the status register showing active flags.
     /// </summary>
     /// <returns>A formatted string showing the active flags.</returns>

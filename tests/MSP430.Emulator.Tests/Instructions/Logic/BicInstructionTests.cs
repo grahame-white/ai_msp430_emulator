@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.Logic;
@@ -11,14 +12,7 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 /// </summary>
 public class BicInstructionTests
 {
-    /// <summary>
-    /// Creates a fresh register file and memory array for testing.
-    /// </summary>
-    /// <returns>A tuple containing a new RegisterFile and memory array.</returns>
-    private static (RegisterFile registerFile, byte[] memory) CreateTestEnvironment()
-    {
-        return (new RegisterFile(), new byte[65536]);
-    }
+
     [Fact]
     public void Constructor_ValidParameters_CreatesInstruction()
     {
@@ -212,7 +206,7 @@ public class BicInstructionTests
     public void Execute_BasicOperation_ClearsBitsCorrectly()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F); // source: bits to clear
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination: all bits set
@@ -241,7 +235,7 @@ public class BicInstructionTests
     public void Execute_ByteOperation_PerformsBicOnBytes()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
         registerFile.WriteRegister(RegisterName.R4, 0x340F); // source: bits to clear (byte operation uses low byte)
         registerFile.WriteRegister(RegisterName.R5, 0x34FF); // destination
@@ -268,7 +262,7 @@ public class BicInstructionTests
     public void Execute_ResultZero_SetsZeroFlag()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
         registerFile.WriteRegister(RegisterName.R4, 0xFFFF); // source: clear all bits
         registerFile.WriteRegister(RegisterName.R5, 0x5555); // destination
@@ -294,7 +288,7 @@ public class BicInstructionTests
     public void Execute_NegativeResult_SetsNegativeFlag()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
         registerFile.WriteRegister(RegisterName.R4, 0x7FFF); // source: clear bits 0-14, leave bit 15
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination
@@ -322,7 +316,7 @@ public class BicInstructionTests
     public void Execute_RegisterToRegister_Takes1Cycle()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -345,7 +339,7 @@ public class BicInstructionTests
     public void Execute_ImmediateToRegister_Takes1Cycle()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
         var instruction = new BicInstruction(
@@ -369,7 +363,7 @@ public class BicInstructionTests
     public void Execute_RegisterToIndexed_Takes4Cycles()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x0100); // Base address
 
@@ -398,7 +392,7 @@ public class BicInstructionTests
     public void Execute_IndexedToRegister_Takes4Cycles()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x0100); // Base address
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -427,7 +421,7 @@ public class BicInstructionTests
     public void Execute_IndirectToRegister_Takes3Cycles()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory location
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -454,7 +448,7 @@ public class BicInstructionTests
     public void Execute_RegisterToIndirect_Takes3Cycles()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x0200); // Points to memory location
 
@@ -481,7 +475,7 @@ public class BicInstructionTests
     public void Execute_AbsoluteToAbsolute_Takes7Cycles()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
         // Set up memory at source absolute address
         memory[0x0300] = 0x00;
@@ -512,7 +506,7 @@ public class BicInstructionTests
     public void Execute_SymbolicToSymbolic_Takes7Cycles()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R0, 0x1000); // PC value
 
         // Set up memory at source symbolic address (PC + offset)
@@ -544,7 +538,7 @@ public class BicInstructionTests
     public void Execute_IndirectAutoIncrementToRegister_Takes3Cycles()
     {
         // Arrange
-        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory location
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 

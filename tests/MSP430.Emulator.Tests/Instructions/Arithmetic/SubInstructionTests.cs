@@ -1,6 +1,8 @@
+using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Arithmetic;
+using MSP430.Emulator.Tests.TestUtilities;
 
 namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 
@@ -9,12 +11,7 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 /// </summary>
 public class SubInstructionTests
 {
-    private static (IRegisterFile registerFile, byte[] memory) CreateTestEnvironment()
-    {
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
-        return (registerFile, memory);
-    }
+
     [Fact]
     public void Constructor_ValidParameters_CreatesInstruction()
     {
@@ -182,7 +179,7 @@ public class SubInstructionTests
     public void Execute_RegisterToRegister_SubtractsValues()
     {
         // Arrange
-        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234); // Source
         registerFile.WriteRegister(RegisterName.R4, 0x5678); // Destination
 
@@ -195,7 +192,7 @@ public class SubInstructionTests
             false);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, []);
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x4444, registerFile.ReadRegister(RegisterName.R4)); // 0x5678 - 0x1234 = 0x4444
@@ -210,7 +207,7 @@ public class SubInstructionTests
     public void Execute_SubtractLargerFromSmaller_SetsCarryFlag()
     {
         // Arrange
-        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x5678); // Source (larger)
         registerFile.WriteRegister(RegisterName.R4, 0x1234); // Destination (smaller)
 
@@ -223,7 +220,7 @@ public class SubInstructionTests
             false);
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0xBBBC, registerFile.ReadRegister(RegisterName.R4)); // 0x1234 - 0x5678 = 0xBBBC (with carry)
@@ -235,7 +232,7 @@ public class SubInstructionTests
     public void Execute_SubtractToZero_SetsZeroFlag()
     {
         // Arrange
-        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234);
         registerFile.WriteRegister(RegisterName.R4, 0x1234);
 
@@ -248,7 +245,7 @@ public class SubInstructionTests
             false);
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x0000, registerFile.ReadRegister(RegisterName.R4)); // 0x1234 - 0x1234 = 0x0000
@@ -260,7 +257,7 @@ public class SubInstructionTests
     public void Execute_OverflowCondition_SetsOverflowFlag()
     {
         // Arrange
-        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x8000); // Negative source
         registerFile.WriteRegister(RegisterName.R4, 0x7FFF); // Positive destination
 
@@ -273,7 +270,7 @@ public class SubInstructionTests
             false);
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0xFFFF, registerFile.ReadRegister(RegisterName.R4)); // 0x7FFF - 0x8000 = 0xFFFF
@@ -285,7 +282,7 @@ public class SubInstructionTests
     public void Execute_ByteOperation_SubtractsLowBytesOnly()
     {
         // Arrange
-        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234);
         registerFile.WriteRegister(RegisterName.R4, 0x5678);
 
@@ -298,7 +295,7 @@ public class SubInstructionTests
             true);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, []);
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x5644, registerFile.ReadRegister(RegisterName.R4)); // High byte unchanged, low byte: 0x78 - 0x34 = 0x44
@@ -316,7 +313,7 @@ public class SubInstructionTests
     public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
     {
         // Arrange
-        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1000);
         registerFile.WriteRegister(RegisterName.R4, 0x2000);
 
@@ -335,8 +332,8 @@ public class SubInstructionTests
             AddressingMode.Absolute when destMode == AddressingMode.Absolute => [0x1000, 0x2000],
             AddressingMode.Symbolic when destMode == AddressingMode.Symbolic => [0x1000, 0x2000],
             AddressingMode.Register when destMode == AddressingMode.Indexed => [0x0010],
-            AddressingMode.Register when destMode == AddressingMode.Indirect => [],
-            _ => []
+            AddressingMode.Register when destMode == AddressingMode.Indirect => Array.Empty<ushort>(),
+            _ => Array.Empty<ushort>()
         };
 
         // Act

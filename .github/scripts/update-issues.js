@@ -145,6 +145,12 @@ class GitHubIssuesUpdater {
      */
     async getAllTaskIssues() {
         try {
+            // In dry-run mode without token, return empty array
+            if (this.dryRun && !process.env.GITHUB_TOKEN) {
+                console.log('[DRY RUN] Would fetch task issues from GitHub API');
+                return [];
+            }
+
             // Add delay to respect rate limits
             await this.delay(1000);
 
@@ -488,15 +494,28 @@ async function main() {
     const token = process.env.GITHUB_TOKEN;
     const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
     const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-    const tasksFile = process.argv[2] || '../../MSP430_EMULATOR_TASKS.md';
     const dryRun = process.argv.includes('--dry-run');
 
-    if (!token) {
-        console.error('Error: GITHUB_TOKEN environment variable is required');
+    // Get tasks file path from arguments, excluding flags
+    const taskFileArg = process.argv.slice(2).find(arg => !arg.startsWith('--'));
+    const tasksFile = taskFileArg || '../../MSP430_EMULATOR_TASKS.md';
+
+    // For dry-run mode, we can operate with a dummy token since no API calls will be made
+    if (!token && !dryRun) {
+        console.error('Error: GITHUB_TOKEN environment variable is required for live operations');
+        console.error('Hint: Use --dry-run flag to preview changes without authentication');
         process.exit(1);
     }
 
     try {
+        // Use dummy token for dry-run mode if no real token is provided
+        const effectiveToken = token || (dryRun ? 'dummy-token-for-dry-run' : null);
+
+        if (!effectiveToken) {
+            console.error('Error: GITHUB_TOKEN environment variable is required');
+            process.exit(1);
+        }
+
         // Parse tasks
         const parser = new TaskParser(tasksFile);
         const tasks = await parser.parse();
@@ -504,10 +523,13 @@ async function main() {
         console.log(`Found ${tasks.length} tasks to check for updates`);
 
         // Update issues
-        const updater = new GitHubIssuesUpdater(token, owner, repo);
+        const updater = new GitHubIssuesUpdater(effectiveToken, owner, repo);
         if (dryRun) {
             updater.enableDryRun();
-            console.log('Running in DRY RUN mode - no actual changes will be made');
+            console.log('🔍 Running in DRY RUN mode - no actual changes will be made\n');
+            if (!token) {
+                console.log('ℹ️  No GITHUB_TOKEN provided - running in offline preview mode\n');
+            }
         }
 
         const results = await updater.updateIssuesFromTasks(tasks);
@@ -523,7 +545,16 @@ async function main() {
             results.errors.forEach(error => {
                 console.log(`- Task ${error.task.id}: ${error.error}`);
             });
-            process.exit(1);
+
+            // Exit with error code if there were errors (but ignore API errors in dry-run mode without token)
+            const hasNonApiErrors = results.errors.some(
+                error =>
+                    !dryRun ||
+                    (!error.error.includes('API') && !error.error.includes('authentication'))
+            );
+            if (hasNonApiErrors || !dryRun) {
+                process.exit(1);
+            }
         }
     } catch (error) {
         console.error('Error:', error.message);

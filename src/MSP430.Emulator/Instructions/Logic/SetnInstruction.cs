@@ -1,3 +1,5 @@
+using MSP430.Emulator.Cpu;
+
 namespace MSP430.Emulator.Instructions.Logic;
 
 /// <summary>
@@ -11,7 +13,7 @@ public class SetnInstruction : StatusBitInstruction
     /// </summary>
     /// <param name="instructionWord">The 16-bit instruction word.</param>
     public SetnInstruction(ushort instructionWord)
-        : base(instructionWord, true, 0x0004) // Negative flag is bit 2
+        : base(instructionWord, true, StatusRegister.NegativeMask)
     {
     }
 

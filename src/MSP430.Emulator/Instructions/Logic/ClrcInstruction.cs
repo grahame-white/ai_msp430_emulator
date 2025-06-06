@@ -1,3 +1,5 @@
+using MSP430.Emulator.Cpu;
+
 namespace MSP430.Emulator.Instructions.Logic;
 
 /// <summary>
@@ -11,7 +13,7 @@ public class ClrcInstruction : StatusBitInstruction
     /// </summary>
     /// <param name="instructionWord">The 16-bit instruction word.</param>
     public ClrcInstruction(ushort instructionWord)
-        : base(instructionWord, false, 0x0001) // Carry flag is bit 0
+        : base(instructionWord, false, StatusRegister.CarryMask)
     {
     }
 

@@ -10,6 +10,51 @@ namespace MSP430.Emulator.Cpu;
 /// </summary>
 public class StatusRegister
 {
+    /// <summary>
+    /// Bit mask for the Carry flag (bit 0).
+    /// </summary>
+    public const ushort CarryMask = 0x0001;
+
+    /// <summary>
+    /// Bit mask for the Zero flag (bit 1).
+    /// </summary>
+    public const ushort ZeroMask = 0x0002;
+
+    /// <summary>
+    /// Bit mask for the Negative flag (bit 2).
+    /// </summary>
+    public const ushort NegativeMask = 0x0004;
+
+    /// <summary>
+    /// Bit mask for the General Interrupt Enable flag (bit 3).
+    /// </summary>
+    public const ushort GeneralInterruptEnableMask = 0x0008;
+
+    /// <summary>
+    /// Bit mask for the CPU Off flag (bit 4).
+    /// </summary>
+    public const ushort CpuOffMask = 0x0010;
+
+    /// <summary>
+    /// Bit mask for the Oscillator Off flag (bit 5).
+    /// </summary>
+    public const ushort OscillatorOffMask = 0x0020;
+
+    /// <summary>
+    /// Bit mask for the System Clock Generator 0 flag (bit 6).
+    /// </summary>
+    public const ushort SystemClockGenerator0Mask = 0x0040;
+
+    /// <summary>
+    /// Bit mask for the System Clock Generator 1 flag (bit 7).
+    /// </summary>
+    public const ushort SystemClockGenerator1Mask = 0x0080;
+
+    /// <summary>
+    /// Bit mask for the Overflow flag (bit 8).
+    /// </summary>
+    public const ushort OverflowMask = 0x0100;
+
     private ushort _value;
 
     /// <summary>
@@ -27,8 +72,8 @@ public class StatusRegister
     /// </summary>
     public bool Carry
     {
-        get => (_value & 0x0001) != 0;
-        set => _value = value ? (ushort)(_value | 0x0001) : (ushort)(_value & ~0x0001);
+        get => (_value & CarryMask) != 0;
+        set => _value = value ? (ushort)(_value | CarryMask) : (ushort)(_value & ~CarryMask);
     }
 
     /// <summary>
@@ -37,8 +82,8 @@ public class StatusRegister
     /// </summary>
     public bool Zero
     {
-        get => (_value & 0x0002) != 0;
-        set => _value = value ? (ushort)(_value | 0x0002) : (ushort)(_value & ~0x0002);
+        get => (_value & ZeroMask) != 0;
+        set => _value = value ? (ushort)(_value | ZeroMask) : (ushort)(_value & ~ZeroMask);
     }
 
     /// <summary>
@@ -47,8 +92,8 @@ public class StatusRegister
     /// </summary>
     public bool Negative
     {
-        get => (_value & 0x0004) != 0;
-        set => _value = value ? (ushort)(_value | 0x0004) : (ushort)(_value & ~0x0004);
+        get => (_value & NegativeMask) != 0;
+        set => _value = value ? (ushort)(_value | NegativeMask) : (ushort)(_value & ~NegativeMask);
     }
 
     /// <summary>
@@ -57,8 +102,8 @@ public class StatusRegister
     /// </summary>
     public bool GeneralInterruptEnable
     {
-        get => (_value & 0x0008) != 0;
-        set => _value = value ? (ushort)(_value | 0x0008) : (ushort)(_value & ~0x0008);
+        get => (_value & GeneralInterruptEnableMask) != 0;
+        set => _value = value ? (ushort)(_value | GeneralInterruptEnableMask) : (ushort)(_value & ~GeneralInterruptEnableMask);
     }
 
     /// <summary>
@@ -67,8 +112,8 @@ public class StatusRegister
     /// </summary>
     public bool CpuOff
     {
-        get => (_value & 0x0010) != 0;
-        set => _value = value ? (ushort)(_value | 0x0010) : (ushort)(_value & ~0x0010);
+        get => (_value & CpuOffMask) != 0;
+        set => _value = value ? (ushort)(_value | CpuOffMask) : (ushort)(_value & ~CpuOffMask);
     }
 
     /// <summary>
@@ -77,8 +122,8 @@ public class StatusRegister
     /// </summary>
     public bool OscillatorOff
     {
-        get => (_value & 0x0020) != 0;
-        set => _value = value ? (ushort)(_value | 0x0020) : (ushort)(_value & ~0x0020);
+        get => (_value & OscillatorOffMask) != 0;
+        set => _value = value ? (ushort)(_value | OscillatorOffMask) : (ushort)(_value & ~OscillatorOffMask);
     }
 
     /// <summary>
@@ -87,8 +132,8 @@ public class StatusRegister
     /// </summary>
     public bool SystemClockGenerator0
     {
-        get => (_value & 0x0040) != 0;
-        set => _value = value ? (ushort)(_value | 0x0040) : (ushort)(_value & ~0x0040);
+        get => (_value & SystemClockGenerator0Mask) != 0;
+        set => _value = value ? (ushort)(_value | SystemClockGenerator0Mask) : (ushort)(_value & ~SystemClockGenerator0Mask);
     }
 
     /// <summary>
@@ -97,8 +142,8 @@ public class StatusRegister
     /// </summary>
     public bool SystemClockGenerator1
     {
-        get => (_value & 0x0080) != 0;
-        set => _value = value ? (ushort)(_value | 0x0080) : (ushort)(_value & ~0x0080);
+        get => (_value & SystemClockGenerator1Mask) != 0;
+        set => _value = value ? (ushort)(_value | SystemClockGenerator1Mask) : (ushort)(_value & ~SystemClockGenerator1Mask);
     }
 
     /// <summary>
@@ -107,8 +152,8 @@ public class StatusRegister
     /// </summary>
     public bool Overflow
     {
-        get => (_value & 0x0100) != 0;
-        set => _value = value ? (ushort)(_value | 0x0100) : (ushort)(_value & ~0x0100);
+        get => (_value & OverflowMask) != 0;
+        set => _value = value ? (ushort)(_value | OverflowMask) : (ushort)(_value & ~OverflowMask);
     }
 
     /// <summary>

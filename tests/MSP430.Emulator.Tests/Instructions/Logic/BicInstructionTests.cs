@@ -11,6 +11,14 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 /// </summary>
 public class BicInstructionTests
 {
+    /// <summary>
+    /// Creates a fresh register file and memory array for testing.
+    /// </summary>
+    /// <returns>A tuple containing a new RegisterFile and memory array.</returns>
+    private static (RegisterFile registerFile, byte[] memory) CreateTestEnvironment()
+    {
+        return (new RegisterFile(), new byte[65536]);
+    }
     [Fact]
     public void Constructor_ValidParameters_CreatesInstruction()
     {
@@ -204,8 +212,7 @@ public class BicInstructionTests
     public void Execute_BasicOperation_ClearsBitsCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
 
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F); // source: bits to clear
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination: all bits set
@@ -234,8 +241,7 @@ public class BicInstructionTests
     public void Execute_ByteOperation_PerformsBicOnBytes()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
 
         registerFile.WriteRegister(RegisterName.R4, 0x340F); // source: bits to clear (byte operation uses low byte)
         registerFile.WriteRegister(RegisterName.R5, 0x34FF); // destination
@@ -262,8 +268,7 @@ public class BicInstructionTests
     public void Execute_ResultZero_SetsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
 
         registerFile.WriteRegister(RegisterName.R4, 0xFFFF); // source: clear all bits
         registerFile.WriteRegister(RegisterName.R5, 0x5555); // destination
@@ -289,8 +294,7 @@ public class BicInstructionTests
     public void Execute_NegativeResult_SetsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
 
         registerFile.WriteRegister(RegisterName.R4, 0x7FFF); // source: clear bits 0-14, leave bit 15
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination

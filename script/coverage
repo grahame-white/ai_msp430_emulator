@@ -47,47 +47,46 @@ reportgenerator \
   -targetdir:"TestResults/CoverageReport" \
   -reporttypes:"HtmlInline_AzurePipelines;Cobertura;JsonSummary"
 
+# Helper function to check coverage threshold
+check_coverage_threshold() {
+  local coverage_type="$1"
+  local coverage_value="$2"
+  local threshold="$3"
+  local coverage_name="$4"
+  
+  if [ -n "$coverage_value" ] && [ "$coverage_value" != "null" ] && [ "$coverage_value" != "0" ]; then
+    echo "==> $coverage_name coverage: $coverage_value%"
+    
+    if (( $(echo "$coverage_value < $threshold" | bc -l 2>/dev/null || echo "0") )); then
+      echo "❌ $coverage_name coverage $coverage_value% is below minimum threshold of $threshold%"
+      return 1
+    else
+      echo "✅ $coverage_name coverage $coverage_value% meets minimum threshold of $threshold%"
+      return 0
+    fi
+  else
+    echo "⚠️  No $coverage_type coverage data available in summary."
+    return 1
+  fi
+}
+
 # Check coverage thresholds
 if [ -f "TestResults/CoverageReport/Summary.json" ]; then
   LINE_COVERAGE=$(grep -o '"linecoverage": [0-9.]*' TestResults/CoverageReport/Summary.json | head -1 | grep -o '[0-9.]*' || echo "0")
   BRANCH_COVERAGE=$(grep -o '"branchcoverage": [0-9.]*' TestResults/CoverageReport/Summary.json | head -1 | grep -o '[0-9.]*' || echo "0")
   
-  if [ -n "$LINE_COVERAGE" ] && [ "$LINE_COVERAGE" != "null" ] && [ "$LINE_COVERAGE" != "0" ]; then
-    echo "==> Line coverage: $LINE_COVERAGE%"
-    
-    # Check line coverage against threshold (default 80%)
-    LINE_THRESHOLD=${COVERAGE_THRESHOLD:-80}
-    LINE_PASS=true
-    if (( $(echo "$LINE_COVERAGE < $LINE_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
-      echo "❌ Line coverage $LINE_COVERAGE% is below minimum threshold of $LINE_THRESHOLD%"
-      LINE_PASS=false
-    else
-      echo "✅ Line coverage $LINE_COVERAGE% meets minimum threshold of $LINE_THRESHOLD%"
-    fi
-  else
-    echo "⚠️  No line coverage data available in summary."
-    LINE_PASS=false
-  fi
+  # Check line coverage against threshold (default 80%)
+  LINE_THRESHOLD=${COVERAGE_THRESHOLD:-80}
+  check_coverage_threshold "line" "$LINE_COVERAGE" "$LINE_THRESHOLD" "Line"
+  LINE_PASS=$?
   
-  if [ -n "$BRANCH_COVERAGE" ] && [ "$BRANCH_COVERAGE" != "null" ] && [ "$BRANCH_COVERAGE" != "0" ]; then
-    echo "==> Branch coverage: $BRANCH_COVERAGE%"
-    
-    # Check branch coverage against threshold (default 70%)
-    BRANCH_THRESHOLD=${BRANCH_COVERAGE_THRESHOLD:-70}
-    BRANCH_PASS=true
-    if (( $(echo "$BRANCH_COVERAGE < $BRANCH_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
-      echo "❌ Branch coverage $BRANCH_COVERAGE% is below minimum threshold of $BRANCH_THRESHOLD%"
-      BRANCH_PASS=false
-    else
-      echo "✅ Branch coverage $BRANCH_COVERAGE% meets minimum threshold of $BRANCH_THRESHOLD%"
-    fi
-  else
-    echo "⚠️  No branch coverage data available in summary."
-    BRANCH_PASS=false
-  fi
+  # Check branch coverage against threshold (default 70%)
+  BRANCH_THRESHOLD=${BRANCH_COVERAGE_THRESHOLD:-70}
+  check_coverage_threshold "branch" "$BRANCH_COVERAGE" "$BRANCH_THRESHOLD" "Branch"
+  BRANCH_PASS=$?
   
-  # Both line and branch coverage must pass
-  if [ "$LINE_PASS" = false ] || [ "$BRANCH_PASS" = false ]; then
+  # Both line and branch coverage must pass (return code 0 means pass)
+  if [ $LINE_PASS -ne 0 ] || [ $BRANCH_PASS -ne 0 ]; then
     echo "❌ Coverage validation failed - both line and branch coverage thresholds must be met"
     exit 1
   fi

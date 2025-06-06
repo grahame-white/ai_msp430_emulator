@@ -1,5 +1,8 @@
 # ai_msp430_emulator
 
+[![CI/CD Pipeline](https://github.com/grahame-white/ai_msp430_emulator/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/grahame-white/ai_msp430_emulator/actions/workflows/ci.yml)
+[![Security Scanning](https://github.com/grahame-white/ai_msp430_emulator/workflows/Security%20Scanning/badge.svg)](https://github.com/grahame-white/ai_msp430_emulator/actions/workflows/security.yml)
+
 An exploration of using an AI agent to develop a high accuracy MSP430 emulator
 
 ## Contributing

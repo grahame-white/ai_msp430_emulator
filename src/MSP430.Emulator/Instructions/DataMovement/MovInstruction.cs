@@ -126,6 +126,7 @@ public class MovInstruction : Instruction, IExecutableInstruction
             destinationExtensionWord);
 
         // Update flags: MOV sets N and Z based on the value moved, clears V, preserves C
+        // Note: There are edge cases with R2 (Status Register) that need further investigation
         UpdateFlags(sourceValue, registerFile.StatusRegister);
 
         // Return cycle count based on addressing modes

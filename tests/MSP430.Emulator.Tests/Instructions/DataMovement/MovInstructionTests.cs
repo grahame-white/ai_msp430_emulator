@@ -63,7 +63,7 @@ public class MovInstructionTests
         var instruction = new MovInstruction(
             0x4000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4, // Use R4 instead of R2
             AddressingMode.Register,
             AddressingMode.Register,
             false);
@@ -72,7 +72,7 @@ public class MovInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R2));
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R4));
         Assert.Equal(1u, cycles); // Register to register takes 1 cycle
     }
 
@@ -82,7 +82,7 @@ public class MovInstructionTests
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234);
-        registerFile.WriteRegister(RegisterName.R2, 0x5678);
+        registerFile.WriteRegister(RegisterName.R3, 0x5678); // Set up R3 with a known value
 
         // Debug: check what ReadOperand returns
         ushort sourceValue = InstructionHelpers.ReadOperand(
@@ -99,7 +99,7 @@ public class MovInstructionTests
         var instruction = new MovInstruction(
             0x4000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R3, // Use R3 instead of R2 to avoid status register conflicts
             AddressingMode.Register,
             AddressingMode.Register,
             true);
@@ -108,8 +108,8 @@ public class MovInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        ushort actualR2 = registerFile.ReadRegister(RegisterName.R2);
-        Assert.Equal(0x5634, actualR2); // High byte preserved, low byte changed
+        ushort actualR3 = registerFile.ReadRegister(RegisterName.R3);
+        Assert.Equal(0x5634, actualR3); // High byte preserved, low byte changed to 0x34
     }
 
     [Fact]
@@ -191,13 +191,13 @@ public class MovInstructionTests
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1000);
-        registerFile.WriteRegister(RegisterName.R2, 0xFF00);
+        registerFile.WriteRegister(RegisterName.R3, 0xFF00); // Use R3 instead of R2
         memory[0x1000] = 0x34;
 
         var instruction = new MovInstruction(
             0x4000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R3, // Use R3 instead of R2
             AddressingMode.IndirectAutoIncrement,
             AddressingMode.Register,
             true);
@@ -206,7 +206,7 @@ public class MovInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(0xFF34, registerFile.ReadRegister(RegisterName.R2));
+        Assert.Equal(0xFF34, registerFile.ReadRegister(RegisterName.R3));
         Assert.Equal(0x1001, registerFile.ReadRegister(RegisterName.R1)); // Incremented by 1 for byte operation
     }
 
@@ -293,12 +293,12 @@ public class MovInstructionTests
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0xABCD);
-        registerFile.WriteRegister(RegisterName.R2, 0x2000);
+        registerFile.WriteRegister(RegisterName.R4, 0x2000); // Use R4 instead of R2
 
         var instruction = new MovInstruction(
             0x4000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4, // Use R4 instead of R2
             AddressingMode.Register,
             AddressingMode.Indirect,
             false);
@@ -354,7 +354,7 @@ public class MovInstructionTests
         var instruction = new MovInstruction(
             0x4000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R3, // Use R3 instead of R2 to avoid status register conflicts
             AddressingMode.Register,
             AddressingMode.Register,
             isByteOperation);

@@ -195,4 +195,63 @@ public class XorInstructionTests
         Assert.Equal(mode, instruction.SourceAddressingMode);
         Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
+
+    #region Execute Method Tests
+
+    [Fact]
+    public void Execute_RegisterToRegister_PerformsXorOperation()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert - XOR operation: 0xF0F0 ^ 0x0FF0 = 0xFF00
+        Assert.Equal(0xFF00, registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.True(registerFile.StatusRegister.Negative); // 0xFF00 has bit 15 set (negative)
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+        Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_PerformsXorOnBytes()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x12AA);
+        registerFile.WriteRegister(RegisterName.R5, 0x3455);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true); // Byte operation
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert - only low byte should be affected: (0xAA ^ 0x55) | 0x3400 = 0x34FF
+        Assert.Equal((ushort)((0xAA ^ 0x55) | 0x3400), registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.True(registerFile.StatusRegister.Negative); // 0xFF has bit 7 set (negative for byte)
+    }
+
+    #endregion
 }

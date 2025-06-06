@@ -13,7 +13,7 @@ public class DiagnosticReportGeneratorTests
     public void GenerateReport_ShouldReturnValidReport()
     {
         // Arrange
-        var logger = new ConsoleLogger { SuppressOutput = true };
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
         var generator = new DiagnosticReportGenerator(logger);
 
         // Act
@@ -33,7 +33,7 @@ public class DiagnosticReportGeneratorTests
     public void GenerateReport_ShouldIncludeSystemInfo()
     {
         // Arrange
-        var logger = new ConsoleLogger { SuppressOutput = true };
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
         var generator = new DiagnosticReportGenerator(logger);
 
         // Act
@@ -50,7 +50,7 @@ public class DiagnosticReportGeneratorTests
     public void GenerateReport_ShouldIncludeApplicationInfo()
     {
         // Arrange
-        var logger = new ConsoleLogger { SuppressOutput = true };
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
         var generator = new DiagnosticReportGenerator(logger);
 
         // Act
@@ -66,7 +66,7 @@ public class DiagnosticReportGeneratorTests
     public void GenerateReport_ShouldIncludeRuntimeInfo()
     {
         // Arrange
-        var logger = new ConsoleLogger { SuppressOutput = true };
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
         var generator = new DiagnosticReportGenerator(logger);
 
         // Act
@@ -123,7 +123,7 @@ public class DiagnosticReportGeneratorTests
     public void GenerateReport_WithStandardLogger_ShouldIndicateNoRecentEntries()
     {
         // Arrange
-        var logger = new ConsoleLogger { SuppressOutput = true };
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
         var generator = new DiagnosticReportGenerator(logger);
 
         // Act
@@ -138,7 +138,7 @@ public class DiagnosticReportGeneratorTests
     public void GenerateReportToFile_ShouldCreateFile()
     {
         // Arrange
-        var logger = new ConsoleLogger { SuppressOutput = true };
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
         var generator = new DiagnosticReportGenerator(logger);
         string testFile = Path.Join(Path.GetTempPath(), "test-diagnostic-report.md");
 
@@ -168,7 +168,7 @@ public class DiagnosticReportGeneratorTests
     public void GenerateReportToFile_WithNullPath_ShouldCreateDefaultNamedFile()
     {
         // Arrange
-        var logger = new ConsoleLogger { SuppressOutput = true };
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
         var generator = new DiagnosticReportGenerator(logger);
 
         try

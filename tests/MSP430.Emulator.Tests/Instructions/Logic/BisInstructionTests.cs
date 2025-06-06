@@ -195,4 +195,63 @@ public class BisInstructionTests
         Assert.Equal(mode, instruction.SourceAddressingMode);
         Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
+
+    #region Execute Method Tests
+
+    [Fact]
+    public void Execute_RegisterToRegister_PerformsBisOperation()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
+        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
+
+        var instruction = new BisInstruction(
+            0xD000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert - BIS is OR operation: 0x00F0 | 0x0F00 = 0x0FF0
+        Assert.Equal(0x0FF0, registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+        Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_PerformsBisOnBytes()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x120F);
+        registerFile.WriteRegister(RegisterName.R5, 0x34F0);
+
+        var instruction = new BisInstruction(
+            0xD000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true); // Byte operation
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert - only low byte should be affected: (0x0F | 0xF0) | 0x3400 = 0x34FF
+        Assert.Equal((ushort)((0x0F | 0xF0) | 0x3400), registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.True(registerFile.StatusRegister.Negative); // 0xFF has bit 7 set (negative for byte)
+    }
+
+    #endregion
 }

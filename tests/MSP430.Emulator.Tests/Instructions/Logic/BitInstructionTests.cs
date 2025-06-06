@@ -195,4 +195,122 @@ public class BitInstructionTests
         Assert.Equal(mode, instruction.SourceAddressingMode);
         Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
+
+    #region Execute Method Tests
+
+    [Fact]
+    public void Execute_RegisterToRegister_TestsBitsWithoutWriting()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+        ushort originalR5 = registerFile.ReadRegister(RegisterName.R5);
+
+        var instruction = new BitInstruction(
+            0xB000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert - destination should be unchanged
+        Assert.Equal(originalR5, registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero); // 0xFF0F & 0x0FF0 = 0x0F00 (not zero)
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+        Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_ResultIsZero_SetsZeroFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xFF00);
+        registerFile.WriteRegister(RegisterName.R5, 0x00FF);
+        ushort originalR5 = registerFile.ReadRegister(RegisterName.R5);
+
+        var instruction = new BitInstruction(
+            0xB000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert - destination unchanged but flags set based on AND result
+        Assert.Equal(originalR5, registerFile.ReadRegister(RegisterName.R5));
+        Assert.True(registerFile.StatusRegister.Zero); // 0xFF00 & 0x00FF = 0
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_ImmediateSource_UsesExtensionWord()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R5, 0x12FF);
+        ushort originalR5 = registerFile.ReadRegister(RegisterName.R5);
+
+        var instruction = new BitInstruction(
+            0xB000,
+            RegisterName.R0, // Using R0 as immediate addressing source
+            RegisterName.R5,
+            AddressingMode.Immediate,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = [0x00F0]; // Immediate value
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert - destination unchanged, flags based on 0x00F0 & 0x12FF = 0x00F0
+        Assert.Equal(originalR5, registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero); // 0x00F0 & 0x12FF = 0x00F0 (not zero)
+        Assert.False(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_TestsBytesOnly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x12AB);
+        registerFile.WriteRegister(RegisterName.R5, 0x34CD);
+        ushort originalR5 = registerFile.ReadRegister(RegisterName.R5);
+
+        var instruction = new BitInstruction(
+            0xB000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true); // Byte operation
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert - destination unchanged, flags based on byte AND (0xAB & 0xCD = 0x89)
+        Assert.Equal(originalR5, registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero); // 0xAB & 0xCD = 0x89 (not zero)
+        Assert.True(registerFile.StatusRegister.Negative); // 0x89 has bit 7 set (negative for byte)
+    }
+
+    #endregion
 }

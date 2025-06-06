@@ -195,4 +195,267 @@ public class AndInstructionTests
         Assert.Equal(mode, instruction.SourceAddressingMode);
         Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
+
+    #region Execute Method Tests
+
+    [Fact]
+    public void Execute_RegisterToRegister_PerformsAndOperation()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0xFF0F & 0x0FF0, registerFile.ReadRegister(RegisterName.R5)); // 0x0F00
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+        Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_ResultIsZero_SetsZeroFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xFF00);
+        registerFile.WriteRegister(RegisterName.R5, 0x00FF);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0, registerFile.ReadRegister(RegisterName.R5));
+        Assert.True(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_WordResultNegative_SetsNegativeFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x8000);
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x8000, registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.True(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_ImmediateSource_UsesExtensionWord()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R0, // Using R0 as immediate addressing source
+            RegisterName.R5,
+            AddressingMode.Immediate,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = [0x1234]; // Immediate value
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R5));
+    }
+
+    [Fact]
+    public void Execute_AbsoluteDestination_UsesExtensionWord()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        // Set up existing value at absolute address 0x200
+        memory[0x200] = 0xFF;
+        memory[0x201] = 0xFF; // 0xFFFF in little-endian
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R0, // Using R0 as absolute addressing destination
+            AddressingMode.Register,
+            AddressingMode.Absolute,
+            false);
+
+        ushort[] extensionWords = [0x0200]; // Absolute address
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert - memory at 0x200 should be modified
+        Assert.Equal(0x34, memory[0x200]); // Low byte of (0x1234 & 0xFFFF) = 0x1234
+        Assert.Equal(0x12, memory[0x201]); // High byte of 0x1234
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_WorksCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x12AB);
+        registerFile.WriteRegister(RegisterName.R5, 0x34CD);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true); // Byte operation
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert - only low byte should be affected
+        Assert.Equal((ushort)((0xAB & 0xCD) | 0x3400), registerFile.ReadRegister(RegisterName.R5));
+        Assert.Equal(0x89, 0xAB & 0xCD); // Verify expected low byte result
+    }
+
+    [Fact]
+    public void Execute_SymbolicSource_UsesExtensionWord()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R5, 0xFF00);
+
+        // Set up memory at symbolic address (R0 + offset)
+        registerFile.WriteRegister(RegisterName.R0, 0x0100); // PC base
+        memory[0x0200] = 0x0F; // Low byte at symbolic address 0x200 = 0x100 + 0x100
+        memory[0x0201] = 0x00; // High byte of 0x000F
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R0, // Using R0 for symbolic addressing
+            RegisterName.R5,
+            AddressingMode.Symbolic,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = [0x0100]; // Symbolic offset
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert - should AND 0xFF00 & 0x000F = 0x0000
+        Assert.Equal(0x0000, registerFile.ReadRegister(RegisterName.R5));
+        Assert.True(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_IndexedDestination_UsesExtensionWord()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x00FF);
+        registerFile.WriteRegister(RegisterName.R6, 0x0200); // Base address
+
+        // Set up initial value at indexed destination
+        memory[0x0210] = 0xF0; // Low byte at indexed address 0x200 + 0x10 = 0x210
+        memory[0x0211] = 0x0F; // High byte of 0x0FF0
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R6,
+            AddressingMode.Register,
+            AddressingMode.Indexed,
+            false);
+
+        ushort[] extensionWords = [0x0010]; // Index offset
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert - memory at indexed location should be modified: 0x00FF & 0x0FF0 = 0x00F0
+        Assert.Equal(0xF0, memory[0x0210]); // Low byte of 0x00F0
+        Assert.Equal(0x00, memory[0x0211]); // High byte of 0x00F0
+    }
+
+    [Fact]
+    public void Execute_BothSourceAndDestinationRequireExtensionWords()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+
+        // Set up memory values
+        memory[0x0100] = 0xAA; // Source value at absolute address 0x100
+        memory[0x0101] = 0x55; // High byte: 0x55AA
+        memory[0x0200] = 0xFF; // Destination value at absolute address 0x200
+        memory[0x0201] = 0x00; // High byte: 0x00FF
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R0, // Absolute source
+            RegisterName.R1, // Absolute destination
+            AddressingMode.Absolute,
+            AddressingMode.Absolute,
+            false);
+
+        ushort[] extensionWords = [0x0100, 0x0200]; // Source address, destination address
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert - memory at destination should be modified: 0x55AA & 0x00FF = 0x00AA
+        Assert.Equal(0xAA, memory[0x0200]); // Low byte of 0x00AA
+        Assert.Equal(0x00, memory[0x0201]); // High byte of 0x00AA
+        Assert.Equal(7u, cycles); // 1 base + 3 for absolute source + 3 for absolute destination
+    }
+
+    #endregion
 }

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace MSP430.Emulator.Memory;
 
 /// <summary>

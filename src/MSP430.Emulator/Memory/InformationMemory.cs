@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Memory;
@@ -20,6 +23,7 @@ public class InformationMemory : IInformationMemory
     private readonly byte[] _memory;
     private readonly ILogger? _logger;
     private readonly Dictionary<InformationSegment, bool> _segmentProtection;
+    private IReadOnlyList<InformationSegmentInfo>? _cachedSegments;
 
     /// <summary>
     /// Initializes a new instance of the InformationMemory class.
@@ -56,16 +60,16 @@ public class InformationMemory : IInformationMemory
     public int SegmentSize => SegSize;
 
     /// <inheritdoc />
-    public IReadOnlyList<InformationSegmentInfo> Segments => GetCurrentSegmentInfos();
+    public IReadOnlyList<InformationSegmentInfo> Segments => _cachedSegments ??= GetCurrentSegmentInfos();
 
     private List<InformationSegmentInfo> GetCurrentSegmentInfos()
     {
         return new List<InformationSegmentInfo>
         {
-            new(InformationSegment.SegmentA, 0x1980, 0x19FF, IsSegmentWriteProtected(InformationSegment.SegmentA), "Calibration data and factory settings"),
-            new(InformationSegment.SegmentB, 0x1900, 0x197F, IsSegmentWriteProtected(InformationSegment.SegmentB), "User information storage"),
-            new(InformationSegment.SegmentC, 0x1880, 0x18FF, IsSegmentWriteProtected(InformationSegment.SegmentC), "User information storage"),
-            new(InformationSegment.SegmentD, 0x1800, 0x187F, IsSegmentWriteProtected(InformationSegment.SegmentD), "User information storage")
+            new(InformationSegment.SegmentA, (ushort)(BaseAddr + SegSize * 3), (ushort)(BaseAddr + SegSize * 4 - 1), IsSegmentWriteProtected(InformationSegment.SegmentA), "Calibration data and factory settings"),
+            new(InformationSegment.SegmentB, (ushort)(BaseAddr + SegSize * 2), (ushort)(BaseAddr + SegSize * 3 - 1), IsSegmentWriteProtected(InformationSegment.SegmentB), "User information storage"),
+            new(InformationSegment.SegmentC, (ushort)(BaseAddr + SegSize * 1), (ushort)(BaseAddr + SegSize * 2 - 1), IsSegmentWriteProtected(InformationSegment.SegmentC), "User information storage"),
+            new(InformationSegment.SegmentD, (ushort)(BaseAddr + SegSize * 0), (ushort)(BaseAddr + SegSize * 1 - 1), IsSegmentWriteProtected(InformationSegment.SegmentD), "User information storage")
         };
     }
 
@@ -146,15 +150,35 @@ public class InformationMemory : IInformationMemory
     {
         ValidateAddress(address);
 
-        return address switch
+        // Calculate segment boundaries based on BaseAddr and SegSize
+        ushort segmentDEnd = (ushort)(BaseAddr + SegSize - 1);
+        ushort segmentCStart = (ushort)(BaseAddr + SegSize);
+        ushort segmentCEnd = (ushort)(BaseAddr + SegSize * 2 - 1);
+        ushort segmentBStart = (ushort)(BaseAddr + SegSize * 2);
+        ushort segmentBEnd = (ushort)(BaseAddr + SegSize * 3 - 1);
+        ushort segmentAStart = (ushort)(BaseAddr + SegSize * 3);
+
+        if (address >= segmentAStart)
         {
-            >= 0x1980 and <= 0x19FF => InformationSegment.SegmentA,
-            >= 0x1900 and <= 0x197F => InformationSegment.SegmentB,
-            >= 0x1880 and <= 0x18FF => InformationSegment.SegmentC,
-            >= 0x1800 and <= 0x187F => InformationSegment.SegmentD,
-            _ => throw new ArgumentOutOfRangeException(nameof(address),
-                $"Address 0x{address:X4} is not within information memory bounds")
-        };
+            return InformationSegment.SegmentA;
+        }
+        else if (address >= segmentBStart && address <= segmentBEnd)
+        {
+            return InformationSegment.SegmentB;
+        }
+        else if (address >= segmentCStart && address <= segmentCEnd)
+        {
+            return InformationSegment.SegmentC;
+        }
+        else if (address >= BaseAddr && address <= segmentDEnd)
+        {
+            return InformationSegment.SegmentD;
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(address),
+                $"Address 0x{address:X4} is not within information memory bounds");
+        }
     }
 
     /// <inheritdoc />
@@ -174,6 +198,9 @@ public class InformationMemory : IInformationMemory
     {
         bool oldState = _segmentProtection[segment];
         _segmentProtection[segment] = isProtected;
+
+        // Invalidate cache since protection state changed
+        _cachedSegments = null;
 
         _logger?.Info($"Segment {segment} write protection changed from {oldState} to {isProtected}");
 

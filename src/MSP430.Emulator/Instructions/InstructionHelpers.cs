@@ -106,16 +106,11 @@ public static class InstructionHelpers
         switch (addressingMode)
         {
             case AddressingMode.Register:
-                if (isByteOperation)
-                {
-                    // For byte operations, only write to the low byte, preserve high byte
-                    ushort currentValue = registerFile.ReadRegister(register);
-                    registerFile.WriteRegister(register, (ushort)((currentValue & 0xFF00) | (value & 0xFF)));
-                }
-                else
-                {
-                    registerFile.WriteRegister(register, value);
-                }
+                // For byte operations, only write to the low byte, preserve high byte
+                ushort valueToWrite = isByteOperation
+                    ? (ushort)((registerFile.ReadRegister(register) & 0xFF00) | (value & 0xFF))
+                    : value;
+                registerFile.WriteRegister(register, valueToWrite);
                 break;
 
             case AddressingMode.Indirect:

@@ -508,8 +508,11 @@ async function main() {
     const token = process.env.GITHUB_TOKEN;
     const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || 'grahame-white';
     const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'ai_msp430_emulator';
-    const tasksFile = process.argv[2] || '../../MSP430_EMULATOR_TASKS.md';
     const dryRun = process.argv.includes('--dry-run');
+
+    // Get tasks file path from arguments, excluding flags
+    const taskFileArg = process.argv.slice(2).find(arg => !arg.startsWith('--'));
+    const tasksFile = taskFileArg || '../../MSP430_EMULATOR_TASKS.md';
 
     // For dry-run mode, we can operate with a dummy token since no API calls will be made
     if (!token && !dryRun) {

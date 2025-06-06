@@ -308,7 +308,104 @@ runner.test('update-issues.js has required exports', () => {
         'GitHubIssuesUpdater class not found'
     );
     runner.assert(content.includes('updateIssue'), 'updateIssue method not found');
+    runner.assert(
+        content.includes('createImpactAnalysis'),
+        'createImpactAnalysis method not found'
+    );
+    runner.assert(
+        content.includes('generateImpactAnalysisBody'),
+        'generateImpactAnalysisBody method not found'
+    );
     runner.assert(content.includes('module.exports'), 'module.exports not found');
+});
+
+// Test: Impact analysis functionality
+runner.test('GitHubIssuesUpdater impact analysis functionality works', () => {
+    const { GitHubIssuesUpdater } = require('./update-issues.js');
+
+    // Create updater instance with dummy token for testing
+    const updater = new GitHubIssuesUpdater('dummy-token', 'test-owner', 'test-repo');
+    updater.enableDryRun();
+
+    // Test impact analysis body generation
+    const mockIssue = {
+        number: 123,
+        title: 'Task 1.1: Test Task'
+    };
+
+    const mockTask = {
+        id: '1.1',
+        title: 'Test Task',
+        priority: 'High',
+        effort: '2 hours',
+        phase: 'Core Framework',
+        dependencies: [],
+        description: 'Test task description',
+        acceptanceCriteria: [
+            { text: 'First criterion', completed: false },
+            { text: 'Second criterion', completed: true }
+        ],
+        completed: false
+    };
+
+    const analysisBody = updater.generateImpactAnalysisBody(mockIssue, mockTask);
+
+    runner.assert(
+        analysisBody.includes('Task Requirements Changed'),
+        'Impact analysis body should include requirements change header'
+    );
+    runner.assert(
+        analysisBody.includes('**Original Issue**: #123'),
+        'Impact analysis body should reference original issue'
+    );
+    runner.assert(
+        analysisBody.includes('**Task**: 1.1'),
+        'Impact analysis body should include task ID'
+    );
+    runner.assert(
+        analysisBody.includes('Completed → Incomplete'),
+        'Impact analysis body should show status change'
+    );
+    runner.assert(
+        analysisBody.includes('Impact Analysis Checklist'),
+        'Impact analysis body should include checklist'
+    );
+    runner.assert(
+        analysisBody.includes('Review changes to task requirements'),
+        'Impact analysis body should include review step'
+    );
+});
+
+// Test: Dry-run mode works without GitHub token
+runner.test('update-issues.js dry-run mode works without GitHub token', async () => {
+    // Store original token
+    const originalToken = process.env.GITHUB_TOKEN;
+
+    try {
+        // Temporarily remove GitHub token
+        delete process.env.GITHUB_TOKEN;
+
+        const { GitHubIssuesUpdater } = require('./update-issues.js');
+        const updater = new GitHubIssuesUpdater('dummy-token', 'test-owner', 'test-repo');
+        updater.enableDryRun();
+
+        // Test that getAllTaskIssues works in dry-run mode
+        const issues = await updater.getAllTaskIssues();
+        runner.assert(
+            Array.isArray(issues),
+            'getAllTaskIssues should return an array in dry-run mode'
+        );
+        runner.assertEqual(
+            issues.length,
+            0,
+            'getAllTaskIssues should return empty array in dry-run mode without token'
+        );
+    } finally {
+        // Restore original token
+        if (originalToken) {
+            process.env.GITHUB_TOKEN = originalToken;
+        }
+    }
 });
 
 // Test: Manual-issue-protector module structure

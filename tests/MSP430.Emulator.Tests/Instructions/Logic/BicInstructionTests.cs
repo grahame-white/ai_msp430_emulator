@@ -3,21 +3,22 @@ using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
 using MSP430.Emulator.Tests.TestUtilities;
+using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.Logic;
 
 /// <summary>
-/// Unit tests for the XorInstruction class.
+/// Unit tests for the BicInstruction class.
 /// </summary>
-public class XorInstructionTests
+public class BicInstructionTests
 {
 
     [Fact]
     public void Constructor_ValidParameters_CreatesInstruction()
     {
         // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
+        var instruction = new BicInstruction(
+            0xC123,
             RegisterName.R1,
             RegisterName.R2,
             AddressingMode.Register,
@@ -26,9 +27,9 @@ public class XorInstructionTests
 
         // Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-        Assert.Equal(0xE, instruction.Opcode);
-        Assert.Equal(0xE123, instruction.InstructionWord);
-        Assert.Equal("XOR", instruction.Mnemonic);
+        Assert.Equal(0xC, instruction.Opcode);
+        Assert.Equal(0xC123, instruction.InstructionWord);
+        Assert.Equal("BIC", instruction.Mnemonic);
         Assert.False(instruction.IsByteOperation);
         Assert.Equal(RegisterName.R1, instruction.SourceRegister);
         Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
@@ -40,8 +41,8 @@ public class XorInstructionTests
     public void Constructor_ByteOperation_SetsByteFlag()
     {
         // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE563,
+        var instruction = new BicInstruction(
+            0xC563,
             RegisterName.R5,
             RegisterName.R6,
             AddressingMode.Register,
@@ -50,7 +51,7 @@ public class XorInstructionTests
 
         // Assert
         Assert.True(instruction.IsByteOperation);
-        Assert.Equal("XOR.B", instruction.Mnemonic);
+        Assert.Equal("BIC.B", instruction.Mnemonic);
     }
 
     [Theory]
@@ -71,64 +72,41 @@ public class XorInstructionTests
         AddressingMode destMode,
         int expectedCount)
     {
-        // Arrange
-        var instruction = new XorInstruction(
-            0xE000,
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R1,
             RegisterName.R2,
             sourceMode,
             destMode,
             false);
 
-        // Act & Assert
+        // Assert
         Assert.Equal(expectedCount, instruction.ExtensionWordCount);
     }
 
     [Theory]
-    [InlineData(AddressingMode.Register, "R1")]
-    [InlineData(AddressingMode.Indexed, "X(R1)")]
-    [InlineData(AddressingMode.Indirect, "@R1")]
-    [InlineData(AddressingMode.IndirectAutoIncrement, "@R1+")]
-    [InlineData(AddressingMode.Immediate, "#N")]
-    [InlineData(AddressingMode.Absolute, "&ADDR")]
-    [InlineData(AddressingMode.Symbolic, "ADDR")]
-    public void ToString_VariousAddressingModes_FormatsCorrectly(
-        AddressingMode mode,
-        string expectedOperand)
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode mode)
     {
-        // Arrange
-        var instruction = new XorInstruction(
-            0xE000,
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R1,
-            RegisterName.R1,
+            RegisterName.R2,
             mode,
-            AddressingMode.Register,
+            mode,
             false);
 
-        // Act
-        string result = instruction.ToString();
-
         // Assert
-        Assert.Equal($"XOR {expectedOperand}, R1", result);
-    }
-
-    [Fact]
-    public void ToString_ByteOperation_IncludesByteModifier()
-    {
-        // Arrange
-        var instruction = new XorInstruction(
-            0xE000,
-            RegisterName.R3,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        // Act
-        string result = instruction.ToString();
-
-        // Assert
-        Assert.Equal("XOR.B R3, R4", result);
+        Assert.Equal(mode, instruction.SourceAddressingMode);
+        Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
 
     [Theory]
@@ -141,10 +119,10 @@ public class XorInstructionTests
     public void SourceRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)
     {
         // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE000,
+        var instruction = new BicInstruction(
+            0xC000,
             register,
-            RegisterName.R1,
+            RegisterName.R5,
             AddressingMode.Register,
             AddressingMode.Register,
             false);
@@ -163,8 +141,8 @@ public class XorInstructionTests
     public void DestinationRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)
     {
         // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE000,
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R1,
             register,
             AddressingMode.Register,
@@ -176,42 +154,65 @@ public class XorInstructionTests
     }
 
     [Theory]
-    [InlineData(AddressingMode.Register)]
-    [InlineData(AddressingMode.Indexed)]
-    [InlineData(AddressingMode.Indirect)]
-    [InlineData(AddressingMode.IndirectAutoIncrement)]
-    [InlineData(AddressingMode.Immediate)]
-    [InlineData(AddressingMode.Absolute)]
-    [InlineData(AddressingMode.Symbolic)]
-    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode mode)
+    [InlineData(AddressingMode.Register, "R1")]
+    [InlineData(AddressingMode.Indirect, "@R1")]
+    [InlineData(AddressingMode.IndirectAutoIncrement, "@R1+")]
+    [InlineData(AddressingMode.Immediate, "#N")]
+    [InlineData(AddressingMode.Indexed, "X(R1)")]
+    [InlineData(AddressingMode.Absolute, "&ADDR")]
+    [InlineData(AddressingMode.Symbolic, "ADDR")]
+    public void ToString_VariousAddressingModes_FormatsCorrectly(
+        AddressingMode mode,
+        string expectedOperand)
     {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE000,
+        // Arrange
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R1,
             RegisterName.R2,
             mode,
-            mode,
+            AddressingMode.Register,
             false);
 
+        // Act
+        string result = instruction.ToString();
+
         // Assert
-        Assert.Equal(mode, instruction.SourceAddressingMode);
-        Assert.Equal(mode, instruction.DestinationAddressingMode);
+        Assert.Contains("BIC", result);
+        Assert.Contains(expectedOperand, result);
+        Assert.Contains("R2", result);
     }
 
-    #region Execute Method Tests
-
     [Fact]
-    public void Execute_RegisterToRegister_PerformsXorOperation()
+    public void ToString_ByteOperation_IncludesByteModifier()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
-        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
 
-        var instruction = new XorInstruction(
-            0xE000,
+        // Act
+        string result = instruction.ToString();
+
+        // Assert
+        Assert.Contains("BIC.B", result);
+    }
+
+    [Fact]
+    public void Execute_BasicOperation_ClearsBitsCorrectly()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F); // source: bits to clear
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination: all bits set
+
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R4,
             RegisterName.R5,
             AddressingMode.Register,
@@ -221,39 +222,117 @@ public class XorInstructionTests
         // Act
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
-        // Assert - XOR operation: 0xF0F0 ^ 0x0FF0 = 0xFF00
-        Assert.Equal(0xFF00, registerFile.ReadRegister(RegisterName.R5));
+        // Assert
+        Assert.Equal((ushort)0x00F0, registerFile.ReadRegister(RegisterName.R5)); // cleared bits 0-3 and 8-15
         Assert.False(registerFile.StatusRegister.Zero);
-        Assert.True(registerFile.StatusRegister.Negative); // 0xFF00 has bit 15 set (negative)
+        Assert.False(registerFile.StatusRegister.Negative);
         Assert.False(registerFile.StatusRegister.Carry);
         Assert.False(registerFile.StatusRegister.Overflow);
-        Assert.Equal(1u, cycles);
+        Assert.Equal(1u, cycles); // 1 base + 0 source (register) + 0 dest (register)
     }
 
     [Fact]
-    public void Execute_ByteOperation_PerformsXorOnBytes()
+    public void Execute_ByteOperation_PerformsBicOnBytes()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x12AA);
-        registerFile.WriteRegister(RegisterName.R5, 0x3455);
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
-        var instruction = new XorInstruction(
-            0xE000,
+        registerFile.WriteRegister(RegisterName.R4, 0x340F); // source: bits to clear (byte operation uses low byte)
+        registerFile.WriteRegister(RegisterName.R5, 0x34FF); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R4,
             RegisterName.R5,
             AddressingMode.Register,
             AddressingMode.Register,
-            true); // Byte operation
+            true);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal((ushort)((0xF0) | 0x3400), registerFile.ReadRegister(RegisterName.R5)); // cleared low byte bits, high byte unchanged
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.True(registerFile.StatusRegister.Negative); // 0xF0 has bit 7 set (negative for byte)
+        Assert.Equal(1u, cycles); // 1 base + 0 source (register) + 0 dest (register)
+    }
+
+    [Fact]
+    public void Execute_ResultZero_SetsZeroFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFFFF); // source: clear all bits
+        registerFile.WriteRegister(RegisterName.R5, 0x5555); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
 
         // Act
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
-        // Assert - only low byte should be affected: (0xAA ^ 0x55) | 0x3400 = 0x34FF
-        Assert.Equal((ushort)((0xAA ^ 0x55) | 0x3400), registerFile.ReadRegister(RegisterName.R5));
+        // Assert
+        Assert.Equal((ushort)0x0000, registerFile.ReadRegister(RegisterName.R5));
+        Assert.True(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_NegativeResult_SetsNegativeFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0x7FFF); // source: clear bits 0-14, leave bit 15
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal((ushort)0x8000, registerFile.ReadRegister(RegisterName.R5));
         Assert.False(registerFile.StatusRegister.Zero);
-        Assert.True(registerFile.StatusRegister.Negative); // 0xFF has bit 7 set (negative for byte)
+        Assert.True(registerFile.StatusRegister.Negative);
+    }
+
+    #region Cycle Count Tests
+
+    [Fact]
+    public void Execute_RegisterToRegister_Takes1Cycle()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0xFF00);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(1u, cycles); // 1 base + 0 source (register) + 0 dest (register)
     }
 
     [Fact]
@@ -263,8 +342,8 @@ public class XorInstructionTests
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
-        var instruction = new XorInstruction(
-            0xE000,
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R0, // PC for immediate
             RegisterName.R5,
             AddressingMode.Immediate,
@@ -292,8 +371,8 @@ public class XorInstructionTests
         memory[0x0110] = 0xF0;
         memory[0x0111] = 0x0F;
 
-        var instruction = new XorInstruction(
-            0xE000,
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R4,
             RegisterName.R5,
             AddressingMode.Register,
@@ -315,14 +394,14 @@ public class XorInstructionTests
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x0100); // Base address
-        registerFile.WriteRegister(RegisterName.R5, 0x0000);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
         // Set up memory at indexed location R4 + 0x10 = 0x0110
         memory[0x0110] = 0x00;
         memory[0x0111] = 0xFF;
 
-        var instruction = new XorInstruction(
-            0xE000,
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R4,
             RegisterName.R5,
             AddressingMode.Indexed,
@@ -343,25 +422,23 @@ public class XorInstructionTests
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R4, 0x0100); // Points to memory address
-        registerFile.WriteRegister(RegisterName.R5, 0x0000);
+        registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory location
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
         // Set up memory at indirect location
-        memory[0x0100] = 0x00;
-        memory[0x0101] = 0xFF;
+        memory[0x0200] = 0x00;
+        memory[0x0201] = 0xFF;
 
-        var instruction = new XorInstruction(
-            0xE000,
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R4,
             RegisterName.R5,
             AddressingMode.Indirect,
             AddressingMode.Register,
             false);
 
-        ushort[] extensionWords = Array.Empty<ushort>();
-
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(3u, cycles); // 1 base + 2 source (indirect) + 0 dest (register)
@@ -373,24 +450,22 @@ public class XorInstructionTests
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
-        registerFile.WriteRegister(RegisterName.R5, 0x0100); // Points to memory address
+        registerFile.WriteRegister(RegisterName.R5, 0x0200); // Points to memory location
 
         // Set up memory at indirect location
-        memory[0x0100] = 0xF0;
-        memory[0x0101] = 0x0F;
+        memory[0x0200] = 0xF0;
+        memory[0x0201] = 0x0F;
 
-        var instruction = new XorInstruction(
-            0xE000,
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R4,
             RegisterName.R5,
             AddressingMode.Register,
             AddressingMode.Indirect,
             false);
 
-        ushort[] extensionWords = Array.Empty<ushort>();
-
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(3u, cycles); // 1 base + 0 source (register) + 2 dest (indirect)
@@ -410,15 +485,15 @@ public class XorInstructionTests
         memory[0x0400] = 0xF0;
         memory[0x0401] = 0x0F;
 
-        var instruction = new XorInstruction(
-            0xE000,
-            RegisterName.R0, // Absolute source
-            RegisterName.R1, // Absolute destination
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R2, // SR for absolute addressing
+            RegisterName.R2, // SR for absolute addressing
             AddressingMode.Absolute,
             AddressingMode.Absolute,
             false);
 
-        ushort[] extensionWords = { 0x0300, 0x0400 }; // Source address, destination address
+        ushort[] extensionWords = { 0x0300, 0x0400 }; // Source and dest absolute addresses
 
         // Act
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
@@ -432,25 +507,25 @@ public class XorInstructionTests
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.SetProgramCounter(0x1000);
+        registerFile.WriteRegister(RegisterName.R0, 0x1000); // PC value
 
-        // Set up memory at symbolic source location PC + 0x10 = 0x1010
-        memory[0x1010] = 0x00;
-        memory[0x1011] = 0xFF;
+        // Set up memory at source symbolic address (PC + offset)
+        memory[0x1000 + 0x0100] = 0x00; // PC + 0x0100
+        memory[0x1000 + 0x0100 + 1] = 0xFF;
 
-        // Set up memory at symbolic destination location PC + 0x20 = 0x1020
-        memory[0x1020] = 0xF0;
-        memory[0x1021] = 0x0F;
+        // Set up memory at destination symbolic address (PC + offset)
+        memory[0x1000 + 0x0200] = 0xF0; // PC + 0x0200
+        memory[0x1000 + 0x0200 + 1] = 0x0F;
 
-        var instruction = new XorInstruction(
-            0xE000,
-            RegisterName.R0, // PC for symbolic
-            RegisterName.R0, // PC for symbolic
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R0, // PC for symbolic addressing
+            RegisterName.R0, // PC for symbolic addressing
             AddressingMode.Symbolic,
             AddressingMode.Symbolic,
             false);
 
-        ushort[] extensionWords = { 0x0010, 0x0020 }; // Source offset, destination offset
+        ushort[] extensionWords = { 0x0100, 0x0200 }; // Source and dest offsets from PC
 
         // Act
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
@@ -464,29 +539,27 @@ public class XorInstructionTests
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R4, 0x0100); // Points to memory address
-        registerFile.WriteRegister(RegisterName.R5, 0x0000);
+        registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory location
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
         // Set up memory at indirect location
-        memory[0x0100] = 0x00;
-        memory[0x0101] = 0xFF;
+        memory[0x0200] = 0x00;
+        memory[0x0201] = 0xFF;
 
-        var instruction = new XorInstruction(
-            0xE000,
+        var instruction = new BicInstruction(
+            0xC000,
             RegisterName.R4,
             RegisterName.R5,
             AddressingMode.IndirectAutoIncrement,
             AddressingMode.Register,
             false);
 
-        ushort[] extensionWords = Array.Empty<ushort>();
-
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(3u, cycles); // 1 base + 2 source (indirect auto-increment) + 0 dest (register)
-        Assert.Equal(0x0102, registerFile.ReadRegister(RegisterName.R4)); // Should be incremented by 2 for word operation
+        Assert.Equal((ushort)0x0202, registerFile.ReadRegister(RegisterName.R4)); // Auto-incremented by 2 for word
     }
 
     #endregion

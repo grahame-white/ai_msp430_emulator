@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
+using MSP430.Emulator.Tests.TestUtilities;
 
 namespace MSP430.Emulator.Tests.Instructions.Logic;
 
@@ -10,6 +11,7 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 /// </summary>
 public class AndInstructionTests
 {
+
     [Fact]
     public void Constructor_ValidParameters_CreatesInstruction()
     {
@@ -456,6 +458,208 @@ public class AndInstructionTests
         Assert.Equal(0xAA, memory[0x0200]); // Low byte of 0x00AA
         Assert.Equal(0x00, memory[0x0201]); // High byte of 0x00AA
         Assert.Equal(7u, cycles); // 1 base + 3 for absolute source + 3 for absolute destination
+    }
+
+    [Fact]
+    public void Execute_ImmediateToRegister_Takes1Cycle()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R0, // PC for immediate
+            RegisterName.R5,
+            AddressingMode.Immediate,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = { 0xFF00 }; // Immediate value
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(1u, cycles); // 1 base + 0 source (immediate) + 0 dest (register)
+    }
+
+    [Fact]
+    public void Execute_RegisterToIndexed_Takes4Cycles()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0xFF00);
+        registerFile.WriteRegister(RegisterName.R5, 0x0100); // Base address
+
+        // Set up memory at indexed location R5 + 0x10 = 0x0110
+        memory[0x0110] = 0xF0;
+        memory[0x0111] = 0x0F;
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Indexed,
+            false);
+
+        ushort[] extensionWords = { 0x0010 }; // Offset for indexed addressing
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(4u, cycles); // 1 base + 0 source (register) + 3 dest (indexed)
+    }
+
+    [Fact]
+    public void Execute_IndexedToRegister_Takes4Cycles()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0x0100); // Base address
+        registerFile.WriteRegister(RegisterName.R5, 0x0000);
+
+        // Set up memory at indexed location R4 + 0x10 = 0x0110
+        memory[0x0110] = 0x00;
+        memory[0x0111] = 0xFF;
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Indexed,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = { 0x0010 }; // Offset for indexed addressing
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(4u, cycles); // 1 base + 3 source (indexed) + 0 dest (register)
+    }
+
+    [Fact]
+    public void Execute_IndirectToRegister_Takes3Cycles()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0x0100); // Points to memory address
+        registerFile.WriteRegister(RegisterName.R5, 0x0000);
+
+        // Set up memory at indirect location
+        memory[0x0100] = 0x00;
+        memory[0x0101] = 0xFF;
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Indirect,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(3u, cycles); // 1 base + 2 source (indirect) + 0 dest (register)
+    }
+
+    [Fact]
+    public void Execute_RegisterToIndirect_Takes3Cycles()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0xFF00);
+        registerFile.WriteRegister(RegisterName.R5, 0x0100); // Points to memory address
+
+        // Set up memory at indirect location
+        memory[0x0100] = 0xF0;
+        memory[0x0101] = 0x0F;
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Indirect,
+            false);
+
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(3u, cycles); // 1 base + 0 source (register) + 2 dest (indirect)
+    }
+
+    [Fact]
+    public void Execute_SymbolicToSymbolic_Takes7Cycles()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.SetProgramCounter(0x1000);
+
+        // Set up memory at symbolic source location PC + 0x10 = 0x1010
+        memory[0x1010] = 0x00;
+        memory[0x1011] = 0xFF;
+
+        // Set up memory at symbolic destination location PC + 0x20 = 0x1020
+        memory[0x1020] = 0xF0;
+        memory[0x1021] = 0x0F;
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R0, // PC for symbolic
+            RegisterName.R0, // PC for symbolic
+            AddressingMode.Symbolic,
+            AddressingMode.Symbolic,
+            false);
+
+        ushort[] extensionWords = { 0x0010, 0x0020 }; // Source offset, destination offset
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(7u, cycles); // 1 base + 3 source (symbolic) + 3 dest (symbolic)
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrementToRegister_Takes3Cycles()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0x0100); // Points to memory address
+        registerFile.WriteRegister(RegisterName.R5, 0x0000);
+
+        // Set up memory at indirect location
+        memory[0x0100] = 0x00;
+        memory[0x0101] = 0xFF;
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(3u, cycles); // 1 base + 2 source (indirect auto-increment) + 0 dest (register)
+        Assert.Equal(0x0102, registerFile.ReadRegister(RegisterName.R4)); // Should be incremented by 2 for word operation
     }
 
     #endregion

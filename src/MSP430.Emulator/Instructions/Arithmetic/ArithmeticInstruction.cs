@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 
 namespace MSP430.Emulator.Instructions.Arithmetic;
@@ -9,7 +10,7 @@ namespace MSP430.Emulator.Instructions.Arithmetic;
 /// that share similar instruction format, addressing modes, and basic structure.
 /// All two-operand arithmetic instructions use Format I encoding.
 /// </summary>
-public abstract class ArithmeticInstruction : Instruction
+public abstract class ArithmeticInstruction : Instruction, IExecutableInstruction
 {
     /// <summary>
     /// Initializes a new instance of the ArithmeticInstruction class.
@@ -91,5 +92,145 @@ public abstract class ArithmeticInstruction : Instruction
     public override string ToString()
     {
         return $"{Mnemonic} {InstructionHelpers.FormatOperand(_sourceRegister, _sourceAddressingMode)}, {InstructionHelpers.FormatOperand(_destinationRegister, _destinationAddressingMode)}";
+    }
+
+    /// <summary>
+    /// Executes the arithmetic instruction on the specified CPU state.
+    /// Performs the arithmetic operation between source and destination operands and updates flags accordingly.
+    /// </summary>
+    /// <param name="registerFile">The CPU register file for reading/writing registers.</param>
+    /// <param name="memory">The system memory for reading/writing memory locations.</param>
+    /// <param name="extensionWords">Extension words associated with this instruction.</param>
+    /// <returns>The number of CPU cycles consumed by this instruction.</returns>
+    public uint Execute(IRegisterFile registerFile, byte[] memory, ushort[] extensionWords)
+    {
+        // Get extension words for source and destination if needed
+        ushort sourceExtensionWord = 0;
+        ushort destinationExtensionWord = 0;
+        int extensionIndex = 0;
+
+        // Source operand extension word
+        if (_sourceAddressingMode == AddressingMode.Immediate ||
+            _sourceAddressingMode == AddressingMode.Absolute ||
+            _sourceAddressingMode == AddressingMode.Symbolic ||
+            _sourceAddressingMode == AddressingMode.Indexed)
+        {
+            if (extensionIndex >= extensionWords.Length)
+            {
+                throw new ArgumentException($"Extension words array does not contain enough elements. Expected at least {extensionIndex + 1}, but got {extensionWords.Length}.", nameof(extensionWords));
+            }
+            sourceExtensionWord = extensionWords[extensionIndex++];
+        }
+
+        // Destination operand extension word
+        if (_destinationAddressingMode == AddressingMode.Absolute ||
+            _destinationAddressingMode == AddressingMode.Symbolic ||
+            _destinationAddressingMode == AddressingMode.Indexed)
+        {
+            if (extensionIndex >= extensionWords.Length)
+            {
+                throw new ArgumentException($"Extension words array does not contain enough elements. Expected at least {extensionIndex + 1}, but got {extensionWords.Length}.", nameof(extensionWords));
+            }
+            destinationExtensionWord = extensionWords[extensionIndex];
+        }
+
+        // Read source operand
+        ushort sourceValue = InstructionHelpers.ReadOperand(
+            _sourceRegister,
+            _sourceAddressingMode,
+            _isByteOperation,
+            registerFile,
+            memory,
+            sourceExtensionWord);
+
+        // Read destination operand
+        ushort destinationValue = InstructionHelpers.ReadOperand(
+            _destinationRegister,
+            _destinationAddressingMode,
+            _isByteOperation,
+            registerFile,
+            memory,
+            destinationExtensionWord);
+
+        // Perform the arithmetic operation (implemented by derived classes)
+        (ushort result, bool carry, bool overflow) = PerformArithmeticOperation(sourceValue, destinationValue, _isByteOperation);
+
+        // For byte operations, mask to 8 bits
+        if (_isByteOperation)
+        {
+            result &= 0xFF;
+        }
+
+        // Update flags: All arithmetic instructions affect N, Z, C, V
+        InstructionHelpers.UpdateFlags(result, carry, overflow, _isByteOperation, registerFile.StatusRegister);
+
+        // Write result back to destination (unless this is a CMP instruction which only sets flags)
+        if (ShouldWriteResult())
+        {
+            InstructionHelpers.WriteOperand(
+                _destinationRegister,
+                _destinationAddressingMode,
+                _isByteOperation,
+                result,
+                registerFile,
+                memory,
+                destinationExtensionWord);
+        }
+
+        // Return cycle count (varies by addressing mode combination)
+        return GetCycleCount();
+    }
+
+    /// <summary>
+    /// Performs the specific arithmetic operation for this instruction type.
+    /// </summary>
+    /// <param name="sourceValue">The source operand value.</param>
+    /// <param name="destinationValue">The destination operand value.</param>
+    /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <returns>A tuple containing the result, carry flag, and overflow flag.</returns>
+    protected abstract (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation);
+
+    /// <summary>
+    /// Determines whether this instruction should write the result back to the destination.
+    /// Most arithmetic instructions write the result, but CMP instruction only sets flags.
+    /// </summary>
+    /// <returns>True if the result should be written to the destination, false otherwise.</returns>
+    protected virtual bool ShouldWriteResult() => true;
+
+    /// <summary>
+    /// Gets the number of CPU cycles required for this instruction based on addressing modes.
+    /// </summary>
+    /// <returns>The number of CPU cycles.</returns>
+    private uint GetCycleCount()
+    {
+        // Base cycle count for Format I instructions
+        uint baseCycles = 1;
+
+        // Add cycles for source addressing mode
+        uint sourceCycles = _sourceAddressingMode switch
+        {
+            AddressingMode.Register => 0,
+            AddressingMode.Indexed => 3,
+            AddressingMode.Indirect => 2,
+            AddressingMode.IndirectAutoIncrement => 2,
+            AddressingMode.Immediate => 0,
+            AddressingMode.Absolute => 3,
+            AddressingMode.Symbolic => 3,
+            _ => 0
+        };
+
+        // Add cycles for destination addressing mode
+        uint destinationCycles = _destinationAddressingMode switch
+        {
+            AddressingMode.Register => 0,
+            AddressingMode.Indexed => 3,
+            AddressingMode.Indirect => 2,
+            AddressingMode.IndirectAutoIncrement => 2,
+            AddressingMode.Absolute => 3,
+            AddressingMode.Symbolic => 3,
+            _ => 0
+        };
+
+        return baseCycles + sourceCycles + destinationCycles;
     }
 }

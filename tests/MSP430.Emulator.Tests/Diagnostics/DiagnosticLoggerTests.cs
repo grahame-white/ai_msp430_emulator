@@ -9,11 +9,20 @@ namespace MSP430.Emulator.Tests.Diagnostics;
 
 public class DiagnosticLoggerTests
 {
+    /// <summary>
+    /// Creates a console logger with output suppressed for testing purposes.
+    /// </summary>
+    /// <param name="minimumLevel">The minimum log level. Defaults to Debug.</param>
+    /// <returns>A ConsoleLogger with IsOutputSuppressed set to true.</returns>
+    private static ConsoleLogger CreateSuppressedConsoleLogger(LogLevel minimumLevel = LogLevel.Debug)
+    {
+        return new ConsoleLogger { IsOutputSuppressed = true, MinimumLevel = minimumLevel };
+    }
     [Fact]
     public void Constructor_WithValidLogger_ShouldSucceed()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
 
         // Act
         using var diagnosticLogger = new DiagnosticLogger(innerLogger);
@@ -34,7 +43,7 @@ public class DiagnosticLoggerTests
     public void Log_ShouldStoreEntryInBuffer()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         // Act
@@ -51,7 +60,7 @@ public class DiagnosticLoggerTests
     public void Log_WithContext_ShouldStoreContextInBuffer()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
         var context = new { Key = "Value", Number = 42 };
 
@@ -69,7 +78,7 @@ public class DiagnosticLoggerTests
     public void Log_BeyondMaxEntries_ShouldMaintainBufferSize()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 3);
 
         // Act
@@ -93,7 +102,7 @@ public class DiagnosticLoggerTests
     public void GetRecentEntries_WithMaxEntries_ShouldLimitResults()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         for (int i = 1; i <= 5; i++)
@@ -115,7 +124,7 @@ public class DiagnosticLoggerTests
     public void FormatRecentEntries_ShouldReturnFormattedString()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         diagnosticLogger.Info("Test message 1");
@@ -139,7 +148,7 @@ public class DiagnosticLoggerTests
     public void FormatRecentEntries_WithNoEntries_ShouldReturnNoEntriesMessage()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         // Act
@@ -153,7 +162,7 @@ public class DiagnosticLoggerTests
     public void AllLogMethods_ShouldCreateCorrectEntries()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         // Act
@@ -178,7 +187,7 @@ public class DiagnosticLoggerTests
     public void MinimumLevel_ShouldReflectInnerLogger()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { MinimumLevel = LogLevel.Warning, IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger(LogLevel.Warning);
         using var diagnosticLogger = new DiagnosticLogger(innerLogger);
 
         // Act & Assert
@@ -192,7 +201,7 @@ public class DiagnosticLoggerTests
     public void IsEnabled_ShouldReflectInnerLogger()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { MinimumLevel = LogLevel.Warning, IsOutputSuppressed = true };
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger(LogLevel.Warning);
         using var diagnosticLogger = new DiagnosticLogger(innerLogger);
 
         // Act & Assert

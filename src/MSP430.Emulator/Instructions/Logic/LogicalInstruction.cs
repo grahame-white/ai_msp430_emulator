@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 
 namespace MSP430.Emulator.Instructions.Logic;
@@ -114,6 +115,10 @@ public abstract class LogicalInstruction : Instruction, IExecutableInstruction
             _sourceAddressingMode == AddressingMode.Symbolic ||
             _sourceAddressingMode == AddressingMode.Indexed)
         {
+            if (extensionIndex >= extensionWords.Length)
+            {
+                throw new ArgumentException($"Extension words array does not contain enough elements. Expected at least {extensionIndex + 1}, but got {extensionWords.Length}.", nameof(extensionWords));
+            }
             sourceExtensionWord = extensionWords[extensionIndex++];
         }
 
@@ -122,6 +127,10 @@ public abstract class LogicalInstruction : Instruction, IExecutableInstruction
             _destinationAddressingMode == AddressingMode.Symbolic ||
             _destinationAddressingMode == AddressingMode.Indexed)
         {
+            if (extensionIndex >= extensionWords.Length)
+            {
+                throw new ArgumentException($"Extension words array does not contain enough elements. Expected at least {extensionIndex + 1}, but got {extensionWords.Length}.", nameof(extensionWords));
+            }
             destinationExtensionWord = extensionWords[extensionIndex];
         }
 

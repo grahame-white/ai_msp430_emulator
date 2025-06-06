@@ -74,7 +74,7 @@ public class DecInstructionTests
     [InlineData(RegisterName.R5, AddressingMode.Indexed, "X(R5)")]
     [InlineData(RegisterName.R3, AddressingMode.Indirect, "@R3")]
     [InlineData(RegisterName.R4, AddressingMode.IndirectAutoIncrement, "@R4+")]
-    [InlineData(RegisterName.R2, AddressingMode.Absolute, "&ADDR")]
+    [InlineData(RegisterName.R4, AddressingMode.Absolute, "&ADDR")]
     [InlineData(RegisterName.R0, AddressingMode.Symbolic, "ADDR")]
     public void ToString_VariousAddressingModes_FormatsCorrectly(
         RegisterName register,
@@ -153,9 +153,8 @@ public class DecInstructionTests
     }
 
     [Theory]
-    [InlineData(RegisterName.R4, RegisterName.R2)]
-    [InlineData(RegisterName.R7, RegisterName.R3)]
     [InlineData(RegisterName.R4, RegisterName.R5)]
+    [InlineData(RegisterName.R7, RegisterName.R3)]
     [InlineData(RegisterName.R6, RegisterName.R7)]
     public void Properties_DifferentRegisters_ReturnCorrectDestination(RegisterName expected, RegisterName other)
     {

@@ -22,7 +22,7 @@ public class SubInstructionTests
         var instruction = new SubInstruction(
             0x8123,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             AddressingMode.Register,
             AddressingMode.Register,
             false);
@@ -34,7 +34,7 @@ public class SubInstructionTests
         Assert.Equal("SUB", instruction.Mnemonic);
         Assert.False(instruction.IsByteOperation);
         Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-        Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
+        Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
         Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
     }
@@ -76,7 +76,7 @@ public class SubInstructionTests
         var instruction = new SubInstruction(
             0x8000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             sourceMode,
             destMode,
             false);
@@ -91,7 +91,7 @@ public class SubInstructionTests
     [InlineData(RegisterName.R3, AddressingMode.Indirect, "@R3")]
     [InlineData(RegisterName.R4, AddressingMode.IndirectAutoIncrement, "@R4+")]
     [InlineData(RegisterName.R0, AddressingMode.Immediate, "#N")]
-    [InlineData(RegisterName.R2, AddressingMode.Absolute, "&ADDR")]
+    [InlineData(RegisterName.R4, AddressingMode.Absolute, "&ADDR")]
     [InlineData(RegisterName.R0, AddressingMode.Symbolic, "ADDR")]
     public void ToString_VariousAddressingModes_FormatsCorrectly(
         RegisterName register,
@@ -135,7 +135,7 @@ public class SubInstructionTests
 
     [Theory]
     [InlineData(RegisterName.R0, RegisterName.R1)]
-    [InlineData(RegisterName.R15, RegisterName.R2)]
+    [InlineData(RegisterName.R15, RegisterName.R4)]
     [InlineData(RegisterName.R3, RegisterName.R4)]
     [InlineData(RegisterName.R5, RegisterName.R6)]
     public void Properties_VariousRegisters_ReturnCorrectValues(RegisterName source, RegisterName dest)
@@ -168,7 +168,7 @@ public class SubInstructionTests
         var instruction = new SubInstruction(
             0x8000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             mode,
             AddressingMode.Register,
             false);
@@ -184,12 +184,12 @@ public class SubInstructionTests
         // Arrange
         (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234); // Source
-        registerFile.WriteRegister(RegisterName.R2, 0x5678); // Destination
+        registerFile.WriteRegister(RegisterName.R4, 0x5678); // Destination
 
         var instruction = new SubInstruction(
-            0x8012,
+            0x8014,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             AddressingMode.Register,
             AddressingMode.Register,
             false);
@@ -198,7 +198,7 @@ public class SubInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, []);
 
         // Assert
-        Assert.Equal(0x4444, registerFile.ReadRegister(RegisterName.R2)); // 0x5678 - 0x1234 = 0x4444
+        Assert.Equal(0x4444, registerFile.ReadRegister(RegisterName.R4)); // 0x5678 - 0x1234 = 0x4444
         Assert.Equal(1u, cycles);
         Assert.False(registerFile.StatusRegister.Zero);
         Assert.False(registerFile.StatusRegister.Negative);
@@ -212,12 +212,12 @@ public class SubInstructionTests
         // Arrange
         (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x5678); // Source (larger)
-        registerFile.WriteRegister(RegisterName.R2, 0x1234); // Destination (smaller)
+        registerFile.WriteRegister(RegisterName.R4, 0x1234); // Destination (smaller)
 
         var instruction = new SubInstruction(
-            0x8012,
+            0x8014,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             AddressingMode.Register,
             AddressingMode.Register,
             false);
@@ -226,7 +226,7 @@ public class SubInstructionTests
         instruction.Execute(registerFile, memory, []);
 
         // Assert
-        Assert.Equal(0xBBBC, registerFile.ReadRegister(RegisterName.R2)); // 0x1234 - 0x5678 = 0xBBBC (with carry)
+        Assert.Equal(0xBBBC, registerFile.ReadRegister(RegisterName.R4)); // 0x1234 - 0x5678 = 0xBBBC (with carry)
         Assert.True(registerFile.StatusRegister.Carry);
         Assert.True(registerFile.StatusRegister.Negative);
     }
@@ -237,12 +237,12 @@ public class SubInstructionTests
         // Arrange
         (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234);
-        registerFile.WriteRegister(RegisterName.R2, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
 
         var instruction = new SubInstruction(
-            0x8012,
+            0x8014,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             AddressingMode.Register,
             AddressingMode.Register,
             false);
@@ -251,7 +251,7 @@ public class SubInstructionTests
         instruction.Execute(registerFile, memory, []);
 
         // Assert
-        Assert.Equal(0x0000, registerFile.ReadRegister(RegisterName.R2)); // 0x1234 - 0x1234 = 0x0000
+        Assert.Equal(0x0000, registerFile.ReadRegister(RegisterName.R4)); // 0x1234 - 0x1234 = 0x0000
         Assert.True(registerFile.StatusRegister.Zero);
         Assert.False(registerFile.StatusRegister.Carry);
     }
@@ -262,12 +262,12 @@ public class SubInstructionTests
         // Arrange
         (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x8000); // Negative source
-        registerFile.WriteRegister(RegisterName.R2, 0x7FFF); // Positive destination
+        registerFile.WriteRegister(RegisterName.R4, 0x7FFF); // Positive destination
 
         var instruction = new SubInstruction(
-            0x8012,
+            0x8014,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             AddressingMode.Register,
             AddressingMode.Register,
             false);
@@ -276,7 +276,7 @@ public class SubInstructionTests
         instruction.Execute(registerFile, memory, []);
 
         // Assert
-        Assert.Equal(0xFFFF, registerFile.ReadRegister(RegisterName.R2)); // 0x7FFF - 0x8000 = 0xFFFF
+        Assert.Equal(0xFFFF, registerFile.ReadRegister(RegisterName.R4)); // 0x7FFF - 0x8000 = 0xFFFF
         Assert.True(registerFile.StatusRegister.Overflow);
         Assert.True(registerFile.StatusRegister.Negative);
     }
@@ -287,12 +287,12 @@ public class SubInstructionTests
         // Arrange
         (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234);
-        registerFile.WriteRegister(RegisterName.R2, 0x5678);
+        registerFile.WriteRegister(RegisterName.R4, 0x5678);
 
         var instruction = new SubInstruction(
             0x8552,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             AddressingMode.Register,
             AddressingMode.Register,
             true);
@@ -301,7 +301,7 @@ public class SubInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, []);
 
         // Assert
-        Assert.Equal(0x5644, registerFile.ReadRegister(RegisterName.R2)); // High byte unchanged, low byte: 0x78 - 0x34 = 0x44
+        Assert.Equal(0x5644, registerFile.ReadRegister(RegisterName.R4)); // High byte unchanged, low byte: 0x78 - 0x34 = 0x44
         Assert.Equal(1u, cycles);
     }
 
@@ -318,12 +318,12 @@ public class SubInstructionTests
         // Arrange
         (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1000);
-        registerFile.WriteRegister(RegisterName.R2, 0x2000);
+        registerFile.WriteRegister(RegisterName.R4, 0x2000);
 
         var instruction = new SubInstruction(
             0x8000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             sourceMode,
             destMode,
             false);

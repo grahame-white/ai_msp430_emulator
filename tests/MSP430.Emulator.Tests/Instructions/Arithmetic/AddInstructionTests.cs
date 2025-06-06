@@ -23,7 +23,7 @@ public class AddInstructionTests
         var instruction = new AddInstruction(
             0x5123,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             AddressingMode.Register,
             AddressingMode.Register,
             false);
@@ -35,7 +35,7 @@ public class AddInstructionTests
         Assert.Equal("ADD", instruction.Mnemonic);
         Assert.False(instruction.IsByteOperation);
         Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-        Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
+        Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
         Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
     }
@@ -77,7 +77,7 @@ public class AddInstructionTests
         var instruction = new AddInstruction(
             0x5000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             sourceMode,
             destMode,
             false);
@@ -92,7 +92,7 @@ public class AddInstructionTests
     [InlineData(RegisterName.R3, AddressingMode.Indirect, "@R3")]
     [InlineData(RegisterName.R4, AddressingMode.IndirectAutoIncrement, "@R4+")]
     [InlineData(RegisterName.R0, AddressingMode.Immediate, "#N")]
-    [InlineData(RegisterName.R2, AddressingMode.Absolute, "&ADDR")]
+    [InlineData(RegisterName.R4, AddressingMode.Absolute, "&ADDR")]
     [InlineData(RegisterName.R0, AddressingMode.Symbolic, "ADDR")]
     public void ToString_VariousAddressingModes_FormatsCorrectly(
         RegisterName register,
@@ -136,7 +136,7 @@ public class AddInstructionTests
 
     [Theory]
     [InlineData(RegisterName.R0, RegisterName.R1)]
-    [InlineData(RegisterName.R15, RegisterName.R2)]
+    [InlineData(RegisterName.R15, RegisterName.R4)]
     [InlineData(RegisterName.R3, RegisterName.R4)]
     [InlineData(RegisterName.R5, RegisterName.R6)]
     public void Properties_VariousRegisters_ReturnCorrectValues(RegisterName source, RegisterName dest)
@@ -169,7 +169,7 @@ public class AddInstructionTests
         var instruction = new AddInstruction(
             0x5000,
             RegisterName.R1,
-            RegisterName.R2,
+            RegisterName.R4,
             mode,
             AddressingMode.Register,
             false);

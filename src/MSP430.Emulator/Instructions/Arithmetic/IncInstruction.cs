@@ -13,9 +13,9 @@ namespace MSP430.Emulator.Instructions.Arithmetic;
 /// Flags affected: N, Z, C, V
 /// 
 /// References:
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131), Section 5.3.2: "INC - Increment" - Instruction format and operation
-/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.3.1: "Format I Instructions" - Instruction encoding
-/// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131, January 2023), Section 5.3.2: "INC - Increment" - Instruction format and operation
+/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, May 2021), Section 4.3.1: "Format I Instructions" - Instruction encoding
+/// - MSP430FR2355 Datasheet (SLAS847G, December 2019), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
 /// </summary>
 public class IncInstruction : Instruction, IExecutableInstruction
 {
@@ -122,7 +122,7 @@ public class IncInstruction : Instruction, IExecutableInstruction
             // For byte operations, mask to 8 bits
             result &= 0xFF;
             carry = (currentValue & 0xFF) == 0xFF; // Carry if incrementing 0xFF
-            overflow = (currentValue & 0x7F) == 0x7F; // Overflow if incrementing 0x7F (127)
+            overflow = (currentValue & 0xFF) == 0x7F; // Overflow if incrementing 0x7F (127)
         }
         else
         {

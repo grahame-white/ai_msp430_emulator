@@ -17,7 +17,7 @@ public class MemorySystemIntegrationTests
     {
         // Arrange
         var memoryMap = new MemoryMap();
-        var logger = new ConsoleLogger { MinimumLevel = LogLevel.Warning };
+        var logger = new ConsoleLogger { MinimumLevel = LogLevel.Warning, RedirectErrorsToStdout = true };
         var validator = new MemoryAccessValidator(memoryMap, logger);
 
         // Act & Assert - Test each memory region

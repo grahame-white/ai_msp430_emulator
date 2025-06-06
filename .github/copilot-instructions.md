@@ -89,7 +89,7 @@ Git hooks are automatically configured during setup to catch issues before commi
 - Each file must contain exactly one type (class, interface, enum, struct, delegate)
 - Filename must match the type name exactly
 - Interface files must be prefixed with 'I'
-- Minimum test coverage: 80%
+- Minimum test coverage: 80% line coverage, 70% branch coverage
 - **Avoid `dynamic` keyword**: Use statically typed alternatives (method overloads, generics, or explicit types) to maintain type safety and performance
 
 ### File Organization Rules

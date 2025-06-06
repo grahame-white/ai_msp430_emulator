@@ -4,30 +4,25 @@
   
   <!-- CodeQL-inspired rules for the specific issues mentioned in the comment -->
   
-  <!-- Issue #1: Generic catch clauses -->
+  <!-- Consolidated rules for Microsoft.CodeAnalysis.CSharp analyzer -->
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <!-- Issue #1: Generic catch clauses -->
     <Rule Id="CA1031" Action="Warning" /> <!-- Do not catch general exception types -->
-  </Rules>
-  
-  <!-- Issue #3: IDisposable patterns -->
-  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    
+    <!-- Issue #2: Path operations - note that there's no specific analyzer rule for Path.Combine vs Path.Join -->
+    <!-- This would need to be caught through custom code review or additional tooling -->
+    
+    <!-- Issue #3: IDisposable patterns -->
     <Rule Id="CA2000" Action="Warning" /> <!-- Dispose objects before losing scope -->
     <Rule Id="CA1063" Action="Info" />    <!-- Implement IDisposable correctly -->
     <Rule Id="CA2213" Action="Info" />    <!-- Disposable fields should be disposed -->
-  </Rules>
-  
-  <!-- Issue #2: Path operations - note that there's no specific analyzer rule for Path.Combine vs Path.Join -->
-  <!-- This would need to be caught through custom code review or additional tooling -->
-  
-  <!-- Keep other important security and reliability rules as info -->
-  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    
+    <!-- Keep other important security and reliability rules as info -->
     <Rule Id="CA5394" Action="Info" />    <!-- Do not use insecure randomness -->
     <Rule Id="CA5359" Action="Info" />    <!-- Do not disable certificate validation -->
     <Rule Id="CA2227" Action="Info" />    <!-- Collection properties should be read only -->
-  </Rules>
-  
-  <!-- Disable noisy rules that aren't related to the CodeQL issues -->
-  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    
+    <!-- Disable noisy rules that aren't related to the CodeQL issues -->
     <Rule Id="CA1805" Action="None" />    <!-- Member is explicitly initialized to its default value -->
     <Rule Id="CA1024" Action="None" />    <!-- Use properties where appropriate -->
     <Rule Id="CA1822" Action="None" />    <!-- Member can be marked as static -->

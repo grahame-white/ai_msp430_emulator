@@ -339,9 +339,9 @@ public class MemoryController : IMemoryController
             MemoryRegion.Ram => Ram.ReadByte(context.Address),
             MemoryRegion.Flash => Flash.ReadByte(context.Address),
             MemoryRegion.InformationMemory => InformationMemory.ReadByte(context.Address),
-            MemoryRegion.SpecialFunctionRegisters => (byte)HandlePeripheralRead(context.Address, isWord: false),
-            MemoryRegion.Peripherals8Bit => (byte)HandlePeripheralRead(context.Address, isWord: false),
-            MemoryRegion.Peripherals16Bit => (byte)HandlePeripheralRead(context.Address, isWord: false),
+            MemoryRegion.SpecialFunctionRegisters => HandlePeripheralReadByte(context.Address),
+            MemoryRegion.Peripherals8Bit => HandlePeripheralReadByte(context.Address),
+            MemoryRegion.Peripherals16Bit => HandlePeripheralReadByte(context.Address),
             _ => throw new MemoryAccessException(context.Address, context.AccessType, $"Reading from region {region.Region} is not supported")
         };
     }
@@ -359,9 +359,9 @@ public class MemoryController : IMemoryController
             MemoryRegion.Ram => Ram.ReadWord(context.Address),
             MemoryRegion.Flash => Flash.ReadWord(context.Address),
             MemoryRegion.InformationMemory => InformationMemory.ReadWord(context.Address),
-            MemoryRegion.SpecialFunctionRegisters => (ushort)HandlePeripheralRead(context.Address, isWord: true),
-            MemoryRegion.Peripherals8Bit => (ushort)HandlePeripheralRead(context.Address, isWord: true),
-            MemoryRegion.Peripherals16Bit => (ushort)HandlePeripheralRead(context.Address, isWord: true),
+            MemoryRegion.SpecialFunctionRegisters => HandlePeripheralReadWord(context.Address),
+            MemoryRegion.Peripherals8Bit => HandlePeripheralReadWord(context.Address),
+            MemoryRegion.Peripherals16Bit => HandlePeripheralReadWord(context.Address),
             _ => throw new MemoryAccessException(context.Address, context.AccessType, $"Reading from region {region.Region} is not supported")
         };
     }
@@ -385,11 +385,11 @@ public class MemoryController : IMemoryController
             case MemoryRegion.InformationMemory:
                 return InformationMemory.WriteByte(context.Address, value);
             case MemoryRegion.SpecialFunctionRegisters:
-                return HandlePeripheralWrite(context.Address, value, isWord: false);
+                return HandlePeripheralWriteByte(context.Address, value);
             case MemoryRegion.Peripherals8Bit:
-                return HandlePeripheralWrite(context.Address, value, isWord: false);
+                return HandlePeripheralWriteByte(context.Address, value);
             case MemoryRegion.Peripherals16Bit:
-                return HandlePeripheralWrite(context.Address, value, isWord: false);
+                return HandlePeripheralWriteByte(context.Address, value);
             default:
                 throw new MemoryAccessException(context.Address, context.AccessType, $"Writing to region {region.Region} is not supported");
         }
@@ -414,11 +414,11 @@ public class MemoryController : IMemoryController
             case MemoryRegion.InformationMemory:
                 return InformationMemory.WriteWord(context.Address, value);
             case MemoryRegion.SpecialFunctionRegisters:
-                return HandlePeripheralWrite(context.Address, value, isWord: true);
+                return HandlePeripheralWriteWord(context.Address, value);
             case MemoryRegion.Peripherals8Bit:
-                return HandlePeripheralWrite(context.Address, value, isWord: true);
+                return HandlePeripheralWriteWord(context.Address, value);
             case MemoryRegion.Peripherals16Bit:
-                return HandlePeripheralWrite(context.Address, value, isWord: true);
+                return HandlePeripheralWriteWord(context.Address, value);
             default:
                 throw new MemoryAccessException(context.Address, context.AccessType, $"Writing to region {region.Region} is not supported");
         }
@@ -476,34 +476,63 @@ public class MemoryController : IMemoryController
     }
 
     /// <summary>
-    /// Handles peripheral read operations.
+    /// Handles peripheral byte read operations.
     /// This is a placeholder for memory-mapped peripheral support.
     /// </summary>
     /// <param name="address">The peripheral address.</param>
-    /// <param name="isWord">True for word access, false for byte access.</param>
-    /// <returns>The value read from the peripheral.</returns>
-    private dynamic HandlePeripheralRead(ushort address, bool isWord)
+    /// <returns>The byte value read from the peripheral.</returns>
+    private byte HandlePeripheralReadByte(ushort address)
     {
         // Placeholder implementation for memory-mapped peripherals
         // In a full implementation, this would route to specific peripheral controllers
-        _logger?.Warning($"Peripheral read not implemented: Address=0x{address:X4}, IsWord={isWord}");
+        _logger?.Warning($"Peripheral byte read not implemented: Address=0x{address:X4}");
 
-        return isWord ? (ushort)0x0000 : (byte)0x00; // Return default value for unimplemented peripherals
+        return 0x00; // Return default value for unimplemented peripherals
     }
 
     /// <summary>
-    /// Handles peripheral write operations.
+    /// Handles peripheral word read operations.
     /// This is a placeholder for memory-mapped peripheral support.
     /// </summary>
     /// <param name="address">The peripheral address.</param>
-    /// <param name="value">The value to write.</param>
-    /// <param name="isWord">True for word access, false for byte access.</param>
-    /// <returns>True if the write was successful.</returns>
-    private bool HandlePeripheralWrite(ushort address, dynamic value, bool isWord)
+    /// <returns>The word value read from the peripheral.</returns>
+    private ushort HandlePeripheralReadWord(ushort address)
     {
         // Placeholder implementation for memory-mapped peripherals
         // In a full implementation, this would route to specific peripheral controllers
-        _logger?.Warning($"Peripheral write not implemented: Address=0x{address:X4}, Value=0x{value:X}, IsWord={isWord}");
+        _logger?.Warning($"Peripheral word read not implemented: Address=0x{address:X4}");
+
+        return 0x0000; // Return default value for unimplemented peripherals
+    }
+
+    /// <summary>
+    /// Handles peripheral byte write operations.
+    /// This is a placeholder for memory-mapped peripheral support.
+    /// </summary>
+    /// <param name="address">The peripheral address.</param>
+    /// <param name="value">The byte value to write.</param>
+    /// <returns>True if the write was successful.</returns>
+    private bool HandlePeripheralWriteByte(ushort address, byte value)
+    {
+        // Placeholder implementation for memory-mapped peripherals
+        // In a full implementation, this would route to specific peripheral controllers
+        _logger?.Warning($"Peripheral byte write not implemented: Address=0x{address:X4}, Value=0x{value:X2}");
+
+        return true; // Return success for unimplemented peripherals
+    }
+
+    /// <summary>
+    /// Handles peripheral word write operations.
+    /// This is a placeholder for memory-mapped peripheral support.
+    /// </summary>
+    /// <param name="address">The peripheral address.</param>
+    /// <param name="value">The word value to write.</param>
+    /// <returns>True if the write was successful.</returns>
+    private bool HandlePeripheralWriteWord(ushort address, ushort value)
+    {
+        // Placeholder implementation for memory-mapped peripherals
+        // In a full implementation, this would route to specific peripheral controllers
+        _logger?.Warning($"Peripheral word write not implemented: Address=0x{address:X4}, Value=0x{value:X4}");
 
         return true; // Return success for unimplemented peripherals
     }

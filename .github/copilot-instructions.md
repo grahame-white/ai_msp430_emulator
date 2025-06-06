@@ -90,6 +90,7 @@ Git hooks are automatically configured during setup to catch issues before commi
 - Filename must match the type name exactly
 - Interface files must be prefixed with 'I'
 - Minimum test coverage: 80%
+- **Avoid `dynamic` keyword**: Use statically typed alternatives (method overloads, generics, or explicit types) to maintain type safety and performance
 
 ### File Organization Rules
 **Each file must contain exactly one type** (class, interface, enum, struct, delegate, etc.):
@@ -142,6 +143,7 @@ When review comments highlight problems, consider if tools could have caught the
 - **Documentation issues**: Should be caught by markdownlint-cli2
 - **YAML syntax errors**: Should be caught by yamllint and actionlint
 - **Test failures**: Should be caught by `./script/test` before committing
+- **Dynamic keyword usage**: Should be caught during code review (no automated rule available)
 
 ### Quick Commands Reference
 

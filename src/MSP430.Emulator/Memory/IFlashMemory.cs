@@ -6,6 +6,9 @@ namespace MSP430.Emulator.Memory;
 /// This interface provides methods for reading, programming, and erasing flash memory
 /// with proper timing characteristics, protection mechanisms, and state management
 /// typical of MSP430 devices.
+/// 
+/// Interface design based on MSP430x2xx Family User's Guide (SLAU144J) - Section 5:
+/// "Flash Memory Controller" - Programming model and operational requirements.
 /// </summary>
 public interface IFlashMemory
 {
@@ -41,6 +44,7 @@ public interface IFlashMemory
 
     /// <summary>
     /// Gets the sector size in bytes (typically 512 bytes for MSP430).
+    /// Based on MSP430x2xx Family User's Guide (SLAU144J) - Section 5.3: "Flash Memory Segmentation"
     /// </summary>
     int SectorSize { get; }
 

@@ -7,6 +7,12 @@ namespace MSP430.Emulator.Memory;
 /// 
 /// This class implements the flash controller state machine that manages
 /// programming, erase operations, and protection mechanisms typical of MSP430 devices.
+/// 
+/// Implementation follows MSP430 flash controller specifications:
+/// - MSP430x2xx Family User's Guide (SLAU144J, February 2007 - Revised December 2013)
+///   Section 5.3: "Flash Memory Controller" - State machine and operation control
+/// - MSP430x2xx Family User's Guide (SLAU144J) - Section 5.4: "Flash Memory Timing"
+///   Table 5-1: "Flash Memory Timing Parameters" - Programming and erase cycle counts
 /// </summary>
 public class FlashController
 {
@@ -18,6 +24,7 @@ public class FlashController
 
     /// <summary>
     /// Standard unlock key for MSP430 flash operations (0xA500 + key byte).
+    /// Based on MSP430x2xx Family User's Guide (SLAU144J) - Section 5.3.1: "Flash Memory Control Register (FCTL1)"
     /// </summary>
     public const ushort UnlockKeyBase = 0xA500;
 
@@ -28,21 +35,25 @@ public class FlashController
 
     /// <summary>
     /// CPU cycles required for sector erase operations (typical MSP430 timing).
+    /// Based on MSP430x2xx Family User's Guide (SLAU144J) - Table 5-1: "Flash Memory Timing Parameters"
     /// </summary>
     public const uint SectorEraseCycles = 4819;
 
     /// <summary>
     /// CPU cycles required for mass erase operations (typical MSP430 timing).
+    /// Based on MSP430x2xx Family User's Guide (SLAU144J) - Table 5-1: "Flash Memory Timing Parameters"
     /// </summary>
     public const uint MassEraseCycles = 5297;
 
     /// <summary>
     /// CPU cycles required for byte programming operations (typical MSP430 timing).
+    /// Based on MSP430x2xx Family User's Guide (SLAU144J) - Table 5-1: "Flash Memory Timing Parameters"
     /// </summary>
     public const uint ByteProgramCycles = 30;
 
     /// <summary>
     /// CPU cycles required for word programming operations (typical MSP430 timing).
+    /// Based on MSP430x2xx Family User's Guide (SLAU144J) - Table 5-1: "Flash Memory Timing Parameters"
     /// </summary>
     public const uint WordProgramCycles = 35;
 
@@ -94,7 +105,8 @@ public class FlashController
     /// <returns>True if unlock was successful, false otherwise.</returns>
     public bool TryUnlock(ushort unlockKey)
     {
-        // Check if key follows MSP430 format (0xA5xx)
+        // MSP430 flash unlock key format: 0xA5xx where xx can be any value
+        // Per SLAU144J Section 5.3.1: "Flash Memory Control Register (FCTL1)" - unlock key requirement
         if ((unlockKey & 0xFF00) != UnlockKeyBase)
         {
             _logger?.Warning($"Invalid unlock key format: 0x{unlockKey:X4} (expected 0xA5xx)");

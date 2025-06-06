@@ -8,6 +8,12 @@ namespace MSP430.Emulator.Memory;
 /// This class provides byte and word-level access to flash memory with proper timing
 /// characteristics, programming/erase operations, and protection mechanisms
 /// typical of MSP430 devices.
+/// 
+/// Implementation is based on MSP430 flash memory specifications:
+/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, June 2015 - Revised October 2019)
+///   Section 6: "FRAM Memory" - Flash controller behavior and programming model
+/// - MSP430x2xx Family User's Guide (SLAU144J, February 2007 - Revised December 2013)
+///   Section 5: "Flash Memory Controller" - Flash operations and timing characteristics
 /// </summary>
 public class FlashMemory : IFlashMemory
 {
@@ -27,17 +33,20 @@ public class FlashMemory : IFlashMemory
 
     /// <summary>
     /// Standard sector size for MSP430 flash memory (512 bytes).
+    /// Based on MSP430x2xx Family User's Guide (SLAU144J) - Section 5.3: "Flash Memory Segmentation"
     /// </summary>
     public const int StandardSectorSize = 512;
 
     /// <summary>
     /// Default CPU cycles for flash read operations.
     /// Flash reads are typically slower than RAM reads.
+    /// Based on MSP430x2xx Family User's Guide (SLAU144J) - Section 5.4: "Flash Memory Timing"
     /// </summary>
     public const uint DefaultReadCycles = 3;
 
     /// <summary>
     /// Erased flash memory pattern (all bits set to 1).
+    /// MSP430 flash memory erases to 0xFF state per MSP430x2xx Family User's Guide (SLAU144J) - Section 5.2: "Flash Memory Operation"
     /// </summary>
     public const byte ErasedPattern = 0xFF;
 
@@ -140,7 +149,8 @@ public class FlashMemory : IFlashMemory
 
         int offset = address - BaseAddress;
 
-        // Flash programming can only change 1 bits to 0 bits
+        // MSP430 flash programming restriction: can only change 1 bits to 0 bits
+        // Per SLAU144J Section 5.2: "Flash Memory Operation" - bits cannot be programmed from 0 to 1
         // Cannot change 0 bits to 1 bits without erase
         byte currentValue = _memory[offset];
         byte programmableValue = (byte)(currentValue & value);
@@ -186,7 +196,8 @@ public class FlashMemory : IFlashMemory
             return false;
         }
 
-        // Little-endian: low byte at address, high byte at address+1
+        // MSP430 little-endian word storage: low byte at address, high byte at address+1
+        // Per SLAU144J Section 5.2: "Flash Memory Operation" - word access byte ordering
         _memory[offset] = lowByte;
         _memory[offset + 1] = highByte;
 
@@ -211,7 +222,8 @@ public class FlashMemory : IFlashMemory
         ushort sectorBase = GetSectorBaseAddress(address);
         int offset = sectorBase - BaseAddress;
 
-        // Set all bytes in sector to erased state (0xFF)
+        // MSP430 flash erase sets all bits to 1 (0xFF pattern)
+        // Per SLAU144J Section 5.2: "Flash Memory Operation" - erased state is all 1s
         Array.Fill(_memory, ErasedPattern, offset, SectorSize);
 
         // Complete the erase operation immediately

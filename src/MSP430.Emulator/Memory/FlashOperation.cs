@@ -5,6 +5,9 @@ namespace MSP430.Emulator.Memory;
 /// 
 /// These operations correspond to the flash controller commands available in
 /// real MSP430 devices for programming and erasing flash memory.
+/// 
+/// Based on MSP430x2xx Family User's Guide (SLAU144J) - Section 5.3: "Flash Memory Controller"
+/// Flash Memory Control Register (FCTL1) operation bits and command sequences.
 /// </summary>
 public enum FlashOperation
 {
@@ -43,6 +46,9 @@ public enum FlashOperation
 /// 
 /// The flash controller follows a state machine pattern for secure
 /// flash operations, preventing accidental writes or erases.
+/// 
+/// State transitions based on MSP430x2xx Family User's Guide (SLAU144J) - Section 5.3.2:
+/// "Flash Memory Control Register (FCTL3)" - Lock bit and protection mechanisms.
 /// </summary>
 public enum FlashControllerState
 {

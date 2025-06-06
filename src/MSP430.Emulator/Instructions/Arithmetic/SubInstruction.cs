@@ -42,4 +42,41 @@ public class SubInstruction : ArithmeticInstruction
     /// Gets the base mnemonic for the SUB instruction.
     /// </summary>
     protected override string BaseMnemonic => "SUB";
+
+    /// <summary>
+    /// Performs the SUB operation: dst = dst - src
+    /// </summary>
+    /// <param name="sourceValue">The source operand value.</param>
+    /// <param name="destinationValue">The destination operand value.</param>
+    /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <returns>A tuple containing the result, carry flag, and overflow flag.</returns>
+    protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation)
+    {
+        // Subtraction is performed as: dst = dst + (~src) + 1, which is dst + twos_complement(src)
+        uint result = (uint)destinationValue - (uint)sourceValue;
+
+        bool carry, overflow;
+        if (isByteOperation)
+        {
+            // For byte operations, check carry and overflow at 8-bit boundaries
+            carry = sourceValue > destinationValue; // No borrow means carry is set
+
+            // Overflow occurs when subtracting a negative from positive gives negative, or positive from negative gives positive
+            byte src8 = (byte)(sourceValue & 0xFF);
+            byte dest8 = (byte)(destinationValue & 0xFF);
+            byte result8 = (byte)(result & 0xFF);
+
+            overflow = ((src8 & 0x80) != (dest8 & 0x80)) && ((dest8 & 0x80) != (result8 & 0x80));
+        }
+        else
+        {
+            // For word operations, check carry and overflow at 16-bit boundaries
+            carry = sourceValue > destinationValue; // No borrow means carry is set
+
+            // Overflow occurs when subtracting a negative from positive gives negative, or positive from negative gives positive
+            overflow = ((sourceValue & 0x8000) != (destinationValue & 0x8000)) && ((destinationValue & 0x8000) != (result & 0x8000));
+        }
+
+        return ((ushort)result, carry, overflow);
+    }
 }

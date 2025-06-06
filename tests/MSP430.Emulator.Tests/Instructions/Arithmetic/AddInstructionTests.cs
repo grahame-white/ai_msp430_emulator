@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Arithmetic;
@@ -9,6 +10,12 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 /// </summary>
 public class AddInstructionTests
 {
+    private static (IRegisterFile registerFile, byte[] memory) CreateTestEnvironment()
+    {
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        return (registerFile, memory);
+    }
     [Fact]
     public void Constructor_ValidParameters_CreatesInstruction()
     {
@@ -170,5 +177,120 @@ public class AddInstructionTests
         // Act & Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_AddsValues()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x1234); // Use R5 instead of R1 to avoid alignment
+        registerFile.WriteRegister(RegisterName.R4, 0x5678); // Use R4 to avoid status register conflicts
+
+        var instruction = new AddInstruction(
+            0x5054,
+            RegisterName.R5, // Use R5 instead of R1
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal((ushort)0x68AC, registerFile.ReadRegister(RegisterName.R4)); // 0x1234 + 0x5678 = 0x68AC
+        Assert.Equal(1u, cycles);
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_Addition_SetsCarryFlag()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // Use R5 instead of R1 to avoid alignment
+        registerFile.WriteRegister(RegisterName.R4, 0x0001);
+
+        var instruction = new AddInstruction(
+            0x5054,
+            RegisterName.R5, // Use R5 instead of R1
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal((ushort)0x0000, registerFile.ReadRegister(RegisterName.R4)); // 0xFFFF + 0x0001 = 0x10000 (truncated to 0x0000)
+        Assert.True(registerFile.StatusRegister.Carry);
+        Assert.True(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_PositiveOverflow_SetsOverflowFlag()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x7FFF); // Maximum positive signed 16-bit value
+        registerFile.WriteRegister(RegisterName.R4, 0x0001);
+
+        var instruction = new AddInstruction(
+            0x5054,
+            RegisterName.R5, // Use R5 instead of R1
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal((ushort)0x8000, registerFile.ReadRegister(RegisterName.R4)); // 0x7FFF + 0x0001 = 0x8000 (negative)
+        Assert.True(registerFile.StatusRegister.Overflow);
+        Assert.True(registerFile.StatusRegister.Negative);
+    }
+
+    // Cycle count tests for key addressing mode combinations
+    [Theory]
+    [InlineData(AddressingMode.Register, AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 4u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 7u)]
+    public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.WriteRegister(RegisterName.R4, 0x2000);
+
+        var instruction = new AddInstruction(
+            0x5000,
+            RegisterName.R1,
+            RegisterName.R4,
+            sourceMode,
+            destMode,
+            false);
+
+        // Set up extension words for modes that need them
+        ushort[] extensionWords = sourceMode switch
+        {
+            AddressingMode.Immediate when destMode == AddressingMode.Register => [0x0100],
+            AddressingMode.Absolute when destMode == AddressingMode.Absolute => [0x1000, 0x2000],
+            AddressingMode.Register when destMode == AddressingMode.Indexed => [0x0010],
+            _ => []
+        };
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(expectedCycles, cycles);
     }
 }

@@ -9,6 +9,12 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 /// </summary>
 public class SubInstructionTests
 {
+    private static (IRegisterFile registerFile, byte[] memory) CreateTestEnvironment()
+    {
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        return (registerFile, memory);
+    }
     [Fact]
     public void Constructor_ValidParameters_CreatesInstruction()
     {
@@ -170,5 +176,173 @@ public class SubInstructionTests
         // Act & Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_SubtractsValues()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234); // Source
+        registerFile.WriteRegister(RegisterName.R2, 0x5678); // Destination
+
+        var instruction = new SubInstruction(
+            0x8012,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x4444, registerFile.ReadRegister(RegisterName.R2)); // 0x5678 - 0x1234 = 0x4444
+        Assert.Equal(1u, cycles);
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_SubtractLargerFromSmaller_SetsCarryFlag()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x5678); // Source (larger)
+        registerFile.WriteRegister(RegisterName.R2, 0x1234); // Destination (smaller)
+
+        var instruction = new SubInstruction(
+            0x8012,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0xBBBC, registerFile.ReadRegister(RegisterName.R2)); // 0x1234 - 0x5678 = 0xBBBC (with carry)
+        Assert.True(registerFile.StatusRegister.Carry);
+        Assert.True(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_SubtractToZero_SetsZeroFlag()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+        registerFile.WriteRegister(RegisterName.R2, 0x1234);
+
+        var instruction = new SubInstruction(
+            0x8012,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x0000, registerFile.ReadRegister(RegisterName.R2)); // 0x1234 - 0x1234 = 0x0000
+        Assert.True(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_OverflowCondition_SetsOverflowFlag()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x8000); // Negative source
+        registerFile.WriteRegister(RegisterName.R2, 0x7FFF); // Positive destination
+
+        var instruction = new SubInstruction(
+            0x8012,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0xFFFF, registerFile.ReadRegister(RegisterName.R2)); // 0x7FFF - 0x8000 = 0xFFFF
+        Assert.True(registerFile.StatusRegister.Overflow);
+        Assert.True(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_SubtractsLowBytesOnly()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+        registerFile.WriteRegister(RegisterName.R2, 0x5678);
+
+        var instruction = new SubInstruction(
+            0x8552,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x5644, registerFile.ReadRegister(RegisterName.R2)); // High byte unchanged, low byte: 0x78 - 0x34 = 0x44
+        Assert.Equal(1u, cycles);
+    }
+
+    // Cycle count tests
+    [Theory]
+    [InlineData(AddressingMode.Register, AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 4u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indirect, 3u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 7u)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 7u)]
+    public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.WriteRegister(RegisterName.R2, 0x2000);
+
+        var instruction = new SubInstruction(
+            0x8000,
+            RegisterName.R1,
+            RegisterName.R2,
+            sourceMode,
+            destMode,
+            false);
+
+        // Set up extension words for modes that need them
+        ushort[] extensionWords = sourceMode switch
+        {
+            AddressingMode.Immediate when destMode == AddressingMode.Register => [0x0100],
+            AddressingMode.Absolute when destMode == AddressingMode.Absolute => [0x1000, 0x2000],
+            AddressingMode.Symbolic when destMode == AddressingMode.Symbolic => [0x1000, 0x2000],
+            AddressingMode.Register when destMode == AddressingMode.Indexed => [0x0010],
+            AddressingMode.Register when destMode == AddressingMode.Indirect => [],
+            _ => []
+        };
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(expectedCycles, cycles);
     }
 }

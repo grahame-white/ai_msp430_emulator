@@ -9,6 +9,12 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 /// </summary>
 public class CmpInstructionTests
 {
+    private static (IRegisterFile registerFile, byte[] memory) CreateTestEnvironment()
+    {
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        return (registerFile, memory);
+    }
     [Fact]
     public void Constructor_ValidParameters_CreatesInstruction()
     {
@@ -170,5 +176,201 @@ public class CmpInstructionTests
         // Act & Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+    }
+
+    [Fact]
+    public void Execute_EqualValues_SetsZeroFlag()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234); // Source
+        registerFile.WriteRegister(RegisterName.R2, 0x1234); // Destination
+
+        var instruction = new CmpInstruction(
+            0x9012,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R2)); // Destination unchanged
+        Assert.Equal(1u, cycles);
+        Assert.True(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_SourceGreaterThanDestination_SetsCarryFlag()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x5678); // Source (larger)
+        registerFile.WriteRegister(RegisterName.R2, 0x1234); // Destination (smaller)
+
+        var instruction = new CmpInstruction(
+            0x9012,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R2)); // Destination unchanged
+        Assert.True(registerFile.StatusRegister.Carry);
+        Assert.True(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_DestinationNotModified()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.WriteRegister(RegisterName.R2, 0x2000);
+
+        var instruction = new CmpInstruction(
+            0x9012,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x2000, registerFile.ReadRegister(RegisterName.R2)); // Destination completely unchanged
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_OverflowCondition_SetsOverflowFlag()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x8000); // Negative source
+        registerFile.WriteRegister(RegisterName.R2, 0x7FFF); // Positive destination
+
+        var instruction = new CmpInstruction(
+            0x9012,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x7FFF, registerFile.ReadRegister(RegisterName.R2)); // Destination unchanged
+        Assert.True(registerFile.StatusRegister.Overflow);
+        Assert.True(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_ComparesLowBytesOnly()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+        registerFile.WriteRegister(RegisterName.R2, 0x5634); // Same low byte as source
+
+        var instruction = new CmpInstruction(
+            0x9552,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, []);
+
+        // Assert
+        Assert.Equal(0x5634, registerFile.ReadRegister(RegisterName.R2)); // Destination unchanged
+        Assert.Equal(1u, cycles);
+        Assert.True(registerFile.StatusRegister.Zero); // Low bytes are equal (0x34)
+    }
+
+    [Fact]
+    public void Execute_ImmediateComparison_ComparesWithImmediateValue()
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+
+        var instruction = new CmpInstruction(
+            0x9031,
+            RegisterName.R0, // Using R0 for immediate addressing
+            RegisterName.R1,
+            AddressingMode.Immediate,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = [0x1234]; // Immediate value
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R1)); // Destination unchanged
+        Assert.Equal(1u, cycles);
+        Assert.True(registerFile.StatusRegister.Zero); // Values are equal
+    }
+
+    // Cycle count tests
+    [Theory]
+    [InlineData(AddressingMode.Register, AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 4u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indirect, 3u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 7u)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 7u)]
+    public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
+    {
+        // Arrange
+        (IRegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.WriteRegister(RegisterName.R2, 0x2000);
+
+        var instruction = new CmpInstruction(
+            0x9000,
+            RegisterName.R1,
+            RegisterName.R2,
+            sourceMode,
+            destMode,
+            false);
+
+        // Set up extension words for modes that need them
+        ushort[] extensionWords = sourceMode switch
+        {
+            AddressingMode.Immediate when destMode == AddressingMode.Register => [0x0100],
+            AddressingMode.Absolute when destMode == AddressingMode.Absolute => [0x1000, 0x2000],
+            AddressingMode.Symbolic when destMode == AddressingMode.Symbolic => [0x1000, 0x2000],
+            AddressingMode.Register when destMode == AddressingMode.Indexed => [0x0010],
+            AddressingMode.Register when destMode == AddressingMode.Indirect => [],
+            _ => []
+        };
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(expectedCycles, cycles);
     }
 }

@@ -16,6 +16,12 @@ public class ConsoleLogger : ILogger
     /// </summary>
     public bool RedirectErrorsToStdout { get; set; } = false;
 
+    /// <summary>
+    /// Gets or sets whether to suppress all console output.
+    /// This is useful in CI environments where log content may be interpreted as CI failures.
+    /// </summary>
+    public bool SuppressOutput { get; set; } = false;
+
     /// <inheritdoc/>
     public void Log(LogLevel level, string message)
     {
@@ -26,6 +32,12 @@ public class ConsoleLogger : ILogger
     public virtual void Log(LogLevel level, string message, object? context)
     {
         if (!IsEnabled(level))
+        {
+            return;
+        }
+
+        // If output is suppressed (e.g., in CI environments), skip console output entirely
+        if (SuppressOutput)
         {
             return;
         }

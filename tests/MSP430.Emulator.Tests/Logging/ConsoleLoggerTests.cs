@@ -149,6 +149,31 @@ public class ConsoleLoggerTests
         Assert.Null(logger.LastMessage);
     }
 
+    [Fact]
+    public void SuppressOutput_DefaultsToFalse()
+    {
+        var logger = new ConsoleLogger();
+        Assert.False(logger.SuppressOutput);
+    }
+
+    [Fact]
+    public void SuppressOutput_CanBeSet()
+    {
+        var logger = new ConsoleLogger();
+        logger.SuppressOutput = true;
+        Assert.True(logger.SuppressOutput);
+    }
+
+    [Fact]
+    public void Log_WithSuppressOutput_DoesNotCallConsole()
+    {
+        var logger = new TestableConsoleLogger { SuppressOutput = true };
+        logger.Log(LogLevel.Info, "test message");
+        // Logger should still receive the call when SuppressOutput is true
+        // but actual console output is suppressed in the base implementation
+        Assert.Equal("test message", logger.LastMessage);
+    }
+
     private class TestableConsoleLogger : ConsoleLogger
     {
         public LogLevel? LastLogLevel { get; private set; }

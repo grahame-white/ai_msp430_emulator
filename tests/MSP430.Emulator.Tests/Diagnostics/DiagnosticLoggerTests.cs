@@ -13,7 +13,7 @@ public class DiagnosticLoggerTests
     public void Constructor_WithValidLogger_ShouldSucceed()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { SuppressOutput = true };
 
         // Act
         using var diagnosticLogger = new DiagnosticLogger(innerLogger);
@@ -34,7 +34,7 @@ public class DiagnosticLoggerTests
     public void Log_ShouldStoreEntryInBuffer()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         // Act
@@ -51,7 +51,7 @@ public class DiagnosticLoggerTests
     public void Log_WithContext_ShouldStoreContextInBuffer()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
         var context = new { Key = "Value", Number = 42 };
 
@@ -69,7 +69,7 @@ public class DiagnosticLoggerTests
     public void Log_BeyondMaxEntries_ShouldMaintainBufferSize()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 3);
 
         // Act
@@ -93,7 +93,7 @@ public class DiagnosticLoggerTests
     public void GetRecentEntries_WithMaxEntries_ShouldLimitResults()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         for (int i = 1; i <= 5; i++)
@@ -115,7 +115,7 @@ public class DiagnosticLoggerTests
     public void FormatRecentEntries_ShouldReturnFormattedString()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         diagnosticLogger.Info("Test message 1");
@@ -139,7 +139,7 @@ public class DiagnosticLoggerTests
     public void FormatRecentEntries_WithNoEntries_ShouldReturnNoEntriesMessage()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         // Act
@@ -153,7 +153,7 @@ public class DiagnosticLoggerTests
     public void AllLogMethods_ShouldCreateCorrectEntries()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
 
         // Act
@@ -178,7 +178,7 @@ public class DiagnosticLoggerTests
     public void MinimumLevel_ShouldReflectInnerLogger()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { MinimumLevel = LogLevel.Warning, RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { MinimumLevel = LogLevel.Warning, SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger);
 
         // Act & Assert
@@ -192,7 +192,7 @@ public class DiagnosticLoggerTests
     public void IsEnabled_ShouldReflectInnerLogger()
     {
         // Arrange
-        var innerLogger = new ConsoleLogger { MinimumLevel = LogLevel.Warning, RedirectErrorsToStdout = true };
+        var innerLogger = new ConsoleLogger { MinimumLevel = LogLevel.Warning, SuppressOutput = true };
         using var diagnosticLogger = new DiagnosticLogger(innerLogger);
 
         // Act & Assert

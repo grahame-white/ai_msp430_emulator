@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Arithmetic;
@@ -60,7 +61,7 @@ public class IncInstructionTests
         // Arrange
         var instruction = new IncInstruction(
             0xA000,
-            RegisterName.R1,
+            RegisterName.R4,
             destMode,
             false);
 
@@ -113,7 +114,7 @@ public class IncInstructionTests
 
     [Theory]
     [InlineData(RegisterName.R0)]
-    [InlineData(RegisterName.R15)]
+    [InlineData(RegisterName.R7)]
     [InlineData(RegisterName.R3)]
     [InlineData(RegisterName.R5)]
     public void Properties_VariousRegisters_ReturnCorrectValues(RegisterName dest)
@@ -142,7 +143,7 @@ public class IncInstructionTests
         // Arrange
         var instruction = new IncInstruction(
             0xA000,
-            RegisterName.R1,
+            RegisterName.R4,
             mode,
             false);
 
@@ -152,8 +153,8 @@ public class IncInstructionTests
     }
 
     [Theory]
-    [InlineData(RegisterName.R1, RegisterName.R2)]
-    [InlineData(RegisterName.R15, RegisterName.R3)]
+    [InlineData(RegisterName.R4, RegisterName.R2)]
+    [InlineData(RegisterName.R8, RegisterName.R3)]
     [InlineData(RegisterName.R4, RegisterName.R5)]
     [InlineData(RegisterName.R6, RegisterName.R7)]
     public void Properties_DifferentRegisters_ReturnCorrectDestination(RegisterName expected, RegisterName other)
@@ -176,7 +177,7 @@ public class IncInstructionTests
         // Arrange
         var instruction = new IncInstruction(
             0xA000,
-            RegisterName.R1,
+            RegisterName.R4,
             AddressingMode.Register,
             false);
 
@@ -190,11 +191,238 @@ public class IncInstructionTests
         // Arrange
         var instruction = new IncInstruction(
             0xA000,
-            RegisterName.R1,
+            RegisterName.R4,
             AddressingMode.Register,
             false);
 
         // Act & Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+    }
+
+    [Fact]
+    public void Execute_RegisterMode_IncrementsValueAndUpdatesFlags()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        registerFile.WriteRegister(RegisterName.R5, 0x1234);
+
+        var instruction = new IncInstruction(
+            0xA505,
+            RegisterName.R5,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal((ushort)0x1235, registerFile.ReadRegister(RegisterName.R5));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+        Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_RegisterMode_ByteOperation_IncrementsLowByteOnly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        registerFile.WriteRegister(RegisterName.R3, 0xAB34);
+
+        var instruction = new IncInstruction(
+            0xA543,
+            RegisterName.R3,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal((ushort)0xAB35, registerFile.ReadRegister(RegisterName.R3));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+        Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_ZeroValue_SetsZeroFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
+
+        var instruction = new IncInstruction(
+            0xA505,
+            RegisterName.R5,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal((ushort)0x0000, registerFile.ReadRegister(RegisterName.R5));
+        Assert.True(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.True(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_ByteOverflow_SetsCarryFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        registerFile.WriteRegister(RegisterName.R4, 0x12FF);
+
+        var instruction = new IncInstruction(
+            0xA544,
+            RegisterName.R4,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal((ushort)0x1200, registerFile.ReadRegister(RegisterName.R4));
+        Assert.True(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.True(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_PositiveOverflow_SetsOverflowFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        registerFile.WriteRegister(RegisterName.R4, 0x7FFF); // Max positive value
+
+        var instruction = new IncInstruction(
+            0xA504,
+            RegisterName.R4,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal((ushort)0x8000, registerFile.ReadRegister(RegisterName.R4));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.True(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.True(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_BytePositiveOverflow_SetsOverflowFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        registerFile.WriteRegister(RegisterName.R6, 0x127F); // Max positive byte value
+
+        var instruction = new IncInstruction(
+            0xA546,
+            RegisterName.R6,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal((ushort)0x1280, registerFile.ReadRegister(RegisterName.R6));
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.True(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.True(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_AbsoluteMode_IncrementsMemoryValue()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        ushort[] extensionWords = new ushort[] { 0x0200 }; // Absolute address
+
+        // Set up memory with initial value
+        memory[0x0200] = 0x34;
+        memory[0x0201] = 0x12; // 0x1234 in little-endian
+
+        var instruction = new IncInstruction(
+            0xA582,
+            RegisterName.R2, // Register not used in absolute mode
+            AddressingMode.Absolute,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x35, memory[0x0200]);
+        Assert.Equal(0x12, memory[0x0201]); // Should be 0x1235 in little-endian
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+        Assert.Equal(4u, cycles);
+    }
+
+    [Fact]
+    public void Execute_IndirectMode_IncrementsMemoryValueAtRegisterAddress()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7
+        memory[0x0300] = 0x99;
+        memory[0x0301] = 0x88; // 0x8899 in little-endian
+
+        var instruction = new IncInstruction(
+            0xA527,
+            RegisterName.R7,
+            AddressingMode.Indirect,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x9A, memory[0x0300]);
+        Assert.Equal(0x88, memory[0x0301]); // Should be 0x889A in little-endian
+        Assert.Equal((ushort)0x0300, registerFile.ReadRegister(RegisterName.R7)); // R7 unchanged
+        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.True(registerFile.StatusRegister.Negative);
+        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.False(registerFile.StatusRegister.Overflow);
+        Assert.Equal(3u, cycles);
     }
 }

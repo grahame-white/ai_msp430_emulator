@@ -17,7 +17,7 @@ namespace MSP430.Emulator.Instructions.Arithmetic;
 /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.3.1: "Format I Instructions" - Instruction encoding
 /// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
 /// </summary>
-public class IncInstruction : Instruction
+public class IncInstruction : Instruction, IExecutableInstruction
 {
     /// <summary>
     /// Initializes a new instance of the IncInstruction class.
@@ -87,26 +87,82 @@ public class IncInstruction : Instruction
     /// <returns>A string describing the instruction in assembly format.</returns>
     public override string ToString()
     {
-        return $"{Mnemonic} {FormatOperand(_destinationRegister, _destinationAddressingMode)}";
+        return $"{Mnemonic} {InstructionHelpers.FormatOperand(_destinationRegister, _destinationAddressingMode)}";
     }
 
     /// <summary>
-    /// Formats an operand for display based on its register and addressing mode.
+    /// Executes the INC instruction on the specified CPU state.
+    /// Increments the destination operand by 1 and updates the N, Z, C, V flags.
     /// </summary>
-    /// <param name="register">The register.</param>
-    /// <param name="addressingMode">The addressing mode.</param>
-    /// <returns>A formatted string representation of the operand.</returns>
-    private static string FormatOperand(RegisterName register, AddressingMode addressingMode)
+    /// <param name="registerFile">The CPU register file for reading/writing registers.</param>
+    /// <param name="memory">The system memory for reading/writing memory locations.</param>
+    /// <param name="extensionWords">Extension words associated with this instruction.</param>
+    /// <returns>The number of CPU cycles consumed by this instruction.</returns>
+    public uint Execute(IRegisterFile registerFile, byte[] memory, ushort[] extensionWords)
     {
-        return addressingMode switch
+        // Get extension word if needed
+        ushort extensionWord = ExtensionWordCount > 0 ? extensionWords[0] : (ushort)0;
+
+        // Read current value from destination
+        ushort currentValue = InstructionHelpers.ReadOperand(
+            _destinationRegister,
+            _destinationAddressingMode,
+            _isByteOperation,
+            registerFile,
+            memory,
+            extensionWord);
+
+        // Perform increment operation
+        ushort result = (ushort)(currentValue + 1);
+
+        // Calculate flags
+        bool carry, overflow;
+        if (_isByteOperation)
         {
-            AddressingMode.Register => $"R{(int)register}",
-            AddressingMode.Indexed => $"X(R{(int)register})",
-            AddressingMode.Indirect => $"@R{(int)register}",
-            AddressingMode.IndirectAutoIncrement => $"@R{(int)register}+",
-            AddressingMode.Absolute => "&ADDR",
-            AddressingMode.Symbolic => "ADDR",
-            _ => "?"
+            // For byte operations, mask to 8 bits
+            result &= 0xFF;
+            carry = (currentValue & 0xFF) == 0xFF; // Carry if incrementing 0xFF
+            overflow = (currentValue & 0x7F) == 0x7F; // Overflow if incrementing 0x7F (127)
+        }
+        else
+        {
+            // For word operations
+            carry = currentValue == 0xFFFF; // Carry if incrementing 0xFFFF
+            overflow = currentValue == 0x7FFF; // Overflow if incrementing 0x7FFF (32767)
+        }
+
+        // Update flags
+        InstructionHelpers.UpdateFlags(result, carry, overflow, _isByteOperation, registerFile.StatusRegister);
+
+        // Write result back to destination
+        InstructionHelpers.WriteOperand(
+            _destinationRegister,
+            _destinationAddressingMode,
+            _isByteOperation,
+            result,
+            registerFile,
+            memory,
+            extensionWord);
+
+        // Return cycle count (varies by addressing mode, but typically 1-4 cycles)
+        return GetCycleCount();
+    }
+
+    /// <summary>
+    /// Gets the number of CPU cycles required for this instruction based on addressing mode.
+    /// </summary>
+    /// <returns>The number of CPU cycles.</returns>
+    private uint GetCycleCount()
+    {
+        return _destinationAddressingMode switch
+        {
+            AddressingMode.Register => 1,
+            AddressingMode.Indexed => 4,
+            AddressingMode.Indirect => 3,
+            AddressingMode.IndirectAutoIncrement => 3,
+            AddressingMode.Absolute => 4,
+            AddressingMode.Symbolic => 4,
+            _ => 1
         };
     }
 }

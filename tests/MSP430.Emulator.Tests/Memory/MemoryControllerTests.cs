@@ -201,49 +201,49 @@ public class MemoryControllerTests
     public void ReadByte_WithContext_NullContext_ThrowsArgumentNullException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _controller.ReadByte((MemoryAccessContext)null!));
+        Assert.Throws<ArgumentNullException>(() => _controller.ReadByte(null!));
     }
 
     [Fact]
     public void ReadWord_WithContext_NullContext_ThrowsArgumentNullException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _controller.ReadWord((MemoryAccessContext)null!));
+        Assert.Throws<ArgumentNullException>(() => _controller.ReadWord(null!));
     }
 
     [Fact]
     public void WriteByte_WithContext_NullContext_ThrowsArgumentNullException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _controller.WriteByte((MemoryAccessContext)null!, 0x42));
+        Assert.Throws<ArgumentNullException>(() => _controller.WriteByte(null!, 0x42));
     }
 
     [Fact]
     public void WriteWord_WithContext_NullContext_ThrowsArgumentNullException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _controller.WriteWord((MemoryAccessContext)null!, 0x1234));
+        Assert.Throws<ArgumentNullException>(() => _controller.WriteWord(null!, 0x1234));
     }
 
     [Fact]
     public void FetchInstruction_WithContext_NullContext_ThrowsArgumentNullException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _controller.FetchInstruction((MemoryAccessContext)null!));
+        Assert.Throws<ArgumentNullException>(() => _controller.FetchInstruction(null!));
     }
 
     [Fact]
     public void ValidateAccess_NullContext_ThrowsArgumentNullException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _controller.ValidateAccess((MemoryAccessContext)null!));
+        Assert.Throws<ArgumentNullException>(() => _controller.ValidateAccess(null!));
     }
 
     [Fact]
     public void GetAccessCycles_NullContext_ThrowsArgumentNullException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _controller.GetAccessCycles((MemoryAccessContext)null!));
+        Assert.Throws<ArgumentNullException>(() => _controller.GetAccessCycles(null!));
     }
 
     [Fact]

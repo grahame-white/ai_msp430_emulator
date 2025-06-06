@@ -488,14 +488,7 @@ public class MemoryController : IMemoryController
         // In a full implementation, this would route to specific peripheral controllers
         _logger?.Warning($"Peripheral read not implemented: Address=0x{address:X4}, IsWord={isWord}");
 
-        if (isWord)
-        {
-            return (ushort)0x0000; // Return default value for unimplemented peripherals
-        }
-        else
-        {
-            return (byte)0x00; // Return default value for unimplemented peripherals
-        }
+        return isWord ? (ushort)0x0000 : (byte)0x00; // Return default value for unimplemented peripherals
     }
 
     /// <summary>

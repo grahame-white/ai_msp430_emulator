@@ -122,9 +122,11 @@ class GitHubIssuesUpdater {
                     }
                 } else if (!task.completed && issue.state === 'closed') {
                     if (this.dryRun) {
-                        console.log(`[DRY RUN] Would reopen issue #${issue.number}`);
+                        console.log(
+                            `[DRY RUN] Would create impact analysis for issue #${issue.number}`
+                        );
                     } else {
-                        await this.reopenIssue(issue.number);
+                        await this.createImpactAnalysis(issue, task);
                     }
                 }
             } catch (error) {
@@ -370,6 +372,64 @@ class GitHubIssuesUpdater {
         }
 
         return labels;
+    }
+
+    /**
+     * Create an impact analysis issue for a completed task that became incomplete
+     */
+    async createImpactAnalysis(originalIssue, task) {
+        const analysisTitle = `Impact Analysis: Task ${task.id} Requirements Changed`;
+        const analysisBody = this.generateImpactAnalysisBody(originalIssue, task);
+        const analysisLabels = [
+            'impact-analysis',
+            'requirements-change',
+            ...this.generateLabels(task)
+        ];
+
+        // Create the impact analysis issue
+        const result = await this.octokit.rest.issues.create({
+            owner: this.owner,
+            repo: this.repo,
+            title: analysisTitle,
+            body: analysisBody,
+            labels: analysisLabels
+        });
+
+        // Add explanatory comment to original issue without reopening
+        await this.octokit.rest.issues.createComment({
+            owner: this.owner,
+            repo: this.repo,
+            issue_number: originalIssue.number,
+            body: `📊 **Requirements Changed**: Task ${task.id} has changed from completed to incomplete.\n\nAn impact analysis has been created: #${result.data.number}\n\n*This issue remains closed. Please review the impact analysis for next steps.*`
+        });
+
+        return result.data;
+    }
+
+    /**
+     * Generate body content for impact analysis issue
+     */
+    generateImpactAnalysisBody(originalIssue, task) {
+        let body = `🔄 **Task Requirements Changed**\n\n`;
+        body += `**Original Issue**: #${originalIssue.number} - ${originalIssue.title}\n`;
+        body += `**Task**: ${task.id}\n`;
+        body += `**Status Change**: Completed → Incomplete\n\n`;
+
+        body += `## Issue Summary\n\n`;
+        body += `Task ${task.id} was previously marked as completed and issue #${originalIssue.number} was closed. `;
+        body += `However, the task requirements have changed and the task is now marked as incomplete.\n\n`;
+
+        body += `## Impact Analysis Checklist\n\n`;
+        body += `- [ ] Review changes to task requirements in MSP430_EMULATOR_TASKS.md\n`;
+        body += `- [ ] Assess if previous implementation is still valid\n`;
+        body += `- [ ] Determine if additional work is needed\n`;
+        body += `- [ ] Update or create new issue if work is required\n`;
+        body += `- [ ] Close this impact analysis once review is complete\n\n`;
+
+        body += `## Current Task Details\n\n`;
+        body += this.generateIssueBody(task);
+
+        return body;
     }
 
     /**

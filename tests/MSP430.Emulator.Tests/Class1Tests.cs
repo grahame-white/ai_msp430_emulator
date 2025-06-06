@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace MSP430.Emulator.Tests;
 
 public class Class1Tests

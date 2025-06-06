@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+
 namespace MSP430.Emulator.Logging;
 
 /// <summary>

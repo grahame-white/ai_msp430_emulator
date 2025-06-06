@@ -1,3 +1,5 @@
+using System;
+
 namespace MSP430.Emulator.Logging;
 
 /// <summary>

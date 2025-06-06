@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Tests.Logging;

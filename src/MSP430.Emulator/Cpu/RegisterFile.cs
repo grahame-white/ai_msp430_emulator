@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Cpu;

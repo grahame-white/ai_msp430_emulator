@@ -83,32 +83,7 @@ public class AndInstruction : Instruction
     /// <summary>
     /// Gets the number of additional words required by this instruction.
     /// </summary>
-    public override int ExtensionWordCount
-    {
-        get
-        {
-            int count = 0;
-
-            // Source operand extension words
-            if (_sourceAddressingMode == AddressingMode.Immediate ||
-                _sourceAddressingMode == AddressingMode.Absolute ||
-                _sourceAddressingMode == AddressingMode.Symbolic ||
-                _sourceAddressingMode == AddressingMode.Indexed)
-            {
-                count++;
-            }
-
-            // Destination operand extension words
-            if (_destinationAddressingMode == AddressingMode.Absolute ||
-                _destinationAddressingMode == AddressingMode.Symbolic ||
-                _destinationAddressingMode == AddressingMode.Indexed)
-            {
-                count++;
-            }
-
-            return count;
-        }
-    }
+    public override int ExtensionWordCount => InstructionHelpers.CalculateFormatIExtensionWordCount(_sourceAddressingMode, _destinationAddressingMode);
 
     /// <summary>
     /// Returns a string representation of the AND instruction.
@@ -116,27 +91,6 @@ public class AndInstruction : Instruction
     /// <returns>A string describing the instruction in assembly format.</returns>
     public override string ToString()
     {
-        return $"{Mnemonic} {FormatOperand(_sourceRegister, _sourceAddressingMode)}, {FormatOperand(_destinationRegister, _destinationAddressingMode)}";
-    }
-
-    /// <summary>
-    /// Formats an operand for display based on its register and addressing mode.
-    /// </summary>
-    /// <param name="register">The register.</param>
-    /// <param name="addressingMode">The addressing mode.</param>
-    /// <returns>A formatted string representation of the operand.</returns>
-    private static string FormatOperand(RegisterName register, AddressingMode addressingMode)
-    {
-        return addressingMode switch
-        {
-            AddressingMode.Register => $"R{(int)register}",
-            AddressingMode.Indexed => $"X(R{(int)register})",
-            AddressingMode.Indirect => $"@R{(int)register}",
-            AddressingMode.IndirectAutoIncrement => $"@R{(int)register}+",
-            AddressingMode.Immediate => "#N",
-            AddressingMode.Absolute => "&ADDR",
-            AddressingMode.Symbolic => "ADDR",
-            _ => "?"
-        };
+        return $"{Mnemonic} {InstructionHelpers.FormatOperand(_sourceRegister, _sourceAddressingMode)}, {InstructionHelpers.FormatOperand(_destinationRegister, _destinationAddressingMode)}";
     }
 }

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Logging;

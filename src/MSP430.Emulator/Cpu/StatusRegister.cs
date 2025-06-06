@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace MSP430.Emulator.Cpu;
 
 /// <summary>

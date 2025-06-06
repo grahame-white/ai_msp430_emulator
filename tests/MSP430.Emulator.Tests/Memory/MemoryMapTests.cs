@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;

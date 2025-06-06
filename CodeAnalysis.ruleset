@@ -9,6 +9,9 @@
     <!-- Issue #1: Generic catch clauses -->
     <Rule Id="CA1031" Action="Warning" /> <!-- Do not catch general exception types -->
     
+    <!-- Issue #2: Path operations - note that there's no specific analyzer rule for Path.Combine vs Path.Join -->
+    <!-- This would need to be caught through custom code review or additional tooling -->
+    
     <!-- Issue #3: IDisposable patterns -->
     <Rule Id="CA2000" Action="Warning" /> <!-- Dispose objects before losing scope -->
     <Rule Id="CA1063" Action="Info" />    <!-- Implement IDisposable correctly -->
@@ -32,7 +35,4 @@
     <Rule Id="CA1816" Action="None" />    <!-- GC.SuppressFinalize for tests -->
     <Rule Id="CA1852" Action="None" />    <!-- Type can be sealed -->
   </Rules>
-  
-  <!-- Issue #2: Path operations - note that there's no specific analyzer rule for Path.Combine vs Path.Join -->
-  <!-- This would need to be caught through custom code review or additional tooling -->
 </RuleSet>

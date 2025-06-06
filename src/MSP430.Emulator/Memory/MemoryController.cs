@@ -339,9 +339,9 @@ public class MemoryController : IMemoryController
             MemoryRegion.Ram => Ram.ReadByte(context.Address),
             MemoryRegion.Flash => Flash.ReadByte(context.Address),
             MemoryRegion.InformationMemory => InformationMemory.ReadByte(context.Address),
-            MemoryRegion.SpecialFunctionRegisters => HandlePeripheralRead(context.Address, isWord: false),
-            MemoryRegion.Peripherals8Bit => HandlePeripheralRead(context.Address, isWord: false),
-            MemoryRegion.Peripherals16Bit => HandlePeripheralRead(context.Address, isWord: false),
+            MemoryRegion.SpecialFunctionRegisters => (byte)HandlePeripheralRead(context.Address, isWord: false),
+            MemoryRegion.Peripherals8Bit => (byte)HandlePeripheralRead(context.Address, isWord: false),
+            MemoryRegion.Peripherals16Bit => (byte)HandlePeripheralRead(context.Address, isWord: false),
             _ => throw new MemoryAccessException(context.Address, context.AccessType, $"Reading from region {region.Region} is not supported")
         };
     }
@@ -359,9 +359,9 @@ public class MemoryController : IMemoryController
             MemoryRegion.Ram => Ram.ReadWord(context.Address),
             MemoryRegion.Flash => Flash.ReadWord(context.Address),
             MemoryRegion.InformationMemory => InformationMemory.ReadWord(context.Address),
-            MemoryRegion.SpecialFunctionRegisters => HandlePeripheralRead(context.Address, isWord: true),
-            MemoryRegion.Peripherals8Bit => HandlePeripheralRead(context.Address, isWord: true),
-            MemoryRegion.Peripherals16Bit => HandlePeripheralRead(context.Address, isWord: true),
+            MemoryRegion.SpecialFunctionRegisters => (ushort)HandlePeripheralRead(context.Address, isWord: true),
+            MemoryRegion.Peripherals8Bit => (ushort)HandlePeripheralRead(context.Address, isWord: true),
+            MemoryRegion.Peripherals16Bit => (ushort)HandlePeripheralRead(context.Address, isWord: true),
             _ => throw new MemoryAccessException(context.Address, context.AccessType, $"Reading from region {region.Region} is not supported")
         };
     }

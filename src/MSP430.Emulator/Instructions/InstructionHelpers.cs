@@ -33,6 +33,36 @@ public static class InstructionHelpers
     }
 
     /// <summary>
+    /// Calculates the number of extension words required by a Format I instruction.
+    /// </summary>
+    /// <param name="sourceAddressingMode">The source addressing mode.</param>
+    /// <param name="destinationAddressingMode">The destination addressing mode.</param>
+    /// <returns>The number of extension words required (0-2).</returns>
+    public static int CalculateFormatIExtensionWordCount(AddressingMode sourceAddressingMode, AddressingMode destinationAddressingMode)
+    {
+        int count = 0;
+
+        // Source operand extension words
+        if (sourceAddressingMode == AddressingMode.Immediate ||
+            sourceAddressingMode == AddressingMode.Absolute ||
+            sourceAddressingMode == AddressingMode.Symbolic ||
+            sourceAddressingMode == AddressingMode.Indexed)
+        {
+            count++;
+        }
+
+        // Destination operand extension words
+        if (destinationAddressingMode == AddressingMode.Absolute ||
+            destinationAddressingMode == AddressingMode.Symbolic ||
+            destinationAddressingMode == AddressingMode.Indexed)
+        {
+            count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>
     /// Reads an operand value based on the addressing mode.
     /// </summary>
     /// <param name="register">The register used by the addressing mode.</param>
@@ -155,14 +185,7 @@ public static class InstructionHelpers
         statusRegister.Zero = result == 0;
 
         // Negative flag: Set if the sign bit is set
-        if (isByteOperation)
-        {
-            statusRegister.Negative = (result & 0x80) != 0;
-        }
-        else
-        {
-            statusRegister.Negative = (result & 0x8000) != 0;
-        }
+        statusRegister.Negative = (result & (isByteOperation ? 0x80 : 0x8000)) != 0;
 
         // Carry flag
         statusRegister.Carry = carry;
@@ -216,5 +239,24 @@ public static class InstructionHelpers
             memory[address] = (byte)(value & 0xFF);
             memory[address + 1] = (byte)((value >> 8) & 0xFF);
         }
+    }
+
+    /// <summary>
+    /// Gets the number of CPU cycles required for a single-operand instruction based on addressing mode.
+    /// </summary>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <returns>The number of CPU cycles.</returns>
+    public static uint GetSingleOperandCycleCount(AddressingMode addressingMode)
+    {
+        return addressingMode switch
+        {
+            AddressingMode.Register => 1,
+            AddressingMode.Indexed => 4,
+            AddressingMode.Indirect => 3,
+            AddressingMode.IndirectAutoIncrement => 3,
+            AddressingMode.Absolute => 4,
+            AddressingMode.Symbolic => 4,
+            _ => 1
+        };
     }
 }

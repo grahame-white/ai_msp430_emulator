@@ -10,6 +10,18 @@ public class ConsoleLogger : ILogger
     /// <inheritdoc/>
     public LogLevel MinimumLevel { get; set; } = LogLevel.Info;
 
+    /// <summary>
+    /// Gets or sets whether to redirect error-level messages to stdout instead of stderr.
+    /// This is useful in test environments where stderr output may cause CI failures.
+    /// </summary>
+    public bool RedirectErrorsToStdout { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets whether to suppress all console output.
+    /// This is useful in CI environments where log content may be interpreted as CI failures.
+    /// </summary>
+    public bool IsOutputSuppressed { get; set; } = false;
+
     /// <inheritdoc/>
     public void Log(LogLevel level, string message)
     {
@@ -24,15 +36,31 @@ public class ConsoleLogger : ILogger
             return;
         }
 
+        // If output is suppressed (e.g., in CI environments), skip console output entirely
+        if (IsOutputSuppressed)
+        {
+            return;
+        }
+
         string logEntry = LogEntryFormatter.FormatLogEntry(level, message, context);
 
-        // Write to appropriate output stream based on level
+        // Write to appropriate output stream based on level and redirect setting
         if (level >= LogLevel.Error)
         {
-            Console.Error.WriteLine(logEntry);
+            if (RedirectErrorsToStdout)
+            {
+                // Redirect error messages to stdout (useful in CI environments)
+                Console.WriteLine(logEntry);
+            }
+            else
+            {
+                // Write error messages to stderr (default behavior)
+                Console.Error.WriteLine(logEntry);
+            }
         }
         else
         {
+            // Non-error levels always go to stdout
             Console.WriteLine(logEntry);
         }
     }

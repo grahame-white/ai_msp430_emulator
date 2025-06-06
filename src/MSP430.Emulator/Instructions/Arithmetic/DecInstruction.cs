@@ -145,24 +145,6 @@ public class DecInstruction : Instruction, IExecutableInstruction
             extensionWord);
 
         // Return cycle count (varies by addressing mode, but typically 1-4 cycles)
-        return GetCycleCount();
-    }
-
-    /// <summary>
-    /// Gets the number of CPU cycles required for this instruction based on addressing mode.
-    /// </summary>
-    /// <returns>The number of CPU cycles.</returns>
-    private uint GetCycleCount()
-    {
-        return _destinationAddressingMode switch
-        {
-            AddressingMode.Register => 1,
-            AddressingMode.Indexed => 4,
-            AddressingMode.Indirect => 3,
-            AddressingMode.IndirectAutoIncrement => 3,
-            AddressingMode.Absolute => 4,
-            AddressingMode.Symbolic => 4,
-            _ => 1
-        };
+        return InstructionHelpers.GetSingleOperandCycleCount(_destinationAddressingMode);
     }
 }

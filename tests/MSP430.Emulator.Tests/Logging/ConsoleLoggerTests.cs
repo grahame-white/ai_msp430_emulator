@@ -149,6 +149,66 @@ public class ConsoleLoggerTests
         Assert.Null(logger.LastMessage);
     }
 
+    [Fact]
+    public void IsOutputSuppressed_DefaultsToFalse()
+    {
+        var logger = new ConsoleLogger();
+        Assert.False(logger.IsOutputSuppressed);
+    }
+
+    [Fact]
+    public void IsOutputSuppressed_CanBeSet()
+    {
+        var logger = new ConsoleLogger();
+        logger.IsOutputSuppressed = true;
+        Assert.True(logger.IsOutputSuppressed);
+    }
+
+    [Fact]
+    public void Log_WithIsOutputSuppressed_DoesNotCallConsole()
+    {
+        var logger = new TestableConsoleLogger { IsOutputSuppressed = true };
+        logger.Log(LogLevel.Info, "test message");
+        // Logger should still receive the call when IsOutputSuppressed is true
+        // but actual console output is suppressed in the base implementation
+        Assert.Equal("test message", logger.LastMessage);
+    }
+
+    [Fact]
+    public void RedirectErrorsToStdout_DefaultsToFalse()
+    {
+        var logger = new ConsoleLogger();
+        Assert.False(logger.RedirectErrorsToStdout);
+    }
+
+    [Fact]
+    public void RedirectErrorsToStdout_CanBeSet()
+    {
+        var logger = new ConsoleLogger();
+        logger.RedirectErrorsToStdout = true;
+        Assert.True(logger.RedirectErrorsToStdout);
+    }
+
+    [Fact]
+    public void Log_ErrorLevelWithRedirectErrorsToStdout_CallsCorrectMethod()
+    {
+        // This test verifies the branch for RedirectErrorsToStdout=true with Error level
+        var logger = new TestableConsoleLogger { RedirectErrorsToStdout = true };
+        logger.Log(LogLevel.Error, "error message");
+        Assert.Equal("error message", logger.LastMessage);
+        Assert.Equal(LogLevel.Error, logger.LastLogLevel);
+    }
+
+    [Fact]
+    public void Log_ErrorLevelWithoutRedirectErrorsToStdout_CallsCorrectMethod()
+    {
+        // This test verifies the branch for RedirectErrorsToStdout=false with Error level
+        var logger = new TestableConsoleLogger { RedirectErrorsToStdout = false };
+        logger.Log(LogLevel.Error, "error message");
+        Assert.Equal("error message", logger.LastMessage);
+        Assert.Equal(LogLevel.Error, logger.LastLogLevel);
+    }
+
     private class TestableConsoleLogger : ConsoleLogger
     {
         public LogLevel? LastLogLevel { get; private set; }

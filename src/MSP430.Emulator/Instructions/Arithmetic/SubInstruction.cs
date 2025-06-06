@@ -16,7 +16,7 @@ namespace MSP430.Emulator.Instructions.Arithmetic;
 /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.3.1: "Format I Instructions" - Instruction encoding
 /// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
 /// </summary>
-public class SubInstruction : Instruction
+public class SubInstruction : ArithmeticInstruction
 {
     /// <summary>
     /// Initializes a new instance of the SubInstruction class.
@@ -34,108 +34,12 @@ public class SubInstruction : Instruction
         AddressingMode sourceAddressingMode,
         AddressingMode destinationAddressingMode,
         bool isByteOperation)
-        : base(InstructionFormat.FormatI, 0x8, instructionWord)
+        : base(0x8, instructionWord, sourceRegister, destinationRegister, sourceAddressingMode, destinationAddressingMode, isByteOperation)
     {
-        _sourceRegister = sourceRegister;
-        _destinationRegister = destinationRegister;
-        _sourceAddressingMode = sourceAddressingMode;
-        _destinationAddressingMode = destinationAddressingMode;
-        _isByteOperation = isByteOperation;
-    }
-
-    private readonly RegisterName _sourceRegister;
-    private readonly RegisterName _destinationRegister;
-    private readonly AddressingMode _sourceAddressingMode;
-    private readonly AddressingMode _destinationAddressingMode;
-    private readonly bool _isByteOperation;
-
-    /// <summary>
-    /// Gets the mnemonic for the SUB instruction.
-    /// </summary>
-    public override string Mnemonic => _isByteOperation ? "SUB.B" : "SUB";
-
-    /// <summary>
-    /// Gets a value indicating whether this instruction operates on bytes (true) or words (false).
-    /// </summary>
-    public override bool IsByteOperation => _isByteOperation;
-
-    /// <summary>
-    /// Gets the source register for this instruction.
-    /// </summary>
-    public override RegisterName? SourceRegister => _sourceRegister;
-
-    /// <summary>
-    /// Gets the destination register for this instruction.
-    /// </summary>
-    public override RegisterName? DestinationRegister => _destinationRegister;
-
-    /// <summary>
-    /// Gets the source addressing mode for this instruction.
-    /// </summary>
-    public override AddressingMode? SourceAddressingMode => _sourceAddressingMode;
-
-    /// <summary>
-    /// Gets the destination addressing mode for this instruction.
-    /// </summary>
-    public override AddressingMode? DestinationAddressingMode => _destinationAddressingMode;
-
-    /// <summary>
-    /// Gets the number of additional words required by this instruction.
-    /// </summary>
-    public override int ExtensionWordCount
-    {
-        get
-        {
-            int count = 0;
-
-            // Source operand extension words
-            if (_sourceAddressingMode == AddressingMode.Immediate ||
-                _sourceAddressingMode == AddressingMode.Absolute ||
-                _sourceAddressingMode == AddressingMode.Symbolic ||
-                _sourceAddressingMode == AddressingMode.Indexed)
-            {
-                count++;
-            }
-
-            // Destination operand extension words
-            if (_destinationAddressingMode == AddressingMode.Absolute ||
-                _destinationAddressingMode == AddressingMode.Symbolic ||
-                _destinationAddressingMode == AddressingMode.Indexed)
-            {
-                count++;
-            }
-
-            return count;
-        }
     }
 
     /// <summary>
-    /// Returns a string representation of the SUB instruction.
+    /// Gets the base mnemonic for the SUB instruction.
     /// </summary>
-    /// <returns>A string describing the instruction in assembly format.</returns>
-    public override string ToString()
-    {
-        return $"{Mnemonic} {FormatOperand(_sourceRegister, _sourceAddressingMode)}, {FormatOperand(_destinationRegister, _destinationAddressingMode)}";
-    }
-
-    /// <summary>
-    /// Formats an operand for display based on its register and addressing mode.
-    /// </summary>
-    /// <param name="register">The register.</param>
-    /// <param name="addressingMode">The addressing mode.</param>
-    /// <returns>A formatted string representation of the operand.</returns>
-    private static string FormatOperand(RegisterName register, AddressingMode addressingMode)
-    {
-        return addressingMode switch
-        {
-            AddressingMode.Register => $"R{(int)register}",
-            AddressingMode.Indexed => $"X(R{(int)register})",
-            AddressingMode.Indirect => $"@R{(int)register}",
-            AddressingMode.IndirectAutoIncrement => $"@R{(int)register}+",
-            AddressingMode.Immediate => "#N",
-            AddressingMode.Absolute => "&ADDR",
-            AddressingMode.Symbolic => "ADDR",
-            _ => "?"
-        };
-    }
+    protected override string BaseMnemonic => "SUB";
 }

@@ -56,6 +56,8 @@ public class BisInstructionTests
     [InlineData(AddressingMode.Absolute, AddressingMode.Register, 1)]
     [InlineData(AddressingMode.Symbolic, AddressingMode.Register, 1)]
     [InlineData(AddressingMode.Indexed, AddressingMode.Register, 1)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indirect, 0)]
+    [InlineData(AddressingMode.Register, AddressingMode.IndirectAutoIncrement, 0)]
     [InlineData(AddressingMode.Register, AddressingMode.Absolute, 1)]
     [InlineData(AddressingMode.Register, AddressingMode.Symbolic, 1)]
     [InlineData(AddressingMode.Register, AddressingMode.Indexed, 1)]

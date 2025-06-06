@@ -18,7 +18,7 @@ namespace MSP430.Emulator.Instructions.Logic;
 /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.3.1: "Format I Instructions" - Instruction encoding
 /// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
 /// </summary>
-public class BitInstruction : Instruction
+public class BitInstruction : Instruction, IExecutableInstruction
 {
     /// <summary>
     /// Initializes a new instance of the BitInstruction class.
@@ -93,5 +93,115 @@ public class BitInstruction : Instruction
     public override string ToString()
     {
         return $"{Mnemonic} {InstructionHelpers.FormatOperand(_sourceRegister, _sourceAddressingMode)}, {InstructionHelpers.FormatOperand(_destinationRegister, _destinationAddressingMode)}";
+    }
+
+    /// <summary>
+    /// Executes the BIT instruction on the specified CPU state.
+    /// Performs a bitwise AND operation between source and destination operands for testing purposes.
+    /// The result affects the N, Z flags; C and V flags are cleared. The destination operand is not modified.
+    /// </summary>
+    /// <param name="registerFile">The CPU register file for reading/writing registers.</param>
+    /// <param name="memory">The system memory for reading/writing memory locations.</param>
+    /// <param name="extensionWords">Extension words associated with this instruction.</param>
+    /// <returns>The number of CPU cycles consumed by this instruction.</returns>
+    public uint Execute(IRegisterFile registerFile, byte[] memory, ushort[] extensionWords)
+    {
+        // Get extension words for source and destination if needed
+        ushort sourceExtensionWord = 0;
+        ushort destinationExtensionWord = 0;
+        int extensionIndex = 0;
+
+        // Source operand extension word
+        if (_sourceAddressingMode == AddressingMode.Immediate ||
+            _sourceAddressingMode == AddressingMode.Absolute ||
+            _sourceAddressingMode == AddressingMode.Symbolic ||
+            _sourceAddressingMode == AddressingMode.Indexed)
+        {
+            sourceExtensionWord = extensionWords[extensionIndex++];
+        }
+
+        // Destination operand extension word
+        if (_destinationAddressingMode == AddressingMode.Absolute ||
+            _destinationAddressingMode == AddressingMode.Symbolic ||
+            _destinationAddressingMode == AddressingMode.Indexed)
+        {
+            destinationExtensionWord = extensionWords[extensionIndex];
+        }
+
+        // Read source operand
+        ushort sourceValue = InstructionHelpers.ReadOperand(
+            _sourceRegister,
+            _sourceAddressingMode,
+            _isByteOperation,
+            registerFile,
+            memory,
+            sourceExtensionWord);
+
+        // Read destination operand
+        ushort destinationValue = InstructionHelpers.ReadOperand(
+            _destinationRegister,
+            _destinationAddressingMode,
+            _isByteOperation,
+            registerFile,
+            memory,
+            destinationExtensionWord);
+
+        // Perform BIT operation: src & dst (result used only for flags, destination not modified)
+        ushort result = (ushort)(sourceValue & destinationValue);
+
+        // For byte operations, mask to 8 bits
+        if (_isByteOperation)
+        {
+            result &= 0xFF;
+        }
+
+        // Update flags: BIT instruction affects N, Z; clears C, V
+        registerFile.StatusRegister.Zero = result == 0;
+        registerFile.StatusRegister.Negative = _isByteOperation ? (result & 0x80) != 0 : (result & 0x8000) != 0;
+        registerFile.StatusRegister.Carry = false;  // BIT always clears carry
+        registerFile.StatusRegister.Overflow = false;  // BIT always clears overflow
+
+        // Note: BIT instruction does NOT write the result back to the destination
+        // It only affects the flags based on the AND operation result
+
+        // Return cycle count (varies by addressing mode combination)
+        return GetCycleCount();
+    }
+
+    /// <summary>
+    /// Gets the number of CPU cycles required for this instruction based on addressing modes.
+    /// </summary>
+    /// <returns>The number of CPU cycles.</returns>
+    private uint GetCycleCount()
+    {
+        // Base cycle count for Format I instructions
+        uint baseCycles = 1;
+
+        // Add cycles for source addressing mode
+        uint sourceCycles = _sourceAddressingMode switch
+        {
+            AddressingMode.Register => 0,
+            AddressingMode.Indexed => 3,
+            AddressingMode.Indirect => 2,
+            AddressingMode.IndirectAutoIncrement => 2,
+            AddressingMode.Immediate => 0,
+            AddressingMode.Absolute => 3,
+            AddressingMode.Symbolic => 3,
+            _ => 0
+        };
+
+        // Add cycles for destination addressing mode
+        uint destinationCycles = _destinationAddressingMode switch
+        {
+            AddressingMode.Register => 0,
+            AddressingMode.Indexed => 3,
+            AddressingMode.Indirect => 2,
+            AddressingMode.IndirectAutoIncrement => 2,
+            AddressingMode.Absolute => 3,
+            AddressingMode.Symbolic => 3,
+            _ => 0
+        };
+
+        return baseCycles + sourceCycles + destinationCycles;
     }
 }

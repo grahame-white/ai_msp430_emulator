@@ -240,4 +240,23 @@ public static class InstructionHelpers
             memory[address + 1] = (byte)((value >> 8) & 0xFF);
         }
     }
+
+    /// <summary>
+    /// Gets the number of CPU cycles required for a single-operand instruction based on addressing mode.
+    /// </summary>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <returns>The number of CPU cycles.</returns>
+    public static uint GetSingleOperandCycleCount(AddressingMode addressingMode)
+    {
+        return addressingMode switch
+        {
+            AddressingMode.Register => 1,
+            AddressingMode.Indexed => 4,
+            AddressingMode.Indirect => 3,
+            AddressingMode.IndirectAutoIncrement => 3,
+            AddressingMode.Absolute => 4,
+            AddressingMode.Symbolic => 4,
+            _ => 1
+        };
+    }
 }

@@ -8,7 +8,7 @@ namespace MSP430.Emulator.Memory;
 /// Provides non-volatile storage for calibration data and user information
 /// with segment-based organization and write protection controls.
 /// 
-/// Implementation based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 7.2.4:
+/// Implementation based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, June 2013 - Revised July 2019) - Section 7.2.4:
 /// "Information Memory" - Memory organization and protection mechanisms.
 /// </summary>
 public class InformationMemory : IInformationMemory

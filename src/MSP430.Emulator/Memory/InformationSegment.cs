@@ -6,7 +6,7 @@ namespace MSP430.Emulator.Memory;
 /// Information memory contains calibration data and user-specific information
 /// stored in FRAM. Each segment has specific characteristics and protection levels.
 /// 
-/// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 7.2.4:
+/// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, June 2013 - Revised July 2019) - Section 7.2.4:
 /// "Information Memory" - Segment organization and access control.
 /// </summary>
 public enum InformationSegment

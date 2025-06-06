@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
@@ -216,7 +217,7 @@ public class XorInstructionTests
             false);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, []);
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert - XOR operation: 0xF0F0 ^ 0x0FF0 = 0xFF00
         Assert.Equal(0xFF00, registerFile.ReadRegister(RegisterName.R5));
@@ -245,7 +246,7 @@ public class XorInstructionTests
             true); // Byte operation
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert - only low byte should be affected: (0xAA ^ 0x55) | 0x3400 = 0x34FF
         Assert.Equal((ushort)((0xAA ^ 0x55) | 0x3400), registerFile.ReadRegister(RegisterName.R5));

@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
@@ -217,7 +218,7 @@ public class BitInstructionTests
             false);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, []);
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert - destination should be unchanged
         Assert.Equal(originalR5, registerFile.ReadRegister(RegisterName.R5));
@@ -247,7 +248,7 @@ public class BitInstructionTests
             false);
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert - destination unchanged but flags set based on AND result
         Assert.Equal(originalR5, registerFile.ReadRegister(RegisterName.R5));
@@ -304,7 +305,7 @@ public class BitInstructionTests
             true); // Byte operation
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert - destination unchanged, flags based on byte AND (0xAB & 0xCD = 0x89)
         Assert.Equal(originalR5, registerFile.ReadRegister(RegisterName.R5));

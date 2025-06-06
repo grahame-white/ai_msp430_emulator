@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
@@ -216,7 +217,7 @@ public class AndInstructionTests
             false);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, []);
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0xFF0F & 0x0FF0, registerFile.ReadRegister(RegisterName.R5)); // 0x0F00
@@ -245,7 +246,7 @@ public class AndInstructionTests
             false);
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0, registerFile.ReadRegister(RegisterName.R5));
@@ -273,7 +274,7 @@ public class AndInstructionTests
             false);
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x8000, registerFile.ReadRegister(RegisterName.R5));
@@ -356,7 +357,7 @@ public class AndInstructionTests
             true); // Byte operation
 
         // Act
-        instruction.Execute(registerFile, memory, []);
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert - only low byte should be affected
         Assert.Equal((ushort)((0xAB & 0xCD) | 0x3400), registerFile.ReadRegister(RegisterName.R5));

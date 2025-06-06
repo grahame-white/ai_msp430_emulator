@@ -44,14 +44,23 @@ public class ConsoleLogger : ILogger
 
         string logEntry = LogEntryFormatter.FormatLogEntry(level, message, context);
 
-        // Write to appropriate output stream based on level
-        // In test environments, redirect errors to stdout to avoid CI failures
-        if (level >= LogLevel.Error && !RedirectErrorsToStdout)
+        // Write to appropriate output stream based on level and redirect setting
+        if (level >= LogLevel.Error)
         {
-            Console.Error.WriteLine(logEntry);
+            if (RedirectErrorsToStdout)
+            {
+                // Redirect error messages to stdout (useful in CI environments)
+                Console.WriteLine(logEntry);
+            }
+            else
+            {
+                // Write error messages to stderr (default behavior)
+                Console.Error.WriteLine(logEntry);
+            }
         }
         else
         {
+            // Non-error levels always go to stdout
             Console.WriteLine(logEntry);
         }
     }

@@ -2,10 +2,10 @@
 
 <p align="center">
   <a href="https://github.com/grahame-white/ai_msp430_emulator/actions/workflows/ci.yml">
-    <img src="https://github.com/grahame-white/ai_msp430_emulator/workflows/CI%2FCD%20Pipeline/badge.svg" alt="CI/CD Pipeline">
+    <img src="https://github.com/grahame-white/ai_msp430_emulator/actions/workflows/ci.yml/badge.svg" alt="CI/CD Pipeline">
   </a>
   <a href="https://github.com/grahame-white/ai_msp430_emulator/actions/workflows/security.yml">
-    <img src="https://github.com/grahame-white/ai_msp430_emulator/workflows/Security%20Scanning/badge.svg"
+    <img src="https://github.com/grahame-white/ai_msp430_emulator/actions/workflows/security.yml/badge.svg"
          alt="Security Scanning">
   </a>
 </p>

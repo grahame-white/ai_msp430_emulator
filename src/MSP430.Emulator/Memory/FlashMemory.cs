@@ -273,8 +273,8 @@ public class FlashMemory : IFlashMemory
     /// <inheritdoc />
     public void Clear()
     {
-        Array.Clear(_memory, 0, _memory.Length);
-        _logger?.Debug($"Flash cleared: {Size} bytes set to 0x00");
+        Array.Fill(_memory, ErasedPattern);
+        _logger?.Debug($"Flash cleared: {Size} bytes set to 0x{ErasedPattern:X2}");
     }
 
     /// <inheritdoc />

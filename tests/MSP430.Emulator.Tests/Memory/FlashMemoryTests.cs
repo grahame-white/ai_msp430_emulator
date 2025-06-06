@@ -349,14 +349,14 @@ public class FlashMemoryTests
     }
 
     [Fact]
-    public void Clear_SetsAllBytesToZero()
+    public void Clear_SetsAllBytesToErasedPattern()
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
         flash.Clear();
 
-        Assert.Equal(0x00, flash.ReadByte(0x8000));
-        Assert.Equal(0x00, flash.ReadByte(0x8FFF));
+        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8000));
+        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8FFF));
     }
 
     [Fact]

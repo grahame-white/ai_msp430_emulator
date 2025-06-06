@@ -17,6 +17,11 @@
     <Rule Id="CA1063" Action="Info" />    <!-- Implement IDisposable correctly -->
     <Rule Id="CA2213" Action="Info" />    <!-- Disposable fields should be disposed -->
     
+    <!-- Dynamic keyword usage prevention -->
+    <!-- Note: There's no built-in .NET analyzer rule for 'dynamic' keyword -->
+    <!-- This should be caught through code review and manual enforcement -->
+    <!-- Consider adding StyleCop.Analyzers package for additional rules -->
+    
     <!-- Keep other important security and reliability rules as info -->
     <Rule Id="CA5394" Action="Info" />    <!-- Do not use insecure randomness -->
     <Rule Id="CA5359" Action="Info" />    <!-- Do not disable certificate validation -->

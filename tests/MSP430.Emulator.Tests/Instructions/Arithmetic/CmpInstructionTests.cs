@@ -12,8 +12,9 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 public class CmpInstructionTests
 {
 
-    [Fact]
-    public void Constructor_ValidParameters_CreatesInstruction()
+    [Theory]
+    [InlineData(InstructionFormat.FormatI)]
+    public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
     {
         // Arrange & Act
         var instruction = new CmpInstruction(
@@ -25,15 +26,150 @@ public class CmpInstructionTests
             false);
 
         // Assert
-        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-        Assert.Equal(0x9, instruction.Opcode);
-        Assert.Equal(0x9123, instruction.InstructionWord);
-        Assert.Equal("CMP", instruction.Mnemonic);
+        Assert.Equal(expectedFormat, instruction.Format);
+    }
+
+    [Theory]
+    [InlineData(0x9)]
+    public void Constructor_ValidParameters_SetsOpcode(byte expectedOpcode)
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedOpcode, instruction.Opcode);
+    }
+
+    [Theory]
+    [InlineData(0x9123)]
+    public void Constructor_ValidParameters_SetsInstructionWord(ushort expectedWord)
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedWord, instruction.InstructionWord);
+    }
+
+    [Theory]
+    [InlineData("CMP")]
+    public void Constructor_ValidParameters_SetsMnemonic(string expectedMnemonic)
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsIsByteOperationToFalse()
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.False(instruction.IsByteOperation);
-        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-        Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R1)]
+    [InlineData(RegisterName.R5)]
+    [InlineData(RegisterName.R12)]
+    public void Constructor_ValidParameters_SetsSourceRegister(RegisterName expectedRegister)
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9123,
+            expectedRegister,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedRegister, instruction.SourceRegister);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R4)]
+    [InlineData(RegisterName.R7)]
+    [InlineData(RegisterName.R15)]
+    public void Constructor_ValidParameters_SetsDestinationRegister(RegisterName expectedRegister)
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9123,
+            RegisterName.R1,
+            expectedRegister,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedRegister, instruction.DestinationRegister);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    public void Constructor_ValidParameters_SetsSourceAddressingMode(AddressingMode expectedMode)
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9123,
+            RegisterName.R1,
+            RegisterName.R4,
+            expectedMode,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedMode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    public void Constructor_ValidParameters_SetsDestinationAddressingMode(AddressingMode expectedMode)
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            expectedMode,
+            false);
+
+        // Assert
+        Assert.Equal(expectedMode, instruction.DestinationAddressingMode);
     }
 
     [Fact]
@@ -50,7 +186,23 @@ public class CmpInstructionTests
 
         // Assert
         Assert.True(instruction.IsByteOperation);
-        Assert.Equal("CMP.B", instruction.Mnemonic);
+    }
+
+    [Theory]
+    [InlineData("CMP.B")]
+    public void Constructor_ByteOperation_SetsByteMnemonic(string expectedMnemonic)
+    {
+        // Arrange & Act
+        var instruction = new CmpInstruction(
+            0x9563,
+            RegisterName.R5,
+            RegisterName.R6,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
+        // Assert
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Theory]
@@ -135,7 +287,7 @@ public class CmpInstructionTests
     [InlineData(RegisterName.R15, RegisterName.R4)]
     [InlineData(RegisterName.R3, RegisterName.R4)]
     [InlineData(RegisterName.R5, RegisterName.R6)]
-    public void Properties_VariousRegisters_ReturnCorrectValues(RegisterName source, RegisterName dest)
+    public void Properties_VariousRegisters_ReturnsCorrectSourceRegister(RegisterName source, RegisterName dest)
     {
         // Arrange
         var instruction = new CmpInstruction(
@@ -148,6 +300,24 @@ public class CmpInstructionTests
 
         // Act & Assert
         Assert.Equal(source, instruction.SourceRegister);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R1, RegisterName.R4)]
+    [InlineData(RegisterName.R5, RegisterName.R6)]
+    [InlineData(RegisterName.R12, RegisterName.R15)]
+    public void Properties_VariousRegisters_ReturnsCorrectDestinationRegister(RegisterName source, RegisterName dest)
+    {
+        // Arrange
+        var instruction = new CmpInstruction(
+            0x9000,
+            source,
+            dest,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act & Assert
         Assert.Equal(dest, instruction.DestinationRegister);
     }
 
@@ -159,7 +329,7 @@ public class CmpInstructionTests
     [InlineData(AddressingMode.Immediate)]
     [InlineData(AddressingMode.Absolute)]
     [InlineData(AddressingMode.Symbolic)]
-    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode mode)
+    public void AddressingModes_AllSupportedModes_ReturnsCorrectSourceMode(AddressingMode mode)
     {
         // Arrange
         var instruction = new CmpInstruction(
@@ -172,11 +342,32 @@ public class CmpInstructionTests
 
         // Act & Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void AddressingModes_AllSupportedModes_ReturnsCorrectDestinationMode(AddressingMode mode)
+    {
+        // Arrange
+        var instruction = new CmpInstruction(
+            0x9000,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            mode,
+            false);
+
+        // Act & Assert
+        Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
 
     [Fact]
-    public void Execute_EqualValues_SetsZeroFlag()
+    public void Execute_EqualValues_DestinationUnchanged()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -192,19 +383,129 @@ public class CmpInstructionTests
             false);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R4)); // Destination unchanged
+    }
+
+    [Fact]
+    public void Execute_EqualValues_Takes1Cycle()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        var instruction = new CmpInstruction(
+            0x9014,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_EqualValues_SetsZeroFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        var instruction = new CmpInstruction(
+            0x9014,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_EqualValues_ClearsNegativeFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        var instruction = new CmpInstruction(
+            0x9014,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_EqualValues_ClearsCarryFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        var instruction = new CmpInstruction(
+            0x9014,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_EqualValues_ClearsOverflowFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        var instruction = new CmpInstruction(
+            0x9014,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Overflow);
     }
 
     [Fact]
-    public void Execute_SourceGreaterThanDestination_SetsCarryFlag()
+    public void Execute_SourceGreaterThanDestination_DestinationUnchanged()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -224,7 +525,51 @@ public class CmpInstructionTests
 
         // Assert
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R4)); // Destination unchanged
+    }
+
+    [Fact]
+    public void Execute_SourceGreaterThanDestination_SetsCarryFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x5678);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        var instruction = new CmpInstruction(
+            0x9014,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_SourceGreaterThanDestination_SetsNegativeFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x5678);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        var instruction = new CmpInstruction(
+            0x9014,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Negative);
     }
 

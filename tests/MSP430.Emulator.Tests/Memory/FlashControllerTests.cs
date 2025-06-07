@@ -350,8 +350,38 @@ public class FlashControllerTests
         bool result = controller.StartSectorErase();
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void StartSectorErase_WhenUnlocked_SetsStateToErasing()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartSectorErase();
+
         Assert.Equal(FlashControllerState.Erasing, controller.State);
+    }
+
+    [Fact]
+    public void StartSectorErase_WhenUnlocked_SetsCurrentOperationToSectorErase()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartSectorErase();
+
         Assert.Equal(FlashOperation.SectorErase, controller.CurrentOperation);
+    }
+
+    [Fact]
+    public void StartSectorErase_WhenUnlocked_SetsOperationCyclesRemaining()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartSectorErase();
+
         Assert.Equal(FlashController.SectorEraseCycles, controller.OperationCyclesRemaining);
     }
 
@@ -363,6 +393,15 @@ public class FlashControllerTests
         bool result = controller.StartSectorErase();
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void StartSectorErase_WhenLocked_KeepsStateAsLocked()
+    {
+        var controller = new FlashController(_logger);
+
+        controller.StartSectorErase();
+
         Assert.Equal(FlashControllerState.Locked, controller.State);
     }
 
@@ -375,13 +414,43 @@ public class FlashControllerTests
         bool result = controller.StartMassErase();
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void StartMassErase_WhenUnlocked_SetsStateToErasing()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartMassErase();
+
         Assert.Equal(FlashControllerState.Erasing, controller.State);
+    }
+
+    [Fact]
+    public void StartMassErase_WhenUnlocked_SetsCurrentOperationToMassErase()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartMassErase();
+
         Assert.Equal(FlashOperation.MassErase, controller.CurrentOperation);
+    }
+
+    [Fact]
+    public void StartMassErase_WhenUnlocked_SetsOperationCyclesRemaining()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartMassErase();
+
         Assert.Equal(FlashController.MassEraseCycles, controller.OperationCyclesRemaining);
     }
 
     [Fact]
-    public void Update_CompletesOperationWhenCyclesElapse()
+    public void Update_CompletesOperationWhenCyclesElapse_SetsStateToUnlocked()
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
@@ -391,9 +460,57 @@ public class FlashControllerTests
         controller.Update(initialCycles);
 
         Assert.Equal(FlashControllerState.Unlocked, controller.State);
+    }
+
+    [Fact]
+    public void Update_CompletesOperationWhenCyclesElapse_SetsCurrentOperationToNone()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        uint initialCycles = controller.OperationCyclesRemaining;
+
+        controller.Update(initialCycles);
+
         Assert.Equal(FlashOperation.None, controller.CurrentOperation);
+    }
+
+    [Fact]
+    public void Update_CompletesOperationWhenCyclesElapse_SetsOperationCyclesRemainingToZero()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        uint initialCycles = controller.OperationCyclesRemaining;
+
+        controller.Update(initialCycles);
+
         Assert.Equal(0u, controller.OperationCyclesRemaining);
+    }
+
+    [Fact]
+    public void Update_CompletesOperationWhenCyclesElapse_SetsIsOperationInProgressToFalse()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        uint initialCycles = controller.OperationCyclesRemaining;
+
+        controller.Update(initialCycles);
+
         Assert.False(controller.IsOperationInProgress);
+    }
+
+    [Fact]
+    public void Update_PartialCycles_KeepsStateProgramming()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+
+        controller.Update(10);
+
+        Assert.Equal(FlashControllerState.Programming, controller.State);
     }
 
     [Fact]
@@ -406,13 +523,23 @@ public class FlashControllerTests
 
         controller.Update(10);
 
-        Assert.Equal(FlashControllerState.Programming, controller.State);
         Assert.Equal(initialCycles - 10, controller.OperationCyclesRemaining);
+    }
+
+    [Fact]
+    public void Update_PartialCycles_KeepsIsOperationInProgressTrue()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+
+        controller.Update(10);
+
         Assert.True(controller.IsOperationInProgress);
     }
 
     [Fact]
-    public void Update_ExcessCycles_CompletesOperation()
+    public void Update_ExcessCycles_SetsStateToUnlocked()
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
@@ -422,11 +549,23 @@ public class FlashControllerTests
         controller.Update(initialCycles + 100);
 
         Assert.Equal(FlashControllerState.Unlocked, controller.State);
+    }
+
+    [Fact]
+    public void Update_ExcessCycles_SetsOperationCyclesRemainingToZero()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        uint initialCycles = controller.OperationCyclesRemaining;
+
+        controller.Update(initialCycles + 100);
+
         Assert.Equal(0u, controller.OperationCyclesRemaining);
     }
 
     [Fact]
-    public void Update_WhenNoOperationInProgress_DoesNothing()
+    public void Update_WhenNoOperationInProgress_KeepsStateUnlocked()
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
@@ -434,6 +573,16 @@ public class FlashControllerTests
         controller.Update(100);
 
         Assert.Equal(FlashControllerState.Unlocked, controller.State);
+    }
+
+    [Fact]
+    public void Update_WhenNoOperationInProgress_KeepsOperationCyclesRemainingAtZero()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.Update(100);
+
         Assert.Equal(0u, controller.OperationCyclesRemaining);
     }
 
@@ -448,6 +597,18 @@ public class FlashControllerTests
         bool result = controller.SetProtectionLevel(level);
 
         Assert.True(result);
+    }
+
+    [Theory]
+    [InlineData(FlashProtectionLevel.None)]
+    [InlineData(FlashProtectionLevel.WriteProtected)]
+    [InlineData(FlashProtectionLevel.SecurityLocked)]
+    public void SetProtectionLevel_ValidLevel_SetsProtectionLevel(FlashProtectionLevel level)
+    {
+        var controller = new FlashController(_logger);
+
+        controller.SetProtectionLevel(level);
+
         Assert.Equal(level, controller.ProtectionLevel);
     }
 
@@ -461,6 +622,17 @@ public class FlashControllerTests
         bool result = controller.SetProtectionLevel(FlashProtectionLevel.WriteProtected);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void SetProtectionLevel_WhenOperationInProgress_KeepsOriginalProtectionLevel()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+
+        controller.SetProtectionLevel(FlashProtectionLevel.WriteProtected);
+
         Assert.Equal(FlashProtectionLevel.None, controller.ProtectionLevel);
     }
 
@@ -473,6 +645,16 @@ public class FlashControllerTests
         bool result = controller.SetProtectionLevel(FlashProtectionLevel.None);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void SetProtectionLevel_WhenPermanentlyLocked_KeepsPermanentlyLockedLevel()
+    {
+        var controller = new FlashController(_logger);
+        controller.SetProtectionLevel(FlashProtectionLevel.PermanentlyLocked);
+
+        controller.SetProtectionLevel(FlashProtectionLevel.None);
+
         Assert.Equal(FlashProtectionLevel.PermanentlyLocked, controller.ProtectionLevel);
     }
 
@@ -491,24 +673,35 @@ public class FlashControllerTests
     [InlineData(FlashOperation.SectorErase)]
     [InlineData(FlashOperation.MassErase)]
     [InlineData(FlashOperation.SegmentErase)]
-    public void GetEraseCycles_ValidOperation_ReturnsExpectedCycles(FlashOperation operation)
+    public void GetEraseCycles_ValidOperation_ReturnsPositiveCycles(FlashOperation operation)
     {
         uint cycles = FlashController.GetEraseCycles(operation);
 
         Assert.True(cycles > 0);
+    }
 
-        switch (operation)
-        {
-            case FlashOperation.SectorErase:
-                Assert.Equal(FlashController.SectorEraseCycles, cycles);
-                break;
-            case FlashOperation.MassErase:
-                Assert.Equal(FlashController.MassEraseCycles, cycles);
-                break;
-            case FlashOperation.SegmentErase:
-                Assert.Equal(FlashController.SectorEraseCycles / 8, cycles);
-                break;
-        }
+    [Fact]
+    public void GetEraseCycles_SectorErase_ReturnsCorrectCycles()
+    {
+        uint cycles = FlashController.GetEraseCycles(FlashOperation.SectorErase);
+
+        Assert.Equal(FlashController.SectorEraseCycles, cycles);
+    }
+
+    [Fact]
+    public void GetEraseCycles_MassErase_ReturnsCorrectCycles()
+    {
+        uint cycles = FlashController.GetEraseCycles(FlashOperation.MassErase);
+
+        Assert.Equal(FlashController.MassEraseCycles, cycles);
+    }
+
+    [Fact]
+    public void GetEraseCycles_SegmentErase_ReturnsCorrectCycles()
+    {
+        uint cycles = FlashController.GetEraseCycles(FlashOperation.SegmentErase);
+
+        Assert.Equal(FlashController.SectorEraseCycles / 8, cycles);
     }
 
     [Theory]
@@ -541,68 +734,205 @@ public class FlashControllerTests
     }
 
     [Fact]
-    public void OperationLifecycle_ProgrammingOperation_WorksCorrectly()
+    public void OperationLifecycle_ProgrammingOperation_InitialStateIsLocked()
     {
         var controller = new FlashController(_logger);
 
-        // Initial state
-        Assert.Equal(FlashControllerState.Locked, controller.State);
-        Assert.False(controller.IsOperationInProgress);
-
-        // Unlock
-        Assert.True(controller.TryUnlock(0xA555));
-        Assert.Equal(FlashControllerState.Unlocked, controller.State);
-
-        // Start programming
-        Assert.True(controller.StartProgramming(false));
-        Assert.Equal(FlashControllerState.Programming, controller.State);
-        Assert.True(controller.IsOperationInProgress);
-
-        // Complete operation
-        controller.Update(FlashController.ByteProgramCycles);
-        Assert.Equal(FlashControllerState.Unlocked, controller.State);
-        Assert.False(controller.IsOperationInProgress);
-
-        // Lock
-        controller.Lock();
         Assert.Equal(FlashControllerState.Locked, controller.State);
     }
 
     [Fact]
-    public void OperationLifecycle_EraseOperation_WorksCorrectly()
+    public void OperationLifecycle_ProgrammingOperation_InitialOperationInProgressIsFalse()
     {
         var controller = new FlashController(_logger);
 
-        // Unlock and start erase
+        Assert.False(controller.IsOperationInProgress);
+    }
+
+    [Fact]
+    public void OperationLifecycle_ProgrammingOperation_UnlockReturnsTrue()
+    {
+        var controller = new FlashController(_logger);
+
+        bool result = controller.TryUnlock(0xA555);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void OperationLifecycle_ProgrammingOperation_UnlockSetsStateToUnlocked()
+    {
+        var controller = new FlashController(_logger);
+
         controller.TryUnlock(0xA555);
-        Assert.True(controller.StartSectorErase());
-        Assert.Equal(FlashControllerState.Erasing, controller.State);
 
-        // Complete operation
-        controller.Update(FlashController.SectorEraseCycles);
         Assert.Equal(FlashControllerState.Unlocked, controller.State);
     }
 
     [Fact]
-    public void StateTransitions_LogCorrectMessages()
+    public void OperationLifecycle_ProgrammingOperation_StartProgrammingReturnsTrue()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        bool result = controller.StartProgramming(false);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void OperationLifecycle_ProgrammingOperation_StartProgrammingSetsStateToProgramming()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(false);
+
+        Assert.Equal(FlashControllerState.Programming, controller.State);
+    }
+
+    [Fact]
+    public void OperationLifecycle_ProgrammingOperation_StartProgrammingSetsOperationInProgressToTrue()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(false);
+
+        Assert.True(controller.IsOperationInProgress);
+    }
+
+    [Fact]
+    public void OperationLifecycle_ProgrammingOperation_CompleteOperationSetsStateToUnlocked()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+
+        controller.Update(FlashController.ByteProgramCycles);
+
+        Assert.Equal(FlashControllerState.Unlocked, controller.State);
+    }
+
+    [Fact]
+    public void OperationLifecycle_ProgrammingOperation_CompleteOperationSetsOperationInProgressToFalse()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+
+        controller.Update(FlashController.ByteProgramCycles);
+
+        Assert.False(controller.IsOperationInProgress);
+    }
+
+    [Fact]
+    public void OperationLifecycle_ProgrammingOperation_LockSetsStateToLocked()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        controller.Update(FlashController.ByteProgramCycles);
+
+        controller.Lock();
+
+        Assert.Equal(FlashControllerState.Locked, controller.State);
+    }
+
+    [Fact]
+    public void OperationLifecycle_EraseOperation_StartSectorEraseReturnsTrue()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        bool result = controller.StartSectorErase();
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void OperationLifecycle_EraseOperation_StartSectorEraseSetsStateToErasing()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartSectorErase();
+
+        Assert.Equal(FlashControllerState.Erasing, controller.State);
+    }
+
+    [Fact]
+    public void OperationLifecycle_EraseOperation_CompleteOperationSetsStateToUnlocked()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartSectorErase();
+
+        controller.Update(FlashController.SectorEraseCycles);
+
+        Assert.Equal(FlashControllerState.Unlocked, controller.State);
+    }
+
+    [Fact]
+    public void StateTransitions_LogsInitializationMessage()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var controller = new FlashController(_logger);
+
+        Assert.Contains(_logger.LogEntries, entry =>
+            entry.Level == LogLevel.Debug && entry.Message.Contains("FlashController initialized"));
+    }
+
+    [Fact]
+    public void StateTransitions_LogsUnlockMessage()
     {
         _logger.MinimumLevel = LogLevel.Debug;
         var controller = new FlashController(_logger);
 
         controller.TryUnlock(0xA555);
-        controller.StartProgramming(false);
-        controller.Update(FlashController.ByteProgramCycles);
-        controller.Lock();
 
-        // Check that debug messages were logged
-        Assert.Contains(_logger.LogEntries, entry =>
-            entry.Level == LogLevel.Debug && entry.Message.Contains("FlashController initialized"));
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("Flash controller unlocked"));
+    }
+
+    [Fact]
+    public void StateTransitions_LogsProgrammingStartMessage()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(false);
+
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("Programming operation started"));
+    }
+
+    [Fact]
+    public void StateTransitions_LogsOperationCompletedMessage()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+
+        controller.Update(FlashController.ByteProgramCycles);
+
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("operation completed"));
+    }
+
+    [Fact]
+    public void StateTransitions_LogsLockMessage()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        controller.Update(FlashController.ByteProgramCycles);
+
+        controller.Lock();
+
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("Flash controller locked"));
     }

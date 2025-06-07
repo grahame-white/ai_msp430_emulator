@@ -6,6 +6,10 @@
   
   <!-- Consolidated rules for Microsoft.CodeAnalysis.CSharp analyzer -->
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <!-- Useless assignment detection -->
+    <Rule Id="CS0219" Action="Warning" /> <!-- Variable is assigned but never used -->
+    <Rule Id="CS0168" Action="Warning" /> <!-- Variable is declared but never used -->
+    
     <!-- Issue #1: Generic catch clauses -->
     <Rule Id="CA1031" Action="Warning" /> <!-- Do not catch general exception types -->
     
@@ -39,5 +43,33 @@
     <Rule Id="CA1707" Action="None" />    <!-- Remove underscores from names (common in test method names) -->
     <Rule Id="CA1816" Action="None" />    <!-- GC.SuppressFinalize for tests -->
     <Rule Id="CA1852" Action="None" />    <!-- Type can be sealed -->
+  </Rules>
+  
+  <!-- SonarAnalyzer.CSharp rules for additional code quality checks -->
+  <Rules AnalyzerId="SonarAnalyzer.CSharp" RuleNamespace="SonarAnalyzer.CSharp">
+    <!-- Useless assignment and dead code detection - MAIN GOAL -->
+    <Rule Id="S1854" Action="Warning" /> <!-- Useless assignments should be removed -->
+    <Rule Id="S1481" Action="Warning" /> <!-- Unused local variables should be removed -->
+    <Rule Id="S1172" Action="Info" />    <!-- Unused method parameters should be removed -->
+    <Rule Id="S1144" Action="Info" />    <!-- Unused private types or members should be removed -->
+    
+    <!-- Disable rules that cause noise and are not related to useless assignments -->
+    <Rule Id="S2325" Action="None" />    <!-- Make methods static when possible -->
+    <Rule Id="S2589" Action="None" />    <!-- Boolean conditions should not always evaluate to same result -->
+    <Rule Id="S1450" Action="None" />    <!-- Private fields should be removed if not used -->
+    <Rule Id="S2292" Action="None" />    <!-- Auto-implemented property suggestions -->
+    <Rule Id="S101" Action="None" />     <!-- Naming convention suggestions -->
+    <Rule Id="S2971" Action="None" />    <!-- LINQ optimization suggestions -->
+    <Rule Id="S3928" Action="None" />    <!-- Parameter name suggestions -->
+    <Rule Id="S4144" Action="None" />    <!-- Methods should not have identical implementations -->
+    <Rule Id="S3881" Action="None" />    <!-- IDisposable implementation suggestions -->
+    <Rule Id="S3966" Action="None" />    <!-- Resource disposal suggestions -->
+    <Rule Id="S6966" Action="None" />    <!-- Async method suggestions -->
+    <Rule Id="S1751" Action="None" />    <!-- Loop refactoring suggestions -->
+    
+    <!-- Other important code quality rules -->
+    <Rule Id="S3898" Action="Info" />    <!-- Value types should not implement "ICloneable" -->
+    <Rule Id="S2372" Action="Warning" /> <!-- Exceptions should not be thrown from property getters -->
+    <Rule Id="S1066" Action="Info" />    <!-- Mergeable "if" statements should be combined -->
   </Rules>
 </RuleSet>

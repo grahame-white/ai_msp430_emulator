@@ -3,12 +3,13 @@
 ## Register File Organization
 
 The MSP430 CPU contains 16 16-bit registers organized as follows according to the
-MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, December 2016 - Revised December 2020) -
+MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019 -
 Section 3.2: "CPU Registers" - Figure 3-1.
 
 ### Register File Layout
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.1: "Program Counter (PC)" and
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3.1:
+"Program Counter (PC)" and
 Section 3.2.2: "Stack Pointer (SP)"*
 
 ```text
@@ -60,11 +61,13 @@ Section 3.2.2: "Stack Pointer (SP)"*
 
 ## Special Register Organization
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2: "CPU Registers" - Table 3-1*
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3:
+"CPU Registers" - Table 4-1*
 
 ### Program Counter (R0/PC)
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.1: "Program Counter (PC)"*
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3.1:
+"Program Counter (PC)"*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
@@ -80,7 +83,8 @@ Section 3.2.2: "Stack Pointer (SP)"*
 
 ### Stack Pointer (R1/SP)
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.2: "Stack Pointer (SP)"*
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3.2:
+"Stack Pointer (SP)"*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
@@ -96,7 +100,8 @@ Section 3.2.2: "Stack Pointer (SP)"*
 
 ### Status Register (R2/SR)
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.3: "Status Register (SR)"*
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3.3:
+"Status Register (SR)"*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
@@ -115,7 +120,8 @@ Section 3.2.2: "Stack Pointer (SP)"*
 
 ### Constant Generator (R3/CG1)
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.4: "Constant Generator Registers (CG1 and CG2)"*
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3.4:
+"Constant Generator Registers (CG1 and CG2)"*
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐

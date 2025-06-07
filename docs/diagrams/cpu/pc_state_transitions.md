@@ -5,7 +5,7 @@
 The Program Counter (PC) operates in distinct states with specific transition conditions. This document provides
 comprehensive state diagrams and flowcharts for PC behavior.
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, December 2016 - Revised December 2020) -
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019 -
 Section 3.2.1: "Program Counter (PC)" and Section 4: "CPU"*
 
 ## PC State Overview
@@ -96,7 +96,8 @@ stateDiagram-v2
 
 ### Reset State Operations
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 4.1: "CPU Introduction" -
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.1:
+"MSP430X CPU (CPUX) Introduction" -
 Reset behavior*
 
 ```mermaid
@@ -143,7 +144,8 @@ flowchart TD
 
 ### Branch/Jump Operations
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 4.3: "Instruction Set" - Jump and branch instructions*
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5:
+"MSP430 and MSP430X Instructions" - Jump and branch instructions*
 
 ```mermaid
 flowchart TD
@@ -208,7 +210,8 @@ flowchart TD
 
 ### Interrupt Processing
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 5: "Interrupts" - Interrupt processing behavior*
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 1.3:
+"Interrupts" - Interrupt processing behavior*
 
 ```mermaid
 flowchart TD

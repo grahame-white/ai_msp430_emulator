@@ -259,4 +259,15 @@ public static class InstructionHelpers
             _ => 1
         };
     }
+
+    /// <summary>
+    /// Sign-extends an 8-bit value to 16 bits.
+    /// Used by PUSH.B and POP.B instructions to maintain consistency in byte operations.
+    /// </summary>
+    /// <param name="byteValue">The 8-bit value to sign-extend.</param>
+    /// <returns>The sign-extended 16-bit value.</returns>
+    public static ushort SignExtendByte(ushort byteValue)
+    {
+        return (ushort)((sbyte)(byte)(byteValue & 0xFF));
+    }
 }

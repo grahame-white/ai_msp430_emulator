@@ -5,7 +5,7 @@
 The Status Register (SR) is a 16-bit register that contains processor status flags and control bits. Only the
 lower 9 bits (0-8) are used for flags, with the upper bits reserved.
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, December 2016 - Revised December 2020) -
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019 -
 Section 3.2.3: "Status Register (SR)" - Figure 3-2*
 
 ## Bit Field Layout
@@ -29,7 +29,8 @@ Status Register (R2/SR) - 16 bits
 
 ### Bit Field Table
 
-*Reference: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.2.3: "Status Register (SR)" -
+*Reference: MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3.3:
+"Status Register (SR)" -
 Table 3-2*
 
 | Bit | Name | Symbol | Description | Reset Value |

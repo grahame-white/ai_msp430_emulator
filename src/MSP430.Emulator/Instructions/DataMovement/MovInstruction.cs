@@ -14,9 +14,9 @@ namespace MSP430.Emulator.Instructions.DataMovement;
 /// Flags: Sets N and Z based on the value moved, clears V, preserves C
 /// 
 /// References:
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131), Section 5.3.17: "MOV - Move" - Instruction format and operation
-/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.3.1: "Format I Instructions" - Instruction encoding
-/// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - October 2004–Revised June 2021, Section 4: "Assembler Description" - Instruction format and operation
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5.1.1: "MSP430 Double-Operand (Format I) Instructions" - Instruction encoding
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: "Detailed Description" - Instruction Set
 /// </summary>
 public class MovInstruction : Instruction, IExecutableInstruction
 {
@@ -165,7 +165,7 @@ public class MovInstruction : Instruction, IExecutableInstruction
     /// This follows MSP430 specification behavior where writing to SR in register mode doesn't trigger flag updates.
     /// 
     /// References:
-    /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.2.1: "Status Register" - Special handling when SR is destination
+    /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3.3: "Status Register (SR)" - Special handling when SR is destination
     /// </summary>
     /// <param name="value">The value that was moved.</param>
     /// <param name="statusRegister">The CPU status register to update.</param>
@@ -192,7 +192,7 @@ public class MovInstruction : Instruction, IExecutableInstruction
     /// even when R2 is the target register.
     /// 
     /// References:
-    /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.2.1: "Status Register" - Special handling when SR is destination
+    /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.3.3: "Status Register (SR)" - Special handling when SR is destination
     /// </summary>
     /// <returns>True if flags should be updated, false otherwise.</returns>
     private bool ShouldUpdateFlags()

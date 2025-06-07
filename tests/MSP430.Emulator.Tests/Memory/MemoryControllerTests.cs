@@ -326,7 +326,31 @@ public class MemoryControllerTests
 
         // Assert
         Assert.IsType<ushort>(result);
+    }
+
+    [Theory]
+    [InlineData(0x4000)] // Flash start
+    [InlineData(0x4002)] // Flash word-aligned
+    [InlineData(0xBFFE)] // Flash end (word-aligned)
+    public void FetchInstruction_ValidAddress_IncrementsInstructionFetches(ushort address)
+    {
+        // Act
+        _controller.FetchInstruction(address);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalInstructionFetches);
+    }
+
+    [Theory]
+    [InlineData(0x4000)] // Flash start
+    [InlineData(0x4002)] // Flash word-aligned
+    [InlineData(0xBFFE)] // Flash end (word-aligned)
+    public void FetchInstruction_ValidAddress_IncrementsCycles(ushort address)
+    {
+        // Act
+        _controller.FetchInstruction(address);
+
+        // Assert
         Assert.True(_controller.Statistics.TotalCycles > 0);
     }
 
@@ -337,6 +361,24 @@ public class MemoryControllerTests
     {
         // Arrange, Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(address));
+    }
+
+    [Theory]
+    [InlineData(0x0300)] // Invalid address (gap between peripherals and BSL)
+    [InlineData(0x1A00)] // Invalid address (gap between info memory and RAM)
+    public void ReadByte_InvalidAddress_IncrementsViolations(ushort address)
+    {
+        // Arrange, Act
+        try
+        {
+            _controller.ReadByte(address);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalViolations);
     }
 
@@ -347,6 +389,24 @@ public class MemoryControllerTests
     {
         // Arrange, Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.WriteByte(address, 0x42));
+    }
+
+    [Theory]
+    [InlineData(0x0300)] // Invalid address (gap between peripherals and BSL)
+    [InlineData(0x1A00)] // Invalid address (gap between info memory and RAM)
+    public void WriteByte_InvalidAddress_IncrementsViolations(ushort address)
+    {
+        // Arrange, Act
+        try
+        {
+            _controller.WriteByte(address, 0x42);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalViolations);
     }
 
@@ -604,11 +664,20 @@ public class MemoryControllerTests
     }
 
     [Fact]
-    public void Reset_ClearsStatistics()
+    public void Reset_ClearsStatistics_WritesAreTracked()
+    {
+        // Arrange & Act
+        _controller.WriteByte(0x2000, 0x42); // Write to RAM
+
+        // Assert
+        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Fact]
+    public void Reset_ClearsStatistics_OperationsAreCleared()
     {
         // Arrange
         _controller.WriteByte(0x2000, 0x42); // Write to RAM
-        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
 
         // Act
         _controller.Reset();
@@ -667,7 +736,7 @@ public class MemoryControllerTests
     }
 
     [Fact]
-    public void MemoryAccessed_Event_EventArgsContainsCorrectAddress()
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAddress_IsNotNull()
     {
         // Arrange
         MemoryAccessEventArgs? eventArgs = null;
@@ -678,11 +747,10 @@ public class MemoryControllerTests
 
         // Assert
         Assert.NotNull(eventArgs);
-        Assert.Equal(0x2000, eventArgs.Context.Address);
     }
 
     [Fact]
-    public void MemoryAccessed_Event_EventArgsContainsCorrectAccessType()
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAddress_HasCorrectAddress()
     {
         // Arrange
         MemoryAccessEventArgs? eventArgs = null;
@@ -692,12 +760,11 @@ public class MemoryControllerTests
         _controller.ReadByte(0x2000);
 
         // Assert
-        Assert.NotNull(eventArgs);
-        Assert.Equal(MemoryAccessPermissions.Read, eventArgs.Context.AccessType);
+        Assert.Equal(0x2000, eventArgs!.Context.Address);
     }
 
     [Fact]
-    public void MemoryAccessed_Event_EventArgsContainsCorrectRegion()
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAccessType_IsNotNull()
     {
         // Arrange
         MemoryAccessEventArgs? eventArgs = null;
@@ -708,11 +775,24 @@ public class MemoryControllerTests
 
         // Assert
         Assert.NotNull(eventArgs);
-        Assert.Equal(MemoryRegion.Ram, eventArgs.Region.Region);
     }
 
     [Fact]
-    public void MemoryAccessed_Event_EventArgsContainsPositiveCycles()
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAccessType_HasCorrectAccessType()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.Equal(MemoryAccessPermissions.Read, eventArgs!.Context.AccessType);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectRegion_IsNotNull()
     {
         // Arrange
         MemoryAccessEventArgs? eventArgs = null;
@@ -723,7 +803,48 @@ public class MemoryControllerTests
 
         // Assert
         Assert.NotNull(eventArgs);
-        Assert.True(eventArgs.Cycles > 0);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectRegion_HasCorrectRegion()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.Equal(MemoryRegion.Ram, eventArgs!.Region.Region);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsPositiveCycles_IsNotNull()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsPositiveCycles_HasPositiveCycles()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.True(eventArgs!.Cycles > 0);
     }
 
     [Fact]
@@ -734,19 +855,35 @@ public class MemoryControllerTests
     }
 
     [Fact]
-    public void AccessViolation_Event_RaisesEvent()
+    public void AccessViolation_Event_RaisesEvent_ThrowsException()
+    {
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_RaisesEvent_EventIsRaised()
     {
         // Arrange
         bool eventRaised = false;
         _controller.AccessViolation += (sender, args) => eventRaised = true;
 
-        // Act & Assert
-        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
         Assert.True(eventRaised);
     }
 
     [Fact]
-    public void AccessViolation_Event_ContainsEventArgs()
+    public void AccessViolation_Event_ContainsEventArgs_ThrowsException()
     {
         // Arrange
         MemoryAccessViolationEventArgs? eventArgs = null;
@@ -754,11 +891,31 @@ public class MemoryControllerTests
 
         // Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_ContainsEventArgs_EventArgsNotNull()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
         Assert.NotNull(eventArgs);
     }
 
     [Fact]
-    public void AccessViolation_Event_EventArgsContainsCorrectAddress()
+    public void AccessViolation_Event_EventArgsContainsCorrectAddress_ThrowsException()
     {
         // Arrange
         MemoryAccessViolationEventArgs? eventArgs = null;
@@ -766,12 +923,52 @@ public class MemoryControllerTests
 
         // Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
-        Assert.NotNull(eventArgs);
-        Assert.Equal(0x0300, eventArgs.Context.Address);
     }
 
     [Fact]
-    public void AccessViolation_Event_EventArgsContainsException()
+    public void AccessViolation_Event_EventArgsContainsCorrectAddress_EventArgsNotNull()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsCorrectAddress_HasCorrectAddress()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
+        Assert.Equal(0x0300, eventArgs!.Context.Address);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsException_ThrowsException()
     {
         // Arrange
         MemoryAccessViolationEventArgs? eventArgs = null;
@@ -779,8 +976,48 @@ public class MemoryControllerTests
 
         // Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsException_EventArgsNotNull()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
         Assert.NotNull(eventArgs);
-        Assert.NotNull(eventArgs.Exception);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsException_ExceptionNotNull()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
+        Assert.NotNull(eventArgs!.Exception);
     }
 
     [Fact]
@@ -878,17 +1115,31 @@ public class MemoryControllerTests
     [InlineData(0x0000)] // SFR
     [InlineData(0x0100)] // 8-bit peripherals
     [InlineData(0x0200)] // 16-bit peripherals
-    public void PeripheralAccess_ReturnsDefaultValues(ushort address)
+    public void PeripheralAccess_ReturnsDefaultValues_ByteValue(ushort address)
     {
         // These tests verify peripheral access routing
         // Currently returns default values since peripherals are not fully implemented
 
         // Act
         byte byteValue = _controller.ReadByte(address);
-        bool writeResult = _controller.WriteByte(address, 0x42);
 
         // Assert
         Assert.Equal(0x00, byteValue); // Default value for unimplemented peripherals
+    }
+
+    [Theory]
+    [InlineData(0x0000)] // SFR
+    [InlineData(0x0100)] // 8-bit peripherals
+    [InlineData(0x0200)] // 16-bit peripherals
+    public void PeripheralAccess_ReturnsDefaultValues_WriteResult(ushort address)
+    {
+        // These tests verify peripheral access routing
+        // Currently returns default values since peripherals are not fully implemented
+
+        // Act
+        bool writeResult = _controller.WriteByte(address, 0x42);
+
+        // Assert
         Assert.True(writeResult); // Write should succeed for unimplemented peripherals
     }
 

@@ -13,81 +13,31 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 public class AddInstructionTests
 {
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsFormat()
+    [Theory]
+    [InlineData(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false)]
+    [InlineData(0x5456, RegisterName.R2, RegisterName.R3, AddressingMode.Immediate, AddressingMode.Indexed, false)]
+    [InlineData(0x5789, RegisterName.R5, RegisterName.R6, AddressingMode.Absolute, AddressingMode.Symbolic, false)]
+    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName sourceReg, RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOp)
     {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+        var instruction = new AddInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, isByteOp);
+
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        Assert.Equal((byte)0x5, instruction.Opcode);
+        Assert.Equal(instructionWord, instruction.InstructionWord);
+        Assert.Equal(sourceReg, instruction.SourceRegister);
+        Assert.Equal(destReg, instruction.DestinationRegister);
+        Assert.Equal(sourceMode, instruction.SourceAddressingMode);
+        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+        Assert.Equal(isByteOp, instruction.IsByteOperation);
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsOpcode()
+    [Theory]
+    [InlineData(false, "ADD")]
+    [InlineData(true, "ADD.B")]
+    public void Constructor_ByteOperationFlag_SetsMnemonic(bool isByteOperation, string expectedMnemonic)
     {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
-        Assert.Equal(0x5, instruction.Opcode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsInstructionWord()
-    {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
-        Assert.Equal(0x5123, instruction.InstructionWord);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsMnemonic()
-    {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
-        Assert.Equal("ADD", instruction.Mnemonic);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsIsByteOperation()
-    {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
-        Assert.False(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceRegister()
-    {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
-        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationRegister()
-    {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
-        Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceAddressingMode()
-    {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
-    {
-        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsIsByteOperationTrue()
-    {
-        var instruction = new AddInstruction(0x5563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, true);
-        Assert.True(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsByteMnemonic()
-    {
-        var instruction = new AddInstruction(0x5563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, true);
-        Assert.Equal("ADD.B", instruction.Mnemonic);
+        var instruction = new AddInstruction(0x5563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, isByteOperation);
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Theory]

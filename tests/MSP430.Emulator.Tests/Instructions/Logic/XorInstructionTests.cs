@@ -304,7 +304,7 @@ public class XorInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_SetsCarryFlag()
+    public void Execute_RegisterToRegister_ClearsCarryFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -328,7 +328,7 @@ public class XorInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_SetsOverflowFlag()
+    public void Execute_RegisterToRegister_ClearsOverflowFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();

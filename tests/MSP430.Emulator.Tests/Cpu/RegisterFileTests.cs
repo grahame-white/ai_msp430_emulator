@@ -287,13 +287,6 @@ public class RegisterFileTests
     }
 
     [Fact]
-    public void ReadRegister_InvalidRegister_ThrowsArgumentException()
-    {
-        Assert.Throws<ArgumentException>(() =>
-            _registerFile.ReadRegister((RegisterName)16));
-    }
-
-    [Fact]
     public void ReadRegister_InvalidRegister_ExceptionMessageContainsExpectedText()
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>

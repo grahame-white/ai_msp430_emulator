@@ -13,9 +13,8 @@ public class SubInstructionTests
 {
 
     [Fact]
-    public void Constructor_ValidParameters_CreatesInstruction()
+    public void Constructor_ValidParameters_SetsFormat()
     {
-        // Arrange & Act
         var instruction = new SubInstruction(
             0x8123,
             RegisterName.R1,
@@ -24,22 +23,124 @@ public class SubInstructionTests
             AddressingMode.Register,
             false);
 
-        // Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsOpcode()
+    {
+        var instruction = new SubInstruction(
+            0x8123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal(0x8, instruction.Opcode);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsInstructionWord()
+    {
+        var instruction = new SubInstruction(
+            0x8123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal(0x8123, instruction.InstructionWord);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsMnemonic()
+    {
+        var instruction = new SubInstruction(
+            0x8123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal("SUB", instruction.Mnemonic);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsByteOperationFlag()
+    {
+        var instruction = new SubInstruction(
+            0x8123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.False(instruction.IsByteOperation);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceRegister()
+    {
+        var instruction = new SubInstruction(
+            0x8123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal(RegisterName.R1, instruction.SourceRegister);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsDestinationRegister()
+    {
+        var instruction = new SubInstruction(
+            0x8123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceAddressingMode()
+    {
+        var instruction = new SubInstruction(
+            0x8123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
+    {
+        var instruction = new SubInstruction(
+            0x8123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
     }
 
     [Fact]
     public void Constructor_ByteOperation_SetsByteFlag()
     {
-        // Arrange & Act
         var instruction = new SubInstruction(
             0x8563,
             RegisterName.R5,
@@ -48,8 +149,20 @@ public class SubInstructionTests
             AddressingMode.Register,
             true);
 
-        // Assert
         Assert.True(instruction.IsByteOperation);
+    }
+
+    [Fact]
+    public void Constructor_ByteOperation_SetsByteOperationMnemonic()
+    {
+        var instruction = new SubInstruction(
+            0x8563,
+            RegisterName.R5,
+            RegisterName.R6,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
         Assert.Equal("SUB.B", instruction.Mnemonic);
     }
 
@@ -135,9 +248,8 @@ public class SubInstructionTests
     [InlineData(RegisterName.R15, RegisterName.R4)]
     [InlineData(RegisterName.R3, RegisterName.R4)]
     [InlineData(RegisterName.R5, RegisterName.R6)]
-    public void Properties_VariousRegisters_ReturnCorrectValues(RegisterName source, RegisterName dest)
+    public void Properties_VariousRegisters_ReturnsCorrectSourceRegister(RegisterName source, RegisterName dest)
     {
-        // Arrange
         var instruction = new SubInstruction(
             0x8000,
             source,
@@ -146,8 +258,24 @@ public class SubInstructionTests
             AddressingMode.Register,
             false);
 
-        // Act & Assert
         Assert.Equal(source, instruction.SourceRegister);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R0, RegisterName.R1)]
+    [InlineData(RegisterName.R15, RegisterName.R4)]
+    [InlineData(RegisterName.R3, RegisterName.R4)]
+    [InlineData(RegisterName.R5, RegisterName.R6)]
+    public void Properties_VariousRegisters_ReturnsCorrectDestinationRegister(RegisterName source, RegisterName dest)
+    {
+        var instruction = new SubInstruction(
+            0x8000,
+            source,
+            dest,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal(dest, instruction.DestinationRegister);
     }
 
@@ -159,9 +287,8 @@ public class SubInstructionTests
     [InlineData(AddressingMode.Immediate)]
     [InlineData(AddressingMode.Absolute)]
     [InlineData(AddressingMode.Symbolic)]
-    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode mode)
+    public void AddressingModes_AllSupportedModes_ReturnsCorrectSourceAddressingMode(AddressingMode mode)
     {
-        // Arrange
         var instruction = new SubInstruction(
             0x8000,
             RegisterName.R1,
@@ -170,8 +297,27 @@ public class SubInstructionTests
             AddressingMode.Register,
             false);
 
-        // Act & Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void AddressingModes_AllSupportedModes_ReturnsCorrectDestinationAddressingMode(AddressingMode mode)
+    {
+        var instruction = new SubInstruction(
+            0x8000,
+            RegisterName.R1,
+            RegisterName.R4,
+            mode,
+            AddressingMode.Register,
+            false);
+
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
     }
 

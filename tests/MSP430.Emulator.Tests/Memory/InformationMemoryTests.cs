@@ -100,21 +100,72 @@ public class InformationMemoryTests
     }
 
     [Theory]
-    [InlineData(InformationSegment.SegmentA, 0x1980, 0x19FF, true)]
-    [InlineData(InformationSegment.SegmentB, 0x1900, 0x197F, false)]
-    [InlineData(InformationSegment.SegmentC, 0x1880, 0x18FF, false)]
-    [InlineData(InformationSegment.SegmentD, 0x1800, 0x187F, false)]
-    public void GetSegmentInfo_ReturnsCorrectSegmentInfo(InformationSegment segment,
-        ushort expectedStart, ushort expectedEnd, bool expectedProtection)
+    [InlineData(InformationSegment.SegmentA, InformationSegment.SegmentA)]
+    [InlineData(InformationSegment.SegmentB, InformationSegment.SegmentB)]
+    [InlineData(InformationSegment.SegmentC, InformationSegment.SegmentC)]
+    [InlineData(InformationSegment.SegmentD, InformationSegment.SegmentD)]
+    public void GetSegmentInfo_ReturnsCorrectSegment(InformationSegment segment, InformationSegment expectedSegment)
     {
         var infoMemory = new InformationMemory(_logger);
 
         InformationSegmentInfo segmentInfo = infoMemory.GetSegmentInfo(segment);
 
-        Assert.Equal(segment, segmentInfo.Segment);
+        Assert.Equal(expectedSegment, segmentInfo.Segment);
+    }
+
+    [Theory]
+    [InlineData(InformationSegment.SegmentA, 0x1980)]
+    [InlineData(InformationSegment.SegmentB, 0x1900)]
+    [InlineData(InformationSegment.SegmentC, 0x1880)]
+    [InlineData(InformationSegment.SegmentD, 0x1800)]
+    public void GetSegmentInfo_ReturnsCorrectStartAddress(InformationSegment segment, ushort expectedStart)
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        InformationSegmentInfo segmentInfo = infoMemory.GetSegmentInfo(segment);
+
         Assert.Equal(expectedStart, segmentInfo.StartAddress);
+    }
+
+    [Theory]
+    [InlineData(InformationSegment.SegmentA, 0x19FF)]
+    [InlineData(InformationSegment.SegmentB, 0x197F)]
+    [InlineData(InformationSegment.SegmentC, 0x18FF)]
+    [InlineData(InformationSegment.SegmentD, 0x187F)]
+    public void GetSegmentInfo_ReturnsCorrectEndAddress(InformationSegment segment, ushort expectedEnd)
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        InformationSegmentInfo segmentInfo = infoMemory.GetSegmentInfo(segment);
+
         Assert.Equal(expectedEnd, segmentInfo.EndAddress);
+    }
+
+    [Theory]
+    [InlineData(InformationSegment.SegmentA)]
+    [InlineData(InformationSegment.SegmentB)]
+    [InlineData(InformationSegment.SegmentC)]
+    [InlineData(InformationSegment.SegmentD)]
+    public void GetSegmentInfo_ReturnsCorrectSize(InformationSegment segment)
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        InformationSegmentInfo segmentInfo = infoMemory.GetSegmentInfo(segment);
+
         Assert.Equal(128, segmentInfo.Size);
+    }
+
+    [Theory]
+    [InlineData(InformationSegment.SegmentA, true)]
+    [InlineData(InformationSegment.SegmentB, false)]
+    [InlineData(InformationSegment.SegmentC, false)]
+    [InlineData(InformationSegment.SegmentD, false)]
+    public void GetSegmentInfo_ReturnsCorrectProtectionState(InformationSegment segment, bool expectedProtection)
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        InformationSegmentInfo segmentInfo = infoMemory.GetSegmentInfo(segment);
+
         Assert.Equal(expectedProtection, segmentInfo.IsWriteProtected);
     }
 
@@ -281,7 +332,7 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void WriteWord_ToProtectedSegment_Fails()
+    public void WriteWord_ToProtectedSegment_ReturnsFalse()
     {
         var infoMemory = new InformationMemory(_logger);
         const ushort address = 0x1980; // Segment A (protected by default)
@@ -290,6 +341,17 @@ public class InformationMemoryTests
         bool result = infoMemory.WriteWord(address, testValue);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void WriteWord_ToProtectedSegment_MemoryUnchanged()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        const ushort address = 0x1980; // Segment A (protected by default)
+        const ushort testValue = 0x1234;
+
+        infoMemory.WriteWord(address, testValue);
+
         Assert.Equal((ushort)0xFFFF, infoMemory.ReadWord(address)); // Should remain erased
     }
 
@@ -334,26 +396,59 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void SetSegmentWriteProtection_ChangesProtectionState()
+    public void SetSegmentWriteProtection_InitiallySegmentBIsUnprotected()
     {
         var infoMemory = new InformationMemory(_logger);
 
-        // Initially Segment B is unprotected
-        Assert.False(infoMemory.IsSegmentWriteProtected(InformationSegment.SegmentB));
-
-        // Enable protection
-        bool result1 = infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentB, true);
-        Assert.True(result1);
-        Assert.True(infoMemory.IsSegmentWriteProtected(InformationSegment.SegmentB));
-
-        // Disable protection
-        bool result2 = infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentB, false);
-        Assert.True(result2);
         Assert.False(infoMemory.IsSegmentWriteProtected(InformationSegment.SegmentB));
     }
 
     [Fact]
-    public void EraseSegment_UnprotectedSegment_Succeeds()
+    public void SetSegmentWriteProtection_EnableProtection_ReturnsTrue()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        bool result = infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentB, true);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void SetSegmentWriteProtection_EnableProtection_SetsProtectedState()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentB, true);
+
+        Assert.True(infoMemory.IsSegmentWriteProtected(InformationSegment.SegmentB));
+    }
+
+    [Fact]
+    public void SetSegmentWriteProtection_DisableProtection_ReturnsTrue()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        // First enable protection
+        infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentB, true);
+
+        bool result = infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentB, false);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void SetSegmentWriteProtection_DisableProtection_SetsUnprotectedState()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        // First enable protection
+        infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentB, true);
+
+        infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentB, false);
+
+        Assert.False(infoMemory.IsSegmentWriteProtected(InformationSegment.SegmentB));
+    }
+
+    [Fact]
+    public void EraseSegment_UnprotectedSegment_ReturnsTrue()
     {
         var infoMemory = new InformationMemory(_logger);
 
@@ -364,7 +459,31 @@ public class InformationMemoryTests
         bool result = infoMemory.EraseSegment(InformationSegment.SegmentD);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void EraseSegment_UnprotectedSegment_ErasesFirstByte()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        // Write some data to Segment D first
+        infoMemory.WriteByte(0x1800, 0x42);
+
+        infoMemory.EraseSegment(InformationSegment.SegmentD);
+
         Assert.Equal(0xFF, infoMemory.ReadByte(0x1800));
+    }
+
+    [Fact]
+    public void EraseSegment_UnprotectedSegment_ErasesSecondByte()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        // Write some data to Segment D first
+        infoMemory.WriteByte(0x1801, 0x43);
+
+        infoMemory.EraseSegment(InformationSegment.SegmentD);
+
         Assert.Equal(0xFF, infoMemory.ReadByte(0x1801));
     }
 
@@ -449,7 +568,7 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void Clear_WithMixedProtection_ClearsOnlyUnprotectedSegments()
+    public void Clear_WithMixedProtection_ReturnsFalse()
     {
         var infoMemory = new InformationMemory(_logger);
 
@@ -462,13 +581,49 @@ public class InformationMemoryTests
         bool result = infoMemory.Clear();
 
         Assert.False(result); // Should return false because Segment A couldn't be cleared
+    }
+
+    [Fact]
+    public void Clear_WithMixedProtection_ClearsSegmentD()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        // Write data to Segment D
+        infoMemory.WriteByte(0x1800, 0x42);
+
+        infoMemory.Clear();
+
         Assert.Equal(0xFF, infoMemory.ReadByte(0x1800)); // Segment D should be cleared
+    }
+
+    [Fact]
+    public void Clear_WithMixedProtection_ClearsSegmentC()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        // Write data to Segment C
+        infoMemory.WriteByte(0x1880, 0x43);
+
+        infoMemory.Clear();
+
         Assert.Equal(0xFF, infoMemory.ReadByte(0x1880)); // Segment C should be cleared
+    }
+
+    [Fact]
+    public void Clear_WithMixedProtection_ClearsSegmentB()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        // Write data to Segment B
+        infoMemory.WriteByte(0x1900, 0x44);
+
+        infoMemory.Clear();
+
         Assert.Equal(0xFF, infoMemory.ReadByte(0x1900)); // Segment B should be cleared
     }
 
     [Fact]
-    public void Initialize_WithPattern_InitializesUnprotectedSegments()
+    public void Initialize_WithPattern_ReturnsFalse()
     {
         var infoMemory = new InformationMemory(_logger);
         const byte pattern = 0x55;
@@ -476,9 +631,49 @@ public class InformationMemoryTests
         bool result = infoMemory.Initialize(pattern);
 
         Assert.False(result); // Should return false because Segment A couldn't be initialized
+    }
+
+    [Fact]
+    public void Initialize_WithPattern_InitializesSegmentD()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        const byte pattern = 0x55;
+
+        infoMemory.Initialize(pattern);
+
         Assert.Equal(pattern, infoMemory.ReadByte(0x1800)); // Segment D should have pattern
+    }
+
+    [Fact]
+    public void Initialize_WithPattern_InitializesSegmentC()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        const byte pattern = 0x55;
+
+        infoMemory.Initialize(pattern);
+
         Assert.Equal(pattern, infoMemory.ReadByte(0x1880)); // Segment C should have pattern
+    }
+
+    [Fact]
+    public void Initialize_WithPattern_InitializesSegmentB()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        const byte pattern = 0x55;
+
+        infoMemory.Initialize(pattern);
+
         Assert.Equal(pattern, infoMemory.ReadByte(0x1900)); // Segment B should have pattern
+    }
+
+    [Fact]
+    public void Initialize_WithPattern_SegmentARemainsErased()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        const byte pattern = 0x55;
+
+        infoMemory.Initialize(pattern);
+
         Assert.Equal(0xFF, infoMemory.ReadByte(0x1980)); // Segment A should remain erased (protected)
     }
 
@@ -516,17 +711,20 @@ public class InformationMemoryTests
         Assert.Equal(expected, result);
     }
 
-    [Fact]
-    public void InformationSegmentInfo_Contains_WorksCorrectly()
+    [Theory]
+    [InlineData(0x1980, true)]  // Start address
+    [InlineData(0x19FF, true)]  // End address
+    [InlineData(0x1990, true)]  // Middle address
+    [InlineData(0x197F, false)] // Before start
+    [InlineData(0x1A00, false)] // After end
+    public void InformationSegmentInfo_Contains_ReturnsExpectedResult(ushort address, bool expected)
     {
         var segmentInfo = new InformationSegmentInfo(
             InformationSegment.SegmentA, 0x1980, 0x19FF, true, "Test segment");
 
-        Assert.True(segmentInfo.Contains(0x1980));  // Start address
-        Assert.True(segmentInfo.Contains(0x19FF));  // End address
-        Assert.True(segmentInfo.Contains(0x1990));  // Middle address
-        Assert.False(segmentInfo.Contains(0x197F)); // Before start
-        Assert.False(segmentInfo.Contains(0x1A00)); // After end
+        bool result = segmentInfo.Contains(address);
+
+        Assert.Equal(expected, result);
     }
 
     [Fact]

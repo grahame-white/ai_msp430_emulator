@@ -13,43 +13,79 @@ public class AddInstructionTests
 {
 
     [Fact]
-    public void Constructor_ValidParameters_CreatesInstruction()
+    public void Constructor_ValidParameters_SetsFormat()
     {
-        // Arrange & Act
-        var instruction = new AddInstruction(
-            0x5123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsOpcode()
+    {
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(0x5, instruction.Opcode);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsInstructionWord()
+    {
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(0x5123, instruction.InstructionWord);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsMnemonic()
+    {
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal("ADD", instruction.Mnemonic);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsIsByteOperation()
+    {
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.False(instruction.IsByteOperation);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceRegister()
+    {
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(RegisterName.R1, instruction.SourceRegister);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsDestinationRegister()
+    {
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceAddressingMode()
+    {
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
+    {
+        var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
     }
 
     [Fact]
-    public void Constructor_ByteOperation_SetsByteFlag()
+    public void Constructor_ByteOperation_SetsIsByteOperationTrue()
     {
-        // Arrange & Act
-        var instruction = new AddInstruction(
-            0x5563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        // Assert
+        var instruction = new AddInstruction(0x5563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, true);
         Assert.True(instruction.IsByteOperation);
+    }
+
+    [Fact]
+    public void Constructor_ByteOperation_SetsByteMnemonic()
+    {
+        var instruction = new AddInstruction(0x5563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, true);
         Assert.Equal("ADD.B", instruction.Mnemonic);
     }
 
@@ -176,30 +212,104 @@ public class AddInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_AddsValues()
+    public void Execute_RegisterToRegister_ComputesCorrectResult()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R5, 0x1234); // Use R5 instead of R1 to avoid alignment
-        registerFile.WriteRegister(RegisterName.R4, 0x5678); // Use R4 to avoid status register conflicts
+        registerFile.WriteRegister(RegisterName.R5, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x5678);
 
-        var instruction = new AddInstruction(
-            0x5054,
-            RegisterName.R5, // Use R5 instead of R1
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal((ushort)0x68AC, registerFile.ReadRegister(RegisterName.R4)); // 0x1234 + 0x5678 = 0x68AC
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_TakesOneCycle()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x5678);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
 
         // Act
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal((ushort)0x68AC, registerFile.ReadRegister(RegisterName.R4)); // 0x1234 + 0x5678 = 0x68AC
         Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_DoesNotSetZeroFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x5678);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_DoesNotSetNegativeFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x5678);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_DoesNotSetCarryFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x5678);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_DoesNotSetOverflowFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x1234);
+        registerFile.WriteRegister(RegisterName.R4, 0x5678);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Overflow);
     }
 
@@ -208,23 +318,49 @@ public class AddInstructionTests
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // Use R5 instead of R1 to avoid alignment
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
         registerFile.WriteRegister(RegisterName.R4, 0x0001);
 
-        var instruction = new AddInstruction(
-            0x5054,
-            RegisterName.R5, // Use R5 instead of R1
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.True(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_Addition_ComputesCorrectOverflowResult()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
+        registerFile.WriteRegister(RegisterName.R4, 0x0001);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
 
         // Act
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal((ushort)0x0000, registerFile.ReadRegister(RegisterName.R4)); // 0xFFFF + 0x0001 = 0x10000 (truncated to 0x0000)
-        Assert.True(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_Addition_SetsZeroFlagOnOverflow()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
+        registerFile.WriteRegister(RegisterName.R4, 0x0001);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Zero);
     }
 
@@ -236,20 +372,46 @@ public class AddInstructionTests
         registerFile.WriteRegister(RegisterName.R5, 0x7FFF); // Maximum positive signed 16-bit value
         registerFile.WriteRegister(RegisterName.R4, 0x0001);
 
-        var instruction = new AddInstruction(
-            0x5054,
-            RegisterName.R5, // Use R5 instead of R1
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.True(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_PositiveOverflow_ComputesCorrectResult()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x7FFF); // Maximum positive signed 16-bit value
+        registerFile.WriteRegister(RegisterName.R4, 0x0001);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
 
         // Act
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal((ushort)0x8000, registerFile.ReadRegister(RegisterName.R4)); // 0x7FFF + 0x0001 = 0x8000 (negative)
-        Assert.True(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_PositiveOverflow_SetsNegativeFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x7FFF); // Maximum positive signed 16-bit value
+        registerFile.WriteRegister(RegisterName.R4, 0x0001);
+
+        var instruction = new AddInstruction(0x5054, RegisterName.R5, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Negative);
     }
 

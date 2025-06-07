@@ -16,18 +16,59 @@ public class StatusBitInstructionTests
     /// </summary>
     public class SetcInstructionTests
     {
-        [Fact]
-        public void Constructor_ValidParameters_CreatesInstruction()
+        [Theory]
+        [InlineData(InstructionFormat.FormatI)]
+        public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
         {
             // Arrange & Act
             var instruction = new SetcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-            Assert.Equal(0x4, instruction.Opcode); // MOV instruction opcode
-            Assert.Equal("SETC", instruction.Mnemonic);
-            Assert.False(instruction.IsByteOperation);
-            Assert.Equal(0, instruction.ExtensionWordCount);
+            Assert.Equal(expectedFormat, instruction.Format);
+        }
+
+        [Theory]
+        [InlineData(0x4)]
+        public void Constructor_ValidParameters_SetsOpcode(ushort expectedOpcode)
+        {
+            // Arrange & Act
+            var instruction = new SetcInstruction(0x0000);
+
+            // Assert
+            Assert.Equal(expectedOpcode, instruction.Opcode); // MOV instruction opcode
+        }
+
+        [Theory]
+        [InlineData("SETC")]
+        public void Constructor_ValidParameters_SetsMnemonic(string expectedMnemonic)
+        {
+            // Arrange & Act
+            var instruction = new SetcInstruction(0x0000);
+
+            // Assert
+            Assert.Equal(expectedMnemonic, instruction.Mnemonic);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        public void Constructor_ValidParameters_SetsByteOperation(bool expectedByteOp)
+        {
+            // Arrange & Act
+            var instruction = new SetcInstruction(0x0000);
+
+            // Assert
+            Assert.Equal(expectedByteOp, instruction.IsByteOperation);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        public void Constructor_ValidParameters_SetsExtensionWordCount(int expectedCount)
+        {
+            // Arrange & Act
+            var instruction = new SetcInstruction(0x0000);
+
+            // Assert
+            Assert.Equal(expectedCount, instruction.ExtensionWordCount);
         }
 
         [Fact]
@@ -42,10 +83,24 @@ public class StatusBitInstructionTests
             registerFile.StatusRegister.Carry = false;
 
             // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
             Assert.True(registerFile.StatusRegister.Carry);
+        }
+
+        [Fact]
+        public void Execute_SetCarryFlag_Takes1Cycle()
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new SetcInstruction(0x0000);
+
+            // Act
+            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.Equal(1u, cycles);
         }
 

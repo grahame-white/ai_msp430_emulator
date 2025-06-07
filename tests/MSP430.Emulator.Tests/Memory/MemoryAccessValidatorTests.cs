@@ -242,12 +242,19 @@ public class MemoryAccessValidatorTests
     }
 
     [Fact]
-    public void GetValidationInfo_ValidAddress_ReturnsCorrectRegionType()
+    public void GetValidationInfo_ValidAddress_ReturnsNotNullRegion()
     {
         MemoryAccessValidationInfo info = _validator.GetValidationInfo(0x2000); // RAM
 
         Assert.NotNull(info.Region);
-        Assert.Equal(MemoryRegion.Ram, info.Region.Value.Region);
+    }
+
+    [Fact]
+    public void GetValidationInfo_ValidAddress_ReturnsCorrectRegionType()
+    {
+        MemoryAccessValidationInfo info = _validator.GetValidationInfo(0x2000); // RAM
+
+        Assert.Equal(MemoryRegion.Ram, info.Region!.Value.Region);
     }
 
     [Fact]

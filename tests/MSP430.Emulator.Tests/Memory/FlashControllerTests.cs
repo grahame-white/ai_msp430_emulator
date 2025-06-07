@@ -729,6 +729,14 @@ public class FlashControllerTests
         {
             Assert.Equal(FlashController.ByteProgramCycles, cycles);
         }
+    }
+
+    [Theory]
+    [InlineData(false)] // Byte programming
+    [InlineData(true)]  // Word programming
+    public void GetProgramCycles_ReturnsPositiveCycles(bool isWordAccess)
+    {
+        uint cycles = FlashController.GetProgramCycles(isWordAccess);
 
         Assert.True(cycles > 0);
     }

@@ -356,6 +356,18 @@ public class FlashMemoryTests
         bool result = flash.Unlock(invalidKey);
 
         Assert.False(result);
+    }
+
+    [Theory]
+    [InlineData(0x1234)] // Wrong key format
+    [InlineData(0x5555)] // Wrong key format
+    [InlineData(0x0000)] // Wrong key format
+    public void Unlock_InvalidKey_KeepsLockedState(ushort invalidKey)
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+
+        flash.Unlock(invalidKey);
+
         Assert.Equal(FlashControllerState.Locked, flash.ControllerState);
     }
 

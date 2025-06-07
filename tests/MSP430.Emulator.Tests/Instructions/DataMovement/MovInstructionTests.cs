@@ -328,7 +328,7 @@ public class MovInstructionTests
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrement_ReadsAndIncrementsPointer()
+    public void Execute_IndirectAutoIncrement_ReadsValue()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -349,11 +349,34 @@ public class MovInstructionTests
 
         // Assert
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R2));
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrement_IncrementsPointer()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        memory[0x1000] = 0x34;
+        memory[0x1001] = 0x12;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(0x1002, registerFile.ReadRegister(RegisterName.R1)); // Incremented by 2 for word operation
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrementByte_IncrementsBy1()
+    public void Execute_IndirectAutoIncrementByte_ReadsLowByte()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -374,6 +397,28 @@ public class MovInstructionTests
 
         // Assert
         Assert.Equal(0xFF34, registerFile.ReadRegister(RegisterName.R3));
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrementByte_IncrementsBy1()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x1000);
+        memory[0x1000] = 0x34;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R5,
+            RegisterName.R3,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(0x1001, registerFile.ReadRegister(RegisterName.R5)); // Incremented by 1 for byte operation
     }
 

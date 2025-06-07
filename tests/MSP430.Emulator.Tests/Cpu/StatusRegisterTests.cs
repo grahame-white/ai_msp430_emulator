@@ -33,12 +33,17 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void Carry_SetFlag_UpdatesValue()
+    public void Carry_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.Carry = true;
         Assert.Equal((ushort)0x0001, sr.Value);
+    }
 
+    [Fact]
+    public void Carry_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.Carry = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -54,12 +59,17 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void Zero_SetFlag_UpdatesValue()
+    public void Zero_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.Zero = true;
         Assert.Equal((ushort)0x0002, sr.Value);
+    }
 
+    [Fact]
+    public void Zero_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.Zero = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -75,12 +85,17 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void Negative_SetFlag_UpdatesValue()
+    public void Negative_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.Negative = true;
         Assert.Equal((ushort)0x0004, sr.Value);
+    }
 
+    [Fact]
+    public void Negative_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.Negative = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -96,12 +111,17 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void GeneralInterruptEnable_SetFlag_UpdatesValue()
+    public void GeneralInterruptEnable_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.GeneralInterruptEnable = true;
         Assert.Equal((ushort)0x0008, sr.Value);
+    }
 
+    [Fact]
+    public void GeneralInterruptEnable_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.GeneralInterruptEnable = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -117,12 +137,17 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void CpuOff_SetFlag_UpdatesValue()
+    public void CpuOff_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.CpuOff = true;
         Assert.Equal((ushort)0x0010, sr.Value);
+    }
 
+    [Fact]
+    public void CpuOff_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.CpuOff = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -138,12 +163,17 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void OscillatorOff_SetFlag_UpdatesValue()
+    public void OscillatorOff_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.OscillatorOff = true;
         Assert.Equal((ushort)0x0020, sr.Value);
+    }
 
+    [Fact]
+    public void OscillatorOff_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.OscillatorOff = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -159,12 +189,17 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void SystemClockGenerator0_SetFlag_UpdatesValue()
+    public void SystemClockGenerator0_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.SystemClockGenerator0 = true;
         Assert.Equal((ushort)0x0040, sr.Value);
+    }
 
+    [Fact]
+    public void SystemClockGenerator0_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.SystemClockGenerator0 = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -180,12 +215,17 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void SystemClockGenerator1_SetFlag_UpdatesValue()
+    public void SystemClockGenerator1_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.SystemClockGenerator1 = true;
         Assert.Equal((ushort)0x0080, sr.Value);
+    }
 
+    [Fact]
+    public void SystemClockGenerator1_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.SystemClockGenerator1 = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
@@ -201,18 +241,23 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void Overflow_SetFlag_UpdatesValue()
+    public void Overflow_SetFlagToTrue_UpdatesValue()
     {
         var sr = new StatusRegister();
         sr.Overflow = true;
         Assert.Equal((ushort)0x0100, sr.Value);
+    }
 
+    [Fact]
+    public void Overflow_SetFlagToFalse_UpdatesValue()
+    {
+        var sr = new StatusRegister();
         sr.Overflow = false;
         Assert.Equal((ushort)0x0000, sr.Value);
     }
 
     [Fact]
-    public void MultipleFlags_SetSimultaneously_WorkCorrectly()
+    public void MultipleFlags_SetSimultaneously_SetsCorrectValue()
     {
         var sr = new StatusRegister();
 
@@ -222,45 +267,256 @@ public class StatusRegisterTests
         sr.GeneralInterruptEnable = true;
 
         Assert.Equal((ushort)0x000F, sr.Value); // Bits 0-3 set
-        Assert.True(sr.Carry);
-        Assert.True(sr.Zero);
-        Assert.True(sr.Negative);
-        Assert.True(sr.GeneralInterruptEnable);
     }
 
     [Fact]
-    public void Value_SetDirectly_UpdatesAllFlags()
+    public void MultipleFlags_SetSimultaneously_CarryFlagSet()
     {
         var sr = new StatusRegister();
-        sr.Value = 0x01FF; // Set bits 0-8
+
+        sr.Carry = true;
+        sr.Zero = true;
+        sr.Negative = true;
+        sr.GeneralInterruptEnable = true;
 
         Assert.True(sr.Carry);
-        Assert.True(sr.Zero);
-        Assert.True(sr.Negative);
-        Assert.True(sr.GeneralInterruptEnable);
-        Assert.True(sr.CpuOff);
-        Assert.True(sr.OscillatorOff);
-        Assert.True(sr.SystemClockGenerator0);
-        Assert.True(sr.SystemClockGenerator1);
-        Assert.True(sr.Overflow);
     }
 
     [Fact]
-    public void Reset_ClearsAllFlags()
+    public void MultipleFlags_SetSimultaneously_ZeroFlagSet()
+    {
+        var sr = new StatusRegister();
+
+        sr.Carry = true;
+        sr.Zero = true;
+        sr.Negative = true;
+        sr.GeneralInterruptEnable = true;
+
+        Assert.True(sr.Zero);
+    }
+
+    [Fact]
+    public void MultipleFlags_SetSimultaneously_NegativeFlagSet()
+    {
+        var sr = new StatusRegister();
+
+        sr.Carry = true;
+        sr.Zero = true;
+        sr.Negative = true;
+        sr.GeneralInterruptEnable = true;
+
+        Assert.True(sr.Negative);
+    }
+
+    [Fact]
+    public void MultipleFlags_SetSimultaneously_GeneralInterruptEnableFlagSet()
+    {
+        var sr = new StatusRegister();
+
+        sr.Carry = true;
+        sr.Zero = true;
+        sr.Negative = true;
+        sr.GeneralInterruptEnable = true;
+
+        Assert.True(sr.GeneralInterruptEnable);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // Carry bit set
+    [InlineData(0x01FE, false)] // Carry bit clear
+    public void Value_SetDirectly_UpdatesCarryFlag(ushort value, bool expectedCarry)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedCarry, sr.Carry);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // Zero bit set
+    [InlineData(0x01FD, false)] // Zero bit clear
+    public void Value_SetDirectly_UpdatesZeroFlag(ushort value, bool expectedZero)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedZero, sr.Zero);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // Negative bit set
+    [InlineData(0x01FB, false)] // Negative bit clear
+    public void Value_SetDirectly_UpdatesNegativeFlag(ushort value, bool expectedNegative)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedNegative, sr.Negative);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // GIE bit set
+    [InlineData(0x01F7, false)] // GIE bit clear
+    public void Value_SetDirectly_UpdatesGeneralInterruptEnableFlag(ushort value, bool expectedGie)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedGie, sr.GeneralInterruptEnable);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // CpuOff bit set
+    [InlineData(0x01EF, false)] // CpuOff bit clear
+    public void Value_SetDirectly_UpdatesCpuOffFlag(ushort value, bool expectedCpuOff)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedCpuOff, sr.CpuOff);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // OscillatorOff bit set
+    [InlineData(0x01DF, false)] // OscillatorOff bit clear
+    public void Value_SetDirectly_UpdatesOscillatorOffFlag(ushort value, bool expectedOscOff)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedOscOff, sr.OscillatorOff);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // SCG0 bit set
+    [InlineData(0x01BF, false)] // SCG0 bit clear
+    public void Value_SetDirectly_UpdatesSystemClockGenerator0Flag(ushort value, bool expectedScg0)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedScg0, sr.SystemClockGenerator0);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // SCG1 bit set
+    [InlineData(0x017F, false)] // SCG1 bit clear
+    public void Value_SetDirectly_UpdatesSystemClockGenerator1Flag(ushort value, bool expectedScg1)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedScg1, sr.SystemClockGenerator1);
+    }
+
+    [Theory]
+    [InlineData(0x01FF, true)]  // Overflow bit set
+    [InlineData(0x00FF, false)] // Overflow bit clear
+    public void Value_SetDirectly_UpdatesOverflowFlag(ushort value, bool expectedOverflow)
+    {
+        var sr = new StatusRegister();
+        sr.Value = value;
+
+        Assert.Equal(expectedOverflow, sr.Overflow);
+    }
+
+    [Fact]
+    public void Reset_ClearsValueToZero()
     {
         var sr = new StatusRegister(0xFFFF);
         sr.Reset();
 
         Assert.Equal((ushort)0, sr.Value);
-        Assert.False(sr.Carry);
-        Assert.False(sr.Zero);
-        Assert.False(sr.Negative);
-        Assert.False(sr.GeneralInterruptEnable);
-        Assert.False(sr.CpuOff);
-        Assert.False(sr.OscillatorOff);
-        Assert.False(sr.SystemClockGenerator0);
-        Assert.False(sr.SystemClockGenerator1);
-        Assert.False(sr.Overflow);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect carry clear after reset
+    public void Reset_ClearsCarryFlag(ushort initialValue, bool expectedCarry)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedCarry, sr.Carry);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect zero clear after reset
+    public void Reset_ClearsZeroFlag(ushort initialValue, bool expectedZero)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedZero, sr.Zero);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect negative clear after reset
+    public void Reset_ClearsNegativeFlag(ushort initialValue, bool expectedNegative)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedNegative, sr.Negative);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect GIE clear after reset
+    public void Reset_ClearsGeneralInterruptEnableFlag(ushort initialValue, bool expectedGie)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedGie, sr.GeneralInterruptEnable);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect CpuOff clear after reset
+    public void Reset_ClearsCpuOffFlag(ushort initialValue, bool expectedCpuOff)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedCpuOff, sr.CpuOff);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect OscillatorOff clear after reset
+    public void Reset_ClearsOscillatorOffFlag(ushort initialValue, bool expectedOscOff)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedOscOff, sr.OscillatorOff);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect SCG0 clear after reset
+    public void Reset_ClearsSystemClockGenerator0Flag(ushort initialValue, bool expectedScg0)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedScg0, sr.SystemClockGenerator0);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect SCG1 clear after reset
+    public void Reset_ClearsSystemClockGenerator1Flag(ushort initialValue, bool expectedScg1)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedScg1, sr.SystemClockGenerator1);
+    }
+
+    [Theory]
+    [InlineData(0xFFFF, false)] // All bits set, expect overflow clear after reset
+    public void Reset_ClearsOverflowFlag(ushort initialValue, bool expectedOverflow)
+    {
+        var sr = new StatusRegister(initialValue);
+        sr.Reset();
+
+        Assert.Equal(expectedOverflow, sr.Overflow);
     }
 
     [Theory]
@@ -278,17 +534,34 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void ToString_NoFlagsSet_ReturnsCorrectFormat()
+    public void ToString_NoFlagsSet_ContainsCorrectHexValue()
     {
         var sr = new StatusRegister();
         string result = sr.ToString();
 
         Assert.Contains("SR: 0x0000", result);
-        Assert.Contains("[]", result);
     }
 
     [Fact]
-    public void ToString_AllFlagsSet_ShowsAllFlags()
+    public void ToString_NoFlagsSet_ContainsEmptyFlagsList()
+    {
+        var sr = new StatusRegister();
+        string result = sr.ToString();
+
+        Assert.Contains("[]", result);
+    }
+
+    [Theory]
+    [InlineData("C")]
+    [InlineData("Z")]
+    [InlineData("N")]
+    [InlineData("GIE")]
+    [InlineData("CPU_OFF")]
+    [InlineData("OSC_OFF")]
+    [InlineData("SCG0")]
+    [InlineData("SCG1")]
+    [InlineData("V")]
+    public void ToString_AllFlagsSet_ShowsAllFlags(string expectedFlag)
     {
         var sr = new StatusRegister();
         sr.Carry = true;
@@ -303,19 +576,11 @@ public class StatusRegisterTests
 
         string result = sr.ToString();
 
-        Assert.Contains("C", result);
-        Assert.Contains("Z", result);
-        Assert.Contains("N", result);
-        Assert.Contains("GIE", result);
-        Assert.Contains("CPU_OFF", result);
-        Assert.Contains("OSC_OFF", result);
-        Assert.Contains("SCG0", result);
-        Assert.Contains("SCG1", result);
-        Assert.Contains("V", result);
+        Assert.Contains(expectedFlag, result);
     }
 
     [Fact]
-    public void ToString_SomeFlagsSet_ShowsOnlySetFlags()
+    public void ToString_SomeFlagsSet_ShowsCarryFlag()
     {
         var sr = new StatusRegister();
         sr.Carry = true;
@@ -324,8 +589,41 @@ public class StatusRegisterTests
         string result = sr.ToString();
 
         Assert.Contains("C", result);
+    }
+
+    [Fact]
+    public void ToString_SomeFlagsSet_ShowsZeroFlag()
+    {
+        var sr = new StatusRegister();
+        sr.Carry = true;
+        sr.Zero = true;
+
+        string result = sr.ToString();
+
         Assert.Contains("Z", result);
+    }
+
+    [Fact]
+    public void ToString_SomeFlagsSet_DoesNotShowNegativeFlag()
+    {
+        var sr = new StatusRegister();
+        sr.Carry = true;
+        sr.Zero = true;
+
+        string result = sr.ToString();
+
         Assert.DoesNotContain("N", result);
+    }
+
+    [Fact]
+    public void ToString_SomeFlagsSet_DoesNotShowGeneralInterruptEnableFlag()
+    {
+        var sr = new StatusRegister();
+        sr.Carry = true;
+        sr.Zero = true;
+
+        string result = sr.ToString();
+
         Assert.DoesNotContain("GIE", result);
     }
 
@@ -445,28 +743,90 @@ public class StatusRegisterTests
     }
 
     [Fact]
-    public void UpdateFlagsAfterAddition_EdgeCases_HandlesCorrectly()
+    public void UpdateFlagsAfterAddition_EdgeCases_SetsZeroFlag()
     {
         var sr = new StatusRegister();
 
         // Test maximum values
         sr.UpdateFlagsAfterAddition(0xFFFF, 0xFFFF, 0x1FFFE, false);
+
         Assert.False(sr.Zero);
+    }
+
+    [Fact]
+    public void UpdateFlagsAfterAddition_EdgeCases_SetsNegativeFlag()
+    {
+        var sr = new StatusRegister();
+
+        // Test maximum values
+        sr.UpdateFlagsAfterAddition(0xFFFF, 0xFFFF, 0x1FFFE, false);
+
         Assert.True(sr.Negative);
+    }
+
+    [Fact]
+    public void UpdateFlagsAfterAddition_EdgeCases_SetsCarryFlag()
+    {
+        var sr = new StatusRegister();
+
+        // Test maximum values
+        sr.UpdateFlagsAfterAddition(0xFFFF, 0xFFFF, 0x1FFFE, false);
+
         Assert.True(sr.Carry);
+    }
+
+    [Fact]
+    public void UpdateFlagsAfterAddition_EdgeCases_SetsOverflowFlag()
+    {
+        var sr = new StatusRegister();
+
+        // Test maximum values
+        sr.UpdateFlagsAfterAddition(0xFFFF, 0xFFFF, 0x1FFFE, false);
+
         Assert.False(sr.Overflow);
     }
 
     [Fact]
-    public void UpdateFlagsAfterSubtraction_EdgeCases_HandlesCorrectly()
+    public void UpdateFlagsAfterSubtraction_EdgeCases_SetsZeroFlag()
     {
         var sr = new StatusRegister();
 
         // Test minimum subtraction  
         sr.UpdateFlagsAfterSubtraction(0x0000, 0xFFFF, 0x00000001, false);
+
         Assert.False(sr.Zero);
+    }
+
+    [Fact]
+    public void UpdateFlagsAfterSubtraction_EdgeCases_SetsNegativeFlag()
+    {
+        var sr = new StatusRegister();
+
+        // Test minimum subtraction  
+        sr.UpdateFlagsAfterSubtraction(0x0000, 0xFFFF, 0x00000001, false);
+
         Assert.False(sr.Negative);
+    }
+
+    [Fact]
+    public void UpdateFlagsAfterSubtraction_EdgeCases_SetsCarryFlag()
+    {
+        var sr = new StatusRegister();
+
+        // Test minimum subtraction  
+        sr.UpdateFlagsAfterSubtraction(0x0000, 0xFFFF, 0x00000001, false);
+
         Assert.False(sr.Carry);
+    }
+
+    [Fact]
+    public void UpdateFlagsAfterSubtraction_EdgeCases_SetsOverflowFlag()
+    {
+        var sr = new StatusRegister();
+
+        // Test minimum subtraction  
+        sr.UpdateFlagsAfterSubtraction(0x0000, 0xFFFF, 0x00000001, false);
+
         Assert.False(sr.Overflow);
     }
 }

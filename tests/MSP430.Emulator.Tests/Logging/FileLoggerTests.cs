@@ -304,7 +304,7 @@ public class FileLoggerTests : IDisposable
     }
 
     [Fact]
-    public async Task Log_WithMultipleThreads_CreatesLogFile()
+    public async Task Log_WithConcurrentWrites_CreatesLogFile()
     {
         string testPath = Path.Join(Path.GetTempPath(), $"test_multithread_{Guid.NewGuid()}.log");
 

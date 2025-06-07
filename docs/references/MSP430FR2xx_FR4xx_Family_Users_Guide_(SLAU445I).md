@@ -10,7 +10,7 @@
   - 1.2 System Reset and Initialization
     - 1.2.1 Device Initial Conditions After System Reset
   - 1.3 Interrupts
-    - (Non)Maskable Interrupts (NMIs)
+    - 1.3.1 (Non)Maskable Interrupts (NMIs)
     - 1.3.2 SNM Timing
     - 1.3.3 Maskable Interrupts
     - 1.3.4 Interrupt Processing

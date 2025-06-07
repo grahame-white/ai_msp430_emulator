@@ -555,6 +555,7 @@ public class MemoryControllerTests
         _controller.ReadByte(0x2000);
 
         // Assert
+        Assert.NotNull(eventArgs);
         Assert.Equal(0x2000, eventArgs.Context.Address);
     }
 
@@ -569,6 +570,7 @@ public class MemoryControllerTests
         _controller.ReadByte(0x2000);
 
         // Assert
+        Assert.NotNull(eventArgs);
         Assert.Equal(MemoryAccessPermissions.Read, eventArgs.Context.AccessType);
     }
 
@@ -583,6 +585,7 @@ public class MemoryControllerTests
         _controller.ReadByte(0x2000);
 
         // Assert
+        Assert.NotNull(eventArgs);
         Assert.Equal(MemoryRegion.Ram, eventArgs.Region.Region);
     }
 
@@ -597,6 +600,7 @@ public class MemoryControllerTests
         _controller.ReadByte(0x2000);
 
         // Assert
+        Assert.NotNull(eventArgs);
         Assert.True(eventArgs.Cycles > 0);
     }
 
@@ -640,6 +644,7 @@ public class MemoryControllerTests
 
         // Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+        Assert.NotNull(eventArgs);
         Assert.Equal(0x0300, eventArgs.Context.Address);
     }
 
@@ -652,6 +657,7 @@ public class MemoryControllerTests
 
         // Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+        Assert.NotNull(eventArgs);
         Assert.NotNull(eventArgs.Exception);
     }
 

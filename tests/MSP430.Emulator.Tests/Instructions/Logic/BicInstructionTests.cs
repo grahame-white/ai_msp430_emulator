@@ -319,6 +319,32 @@ public class BicInstructionTests
     }
 
     [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void ToString_VariousAddressingModes_ContainsMnemonic(AddressingMode mode)
+    {
+        // Arrange
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R1,
+            RegisterName.R2,
+            mode,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        string result = instruction.ToString();
+
+        // Assert
+        Assert.Contains("BIC", result);
+    }
+
+    [Theory]
     [InlineData(AddressingMode.Register, "R1")]
     [InlineData(AddressingMode.Indirect, "@R1")]
     [InlineData(AddressingMode.IndirectAutoIncrement, "@R1+")]
@@ -326,7 +352,7 @@ public class BicInstructionTests
     [InlineData(AddressingMode.Indexed, "X(R1)")]
     [InlineData(AddressingMode.Absolute, "&ADDR")]
     [InlineData(AddressingMode.Symbolic, "ADDR")]
-    public void ToString_VariousAddressingModes_FormatsCorrectly(
+    public void ToString_VariousAddressingModes_ContainsSourceOperand(
         AddressingMode mode,
         string expectedOperand)
     {
@@ -343,8 +369,32 @@ public class BicInstructionTests
         string result = instruction.ToString();
 
         // Assert
-        Assert.Contains("BIC", result);
         Assert.Contains(expectedOperand, result);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void ToString_VariousAddressingModes_ContainsDestinationRegister(AddressingMode mode)
+    {
+        // Arrange
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R1,
+            RegisterName.R2,
+            mode,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        string result = instruction.ToString();
+
+        // Assert
         Assert.Contains("R2", result);
     }
 

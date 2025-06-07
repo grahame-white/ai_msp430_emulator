@@ -140,10 +140,10 @@ public class MemorySystemIntegrationTests
     }
 
     [Theory]
-    [InlineData(0x2000, true, MemoryAccessPermissions.All, MemoryRegion.Ram)]      // Valid SRAM
-    [InlineData(0x4000, true, MemoryAccessPermissions.All, MemoryRegion.Flash)]    // Valid FRAM  
-    [InlineData(0x0300, false, MemoryAccessPermissions.None, null)]                // Invalid address
-    public void MemorySystem_ValidationInfo_ProvidesCorrectDetails(ushort address, bool expectedValid, MemoryAccessPermissions expectedPermissions, MemoryRegion? expectedRegion)
+    [InlineData(0x2000, true)]      // Valid SRAM
+    [InlineData(0x4000, true)]      // Valid FRAM  
+    [InlineData(0x0300, false)]     // Invalid address
+    public void MemorySystem_ValidationInfo_ProvidesCorrectIsValid(ushort address, bool expectedValid)
     {
         // Arrange
         var memoryMap = new MemoryMap();
@@ -154,16 +154,70 @@ public class MemorySystemIntegrationTests
 
         // Assert
         Assert.Equal(expectedValid, info.IsValid);
+    }
+
+    [Theory]
+    [InlineData(0x2000, MemoryAccessPermissions.All)]  // Valid SRAM
+    [InlineData(0x4000, MemoryAccessPermissions.All)]  // Valid FRAM  
+    [InlineData(0x0300, MemoryAccessPermissions.None)] // Invalid address
+    public void MemorySystem_ValidationInfo_ProvidesCorrectPermissions(ushort address, MemoryAccessPermissions expectedPermissions)
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+        var validator = new MemoryAccessValidator(memoryMap);
+
+        // Act
+        MemoryAccessValidationInfo info = validator.GetValidationInfo(address);
+
+        // Assert
         Assert.Equal(expectedPermissions, info.Permissions);
-        if (expectedRegion.HasValue)
-        {
-            Assert.NotNull(info.Region);
-            Assert.Equal(expectedRegion.Value, info.Region!.Value.Region);
-        }
-        else
-        {
-            Assert.Null(info.Region);
-        }
+    }
+
+    [Theory]
+    [InlineData(0x2000)]  // Valid SRAM
+    [InlineData(0x4000)]  // Valid FRAM  
+    public void MemorySystem_ValidationInfo_ValidAddressHasRegion(ushort address)
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+        var validator = new MemoryAccessValidator(memoryMap);
+
+        // Act
+        MemoryAccessValidationInfo info = validator.GetValidationInfo(address);
+
+        // Assert
+        Assert.NotNull(info.Region);
+    }
+
+    [Theory]
+    [InlineData(0x2000, MemoryRegion.Ram)]   // Valid SRAM
+    [InlineData(0x4000, MemoryRegion.Flash)] // Valid FRAM  
+    public void MemorySystem_ValidationInfo_ProvidesCorrectRegion(ushort address, MemoryRegion expectedRegion)
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+        var validator = new MemoryAccessValidator(memoryMap);
+
+        // Act
+        MemoryAccessValidationInfo info = validator.GetValidationInfo(address);
+
+        // Assert
+        Assert.Equal(expectedRegion, info.Region!.Value.Region);
+    }
+
+    [Theory]
+    [InlineData(0x0300)] // Invalid address
+    public void MemorySystem_ValidationInfo_InvalidAddressHasNullRegion(ushort address)
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+        var validator = new MemoryAccessValidator(memoryMap);
+
+        // Act
+        MemoryAccessValidationInfo info = validator.GetValidationInfo(address);
+
+        // Assert
+        Assert.Null(info.Region);
     }
 
     [Theory]

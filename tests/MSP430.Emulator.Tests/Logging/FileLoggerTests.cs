@@ -74,7 +74,7 @@ public class FileLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Debug_WritesToFile()
+    public void Debug_WritesToFile_ContainsMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Debug("test debug message");
@@ -82,6 +82,16 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test debug message", content);
+    }
+
+    [Fact]
+    public void Debug_WritesToFile_ContainsLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Debug("test debug message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[DEBUG]", content);
     }
 

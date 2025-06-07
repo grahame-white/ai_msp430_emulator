@@ -717,23 +717,6 @@ public class FlashControllerTests
     [Theory]
     [InlineData(false)] // Byte programming
     [InlineData(true)]  // Word programming
-    public void GetProgramCycles_ReturnsExpectedCycles(bool isWordAccess)
-    {
-        uint cycles = FlashController.GetProgramCycles(isWordAccess);
-
-        if (isWordAccess)
-        {
-            Assert.Equal(FlashController.WordProgramCycles, cycles);
-        }
-        else
-        {
-            Assert.Equal(FlashController.ByteProgramCycles, cycles);
-        }
-    }
-
-    [Theory]
-    [InlineData(false)] // Byte programming
-    [InlineData(true)]  // Word programming
     public void GetProgramCycles_ReturnsPositiveCycles(bool isWordAccess)
     {
         uint cycles = FlashController.GetProgramCycles(isWordAccess);

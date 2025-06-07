@@ -12,9 +12,8 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 /// </summary>
 public class MovInstructionTests
 {
-    [Theory]
-    [InlineData(InstructionFormat.FormatI)]
-    public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
+    [Fact]
+    public void Constructor_ValidParameters_SetsFormat()
     {
         // Arrange & Act
         var instruction = new MovInstruction(
@@ -26,12 +25,11 @@ public class MovInstructionTests
             false);
 
         // Assert
-        Assert.Equal(expectedFormat, instruction.Format);
+        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
     }
 
-    [Theory]
-    [InlineData(0x4)]
-    public void Constructor_ValidParameters_SetsOpcode(ushort expectedOpcode)
+    [Fact]
+    public void Constructor_ValidParameters_SetsOpcode()
     {
         // Arrange & Act
         var instruction = new MovInstruction(
@@ -43,7 +41,7 @@ public class MovInstructionTests
             false);
 
         // Assert
-        Assert.Equal(expectedOpcode, instruction.Opcode);
+        Assert.Equal(0x4, instruction.Opcode);
     }
 
     [Theory]

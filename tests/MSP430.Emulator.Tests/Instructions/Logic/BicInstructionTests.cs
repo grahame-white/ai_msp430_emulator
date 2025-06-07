@@ -29,9 +29,8 @@ public class BicInstructionTests
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
     }
 
-    [Theory]
-    [InlineData(0xC)]
-    public void Constructor_ValidParameters_SetsOpcode(byte expectedOpcode)
+    [Fact]
+    public void Constructor_ValidParameters_SetsOpcode()
     {
         // Arrange & Act
         var instruction = new BicInstruction(
@@ -43,12 +42,11 @@ public class BicInstructionTests
             false);
 
         // Assert
-        Assert.Equal(expectedOpcode, instruction.Opcode);
+        Assert.Equal(0xC, instruction.Opcode);
     }
 
-    [Theory]
-    [InlineData(0xC123)]
-    public void Constructor_ValidParameters_SetsInstructionWord(ushort expectedWord)
+    [Fact]
+    public void Constructor_ValidParameters_SetsInstructionWord()
     {
         // Arrange & Act
         var instruction = new BicInstruction(
@@ -60,12 +58,11 @@ public class BicInstructionTests
             false);
 
         // Assert
-        Assert.Equal(expectedWord, instruction.InstructionWord);
+        Assert.Equal(0xC123, instruction.InstructionWord);
     }
 
-    [Theory]
-    [InlineData("BIC")]
-    public void Constructor_ValidParameters_SetsMnemonic(string expectedMnemonic)
+    [Fact]
+    public void Constructor_ValidParameters_SetsMnemonic()
     {
         // Arrange & Act
         var instruction = new BicInstruction(
@@ -77,7 +74,7 @@ public class BicInstructionTests
             false);
 
         // Assert
-        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
+        Assert.Equal("BIC", instruction.Mnemonic);
     }
 
     [Fact]

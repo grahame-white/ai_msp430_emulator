@@ -13,22 +13,20 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 public class AddInstructionTests
 {
 
-    [Theory]
-    [InlineData(InstructionFormat.FormatI)]
-    public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
+    [Fact]
+    public void Constructor_ValidParameters_SetsFormat()
     {
         var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
 
-        Assert.Equal(expectedFormat, instruction.Format);
+        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
     }
 
-    [Theory]
-    [InlineData(0x5)]
-    public void Constructor_ValidParameters_SetsOpcode(byte expectedOpcode)
+    [Fact]
+    public void Constructor_ValidParameters_SetsOpcode()
     {
         var instruction = new AddInstruction(0x5123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false);
 
-        Assert.Equal(expectedOpcode, instruction.Opcode);
+        Assert.Equal(0x5, instruction.Opcode);
     }
 
     [Theory]

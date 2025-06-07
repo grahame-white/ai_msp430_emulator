@@ -16,59 +16,54 @@ public class StatusBitInstructionTests
     /// </summary>
     public class SetcInstructionTests
     {
-        [Theory]
-        [InlineData(InstructionFormat.FormatI)]
-        public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
+        [Fact]
+        public void Constructor_ValidParameters_SetsFormat()
         {
             // Arrange & Act
             var instruction = new SetcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedFormat, instruction.Format);
+            Assert.Equal(InstructionFormat.FormatI, instruction.Format);
         }
 
-        [Theory]
-        [InlineData(0x4)]
-        public void Constructor_ValidParameters_SetsOpcode(ushort expectedOpcode)
+        [Fact]
+        public void Constructor_ValidParameters_SetsOpcode()
         {
             // Arrange & Act
             var instruction = new SetcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedOpcode, instruction.Opcode); // MOV instruction opcode
+            Assert.Equal(0x4, instruction.Opcode); // MOV instruction opcode
         }
 
-        [Theory]
-        [InlineData("SETC")]
-        public void Constructor_ValidParameters_SetsMnemonic(string expectedMnemonic)
+        [Fact]
+        public void Constructor_ValidParameters_SetsMnemonic()
         {
             // Arrange & Act
             var instruction = new SetcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedMnemonic, instruction.Mnemonic);
+            Assert.Equal("SETC", instruction.Mnemonic);
         }
 
-        [Theory]
-        [InlineData(false)]
-        public void Constructor_ValidParameters_SetsByteOperation(bool expectedByteOp)
+        [Fact]
+        public void Constructor_ValidParameters_SetsByteOperation()
         {
             // Arrange & Act
             var instruction = new SetcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedByteOp, instruction.IsByteOperation);
+            Assert.False(instruction.IsByteOperation);
         }
 
-        [Theory]
-        [InlineData(0)]
-        public void Constructor_ValidParameters_SetsExtensionWordCount(int expectedCount)
+        [Fact]
+        public void Constructor_ValidParameters_SetsExtensionWordCount()
         {
             // Arrange & Act
             var instruction = new SetcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedCount, instruction.ExtensionWordCount);
+            Assert.Equal(0, instruction.ExtensionWordCount);
         }
 
         [Fact]
@@ -221,59 +216,54 @@ public class StatusBitInstructionTests
     /// </summary>
     public class ClrcInstructionTests
     {
-        [Theory]
-        [InlineData(InstructionFormat.FormatI)]
-        public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
+        [Fact]
+        public void Constructor_ValidParameters_SetsFormat()
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedFormat, instruction.Format);
+            Assert.Equal(InstructionFormat.FormatI, instruction.Format);
         }
 
-        [Theory]
-        [InlineData("CLRC")]
-        public void Constructor_ValidParameters_SetsMnemonic(string expectedMnemonic)
+        [Fact]
+        public void Constructor_ValidParameters_SetsMnemonic()
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedMnemonic, instruction.Mnemonic);
+            Assert.Equal("CLRC", instruction.Mnemonic);
         }
 
-        [Theory]
-        [InlineData(false)]
-        public void Constructor_ValidParameters_SetsIsByteOperation(bool expectedByteOperation)
+        [Fact]
+        public void Constructor_ValidParameters_SetsIsByteOperation()
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedByteOperation, instruction.IsByteOperation);
+            Assert.False(instruction.IsByteOperation);
         }
 
-        [Theory]
-        [InlineData(0x4)]
-        public void Constructor_ValidParameters_SetsOpcode(int expectedOpcode)
+        [Fact]
+        public void Constructor_ValidParameters_SetsOpcode()
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedOpcode, instruction.Opcode);
+            Assert.Equal(0x4, instruction.Opcode);
         }
 
-        [Theory]
-        [InlineData(0)]
-        public void Constructor_ValidParameters_SetsExtensionWordCount(int expectedCount)
+        [Fact]
+        public void Constructor_ValidParameters_SetsExtensionWordCount()
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(expectedCount, instruction.ExtensionWordCount);
+            Assert.Equal(0, instruction.ExtensionWordCount);
         }
 
         [Fact]

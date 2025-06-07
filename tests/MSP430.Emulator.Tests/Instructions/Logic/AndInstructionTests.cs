@@ -659,6 +659,34 @@ public class AndInstructionTests
 
         // Assert
         Assert.Equal(3u, cycles); // 1 base + 2 source (indirect auto-increment) + 0 dest (register)
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrementToRegister_IncrementsSourceRegister()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0x0100); // Points to memory address
+        registerFile.WriteRegister(RegisterName.R5, 0x0000);
+
+        // Set up memory at indirect location
+        memory[0x0100] = 0x00;
+        memory[0x0101] = 0xFF;
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
         Assert.Equal(0x0102, registerFile.ReadRegister(RegisterName.R4)); // Should be incremented by 2 for word operation
     }
 

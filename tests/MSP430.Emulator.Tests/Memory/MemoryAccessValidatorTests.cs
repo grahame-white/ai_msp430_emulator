@@ -183,18 +183,29 @@ public class MemoryAccessValidatorTests
         Assert.Equal(expected, result);
     }
 
-    [Fact]
-    public void ValidationMethods_LogCorrectAccessTypes()
+    [Theory]
+    [InlineData("ValidateRead", "read access validated")]
+    [InlineData("ValidateWrite", "write access validated")]
+    [InlineData("ValidateExecute", "execute access validated")]
+    public void ValidationMethod_LogsCorrectAccessType(string methodName, string expectedLogMessage)
     {
         _logger.MinimumLevel = LogLevel.Debug;
 
-        _validator.ValidateRead(0x2000);
-        _validator.ValidateWrite(0x2000);
-        _validator.ValidateExecute(0x2000);
+        // Use reflection or switch to call the appropriate method
+        switch (methodName)
+        {
+            case "ValidateRead":
+                _validator.ValidateRead(0x2000);
+                break;
+            case "ValidateWrite":
+                _validator.ValidateWrite(0x2000);
+                break;
+            case "ValidateExecute":
+                _validator.ValidateExecute(0x2000);
+                break;
+        }
 
-        Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains("read access validated"));
-        Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains("write access validated"));
-        Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains("execute access validated"));
+        Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains(expectedLogMessage));
     }
 
     private class TestLogger : ILogger

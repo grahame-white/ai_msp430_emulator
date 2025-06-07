@@ -15,25 +15,79 @@ public class FlashMemoryTests
         _logger = new TestLogger();
     }
 
+    [Theory]
+    [InlineData(4096, 4096)]
+    [InlineData(8192, 8192)]
+    [InlineData(2048, 2048)]
+    public void Constructor_ValidParameters_SetsSize(int size, int expectedSize)
+    {
+        var flash = new FlashMemory(0x8000, size, 512, _logger);
+
+        Assert.Equal(expectedSize, flash.Size);
+    }
+
+    [Theory]
+    [InlineData(0x8000, 0x8000)]
+    [InlineData(0x4000, 0x4000)]
+    [InlineData(0xC000, 0xC000)]
+    public void Constructor_ValidParameters_SetsBaseAddress(ushort baseAddress, ushort expectedBaseAddress)
+    {
+        var flash = new FlashMemory(baseAddress, 4096, 512, _logger);
+
+        Assert.Equal(expectedBaseAddress, flash.BaseAddress);
+    }
+
+    [Theory]
+    [InlineData(0x8000, 4096, 0x8FFF)]
+    [InlineData(0x4000, 2048, 0x47FF)]
+    [InlineData(0xC000, 1024, 0xC3FF)]
+    public void Constructor_ValidParameters_SetsEndAddress(ushort baseAddress, int size, ushort expectedEndAddress)
+    {
+        var flash = new FlashMemory(baseAddress, size, 512, _logger);
+
+        Assert.Equal(expectedEndAddress, flash.EndAddress);
+    }
+
+    [Theory]
+    [InlineData(512, 512)]
+    [InlineData(1024, 1024)]
+    [InlineData(256, 256)]
+    public void Constructor_ValidParameters_SetsSectorSize(int sectorSize, int expectedSectorSize)
+    {
+        var flash = new FlashMemory(0x8000, 4096, sectorSize, _logger);
+
+        Assert.Equal(expectedSectorSize, flash.SectorSize);
+    }
+
     [Fact]
-    public void Constructor_ValidParameters_CreatesFlashMemory()
+    public void Constructor_ValidParameters_SetsDefaultProtectionLevel()
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.Equal(4096, flash.Size);
-        Assert.Equal((ushort)0x8000, flash.BaseAddress);
-        Assert.Equal((ushort)0x8FFF, flash.EndAddress);
-        Assert.Equal(512, flash.SectorSize);
         Assert.Equal(FlashProtectionLevel.None, flash.ProtectionLevel);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsDefaultControllerState()
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+
         Assert.Equal(FlashControllerState.Locked, flash.ControllerState);
     }
 
     [Fact]
-    public void Constructor_NullLogger_CreatesFlashMemory()
+    public void Constructor_NullLogger_SetsSize()
     {
         var flash = new FlashMemory(0x8000, 4096);
 
         Assert.Equal(4096, flash.Size);
+    }
+
+    [Fact]
+    public void Constructor_NullLogger_SetsBaseAddress()
+    {
+        var flash = new FlashMemory(0x8000, 4096);
+
         Assert.Equal((ushort)0x8000, flash.BaseAddress);
     }
 

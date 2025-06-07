@@ -159,27 +159,53 @@ public class ExecutionStateTests
         Assert.Equal(ExecutionState.Reset, stateManager.CurrentState);
     }
 
-    [Fact]
-    public void MultipleTransitions_FollowValidPath()
+    [Theory]
+    [InlineData(ExecutionState.Reset, ExecutionState.Running, ExecutionState.Running)]
+    [InlineData(ExecutionState.Running, ExecutionState.Stopped, ExecutionState.Stopped)]
+    [InlineData(ExecutionState.Stopped, ExecutionState.SingleStep, ExecutionState.SingleStep)]
+    [InlineData(ExecutionState.SingleStep, ExecutionState.Halted, ExecutionState.Halted)]
+    [InlineData(ExecutionState.Halted, ExecutionState.Reset, ExecutionState.Reset)]
+    public void TransitionTo_FromStateToState_UpdatesCurrentState(ExecutionState fromState, ExecutionState toState, ExecutionState expectedState)
     {
         var stateManager = new ExecutionStateManager();
 
-        // Reset -> Running -> Stopped -> SingleStep -> Halted -> Reset
-        Assert.Equal(ExecutionState.Reset, stateManager.CurrentState);
+        // Transition to the initial state if it's not Reset
+        if (fromState != ExecutionState.Reset)
+        {
+            // Navigate to the from state through valid transitions
+            switch (fromState)
+            {
+                case ExecutionState.Running:
+                    stateManager.TransitionTo(ExecutionState.Running);
+                    break;
+                case ExecutionState.Stopped:
+                    stateManager.TransitionTo(ExecutionState.Running);
+                    stateManager.TransitionTo(ExecutionState.Stopped);
+                    break;
+                case ExecutionState.SingleStep:
+                    stateManager.TransitionTo(ExecutionState.Running);
+                    stateManager.TransitionTo(ExecutionState.Stopped);
+                    stateManager.TransitionTo(ExecutionState.SingleStep);
+                    break;
+                case ExecutionState.Halted:
+                    stateManager.TransitionTo(ExecutionState.Running);
+                    stateManager.TransitionTo(ExecutionState.Stopped);
+                    stateManager.TransitionTo(ExecutionState.SingleStep);
+                    stateManager.TransitionTo(ExecutionState.Halted);
+                    break;
+            }
+        }
 
-        stateManager.TransitionTo(ExecutionState.Running);
-        Assert.Equal(ExecutionState.Running, stateManager.CurrentState);
+        stateManager.TransitionTo(toState);
 
-        stateManager.TransitionTo(ExecutionState.Stopped);
-        Assert.Equal(ExecutionState.Stopped, stateManager.CurrentState);
+        Assert.Equal(expectedState, stateManager.CurrentState);
+    }
 
-        stateManager.TransitionTo(ExecutionState.SingleStep);
-        Assert.Equal(ExecutionState.SingleStep, stateManager.CurrentState);
+    [Fact]
+    public void MultipleTransitions_InitialState_IsReset()
+    {
+        var stateManager = new ExecutionStateManager();
 
-        stateManager.TransitionTo(ExecutionState.Halted);
-        Assert.Equal(ExecutionState.Halted, stateManager.CurrentState);
-
-        stateManager.TransitionTo(ExecutionState.Reset);
         Assert.Equal(ExecutionState.Reset, stateManager.CurrentState);
     }
 }

@@ -49,21 +49,21 @@ public class MemoryAccessValidatorTests
     }
 
     [Fact]
-    public void ValidateRead_InvalidAddress_ExceptionAddressProperty()
+    public void ValidateRead_InvalidAddress_ExceptionHasCorrectAddress()
     {
         MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(0x0300));
         Assert.Equal((ushort)0x0300, exception.Address);
     }
 
     [Fact]
-    public void ValidateRead_InvalidAddress_ExceptionAccessTypeProperty()
+    public void ValidateRead_InvalidAddress_ExceptionHasCorrectAccessType()
     {
         MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(0x0300));
         Assert.Equal(MemoryAccessPermissions.Read, exception.AccessType);
     }
 
     [Fact]
-    public void ValidateRead_InvalidAddress_ExceptionMessageProperty()
+    public void ValidateRead_InvalidAddress_ExceptionHasCorrectMessage()
     {
         MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(0x0300));
         Assert.Contains("Invalid memory address", exception.Message);
@@ -86,21 +86,21 @@ public class MemoryAccessValidatorTests
     }
 
     [Fact]
-    public void ValidateWrite_ReadOnlyRegion_ExceptionAddressProperty()
+    public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectAddress()
     {
         MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x1000)); // Bootstrap Loader FRAM - read/execute only
         Assert.Equal((ushort)0x1000, exception.Address);
     }
 
     [Fact]
-    public void ValidateWrite_ReadOnlyRegion_ExceptionAccessTypeProperty()
+    public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectAccessType()
     {
         MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x1000)); // Bootstrap Loader FRAM - read/execute only
         Assert.Equal(MemoryAccessPermissions.Write, exception.AccessType);
     }
 
     [Fact]
-    public void ValidateWrite_ReadOnlyRegion_ExceptionMessageProperty()
+    public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectMessage()
     {
         MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x1000)); // Bootstrap Loader FRAM - read/execute only
         Assert.Contains("Access denied", exception.Message);
@@ -131,7 +131,7 @@ public class MemoryAccessValidatorTests
     }
 
     [Fact]
-    public void ValidateExecute_NonExecutableRegion_ExceptionContainsCorrectAddress()
+    public void ValidateExecute_NonExecutableRegion_ExceptionHasCorrectAddress()
     {
         // Create a custom memory map with a data-only region
         MemoryRegionInfo[] customRegions = new[]
@@ -142,12 +142,11 @@ public class MemoryAccessValidatorTests
         var customValidator = new MemoryAccessValidator(customMap, _logger);
 
         MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => customValidator.ValidateExecute(0x0000));
-
         Assert.Equal((ushort)0x0000, exception.Address);
     }
 
     [Fact]
-    public void ValidateExecute_NonExecutableRegion_ExceptionContainsCorrectAccessType()
+    public void ValidateExecute_NonExecutableRegion_ExceptionHasCorrectAccessType()
     {
         // Create a custom memory map with a data-only region
         MemoryRegionInfo[] customRegions = new[]
@@ -158,7 +157,6 @@ public class MemoryAccessValidatorTests
         var customValidator = new MemoryAccessValidator(customMap, _logger);
 
         MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => customValidator.ValidateExecute(0x0000));
-
         Assert.Equal(MemoryAccessPermissions.Execute, exception.AccessType);
     }
 

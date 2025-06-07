@@ -161,7 +161,7 @@ public class DiagnosticReportGeneratorTests
     }
 
     [Fact]
-    public void GenerateReport_WithDiagnosticLogger_ShouldIncludeRecentEntries()
+    public void GenerateReport_WithDiagnosticLogger_ShouldIncludeRecentEntriesHeader()
     {
         // Arrange
         using var fileLogger = new FileLogger("test.log");
@@ -178,9 +178,46 @@ public class DiagnosticReportGeneratorTests
 
         // Assert
         Assert.Contains("## Recent Log Entries", report);
-        Assert.Contains("Test log entry 1", report);
-        Assert.Contains("Test log entry 2", report);
-        Assert.Contains("Test log entry 3", report);
+
+        // Cleanup test file
+        try
+        {
+            if (File.Exists("test.log"))
+            {
+                File.Delete("test.log");
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Ignore file access errors during test cleanup
+        }
+        catch (IOException)
+        {
+            // Ignore I/O errors during test cleanup
+        }
+    }
+
+    [Theory]
+    [InlineData("Test log entry 1")]
+    [InlineData("Test log entry 2")]
+    [InlineData("Test log entry 3")]
+    public void GenerateReport_WithDiagnosticLogger_ShouldIncludeSpecificLogEntry(string expectedEntry)
+    {
+        // Arrange
+        using var fileLogger = new FileLogger("test.log");
+        using var diagnosticLogger = new DiagnosticLogger(fileLogger);
+        var generator = new DiagnosticReportGenerator(diagnosticLogger);
+
+        // Add some log entries
+        diagnosticLogger.Info("Test log entry 1");
+        diagnosticLogger.Warning("Test log entry 2");
+        diagnosticLogger.Error("Test log entry 3");
+
+        // Act
+        string report = generator.GenerateReport();
+
+        // Assert
+        Assert.Contains(expectedEntry, report);
 
         // Cleanup test file
         try
@@ -229,7 +266,7 @@ public class DiagnosticReportGeneratorTests
     }
 
     [Fact]
-    public void GenerateReportToFile_ShouldCreateFile()
+    public void GenerateReportToFile_ShouldReturnCorrectPath()
     {
         // Arrange
         var logger = new ConsoleLogger { IsOutputSuppressed = true };
@@ -243,8 +280,57 @@ public class DiagnosticReportGeneratorTests
 
             // Assert
             Assert.Equal(Path.GetFullPath(testFile), generatedPath);
-            Assert.True(File.Exists(testFile));
+        }
+        finally
+        {
+            // Cleanup
+            if (File.Exists(testFile))
+            {
+                File.Delete(testFile);
+            }
+        }
+    }
 
+    [Fact]
+    public void GenerateReportToFile_ShouldCreateFileAtPath()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+        string testFile = Path.Join(Path.GetTempPath(), "test-diagnostic-report.md");
+
+        try
+        {
+            // Act
+            generator.GenerateReportToFile(testFile);
+
+            // Assert
+            Assert.True(File.Exists(testFile));
+        }
+        finally
+        {
+            // Cleanup
+            if (File.Exists(testFile))
+            {
+                File.Delete(testFile);
+            }
+        }
+    }
+
+    [Fact]
+    public void GenerateReportToFile_ShouldWriteCorrectContent()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+        string testFile = Path.Join(Path.GetTempPath(), "test-diagnostic-report.md");
+
+        try
+        {
+            // Act
+            generator.GenerateReportToFile(testFile);
+
+            // Assert
             string content = File.ReadAllText(testFile);
             Assert.Contains("# MSP430 Emulator Diagnostic Report", content);
         }
@@ -259,7 +345,7 @@ public class DiagnosticReportGeneratorTests
     }
 
     [Fact]
-    public void GenerateReportToFile_WithNullPath_ShouldCreateDefaultNamedFile()
+    public void GenerateReportToFile_WithNullPath_ShouldCreateFile()
     {
         // Arrange
         var logger = new ConsoleLogger { IsOutputSuppressed = true };
@@ -272,9 +358,119 @@ public class DiagnosticReportGeneratorTests
 
             // Assert
             Assert.True(File.Exists(generatedPath));
-            Assert.Contains("msp430-diagnostic-", Path.GetFileName(generatedPath));
-            Assert.EndsWith(".md", generatedPath);
+        }
+        finally
+        {
+            // Cleanup - find and delete any files we created
+            string currentDir = Directory.GetCurrentDirectory();
+            string[] files = Directory.GetFiles(currentDir, "msp430-diagnostic-*.md");
+            foreach (string file in files)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Ignore file access errors during test cleanup
+                }
+                catch (IOException)
+                {
+                    // Ignore I/O errors during test cleanup
+                }
+            }
+        }
+    }
 
+    [Fact]
+    public void GenerateReportToFile_WithNullPath_ShouldUseDefaultNamePattern()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        try
+        {
+            // Act
+            string generatedPath = generator.GenerateReportToFile();
+
+            // Assert
+            Assert.Contains("msp430-diagnostic-", Path.GetFileName(generatedPath));
+        }
+        finally
+        {
+            // Cleanup - find and delete any files we created
+            string currentDir = Directory.GetCurrentDirectory();
+            string[] files = Directory.GetFiles(currentDir, "msp430-diagnostic-*.md");
+            foreach (string file in files)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Ignore file access errors during test cleanup
+                }
+                catch (IOException)
+                {
+                    // Ignore I/O errors during test cleanup
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void GenerateReportToFile_WithNullPath_ShouldUseMarkdownExtension()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        try
+        {
+            // Act
+            string generatedPath = generator.GenerateReportToFile();
+
+            // Assert
+            Assert.EndsWith(".md", generatedPath);
+        }
+        finally
+        {
+            // Cleanup - find and delete any files we created
+            string currentDir = Directory.GetCurrentDirectory();
+            string[] files = Directory.GetFiles(currentDir, "msp430-diagnostic-*.md");
+            foreach (string file in files)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Ignore file access errors during test cleanup
+                }
+                catch (IOException)
+                {
+                    // Ignore I/O errors during test cleanup
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void GenerateReportToFile_WithNullPath_ShouldWriteCorrectContent()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        try
+        {
+            // Act
+            string generatedPath = generator.GenerateReportToFile();
+
+            // Assert
             string content = File.ReadAllText(generatedPath);
             Assert.Contains("# MSP430 Emulator Diagnostic Report", content);
         }

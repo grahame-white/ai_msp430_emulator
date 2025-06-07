@@ -246,6 +246,7 @@ public class MemoryAccessValidatorTests
     {
         MemoryAccessValidationInfo info = _validator.GetValidationInfo(0x2000); // RAM
 
+        Assert.NotNull(info.Region);
         Assert.Equal(MemoryRegion.Ram, info.Region.Value.Region);
     }
 

@@ -1,0 +1,688 @@
+# MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019
+
+![Texas Instruments logo](/images/common/texas_instruments_red_logo.jpg)
+
+## Contents
+
+- Preface
+- 1 System Resets, Interrupts, and Operating Modes, System Control Module (SYS)
+  - 1.1 System Control Module (SYS) Introduction
+  - 1.2 System Reset and Initialization
+    - 1.2.1 Device Initial Conditions After System Reset
+  - 1.3 Interrupts
+    - (Non)Maskable Interrupts (NMIs)
+    - 1.3.2 SNM Timing
+    - 1.3.3 Maskable Interrupts
+    - 1.3.4 Interrupt Processing
+      - 1.3.4.1 Interrupt Acceptance
+      - 1.3.4.2 Return From Interrupt
+    - 1.3.5 Interrupt Nesting
+    - 1.3.6 Interrupt Vectors
+      - 1.3.6.1 Alternate Interrupt Vectors
+    - 1.3.7 SYS Interrupt Vector Generators
+      - 1.3.7.1 SYSSNIV Software Example
+  - 1.4 Operating Modes
+    - 1.4.1 Low-Power Modes and Clock Requests
+    - 1.4.2 Entering and Exiting Low-Power Modes LPM0 Through LPM4
+    - 1.4.3 Low-Power Modes LPM3.5 and LPM4.5 (LPMx.5)
+      - 1.4.3.1 Enter LPMx.5
+      - 1.4.3.2 Exit From LPMx.5
+      - 1.4.3.3 Wake up From LPM3.5
+      - 1.4.3.3 Wake up From LPM4.5
+    - 1.4.4 Extended Time in Low-Power Modes
+  - 1.5 Principles for Low-Power Applications
+  - 1.6 Connection of Unused Pins
+  - 1.7 Reset Pin (R̅S̅T̅/NMI) Configuration
+  - 1.8 Configuring JTAG Pins
+  - 1.9 Memory Map - Uses and Abilities
+    - 1.9.1 Memory Map
+    - 1.9.2 Vacant Memory Space
+    - 1.9.3 FRAM Write Protection
+    - 1.9.4 Bootloader (BSL)
+  - 1.10 JTAG Mailbox (JMB) System
+    - 1.10.1 JMB Configuration
+    - 1.10.2 SYSJMBO0 and SYSJMBO1 Outgoing Mailbox
+    - 1.10.3 SYSJMBI0 and SYSJMBI1 Incoming Mailbox
+    - 1.10.4 JMB NMI Usage
+  - 1.11 Device Security
+    - 1.11.1 JTAG and SBW Lock Mechanism (Electronic Fuse)
+    - 1.11.2 BSL Security Mechanism
+  - 1.12 Device-Specific Configurations
+    - 1.12.1 MSP430FR413x and MSP430FR203x Configurations
+      - 1.12.1.1 FRAM Write Protection
+      - 1.12.1.2 Infrared Modulation Function
+      - 1.12.1.3 ADC Pin Enable and 1.2V Reference Settings
+      - 1.12.1.4 LCD Power Pin Enable
+    - 1.12.2 MSP430FR2433 Configurations
+      - 1.12.2.1 FRAM Write Protection
+      - 1.12.2.2 Infrared Modulation Function
+      - 1.12.2.3 ADC Pin Enable and 1.2V Reference Settings
+    - 1.12.3 MSP430FR263x and MSP430FR253x Configurations
+      - 1.12.3.1 FRAM Write Protection
+      - 1.12.3.2 Infrared Modulation Function
+      - 1.12.3.3 ADC Pin Enable and 1.2V Reference Settings
+    - 1.12.4 MSP430FR23xx Configurations
+      - 1.12.4.1 FRAM Write Protection
+      - 1.12.4.2 Infrared Modulation Function
+      - 1.12.4.3 ADC Pin Enable and 1.2V Reference Settings
+    - 1.12.5 MSP430FR211x Configurations
+      - 1.12.5.1 FRAM Write Protection
+      - 1.12.5.2 Infrared Modulation Function
+      - 1.12.5.3 ADC Pin Enable and 1.2V Reference Settings
+  - 1.13 Device Descriptor Table
+    - 1.13.1 Identifying Device Type
+    - 1.13.2 TLV Descriptors
+    - 1.13.3 Calibration Values
+      - 1.13.3.1 1.5V Reference Calibration
+      - 1.13.3.2 ADC Offset and Gain Calibration
+      - 1.13.3.3 Temperature Sensor Calibration
+      - 1.13.3.4 DCO Calibration
+  - 1.14 SFR Registers
+    - 1.14.1 SFRIE1 Register (offset = 00h) [reset = 0000h]
+    - 1.14.2 SFRIFG1 Register (offset = 02h) [reset = 0082h]
+    - 1.14.3 SFRRPCR Register (offset = 04h) [reset = 001Ch]
+  - 1.15 SYS Registers
+    - 1.15.1 SYSCTL Register (offset = 00h) [reset = 0000h]
+    - 1.15.2 SYSBSLC Register (offset = 02h) [reset = 0000h]
+    - 1.15.3 SYSJMBC Register (offset = 06h) [reset = 000Ch]
+    - 1.15.4 SYSJMBI0 Register (offset = 08h) [reset = 0000h]
+    - 1.15.5 SYSJMBI1 Register (offset = 0Ah) [reset = 0000h]
+    - 1.15.6 SYSJMBO0 Register (offset = 0Ch) [reset = 0000h]
+    - 1.15.7 SYSJMBO1 Register (offset = 0Eh) [reset = 0000h]
+    - 1.15.8 SYSUNIV Register (offset = 1Ah) [reset = 0000h]
+    - 1.15.9 SYSSNIV Register (offset = 1Ch) [reset = 0000h]
+    - 1.15.10 SYSRSTIV Register (offset = 1Eh) [reset = 0002h]
+  - 1.16 System Configuration Registers
+    - 1.16.1 Smart Analog Combo Subfamily System Configuration Registers
+      - 1.16.1.1 Smart Analog Combo Subfamily SYSCFG0 Register (offset = 00h) [reset = 9601h]
+      - 1.16.1.2 Smart Analog Combo Subfamily SYSCFG1 Register (offset = 02h) [reset = 0000h]
+      - 1.16.1.3 Smart Analog Combo Subfamily SYSCFG2 Register (offset = 04h) [reset = 0000h]
+      - 1.16.1.4 Smart Analog Combo Subfamily SYSCFG3 Register (offset = 06h) [reset = 0000h]
+    - 1.16.2 System Configuration Registers for Devices Without Smart Analog Combo (SAC)
+      - 1.16.1.1 Devices Without Smart Analog Combo SYSCFG0 Register (offset = 00h) [reset = 9603h]
+      - 1.16.1.2 Devices Without Smart Analog Combo SYSCFG1 Register (offset = 02h) [reset = 0000h]
+      - 1.16.1.3 Devices Without Smart Analog Combo SYSCFG2 Register (offset = 04h) [reset = 0000h]
+      - 1.16.1.4 Devices Without Smart Analog Combo SYSCFG3 Register (offset = 06h) [reset = 0000h]
+- 2 Power Management Module (PMM) and Supply Voltage Supervisor (SVS)
+  - 2.1 Power Management Module (PMM) Introduction
+  - 2.2 PMM Operation
+    - 2.2.1 VCORE and the Regulator
+    - 2.2.2 Supply Voltage Supervisor
+    - 2.2.3 Supply Voltage Supervisor During Power-Up
+    - 2.2.4 LPM3.5 and LPM4.5 (LPMx.5)
+    - 2.2.5 Low-Power Reset
+    - 2.2.6 Brownout Reset (BOR)
+    - 2.2.7 LPM3.5 Switch
+    - 2.2.8 Shared Reference Generation and Distribution
+    - 2.2.9 Temperature Sensor
+    - 2.2.10 R̅S̅T̅/NMI
+    - 2.2.11 PMM Interrupts
+    - 2.2.12 Port I/O Control
+  - 2.3 PMM Registers
+    - 2.3.1 PMMCTL0 Register (offset = 00h) [reset = 9640h]
+    - 2.3.2 PMMCTL1 Register (offset = 02h) [reset = 0000h]
+    - 2.3.3 PMMCTL2 Register (offset = 04h) [reset = 0000h]
+    - 2.3.4 PMMIE Register (offset = 0Eh) [reset = 0000h] (External)
+    - 2.3.5 PMMIFG Register (offset = 0Ah) [reset = 0000h] (External)
+    - 2.3.6 PM5CTL0 Register (offset = 10h) [reset = 0011h]
+- 3 Clock System (CS)
+  - 3.1 CS Introduction
+  - 3.2 CS Operation
+    - 3.2.1 CS Module Features for Low-Power Applications
+    - 3.2.2 Internal Very Low-Power Low-Frequency Oscillator (VLO)
+    - 3.2.3 Internal Trimmed Low-Frequency Reference Oscillator (REFO)
+    - 3.2.4 XT1 Oscillator
+    - 3.2.5 Digitally Controlled Oscillator (DCO)
+    - 3.2.6 Frequency Locked Loop (FLL)
+    - 3.2.7 DCO Modulator
+    - 3.2.8 Disabling FLL Hardware and Modulator
+    - 3.2.9 FLL Unlock Detection
+    - 3.2.10 FLL Operation From Low-Power Modes
+    - 3.2.11 DCO Factory Trim and Software Trim
+    - 3.2.12 Operation From Low-Power Modes, Requested by Peripheral Modules
+    - 3.2.13 Fail-Safe Operation
+    - 3.2.14 Synchronization of Clock Signals
+    - 3.2.15 Module Oscillator (MODOSC)
+  - 3.3 CS Registers
+    - 3.3.1 CSCTL0 Register
+    - 3.3.2 CSCTL1 Register
+    - 3.3.3 CSCTL2 Register
+    - 3.3.4 CSCTL3 Register
+    - 3.3.5 CSCTL4 Register
+    - 3.3.6 CSCTL5 Register
+    - 3.3.7 CSCTL6 Register
+    - 3.3.8 CSCTL7 Register
+    - 3.3.9 CSCTL8 Register
+- 4 CPUX
+  - 4.1 MSP430X CPU (CPUX) Introduction
+  - 4.2 Interrupts
+  - 4.3 CPU Registers
+    - 4.3.1 Program Counter (PC)
+    - 4.3.2 Stack Pointer (SP)
+    - 4.3.3 Status Register (SR)
+    - 4.3.4 Constant Generator Registers (CG1 and CG2)
+      - 4.3.4.1 Constant Generator – Expanded Instruction Set
+    - 4.3.5 General-Purpose Registers (R4 to R15)
+  - 4.4 Addressing Modes
+    - 4.4.1 Register Mode
+    - 4.4.2 Indexed Mode
+      - 4.4.2.1 Indexed Mode in Lower 64KB Memory
+      - 4.4.2.2 MSP430 Instruction With Indexed Mode in Upper Memory
+      - 4.4.2.3 MSP430X Instruction With Indexed Mode
+    - 4.4.3 Symbolic Mode
+      - 4.4.3.1 Symbolic Mode in Lower 64KB
+      - 4.4.3.2 MSP430 Instruction With Symbolic Mode in Upper Memory
+      - 4.4.3.3 MSP430X Instruction With Symbolic Mode
+    - 4.4.4 Absolute Mode
+      - 4.4.4.1 Absolute Mode in Lower 64KB
+      - 4.4.4.2 MSP430X Instruction With Absolute Mode
+    - 4.4.5 Indirect Register Mode
+    - 4.4.6 Indirect Autoincrement Mode
+    - 4.4.7 Immediate Mode
+      - 4.4.7.1 MSP430 Instructions With Immediate Mode
+      - 4.4.7.2 MSP430X Instructions With Immediate Mode
+  - 4.5 MSP430 and MSP430X Instructions
+    - 4.5.1 MSP430 Instructions
+      - 4.5.1.1 MSP430 Double-Operand (Format I) Instructions
+      - 4.5.1.2 MSP430 Single-Operand (Format II) Instructions
+      - 4.5.1.3 Jump Instructions
+      - 4.5.1.4 Emulated Instructions
+      - 4.5.1.5 MSP430 Instruction Execution
+        - 4.5.1.5.1 Instruction Cycles and Length for Interrupt, Reset, and Subroutines
+        - 4.5.1.5.2 Format II (Single-Operand) Instruction Cycles and Lengths
+        - 4.5.1.5.3 Jump Instructions Cycles and Lengths
+        - 4.5.1.5.4 Format I (Double-Operand) Instruction Cycles and Lengths
+    - 4.5.2 MSP430X Extended Instructions
+      - 4.5.2.1 Register Mode Extension Word
+      - 4.5.2.2 Non-Register Mode Extension Word
+      - 4.5.2.3 Extended Double-Operand (Format I) Instructions
+      - 4.5.2.4 Extended Single-Operand (Format II) Instructions
+        - 4.5.2.4.1 Extended Format II Instruction Format Exceptions
+      - 4.5.2.5 Extended Emulated Instructions
+      - 4.5.2.6 MSP430X Address Instructions
+      - 4.5.2.7 MSP430X Instruction Execution
+        - 4.5.2.7.1 MSP430X Format II (Single-Operand) Instruction Cycles and Lengths
+        - 4.5.2.7.2 MSP430X Format I (Double-Operand) Instruction Cycles and Lengths
+        - 4.5.2.7.3 MSP430X Address Instruction Cycles and Lengths
+  - 4.6 Instruction Set Description
+    - 4.6.1 Extended Instruction Binary Descriptions
+    - 4.6.2 MSP430 Instructions
+      - 4.6.2.1 ADC
+      - 4.6.2.2 ADD
+      - 4.6.2.3 ADDC
+      - 4.6.2.4 AND
+      - 4.6.2.5 BIC
+      - 4.6.2.6 BIS
+      - 4.6.2.7 BIT
+      - 4.6.2.8 BR, BRANCH
+      - 4.6.2.9 CALL
+      - 4.6.2.10 CLR
+      - 4.6.2.11 CLRC
+      - 4.6.2.12 CLRN
+      - 4.6.2.13 CLRZ
+      - 4.6.2.14 CMP
+      - 4.6.2.15 DADC
+      - 4.6.2.16 DADD
+      - 4.6.2.17 DEC
+      - 4.6.2.18 DECD
+      - 4.6.2.19 DINT
+      - 4.6.2.20 EINT
+      - 4.6.2.21 INC
+      - 4.6.2.22 INCD
+      - 4.6.2.23 INV
+      - 4.6.2.24 JC, JHS
+      - 4.6.2.25 JEQ, JZ
+      - 4.6.2.26 JGE
+      - 4.6.2.27 JL
+      - 4.6.2.28 JMP
+      - 4.6.2.29 JN
+      - 4.6.2.30 JNC, JLO
+      - 4.6.2.31 JNZ, JN
+      - 4.6.2.32 MOV
+      - 4.6.2.33 NOP
+      - 4.6.2.34 POP
+      - 4.6.2.35 PUSH
+      - 4.6.2.36 RET
+      - 4.6.2.37 RETI
+      - 4.6.2.38 RLA
+      - 4.6.2.39 RLC
+      - 4.6.2.40 RRA
+      - 4.6.2.41 RRC
+      - 4.6.2.42 SBC
+      - 4.6.2.43 SETC
+      - 4.6.2.44 SETN
+      - 4.6.2.45 SETZ
+      - 4.6.2.46 SUB
+      - 4.6.2.47 SUBC
+      - 4.6.2.48 SWPB
+      - 4.6.2.49 SXT
+      - 4.6.2.50 TST
+      - 4.6.2.51 XOR
+    - 4.6.3 Extended Instructions
+      - 4.6.3.1 ADCX
+      - 4.6.3.2 ADDX
+      - 4.6.3.3 ADDCX
+      - 4.6.3.4 ANDX
+      - 4.6.3.5 BICX
+      - 4.6.3.6 BISX
+      - 4.6.3.7 BITX
+      - 4.6.3.8 CLRX
+      - 4.6.3.9 CMPX
+      - 4.6.3.10 DADCX
+      - 4.6.3.11 DADDX
+      - 4.6.3.12 DECX
+      - 4.6.3.13 DECDX
+      - 4.6.3.14 INCX
+      - 4.6.3.15 INCDX
+      - 4.6.3.16 INVX
+      - 4.6.3.17 MOVX
+      - 4.6.3.18 POPM
+      - 4.6.3.19 PUSHM
+      - 4.6.3.20 POPX
+      - 4.6.3.21 PUSHX
+      - 4.6.3.22 RLAM
+      - 4.6.3.23 RLAX
+      - 4.6.3.24 RLCX
+      - 4.6.3.25 RRAM
+      - 4.6.3.26 RRAX
+      - 4.6.3.27 RRCM
+      - 4.6.3.28 RRCX
+      - 4.6.3.29 RRUM
+      - 4.6.3.30 RRUX
+      - 4.6.3.31 SBCX
+      - 4.6.3.32 SUBX
+      - 4.6.3.33 SUBCX
+      - 4.6.3.34 SWPBX
+      - 4.6.3.35 SXTX
+      - 4.6.3.36 TSTX
+      - 4.6.3.37 XORX
+    - 4.6.4 Address Instructions
+       - 4.6.4.1 ADDA
+       - 4.6.4.2 BRA
+       - 4.6.4.3 CALLA
+       - 4.6.4.4 CLRA
+       - 4.6.4.5 CMPA
+       - 4.6.4.6 DECDA
+       - 4.6.4.7 INCDA
+       - 4.6.4.8 MOVA
+       - 4.6.4.9 RETA
+       - 4.6.4.10 SUBA
+       - 4.6.4.11 TSTA
+- 5 Interrupt Compare Controller (ICC)
+  - 5.1 Interrupt Compare Controller (ICC) Introduction
+  - 5.2 ICC Operation
+    - 5.2.1 Nested Interrupt and Non-Nested Interrupt Comparison
+    - 5.2.2 Interrupt Priority Levels
+    - 5.2.3 Interrupt Priority Level Comparison
+    - 5.2.4 Interrupt Compare Mask Update and Virtual Stack
+    - 5.2.5 Virtual Stack Push and Pop
+    - 5.2.6 Application Operation
+  - 5.3 ICC Registers
+    - 5.3.1 ICCSC Register (offset = 00h) [reset = 0023h]
+    - 5.3.2 ICCMVS Register (offset = 02h) [reset = 00FFh]
+    - 5.3.3 ICCILSR0 Register (offset = 04h) [reset = FFFFh]
+    - 5.3.4 ICCILSR1 Register (offset = 06h) [reset = FFFFh]
+    - 5.3.5 ICCILSR2 Register (offset = 08h) [reset = FFFh]
+    - 5.3.6 ICCILSR3 Register (offset = 0Ah) [reset = FFFFh]
+    - 5.3.7 ICCILSR4 Register (offset = 0Ch) [reset = FFFFh]
+    - 5.3.8 ICCILSR5 Register (offset = 0Eh) [reset = FFFFh]
+    - 5.3.9 ICCILSR6 Register (offset = 10h) [reset = FFFh]
+    - 5.3.10 ICCILSR7 Register (offset = 12h) [reset = FFFFh]
+- 6 FRAM Controller (FRCTL)
+  - 6.1 FRAM Introduction
+  - 6.2 FRAM Organization
+  - 6.3 FRCTL Module Operation
+  - 6.4 Programming FRAM Devices
+    - 6.4.1 Programming FRAM Through JTAG or Spy-Bi-Wire
+    - 6.4.2 Programming FRAM Through the Bootloader (BSL)
+    - 6.4.3 Programming FRAM Through a Custom Solution
+  - 6.5 Wait State Control
+    - 6.5.1 Wait State and Cache Hit
+  - 6.6 FRAM ECC
+  - 6.7 FRAM Write Back
+  - 6.8 FRAM Power Control
+  - 6.9 FRAM Cache
+  - 6.10 FRCTL Registers
+    - 6.10.1 FRCTL0 Register
+    - 6.10.2 GCCTL0 Register
+    - 6.10.3 GCCTL1 Register
+- 7 Backup Memory (BAKMEM)
+  - 7.1 Backup Memory Introduction
+  - 7.2 BAKMEM Registers
+- 8 Digital I/O
+  - 8.1 Digital I/O Introduction
+  - 8.2 Digital I/O Operation
+    - 8.2.1 Input Registers (PxIN)
+    - 8.2.2 Output Registers (PxOUT)
+    - 8.2.3 Direction Registers (PxDIR)
+    - 8.2.4 Pullup or Pulldown Resistors (PxREN)
+    - 8.2.5 Function Select Registers (PxSEL0, PxSEL1)
+    - 8.2.6 Port Interrupts
+  - 8.3 I/O Configuration
+    - 8.3.1 Configuration After Reset
+    - 8.3.2 Configuration of Unused Port Pins
+    - 8.3.3 Configuration for LPMx.5 Low-Power Modes
+  - 8.4 Digital I/O Registers
+    - 8.4.1 P1IV Register
+    - 8.4.2 P2IV Register
+    - 8.4.3 P3IV Register
+    - 8.4.4 P4IV Register
+    - 8.4.5 PxIN Register
+    - 8.4.6 PxOUT Register
+    - 8.4.7 PxDIR Register
+    - 8.4.8 PxREN Register
+    - 8.4.9 PxSEL0 Register
+    - 8.4.10 PxSEL1 Register
+    - 8.4.11 PxSELC Register
+    - 8.4.12 PxIES Register
+    - 8.4.13 PxIE Register
+    - 8.4.14 PxIFG Register
+- 9 Capacitive Touch I/O
+  - 9.1 Capacitive Touch I/O Introduction
+  - 9.2 Capacitive Touch I/O Operation
+  - 9.3 CapTouch Registers
+    - 9.3.1 CAPTIOxCTL Register (offset = 0Eh) [reset = 0000h]
+- 10 CapTivate™ Module
+  - 10.1 CapTivate Introduction
+  - 10.2 CapTivate Overview
+    - 10.2.1 Declarations
+    - 10.2.2 Terms
+    - 10.2.3 Operation Modes
+  - 10.3 CapTivate Registers
+    - 10.3.1 CAPIE Register
+    - 10.3.2 CAPIFG Register
+    - 10.3.3 CAPIV Register
+- 11 CRC Module
+  - 11.1 Cyclic Redundancy Check (CRC) Module Introduction
+  - 11.2 CRC Standard and Bit Order
+  - 11.3 CRC Checksum Generation
+    - 11.3.1 CRC Implementation
+    - 11.3.2 Assembler Examples
+  - 11.4 CRC Registers
+    - 11.4.1 CRCDI Register
+    - 11.4.2 CRCDIRB Register
+    - 11.4.3 CRCINIRES Register
+    - 11.4.4 CRCRESR Register
+- 12 Watchdog Timer (WDT_A)
+  - 12.1 WDT_A Introduction
+  - 12.2 WDT_A Operation
+    - 12.2.1 Watchdog Timer Counter (WDTCNT)
+    - 12.2.2 Watchdog Mode
+    - 12.2.3 Interval Timer Mode
+    - 12.2.4 Watchdog Timer Interrupts
+    - 12.2.5 Clock Fail-Safe Feature
+    - 12.2.6 Operation in Low-Power Modes
+  - 12.3 WDT_A Registers
+    - 12.3.1 WDTCTL Register
+- 13 Timer A
+  - 13.1 Timer A Introduction
+  - 13.2 Timer_A Operation
+    - 13.2.1 16-Bit Timer Counter
+    - 13.2.2 Starting the Timer
+    - 13.2.3 Timer Mode Control
+    - 13.2.4 Capture/Compare Blocks
+    - 13.2.5 Output Unit
+    - 13.2.6 Timer_A Interrupts
+    - 13.2.7 Updating Timer_A Configuration
+  - 13.3 Timer_A Registers
+    - 13.3.1 TAxCTL Register
+    - 13.3.2 TAxR Register
+    - 13.3.3 TAxCCTLn Register
+    - 13.3.4 TAxCCRn Register
+    - 13.3.5 TAxIV Register
+    - 13.3.6 TAxEX0 Register
+- 14 Timer B
+  - 14.1 Timer B Introduction
+    - 14.1.1 Similarities and Differences From Timer A
+  - 14.2 Timer_B Operation
+    - 14.2.1 16-Bit Timer Counter
+    - 14.2.2 Starting the Timer
+    - 14.2.3 Timer Mode Control
+    - 14.2.4 Capture/Compare Blocks
+    - 14.2.5 Output Unit
+    - 14.2.6 Timer_B Interrupts
+    - 14.2.7 Updating Timer_B Configuration
+  - 14.3 Timer_B Registers
+    - 14.3.1 TBxCTL Register
+    - 14.3.2 TBxR Register
+    - 14.3.3 TBxCCTLn Register
+    - 14.3.4 TBxCCRn Register
+    - 14.3.5 TBxIV Register
+    - 14.3.6 TBxEX0 Register
+- 15 Real-Time Clock (RTC) Counter
+  - 15.1 RTC Counter Introduction
+  - 15.2 RTC Counter Operation
+    - 15.2.1 16-Bit Timer Counter
+    - 15.2.2 Clock Source Select and Divider
+    - 15.2.3 Modulo Register (RTCMOD) and Shadow Register
+    - 15.2.4 RTC Counter Interrupt and External Event/Trigger
+  - 15.3 RTC Counter Registers
+    - 15.3.1 RTCCTL Register
+    - 15.3.2 RTCIV Register
+    - 15.3.3 RTCMOD Register
+    - 15.3.4 RTCCNT Register
+- 16 32-Bit Hardware Multiplier (MPY32)
+  - 16.1 32-Bit Hardware Multiplier (MPY32) Introduction
+  - 16.2 MPY32 Operation
+    - 16.2.1 Operand Registers
+    - 16.2.2 Result Registers
+    - 16.2.3 Software Examples
+    - 16.2.4 Fractional Numbers
+    - 16.2.5 Putting It All Together
+    - 16.2.6 Indirect Addressing of Result Registers
+    - 16.2.7 Using Interrupts
+    - 16.2.8 Using DMA
+  - 16.3 MPY32 Registers
+    - 16.3.1 MPY32CTL0 Register
+- 17 LCD E Controller
+  - 17.1 LCD E Introduction
+  - 17.2 LCD_E Operation
+    - 17.2.1 LCD Memory
+    - 17.2.2 Configuration of Port Pin as LCD Output
+    - 17.2.3 Configuration of LCD Pin as COM or SEG
+    - 17.2.4 LCD Timing Generation
+    - 17.2.5 Blanking the LCD
+    - 17.2.6 LCD Blinking
+    - 17.2.7 LCD Voltage and Bias Generation
+    - 17.2.8 LCD Operation Modes
+    - 17.2.9 LCD Interrupts
+    - 17.2.10 Static Mode
+    - 17.2.11 2-Mux Mode
+    - 17.2.12 3-Mux Mode
+    - 17.2.13 4-Mux Mode
+    - 17.2.14 6-Mux Mode
+    - 17.2.15 8-Mux Mode
+  - 17.3 LCD_E Registers
+    - 17.3.1 LCDCTL0 Register
+    - 17.3.2 LCDCTL1 Register
+    - 17.3.3 LCDBLKCTL Register
+    - 17.3.4 LCDMEMCTL Register
+    - 17.3.5 LCDVCTL Register
+    - 17.3.6 LCDPCTL0 Register
+    - 17.3.7 LCDPCTL1 Register
+    - 17.3.8 LCDPCTL2 Register
+    - 17.3.9 LCDPCTL3 Register
+    - 17.3.10 LCDCSSEL0 Register
+    - 17.3.11 LCDCSSEL1 Register
+    - 17.3.12 LCDCSSEL2 Register
+    - 17.3.13 LCDCSSEL3 Register
+    - 17.3.14 LCDM[index] Register - Static, 2-Mux, 3-Mux, 4-Mux Mode
+    - 17.3.15 LCDM[index] Register - 5-Mux, 6-Mux, 8-Mux Mode
+    - 17.3.16 LCDIV Register
+- 18 Enhanced Comparator (eCOMP)
+  - 18.1 eCOMP Introduction
+  - 18.2 eCOMP Operation
+    - 18.2.1 eCOMP
+    - 18.2.2 Analog Input Switches
+    - 18.2.3 Output Analog Low-Pass Filter
+    - 18.2.4 eCOMP Built-in Dual Buffer 6-Bit DAC
+  - 18.3 eCOMP Interrupts
+  - 18.4 eCOMP Registers
+    - 18.4.1 CPxCTL0 Register (offset = 00h) [reset = 0100h]
+    - 18.4.2 CPxCTL1 Register (offset = 02h) [reset = 0000h]
+    - 18.4.3 CPxINT Register (offset = 06h) [reset = 0000h]
+    - 18.4.4 CPxIV Register (offset = 08h) [reset = 0000h]
+    - 18.4.5 CPxDACCTL Register (offset = 10h) [reset = 0002h]
+    - 18.4.6 CPxDACDATA Register (offset = 12h) [reset = 0100h]
+- 19 Transimpedance Amplifier (TIA)
+  - 19.1 TIA Introduction
+  - 19.2 TIA Operation
+    - 19.2.1 TIA Amplifier
+    - 19.2.2 TIA Input and Output
+  - 19.3 TIA Registers
+    - 19.3.1 TRICTL Register (offset = 00h) [reset = 0000h]
+- 20 Smart Analog Combo (SAC)
+  - 20.1 SAC Introduction
+  - 20.2 SAC Operation
+    - 20.2.1 SAC OA
+    - 20.2.2 SAC OA Configuration
+    - 20.2.3 SAC DAC
+  - 20.3 SAC Configuration
+  - 20.4 SAC Registers
+    - 20.4.1 SACxOA Register (offset = 00h) [reset = 0000h]
+    - 20.4.2 SACxPGA Register (offset = 02h) [reset = 0001h]
+    - 20.4.3 SACxDAC Register (offset = 04h) [reset = 0000h]
+    - 20.4.4 SACxDAT Register (offset = 06h) [reset = 0000h]
+    - 20.4.5 SACxDACSTS Register (offset = 08h) [reset = 0000h]
+    - 20.4.6 SACxIV Register (offset = 0Ah) [reset = 0000h]
+- 21 ADC Module
+  - 21.1 ADC Introduction
+  - 21.2 ADC Operation
+    - 21.2.1 ADC Core
+    - 21.2.2 ADC Inputs and Multiplexer
+    - 21.2.3 Voltage Reference Generator
+    - 21.2.4 Automatic Power Down
+    - 21.2.5 Sample and Conversion Timing
+    - 21.2.6 Conversion Result
+    - 21.2.7 ADC Conversion Modes
+  - 21.3 ADC Registers
+    - 21.3.1 ADCCTL0 Register
+    - 21.3.2 ADCCTL1 Register
+    - 21.3.3 ADCCTL2 Register
+    - 21.3.4 ADCMEM0 Register
+    - 21.3.5 ADCMEM0 Register, 2s-Complement Format
+    - 21.3.6 ADCMCTL0 Register
+    - 21.3.7 ADCHI Register
+    - 21.3.8 ADCHI Register, 2s-Complement Format
+    - 21.3.9 ADCLO Register
+    - 21.3.10 ADCLO Register, 2s-Complement Format
+    - 21.3.11 ADCIE Register
+    - 21.3.12 ADCIFG Register
+    - 21.3.13 ADCIV Register
+    - 21.3.14 MSP430FR413x SYSCFG2 Register (absolute address = 0164h) [reset = 0000h]
+- 22 Enhanced Universal Serial Communication Interface (eUSCI) - UART Mode
+  - 22.1 Enhanced Universal Serial Communication Interface A (eUSCI_A) Overview
+  - 22.2 eUSCI A Introduction - UART Mode
+  - 22.3 eUSCI_A Operation - UART Mode
+    - 22.3.1 eUSCI A Initialization and Reset
+    - 22.3.2 Character Format
+    - 22.3.3 Asynchronous Communication Format
+    - 22.3.4 Automatic Baud-Rate Detection
+    - 22.3.5 IrDA Encoding and Decoding
+    - 22.3.6 Automatic Error Detection
+    - 22.3.7 eUSCI A Receive Enable
+    - 22.3.8 eUSCI A Transmit Enable
+    - 22.3.9 UART Baud-Rate Generation
+    - 22.3.10 Setting a Baud Rate
+    - 22.3.11 Transmit Bit Timing - Error calculation
+    - 22.3.12 Receive Bit Timing – Error Calculation
+    - 22.3.13 Typical Baud Rates and Errors
+    - 22.3.14 Using the eUSCI_A Module in UART Mode With Low-Power Modes
+    - 22.3.15 eUSCI_A Interrupts
+  - 22.4 eUSCI_A UART Registers
+    - 22.4.1 UCAxCTLW0 Register
+    - 22.4.2 UCAxCTLW1 Register
+    - 22.4.3 UCAxBRW Register
+    - 22.4.4 UCAxMCTLW Register
+    - 22.4.5 UCAxSTATW Register
+    - 22.4.6 UCAxRXBUF Register
+    - 22.4.7 UCAxTXBUF Register
+    - 22.4.8 UCAxABCTL Register
+    - 22.4.9 UCAxIRCTL Register
+    - 22.4.10 UCAxIE Register
+    - 22.4.11 UCAxIFG Register
+    - 22.4.12 UCAxIV Register
+- 23 Enhanced Universal Serial Communication Interface (eUSCI) - SPI Mode
+  - 23.1 Enhanced Universal Serial Communication Interfaces (eUSCI_B) Overview
+  - 23.2 eUSCI Introduction - SPI Mode
+  - 23.3 eUSCI Operation - SPI Mode
+    - 23.3.1 eUSCI Initialization and Reset
+    - 23.3.2 Character Format
+    - 23.3.3 Master Mode
+    - 23.3.4 Slave Mode
+    - 23.3.5 SPI Enable
+    - 23.3.6 Serial Clock Control
+    - 23.3.7 Using the SPI Mode With Low-Power Modes
+    - 23.3.8 SPI Interrupts
+  - 23.4 eUSCI_A SPI Registers
+    - 23.4.1 UCAxCTLW0 Register
+    - 23.4.2 UCAxBRW Register
+    - 23.4.3 UCAxSTATW Register
+    - 23.4.4 UCAxRXBUF Register
+    - 23.4.5 UCAxTXBUF Register
+    - 23.4.6 UCAxIE Register
+    - 23.4.7 UCAxIFG Register
+    - 23.4.8 UCAxIV Register
+  - 23.5 eUSCI_B SPI Registers
+    - 23.5.1 UCBxCTLW0 Register
+    - 23.5.2 UCBxBRW Register
+    - 23.5.3 UCBxSTATW Register
+    - 23.5.4 UCBxRXBUF Register
+    - 23.5.5 UCBxTXBUF Register
+    - 23.5.6 UCBxIE Register
+    - 23.5.7 UCBxIFG Register
+    - 23.5.8 UCBxIV Register
+- 24 Enhanced Universal Serial Communication Interface (eUSCI) - I²C Mode
+  - 24.1 Enhanced Universal Serial Communication Interface B (eUSCI_B) Overview
+  - 24.2 eUSCI B Introduction - I²C Mode
+  - 24.3 eUSCI_B Operation - I²C Mode
+    - 24.3.1 eUSCI B Initialization and Reset
+    - 24.3.2 I²C Serial Data
+    - 24.3.3 I²C Addressing Modes
+    - 24.3.4 I²C Quick Setup
+    - 24.3.5 I²C Module Operating Modes
+    - 24.3.6 Glitch Filtering
+    - 24.3.7 I²C Clock Generation and Synchronization
+    - 24.3.8 Byte Counter
+    - 24.3.9 Multiple Slave Addresses
+    - 24.3.10 Using the eUSCI B Module in I²C Mode With Low-Power Modes
+    - 24.3.11 eUSCI_B Interrupts in I²C Mode
+  - 24.4 eUSCI_B I2C Registers
+    - 24.4.1 UCBxCTLW0 Register
+    - 24.4.2 UCBxCTLW1 Register
+    - 24.4.3 UCBxBRW Register
+    - 24.4.4 UCBxSTATW Register
+    - 24.4.5 UCBxTBCNT Register
+    - 24.4.6 UCBxRXBUF Register
+    - 24.4.7 UCBxTXBUF Register
+    - 24.4.8 UCBxI2COA0 Register
+    - 24.4.9 UCBxI2COA1 Register
+    - 24.4.10 UCBxI2COA2 Register
+    - 24.4.11 UCBxI2COA3 Register
+    - 24.4.12 UCBxADDRX Register
+    - 24.4.13 UCBxADDMASK Register
+    - 24.4.14 UCBxI2CSA Register
+    - 24.4.15 UCBxIE Register
+    - 24.4.16 UCBxIFG Register
+    - 24.4.17 UCBxIV Register
+- 25 Manchester Function Module (MFM)
+  - 25.1 MFM Decoder Introduction
+  - 25.2 Manchester Codec Operation
+  - 25.3 Clock Generation
+  - 25.4 Manchester Coding
+  - 25.5 Clock Recovery and Regeneration
+  - 25.6 Codec Interface
+    - 25.6.1 SPI Interface
+    - 25.6.2 External Event Trigger
+    - 25.6.3 Interrupt Operations
+  - 25.7 System Integration Reference
+- 26 Embedded Emulation Module (EEM)
+  - 26.1 Embedded Emulation Module (EEM) Introduction
+  - 26.2 EEM Building Blocks
+    - 26.2.1 Triggers
+    - 26.2.2 Trigger Sequencer
+    - 26.2.3 State Storage (Internal Trace Buffer)
+    - 26.2.4 Cycle Counter
+    - 26.2.5 Clock Control
+  - 26.3 EEM Configurations
+- Revision History

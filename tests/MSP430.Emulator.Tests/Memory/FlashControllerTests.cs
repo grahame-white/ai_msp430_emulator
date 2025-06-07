@@ -16,15 +16,44 @@ public class FlashControllerTests
     }
 
     [Fact]
-    public void Constructor_InitializesInLockedState()
+    public void Constructor_SetsStateToLocked()
     {
         var controller = new FlashController(_logger);
 
         Assert.Equal(FlashControllerState.Locked, controller.State);
+    }
+
+    [Fact]
+    public void Constructor_SetsProtectionLevelToNone()
+    {
+        var controller = new FlashController(_logger);
+
         Assert.Equal(FlashProtectionLevel.None, controller.ProtectionLevel);
+    }
+
+    [Fact]
+    public void Constructor_SetsCurrentOperationToNone()
+    {
+        var controller = new FlashController(_logger);
+
         Assert.Equal(FlashOperation.None, controller.CurrentOperation);
+    }
+
+    [Fact]
+    public void Constructor_SetsIsOperationInProgressToFalse()
+    {
+        var controller = new FlashController(_logger);
+
         Assert.False(controller.IsOperationInProgress);
-        Assert.Equal(0u, controller.OperationCyclesRemaining);
+    }
+
+    [Theory]
+    [InlineData(0u)]
+    public void Constructor_SetsOperationCyclesRemaining(uint expectedCycles)
+    {
+        var controller = new FlashController(_logger);
+
+        Assert.Equal(expectedCycles, controller.OperationCyclesRemaining);
     }
 
     [Fact]
@@ -46,6 +75,18 @@ public class FlashControllerTests
         bool result = controller.TryUnlock(validKey);
 
         Assert.True(result);
+    }
+
+    [Theory]
+    [InlineData(0xA500)]
+    [InlineData(0xA555)]
+    [InlineData(0xA5FF)]
+    public void TryUnlock_ValidKey_UnlocksController(ushort validKey)
+    {
+        var controller = new FlashController(_logger);
+
+        controller.TryUnlock(validKey);
+
         Assert.Equal(FlashControllerState.Unlocked, controller.State);
     }
 
@@ -61,6 +102,19 @@ public class FlashControllerTests
         bool result = controller.TryUnlock(invalidKey);
 
         Assert.False(result);
+    }
+
+    [Theory]
+    [InlineData(0x1234)] // Wrong prefix
+    [InlineData(0x5555)] // Wrong prefix
+    [InlineData(0x0000)] // Wrong prefix
+    [InlineData(0xFFFF)] // Wrong prefix
+    public void TryUnlock_InvalidKey_KeepsControllerLocked(ushort invalidKey)
+    {
+        var controller = new FlashController(_logger);
+
+        controller.TryUnlock(invalidKey);
+
         Assert.Equal(FlashControllerState.Locked, controller.State);
     }
 
@@ -73,6 +127,16 @@ public class FlashControllerTests
         bool result = controller.TryUnlock(0xA555);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void TryUnlock_WhenAlreadyUnlocked_KeepsControllerUnlocked()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.TryUnlock(0xA555);
+
         Assert.Equal(FlashControllerState.Unlocked, controller.State);
     }
 
@@ -87,6 +151,18 @@ public class FlashControllerTests
         bool result = controller.TryUnlock(0xA555);
 
         Assert.False(result);
+    }
+
+    [Theory]
+    [InlineData(FlashProtectionLevel.SecurityLocked)]
+    [InlineData(FlashProtectionLevel.PermanentlyLocked)]
+    public void TryUnlock_WhenProtected_KeepsControllerLocked(FlashProtectionLevel protectionLevel)
+    {
+        var controller = new FlashController(_logger);
+        controller.SetProtectionLevel(protectionLevel);
+
+        controller.TryUnlock(0xA555);
+
         Assert.Equal(FlashControllerState.Locked, controller.State);
     }
 
@@ -99,6 +175,16 @@ public class FlashControllerTests
         controller.Lock();
 
         Assert.Equal(FlashControllerState.Locked, controller.State);
+    }
+
+    [Fact]
+    public void Lock_FromUnlockedState_SetsCurrentOperationToNone()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.Lock();
+
         Assert.Equal(FlashOperation.None, controller.CurrentOperation);
     }
 
@@ -123,9 +209,49 @@ public class FlashControllerTests
         bool result = controller.StartProgramming(false);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void StartProgramming_ByteOperation_SetsStateToProgramming()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(false);
+
         Assert.Equal(FlashControllerState.Programming, controller.State);
+    }
+
+    [Fact]
+    public void StartProgramming_ByteOperation_SetsCurrentOperationToProgram()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(false);
+
         Assert.Equal(FlashOperation.Program, controller.CurrentOperation);
+    }
+
+    [Fact]
+    public void StartProgramming_ByteOperation_SetsOperationCyclesRemaining()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(false);
+
         Assert.Equal(FlashController.ByteProgramCycles, controller.OperationCyclesRemaining);
+    }
+
+    [Fact]
+    public void StartProgramming_ByteOperation_SetsIsOperationInProgressToTrue()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(false);
+
         Assert.True(controller.IsOperationInProgress);
     }
 
@@ -138,8 +264,38 @@ public class FlashControllerTests
         bool result = controller.StartProgramming(true);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void StartProgramming_WordOperation_SetsStateToProgramming()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(true);
+
         Assert.Equal(FlashControllerState.Programming, controller.State);
+    }
+
+    [Fact]
+    public void StartProgramming_WordOperation_SetsCurrentOperationToProgram()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(true);
+
         Assert.Equal(FlashOperation.Program, controller.CurrentOperation);
+    }
+
+    [Fact]
+    public void StartProgramming_WordOperation_SetsOperationCyclesRemaining()
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+
+        controller.StartProgramming(true);
+
         Assert.Equal(FlashController.WordProgramCycles, controller.OperationCyclesRemaining);
     }
 
@@ -151,7 +307,25 @@ public class FlashControllerTests
         bool result = controller.StartProgramming(false);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void StartProgramming_WhenLocked_KeepsStateAsLocked()
+    {
+        var controller = new FlashController(_logger);
+
+        controller.StartProgramming(false);
+
         Assert.Equal(FlashControllerState.Locked, controller.State);
+    }
+
+    [Fact]
+    public void StartProgramming_WhenLocked_KeepsCurrentOperationAsNone()
+    {
+        var controller = new FlashController(_logger);
+
+        controller.StartProgramming(false);
+
         Assert.Equal(FlashOperation.None, controller.CurrentOperation);
     }
 

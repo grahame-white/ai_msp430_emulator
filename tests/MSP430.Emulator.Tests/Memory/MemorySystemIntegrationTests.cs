@@ -13,7 +13,7 @@ namespace MSP430.Emulator.Tests.Memory;
 public class MemorySystemIntegrationTests
 {
     [Fact]
-    public void MemorySystem_Integration_SfrRegionBlocksExecution()
+    public void MemorySystem_Integration_SFRRegionBlocksExecution()
     {
         // Arrange
         var memoryMap = new MemoryMap();

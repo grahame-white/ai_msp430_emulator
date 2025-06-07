@@ -55,6 +55,14 @@ public class RandomAccessMemoryTests
         Assert.Equal((ushort)0x2000, memory.BaseAddress);
     }
 
+    [Fact]
+    public void Constructor_NullLogger_SetsEndAddress()
+    {
+        var memory = new RandomAccessMemory(0x2000, 1024);
+
+        Assert.Equal((ushort)0x23FF, memory.EndAddress);
+    }
+
     [Theory]
     [InlineData(511)]    // Below minimum
     [InlineData(10241)]  // Above maximum
@@ -239,6 +247,7 @@ public class RandomAccessMemoryTests
     [Theory]
     [InlineData(0x2000)]
     [InlineData(0x2100)]
+    [InlineData(0x23FF)]  // Last valid address (baseAddress + size - 1)
     public void Initialize_NoPattern_SetsAllBytesToZero(ushort address)
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);

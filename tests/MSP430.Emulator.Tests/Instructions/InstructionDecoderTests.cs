@@ -109,7 +109,7 @@ public class InstructionDecoderTests
     }
 
     [Fact]
-    public void Decode_ValidFormatI_ReturnsFormatIFormat()
+    public void Decode_ValidFormatI_ReturnsFormatIInstruction()
     {
         // MOV R1, R2 (word operation)
         ushort instructionWord = 0x4102; // 0100 0001 0000 0010

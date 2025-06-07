@@ -21,11 +21,89 @@ public class DiagnosticReportGeneratorTests
 
         // Assert
         Assert.NotNull(report);
+    }
+
+    [Fact]
+    public void GenerateReport_ShouldReturnNonEmptyReport()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        // Act
+        string report = generator.GenerateReport();
+
+        // Assert
         Assert.NotEmpty(report);
+    }
+
+    [Fact]
+    public void GenerateReport_ShouldContainTitle()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        // Act
+        string report = generator.GenerateReport();
+
+        // Assert
         Assert.Contains("# MSP430 Emulator Diagnostic Report", report);
+    }
+
+    [Fact]
+    public void GenerateReport_ShouldContainSystemSection()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        // Act
+        string report = generator.GenerateReport();
+
+        // Assert
         Assert.Contains("## System Information", report);
+    }
+
+    [Fact]
+    public void GenerateReport_ShouldContainApplicationSection()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        // Act
+        string report = generator.GenerateReport();
+
+        // Assert
         Assert.Contains("## Application Information", report);
+    }
+
+    [Fact]
+    public void GenerateReport_ShouldContainRuntimeSection()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        // Act
+        string report = generator.GenerateReport();
+
+        // Assert
         Assert.Contains("## Runtime Information", report);
+    }
+
+    [Fact]
+    public void GenerateReport_ShouldContainInstructions()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        // Act
+        string report = generator.GenerateReport();
+
+        // Assert
         Assert.Contains("**Instructions for GitHub Issue:**", report);
     }
 

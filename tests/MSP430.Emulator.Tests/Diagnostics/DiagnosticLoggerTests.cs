@@ -19,7 +19,7 @@ public class DiagnosticLoggerTests
         return new ConsoleLogger { IsOutputSuppressed = true, MinimumLevel = minimumLevel };
     }
     [Fact]
-    public void Constructor_WithValidLogger_ShouldSucceed()
+    public void Constructor_WithValidLogger_ShouldCreateDiagnosticLogger()
     {
         // Arrange
         ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
@@ -29,6 +29,18 @@ public class DiagnosticLoggerTests
 
         // Assert
         Assert.NotNull(diagnosticLogger);
+    }
+
+    [Fact]
+    public void Constructor_WithValidLogger_ShouldCopyMinimumLevel()
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+
+        // Act
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger);
+
+        // Assert
         Assert.Equal(innerLogger.MinimumLevel, diagnosticLogger.MinimumLevel);
     }
 
@@ -52,7 +64,35 @@ public class DiagnosticLoggerTests
         // Assert
         LogEntry[] entries = diagnosticLogger.GetRecentEntries();
         Assert.Single(entries);
+    }
+
+    [Fact]
+    public void Log_ShouldStoreCorrectMessage()
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
+
+        // Act
+        diagnosticLogger.Info("Test message");
+
+        // Assert
+        LogEntry[] entries = diagnosticLogger.GetRecentEntries();
         Assert.Equal("Test message", entries[0].Message);
+    }
+
+    [Fact]
+    public void Log_ShouldStoreCorrectLevel()
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
+
+        // Act
+        diagnosticLogger.Info("Test message");
+
+        // Assert
+        LogEntry[] entries = diagnosticLogger.GetRecentEntries();
         Assert.Equal(LogLevel.Info, entries[0].Level);
     }
 

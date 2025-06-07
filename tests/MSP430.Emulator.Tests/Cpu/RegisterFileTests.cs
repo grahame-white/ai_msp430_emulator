@@ -291,7 +291,6 @@ public class RegisterFileTests
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.ReadRegister((RegisterName)16));
-
         Assert.Contains("Invalid register", exception.Message);
     }
 
@@ -300,7 +299,6 @@ public class RegisterFileTests
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.ReadRegister((RegisterName)16));
-
         Assert.Equal("register", exception.ParamName);
     }
 
@@ -316,7 +314,6 @@ public class RegisterFileTests
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.WriteRegister((RegisterName)16, 0x1234));
-
         Assert.Contains("Invalid register", exception.Message);
     }
 
@@ -325,7 +322,6 @@ public class RegisterFileTests
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.WriteRegister((RegisterName)16, 0x1234));
-
         Assert.Equal("register", exception.ParamName);
     }
 

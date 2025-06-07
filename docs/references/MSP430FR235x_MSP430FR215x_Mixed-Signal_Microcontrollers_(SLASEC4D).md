@@ -1,0 +1,63 @@
+# MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - May 2018–Revised December 2019
+
+![Texas Instruments logo](/images/common/texas_instruments_red_logo.jpg)
+
+## Contents
+
+- 1 Device Overview
+  - 1.1 Features
+  - 1.2 Applications
+  - 1.3 Description
+  - 1.4 Functional Block Diagrams
+- 2 Revision History
+- 3 Device Comparison
+  - 3.1 Related Products
+- 4 Terminal Configuration and Functions
+  - 4.1 Pin Diagrams
+  - 4.2 Pin Attributes
+  - 4.3 Signal Descriptions
+  - 4.4 Pin Multiplexing
+  - 4.5 Buffer Type
+  - 4.6 Connection of Unused Pins
+- 5 Specifications
+  - 5.1 Absolute Maximum Ratings
+  - 5.2 ESD Ratings
+  - 5.3 Recommended Operating Conditions
+  - 5.4 Active Mode Supply Current Into VCC Excluding External Current
+  - 5.5 Active Mode Supply Current Per MHz
+  - 5.6 Low-Power Mode LPM0 Supply Currents Into VCC Excluding External Current
+  - 5.7 Low-Power Mode LPM3 and LPM4 Supply Currents (Into VCC) Excluding External Current
+  - 5.8 Low-Power Mode LPMx.5 Supply Currents (Into VCC) Excluding External Current
+  - 5.9 Production Distribution of LPM Supply Currents
+  - 5.10 Typical Characteristics - Current Consumption Per Module
+  - 5.11 Thermal Resistance Characteristics
+  - 5.12 Timing and Switching Characteristics
+- 6 Detailed Description
+  - 6.1 CPU
+  - 6.2 Operating Modes
+  - 6.3 Interrupt Vector Addresses
+  - 6.4 Memory Organization
+  - 6.5 Bootloader (BSL)
+  - 6.6 JTAG Standard Interface
+  - 6.7 Spy-Bi-Wire Interface (SBW)
+  - 6.8 FRAM
+  - 6.9 Memory Protection
+  - 6.10 Peripherals
+  - 6.11 Input/Output Diagrams
+  - 6.12 Device Descriptors (TLV)
+  - 6.13 Identification
+- 7 Applications, Implementation, and Layout
+  - 7.1 Device Connection and Layout Fundamentals
+  - 7.2 Peripheral- and Interface-Specific Design Information
+  - 7.3 ROM Libraries
+  - 7.4 Typical Applications
+- 8 Device and Documentation Support
+  - 8.1 Getting Started
+  - 8.2 Device Nomenclature
+  - 8.3 Tools and Software
+  - 8.4 Documentation Support
+  - 8.5 Related Links
+  - 8.6 Trademarks
+  - 8.7 Electrostatic Discharge Caution
+  - 8.8 Glossary
+- 9 Mechanical, Packaging, and Orderable Information

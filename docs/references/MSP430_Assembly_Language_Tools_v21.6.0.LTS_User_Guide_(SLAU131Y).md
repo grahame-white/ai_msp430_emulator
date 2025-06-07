@@ -1,0 +1,312 @@
+# MSP430 Assembly Language Tools v21.6.0.LTS (SLAU131Y) - October 2004–Revised June 2021
+
+![Texas Instruments logo](/images/common/texas_instruments_red_logo.jpg)
+
+## Contents
+
+- Read This First
+- About This Manual
+- How to Use This Manual
+- Notational Conventions
+- Related Documentation From Texas Instruments
+- Trademarks
+- 1 Introduction to the Software Development Tools
+  - 1.1 Software Development Tools Overview
+  - 1.2 Tools Descriptions
+- 2 Introduction to Object Modules
+  - 2.1 Object File Format Specifications
+  - 2.2 Executable Object Files
+  - 2.3 Introduction to Sections
+    - 2.3.1 Special Section Names
+  - 2.4 How the Assembler Handles Sections
+    - 2.4.1 Uninitialized Sections
+    - 2.4.2 Initialized Sections
+    - 2.4.3 User-Named Sections
+    - 2.4.4 Current Section
+    - 2.4.5 Section Program Counters
+    - 2.4.6 Subsections
+    - 2.4.7 Using Sections Directives
+  - 2.5 How the Linker Handles Sections
+    - 2.5.1 Combining Input Sections
+    - 2.5.2 Placing Sections
+  - 2.6 Symbols
+    - 2.6.1 Global (External) Symbols
+    - 2.6.2 Local Symbols
+    - 2.6.3 Weak Symbols
+    - 2.6.4 The Symbol Table
+  - 2.7 Symbolic Relocations
+    - 2.7.1 Relocation Entries
+  - 2.8 Loading a Program
+- 3 Program Loading and Running
+  - 3.1 Loading
+    - 3.1.1 Load and Run Addresses
+    - 3.1.2 Bootstrap Loading
+  - 3.2 Entry Point
+  - 3.3 Run-Time Initialization
+    - 3.3.1 The _c_int00 Function
+    - 3.3.2 RAM Model vs. ROM Model
+    - 3.3.3 About Linker-Generated Copy Tables
+  - 3.4 Arguments to main
+  - 3.5 Run-Time Relocation
+  - 3.6 Additional Information
+- 4 Assembler Description
+  - 4.1 Assembler Overview
+  - 4.2 The Assembler's Role in the Software Development Flow
+  - 4.3 Invoking the Assembler
+  - 4.4 Controlling Application Binary Interface
+  - 4.5 Naming Alternate Directories for Assembler Input
+    - 4.5.1 Using the --include_path Assembler Option
+    - 4.5.2 Using the MSP430_A_DIR Environment Variable
+  - 4.6 Source Statement Format
+    - 4.6.1 Label Field
+    - 4.6.2 Mnemonic Field
+    - 4.6.3 Operand Field
+    - 4.6.4 Comment Field
+  - 4.7 Literal Constants
+    - 4.7.1 Integer Literals
+    - 4.7.2 Character String Literals
+    - 4.7.3 Floating-Point Literals
+  - 4.8 Assembler Symbols
+    - 4.8.1 Identifiers
+    - 4.8.2 Labels
+    - 4.8.3 Local Labels
+    - 4.8.4 Symbolic Constants
+    - 4.8.5 Defining Symbolic Constants (--asm_define Option)
+    - Example 4-2. Using Symbolic Constants Defined on Command Line
+    - 4.8.6 Predefined Symbolic Constants
+    - 4.8.7 Registers
+    - 4.8.8 Substitution Symbols
+  - 4.9 Expressions
+    - 4.9.1 Mathematical and Logical Operators
+    - 4.9.2 Relational Operators and Conditional Expressions
+    - 4.9.3 Well-Defined Expressions
+  - 4.10 Built-in Functions and Operators
+    - 4.10.1 Built-In Math and Trigonometric Functions
+    - 4.10.2 MSP430 Built-In ELF Relocation Generating Operators
+  - 4.11 Source Listings
+  - 4.12 Debugging Assembly Source
+  - 4.13 Cross-Reference Listings
+- 5 Assembler Directives
+  - 5.1 Directives Summary
+  - 5.2 Directives that Define Sections
+  - Example 5-1. Sections Directives
+  - 5.3 Directives that Initialize Values
+  - 5.4 Directives that Perform Alignment and Reserve Space
+  - 5.5 Directives that Format the Output Listings
+  - 5.6 Directives that Reference Other Files
+  - 5.7 Directives that Enable Conditional Assembly
+  - 5.8 Directives that Define Union or Structure Types
+  - 5.9 Directives that Define Enumerated Types
+  - 5.10 Directives that Define Symbols at Assembly Time
+  - 5.11 Miscellaneous Directives
+  - 5.12 Directives Reference
+- 6 Macro Language Description
+  - 6.1 Using Macros
+  - 6.2 Defining Macros
+  - 6.3 Macro Parameters/Substitution Symbols
+    - 6.3.1 Directives That Define Substitution Symbols
+    - 6.3.2 Built-In Substitution Symbol Functions
+    - 6.3.3 Recursive Substitution Symbols
+    - 6.3.4 Forced Substitution
+    - 6.3.5 Accessing Individual Characters of Subscripted Substitution Symbols
+    - 6.3.6 Substitution Symbols as Local Variables in Macros
+  - 6.4 Macro Libraries
+  - 6.5 Using Conditional Assembly in Macros
+  - 6.6 Using Labels in Macros
+  - 6.7 Producing Messages in Macros
+  - 6.8 Using Directives to Format the Output Listing
+  - 6.9 Using Recursive and Nested Macros
+  - 6.10 Macro Directives Summary
+- 7 Archiver Description
+  - 7.1 Archiver Overview
+  - 7.2 The Archiver's Role in the Software Development Flow
+  - 7.3 Invoking the Archiver
+  - 7.4 Archiver Examples
+  - 7.5 Library Information Archiver Description
+    - 7.5.1 Invoking the Library Information Archiver
+    - 7.5.2 Library Information Archiver Example
+    - 7.5.3 Listing the Contents of an Index Library
+    - 7.5.4 Requirements
+- 8 Linker Description
+  - 8.1 Linker Overview
+  - 8.2 The Linker's Role in the Software Development Flow
+  - 8.3 Invoking the Linker
+  - 8.4 Linker Options
+    - 8.4.1 Wildcards in File, Section, and Symbol Patterns
+    - 8.4.2 Specifying C/C++ Symbols with Linker Options
+    - 8.4.3 Relocation Capabilities (--absolute_exe and --relocatable Options)
+    - 8.4.4 Allocate Memory for Use by the Loader to Pass Arguments (--arg_size Option)
+    - 8.4.5 Compression (--cinit_compression and --copy_compression Option)
+    - 8.4.6 Control Linker Diagnostics
+    - 8.4.7 Automatic Library Selection (--disable_auto_rts Option)
+    - 8.4.8 Do Not Remove Unused Sections (--unused_section_elimination Option)
+    - 8.4.9 Linker Command File Preprocessing (--disable_pp, --define and --undefine Options)
+    - 8.4.10 Error Correcting Code Testing (--ecc Options)
+    - 8.4.11 Define an Entry Point (--entry_point Option)
+    - 8.4.12 Set Default Fill Value (--fill_value Option)
+    - 8.4.13 Define Heap Size (--heap_size Option)
+    - 8.4.14 Hiding Symbols
+    - 8.4.15 Alter the Library Search Algorithm (--library, --search_path, and MSP430_C_DIR )
+    - 8.4.16 Change Symbol Localization
+    - 8.4.17 Create a Map File (--map_file Option)
+    - 8.4.18 Managing Map File Contents (--mapfile_contents Option)
+    - 8.4.19 Disable Name Demangling (--no_demangle)
+    - 8.4.20 Disable Merging of Symbolic Debugging Information (--no_sym_merge Option)
+    - 8.4.21 Strip Symbolic Information (--no_symtable Option)
+    - 8.4.22 Name an Output Module (--output_file Option)
+    - 8.4.23 Prioritizing Function Placement (--preferred_order Option)
+    - 8.4.24 C Language Options (--ram_model and --rom_model Options)
+    - 8.4.25 Retain Discarded Sections (--retain Option)
+    - 8.4.26 Create an Absolute Listing File (--run_abs Option)
+    - 8.4.27 Scan All Libraries for Duplicate Symbol Definitions (--scan_libraries)
+    - 8.4.28 Define Stack Size (--stack_size Option)
+    - 8.4.29 Enforce Strict Compatibility (--strict_compatibility Option)
+    - 8.4.30 Mapping of Symbols (--symbol_map Option)
+    - 8.4.31 Introduce an Unresolved Symbol (--undef_sym Option)
+    - 8.4.32 Replace Multiply Routine With Hardware Multiplier Routine (--use_hw_mpy)
+    - 8.4.33 Display a Message When an Undefined Output Section Is Created (--warn_sections)
+    - 8.4.34 Generate XML Link Information File (--xml_link_info Option)
+    - 8.4.35 Zero Initialization (--zero_init Option)
+  - 8.5 Linker Command Files
+    - 8.5.1 Reserved Names in Linker Command Files
+    - 8.5.2 Constants in Linker Command Files
+    - 8.5.3 Accessing Files and Libraries from a Linker Command File
+    - 8.5.4 The MEMORY Directive
+    - 8.5.5 The SECTIONS Directive
+    - 8.5.6 Placing a Section at Different Load and Run Addresses
+    - 8.5.7 Using GROUP and UNION Statements
+    - 8.5.8 Special Section Types (DSECT, COPY, NOLOAD, NOINIT, and VECT_INIT)
+    - 8.5.9 Configuring Error Correcting Code (ECC) with the Linker
+    - 8.5.10 Assigning Symbols at Link Time
+    - 8.5.11 Creating and Filling Holes
+  - 8.6 Linker Symbols
+    - 8.6.1 Using Linker Symbols in C/C++ Applications
+    - 8.6.2 Declaring Weak Symbols
+    - 8.6.3 Resolving Symbols with Object Libraries
+  - 8.7 Default Placement Algorithm
+    - 8.7.1 How the Allocation Algorithm Creates Output Sections
+    - 8.7.2 Reducing Memory Fragmentation
+  - 8.8 Using Linker-Generated Copy Tables
+    - 8.8.1 Using Copy Tables for Boot Loading
+    - 8.8.2 Using Built-in Link Operators in Copy Tables
+    - 8.8.3 Overlay Management Example
+    - 8.8.4 Generating Copy Tables With the table() Operator
+    - 8.8.5 Compression
+    - 8.8.6 Copy Table Contents
+    - 8.8.7 General Purpose Copy Routine
+  - 8.9 Linker-Generated CRC Tables and CRC Over Memory Ranges
+    - 8.9.1 Using the crc_table() Operator in the SECTIONS Directive
+    - 8.9.2 Using the crc() Operator in the MEMORY Directive
+    - 8.9.3 Verification of Linker Computed CRC on MSP430
+  - 8.10 Partial (Incremental) Linking
+  - 8.11 Linking C/C++ Code
+    - 8.11.1 Run-Time Initialization
+    - 8.11.2 Object Libraries and Run-Time Support
+    - 8.11.3 Setting the Size of the Stack and Heap Sections
+    - 8.11.4 Initializing and AutoInitialzing Variables at Run Time
+    - 8.11.5 Initialization of Cinit and Watchdog Timer Hold
+  - 8.12 Linker Example
+- 9 Absolute Lister Description
+  - 9.1 Producing an Absolute Listing
+  - 9.2 Invoking the Absolute Lister
+  - 9.3 Absolute Lister Example
+- 10 Cross-Reference Lister Description
+  - 10.1 Producing a Cross-Reference Listing
+  - 10.2 Invoking the Cross-Reference Lister
+  - 10.3 Cross-Reference Listing Example
+- 11 Object File Utilities
+  - 11.1 Invoking the Object File Display Utility
+  - 11.2 Invoking the Disassembler
+  - 11.3 Invoking the Name Utility
+  - 11.4 Invoking the Strip Utility
+- 12 Hex Conversion Utility Description
+  - 12.1 The Hex Conversion Utility's Role in the Software Development Flow
+  - 12.2 Invoking the Hex Conversion Utility
+    - 12.2.1 Invoking the Hex Conversion Utility From the Command Line
+    - 12.2.2 Invoking the Hex Conversion Utility With a Command File
+  - 12.3 Understanding Memory Widths
+    - 12.3.1 Target Width
+    - 12.3.2 Specifying the Memory Width
+    - 12.3.3 Partitioning Data Into Output Files
+    - 12.3.4 Specifying Word Order for Output Words
+  - 12.4 The ROMS Directive
+    - 12.4.1 When to Use the ROMS Directive
+    - 12.4.2 An Example of the ROMS Directive
+  - 12.5 The SECTIONS Directive
+  - 12.6 The Load Image Format (--load_image Option)
+    - 12.6.1 Load Image Section Formation
+    - 12.6.2 Load Image Characteristics
+  - 12.7 Excluding a Specified Section
+  - 12.8 Assigning Output Filenames
+  - 12.9 Image Mode and the --fill Option
+    - 12.9.1 Generating a Memory Image
+    - 12.9.2 Specifying a Fill Value
+    - 12.9.3 Steps to Follow in Using Image Mode
+  - 12.10 Array Output Format
+  - 12.11 Controlling the ROM Device Address
+  - 12.12 Control Hex Conversion Utility Diagnostics
+  - 12.13 Description of the Object Formats
+    - 12.13.1 ASCII-Hex Object Format (--ascii Option)
+    - 12.13.2 Intel MCS-86 Object Format (--intel Option)
+    - 12.13.3 Motorola Exorciser Object Format (--motorola Option)
+    - 12.13.4 Extended Tektronix Object Format (--tektronix Option)
+    - 12.13.5 Texas Instruments SDSMAC (TI-Tagged) Object Format (--ti_tagged Option)
+    - 12.13.6 TI-TXT Hex Format (--ti_txt Option)
+- 13 Sharing C/C++ Header Files With Assembly Source
+  - 13.1 Overview of the .cdecls Directive
+  - 13.2 Notes on C/C++ Conversions
+    - 13.2.1 Comments
+    - 13.2.2 Conditional Compilation (#if/#else/#ifdef/etc.)
+    - 13.2.3 Pragmas
+    - 13.2.4 The #error and #warning Directives
+    - 13.2.5 Predefined symbol `__ASM_HEADER__`
+    - 13.2.6 Usage Within C/C++ asm( ) Statements
+    - 13.2.7 The #include Directive
+    - 13.2.8 Conversion of #define Macros
+    - 13.2.9 The #undef Directive
+    - 13.2.10 Enumerations
+    - 13.2.11 C Strings
+    - 13.2.12 C/C++ Built-In Functions
+    - 13.2.13 Structures and Unions
+    - 13.2.14 Function/Variable Prototypes
+    - 13.2.15 C Constant Suffixes
+    - 13.2.16 Basic C/C++ Types
+  - 13.3 Notes on C++ Specific Conversions
+    - 13.3.1 Name Mangling
+    - 13.3.2 Derived Classes
+    - 13.3.3 Templates
+    - 13.3.4 Virtual Functions
+  - 13.4 Special Assembler Support
+    - 13.4.1 Enumerations (.enum/.emember/.endenum)
+    - 13.4.2 The .define Directive
+    - 13.4.3 The .undefine/.unasg Directive
+    - 13.4.4 The $defined( ) Built-In Function
+    - 13.4.5 The $sizeof Built-In Function
+    - 13.4.6 Structure/Union Alignment and $alignof( )
+    - 13.4.7 The .cstring Directive
+- A Symbolic Debugging Directives
+  - A.1 DWARF Debugging Format
+  - A.2 Debug Directive Syntax
+- B XML Link Information File Description
+  - B.1 XML Information File Element Types
+  - B.2 Document Elements
+    - B.2.1 Header Elements
+    - B.2.2 Input File List
+    - B.2.3 Object Component List
+    - B.2.4 Logical Group List
+    - B.2.5 Placement Map
+    - B.2.6 Far Call Trampoline List
+    - B.2.7 Symbol Table
+- C CRC Reference Implementation
+  - C.1 Reference CRC Calculation Routine
+  - Example C-1. Reference Implementation of a CRC Calculation Function: example_c1.c
+  - C.2 Linker-Generated Copy Tables and CRC Tables
+  - Example C-2. Main Routine for Example Application: main.c
+  - Example C-3. Checking CRC Values: check_crc.c
+  - Example C-4. Task1 Routine: task1.c
+  - Example C-5. Task2 Routine: task2.c
+  - Example C-6. Task3 Routine: task3.c
+  - Example C-7. Command File Addition
+- D Glossary
+  - D.1 Terminology
+- E Revision History

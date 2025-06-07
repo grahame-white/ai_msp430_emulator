@@ -15,68 +15,76 @@ public class InformationMemoryTests
         _logger = new TestLogger();
     }
 
-    [Fact]
-    public void Constructor_WithLogger_SetsSize()
+    [Theory]
+    [InlineData(512)]
+    public void Constructor_WithLogger_SetsSize(int expectedSize)
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Equal(512, infoMemory.Size);
+        Assert.Equal(expectedSize, infoMemory.Size);
     }
 
-    [Fact]
-    public void Constructor_WithLogger_SetsBaseAddress()
+    [Theory]
+    [InlineData(0x1800)]
+    public void Constructor_WithLogger_SetsBaseAddress(ushort expectedBaseAddress)
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Equal((ushort)0x1800, infoMemory.BaseAddress);
+        Assert.Equal(expectedBaseAddress, infoMemory.BaseAddress);
     }
 
-    [Fact]
-    public void Constructor_WithLogger_SetsEndAddress()
+    [Theory]
+    [InlineData(0x19FF)]
+    public void Constructor_WithLogger_SetsEndAddress(ushort expectedEndAddress)
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Equal((ushort)0x19FF, infoMemory.EndAddress);
+        Assert.Equal(expectedEndAddress, infoMemory.EndAddress);
     }
 
-    [Fact]
-    public void Constructor_WithLogger_SetsSegmentSize()
+    [Theory]
+    [InlineData(128)]
+    public void Constructor_WithLogger_SetsSegmentSize(int expectedSegmentSize)
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Equal(128, infoMemory.SegmentSize);
+        Assert.Equal(expectedSegmentSize, infoMemory.SegmentSize);
     }
 
-    [Fact]
-    public void Constructor_WithLogger_SetsSegmentCount()
+    [Theory]
+    [InlineData(4)]
+    public void Constructor_WithLogger_SetsSegmentCount(int expectedCount)
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Equal(4, infoMemory.Segments.Count);
+        Assert.Equal(expectedCount, infoMemory.Segments.Count);
     }
 
-    [Fact]
-    public void Constructor_WithoutLogger_SetsSize()
+    [Theory]
+    [InlineData(512)]
+    public void Constructor_WithoutLogger_SetsSize(int expectedSize)
     {
         var infoMemory = new InformationMemory();
 
-        Assert.Equal(512, infoMemory.Size);
+        Assert.Equal(expectedSize, infoMemory.Size);
     }
 
-    [Fact]
-    public void Constructor_WithoutLogger_SetsBaseAddress()
+    [Theory]
+    [InlineData(0x1800)]
+    public void Constructor_WithoutLogger_SetsBaseAddress(ushort expectedBaseAddress)
     {
         var infoMemory = new InformationMemory();
 
-        Assert.Equal((ushort)0x1800, infoMemory.BaseAddress);
+        Assert.Equal(expectedBaseAddress, infoMemory.BaseAddress);
     }
 
-    [Fact]
-    public void Constructor_WithoutLogger_SetsEndAddress()
+    [Theory]
+    [InlineData(0x19FF)]
+    public void Constructor_WithoutLogger_SetsEndAddress(ushort expectedEndAddress)
     {
         var infoMemory = new InformationMemory();
 
-        Assert.Equal((ushort)0x19FF, infoMemory.EndAddress);
+        Assert.Equal(expectedEndAddress, infoMemory.EndAddress);
     }
 
     [Fact]

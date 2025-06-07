@@ -212,8 +212,9 @@ public class DecInstructionTests
         Assert.NotEqual(other, instruction.DestinationRegister);
     }
 
-    [Fact]
-    public void Opcode_IsCorrectValue()
+    [Theory]
+    [InlineData(0xB)]
+    public void Opcode_IsCorrectValue(byte expectedOpcode)
     {
         // Arrange
         var instruction = new DecInstruction(
@@ -223,11 +224,12 @@ public class DecInstructionTests
             false);
 
         // Act & Assert
-        Assert.Equal(0xB, instruction.Opcode);
+        Assert.Equal(expectedOpcode, instruction.Opcode);
     }
 
-    [Fact]
-    public void Format_IsFormatI()
+    [Theory]
+    [InlineData(InstructionFormat.FormatI)]
+    public void Format_IsFormatI(InstructionFormat expectedFormat)
     {
         // Arrange
         var instruction = new DecInstruction(
@@ -237,7 +239,7 @@ public class DecInstructionTests
             false);
 
         // Act & Assert
-        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        Assert.Equal(expectedFormat, instruction.Format);
     }
 
     [Fact]

@@ -75,20 +75,22 @@ public class FlashMemoryTests
         Assert.Equal(FlashControllerState.Locked, flash.ControllerState);
     }
 
-    [Fact]
-    public void Constructor_NullLogger_SetsSize()
+    [Theory]
+    [InlineData(4096)]
+    public void Constructor_NullLogger_SetsSize(int expectedSize)
     {
-        var flash = new FlashMemory(0x8000, 4096);
+        var flash = new FlashMemory(0x8000, expectedSize);
 
-        Assert.Equal(4096, flash.Size);
+        Assert.Equal(expectedSize, flash.Size);
     }
 
-    [Fact]
-    public void Constructor_NullLogger_SetsBaseAddress()
+    [Theory]
+    [InlineData(0x8000)]
+    public void Constructor_NullLogger_SetsBaseAddress(ushort expectedBaseAddress)
     {
-        var flash = new FlashMemory(0x8000, 4096);
+        var flash = new FlashMemory(expectedBaseAddress, 4096);
 
-        Assert.Equal((ushort)0x8000, flash.BaseAddress);
+        Assert.Equal(expectedBaseAddress, flash.BaseAddress);
     }
 
     [Theory]

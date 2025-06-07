@@ -226,6 +226,8 @@ All tests must follow these guidelines to ensure maintainability and clarity:
    multiple assertions in one test
 3. **Descriptive Test Names**: Test method names should clearly describe what is being tested and the expected outcome
 4. **Focused Testing**: Each test should validate one specific behavior or outcome
+5. **No Reflection in Tests**: Avoid using reflection in tests as it is brittle and can slow test execution. 
+   Access properties directly (e.g., `memory.Size`, `memory.BaseAddress`) for clearer intent and better performance
 
 ### Example of Compliant Test Structure
 

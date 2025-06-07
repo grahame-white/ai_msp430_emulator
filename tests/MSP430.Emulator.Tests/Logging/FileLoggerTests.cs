@@ -96,7 +96,7 @@ public class FileLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Info_WritesToFile()
+    public void Info_WritesToFile_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Info("test info message");
@@ -104,11 +104,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test info message", content);
+    }
+
+    [Fact]
+    public void Info_WritesToFile_IncludesLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Info("test info message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[INFO]", content);
     }
 
     [Fact]
-    public void Warning_WritesToFile()
+    public void Warning_WritesToFile_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Warning("test warning message");
@@ -116,11 +126,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test warning message", content);
+    }
+
+    [Fact]
+    public void Warning_WritesToFile_IncludesLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Warning("test warning message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[WARNING]", content);
     }
 
     [Fact]
-    public void Error_WritesToFile()
+    public void Error_WritesToFile_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Error("test error message");
@@ -128,11 +148,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test error message", content);
+    }
+
+    [Fact]
+    public void Error_WritesToFile_IncludesLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Error("test error message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[ERROR]", content);
     }
 
     [Fact]
-    public void Fatal_WritesToFile()
+    public void Fatal_WritesToFile_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Fatal("test fatal message");
@@ -140,11 +170,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test fatal message", content);
+    }
+
+    [Fact]
+    public void Fatal_WritesToFile_IncludesLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Fatal("test fatal message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[FATAL]", content);
     }
 
     [Fact]
-    public void Log_WithContext_IncludesContextInOutput()
+    public void Log_WithContext_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         var context = new { TestProperty = "value", Number = 42 };
@@ -153,8 +193,41 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test message", content);
+    }
+
+    [Fact]
+    public void Log_WithContext_IncludesContextLabel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value", Number = 42 };
+        logger.Info("test message", context);
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("Context:", content);
+    }
+
+    [Fact]
+    public void Log_WithContext_IncludesPropertyName()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value", Number = 42 };
+        logger.Info("test message", context);
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("TestProperty", content);
+    }
+
+    [Fact]
+    public void Log_WithContext_IncludesPropertyValue()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value", Number = 42 };
+        logger.Info("test message", context);
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("value", content);
     }
 

@@ -983,6 +983,32 @@ public class BicInstructionTests
 
         // Assert
         Assert.Equal(3u, cycles); // 1 base + 2 source (indirect auto-increment) + 0 dest (register)
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrementToRegister_AutoIncrementsRegister()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory location
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        // Set up memory at indirect location
+        memory[0x0200] = 0x00;
+        memory[0x0201] = 0xFF;
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal((ushort)0x0202, registerFile.ReadRegister(RegisterName.R4)); // Auto-incremented by 2 for word
     }
 

@@ -287,7 +287,7 @@ public class RegisterFileTests
     }
 
     [Fact]
-    public void ReadRegister_InvalidRegister_ExceptionContainsCorrectMessage()
+    public void ReadRegister_InvalidRegister_ExceptionMessageContainsExpectedText()
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.ReadRegister((RegisterName)16));
@@ -296,7 +296,7 @@ public class RegisterFileTests
     }
 
     [Fact]
-    public void ReadRegister_InvalidRegister_ExceptionHasCorrectParameterName()
+    public void ReadRegister_InvalidRegister_ExceptionParameterNameIsCorrect()
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.ReadRegister((RegisterName)16));

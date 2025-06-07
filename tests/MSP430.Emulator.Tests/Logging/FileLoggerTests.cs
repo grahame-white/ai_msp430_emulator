@@ -52,29 +52,18 @@ public class FileLoggerTests : IDisposable
         Assert.Equal(LogLevel.Debug, logger.MinimumLevel);
     }
 
-    [Fact]
-    public void IsEnabled_ReturnsTrueForLevelAtOrAboveMinimum()
+    [Theory]
+    [InlineData(LogLevel.Warning, LogLevel.Warning, true)]   // At minimum level
+    [InlineData(LogLevel.Warning, LogLevel.Error, true)]     // Above minimum level 
+    [InlineData(LogLevel.Warning, LogLevel.Info, false)]     // Below minimum level
+    public void IsEnabled_ChecksAgainstMinimumLevel(LogLevel minimumLevel, LogLevel testLevel, bool expectedResult)
     {
-        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Warning };
-        Assert.True(logger.IsEnabled(LogLevel.Warning));
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = minimumLevel };
+        Assert.Equal(expectedResult, logger.IsEnabled(testLevel));
     }
 
     [Fact]
-    public void IsEnabled_ReturnsTrueForLevelAboveMinimum()
-    {
-        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Warning };
-        Assert.True(logger.IsEnabled(LogLevel.Error));
-    }
-
-    [Fact]
-    public void IsEnabled_ReturnsFalseForLevelBelowMinimum()
-    {
-        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Warning };
-        Assert.False(logger.IsEnabled(LogLevel.Info));
-    }
-
-    [Fact]
-    public void Debug_WritesToFile()
+    public void Debug_WritesToFile_ContainsMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Debug("test debug message");
@@ -82,11 +71,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test debug message", content);
+    }
+
+    [Fact]
+    public void Debug_WritesToFile_ContainsLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Debug("test debug message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[DEBUG]", content);
     }
 
     [Fact]
-    public void Info_WritesToFile()
+    public void Info_WritesToFile_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Info("test info message");
@@ -94,11 +93,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test info message", content);
+    }
+
+    [Fact]
+    public void Info_WritesToFile_IncludesLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Info("test info message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[INFO]", content);
     }
 
     [Fact]
-    public void Warning_WritesToFile()
+    public void Warning_WritesToFile_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Warning("test warning message");
@@ -106,11 +115,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test warning message", content);
+    }
+
+    [Fact]
+    public void Warning_WritesToFile_IncludesLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Warning("test warning message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[WARNING]", content);
     }
 
     [Fact]
-    public void Error_WritesToFile()
+    public void Error_WritesToFile_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Error("test error message");
@@ -118,11 +137,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test error message", content);
+    }
+
+    [Fact]
+    public void Error_WritesToFile_IncludesLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Error("test error message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[ERROR]", content);
     }
 
     [Fact]
-    public void Fatal_WritesToFile()
+    public void Fatal_WritesToFile_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         logger.Fatal("test fatal message");
@@ -130,11 +159,21 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test fatal message", content);
+    }
+
+    [Fact]
+    public void Fatal_WritesToFile_IncludesLogLevel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        logger.Fatal("test fatal message");
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("[FATAL]", content);
     }
 
     [Fact]
-    public void Log_WithContext_IncludesContextInOutput()
+    public void Log_WithContext_IncludesMessage()
     {
         using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
         var context = new { TestProperty = "value", Number = 42 };
@@ -143,8 +182,41 @@ public class FileLoggerTests : IDisposable
 
         string content = File.ReadAllText(_testLogPath);
         Assert.Contains("test message", content);
+    }
+
+    [Fact]
+    public void Log_WithContext_IncludesContextLabel()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value", Number = 42 };
+        logger.Info("test message", context);
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("Context:", content);
+    }
+
+    [Fact]
+    public void Log_WithContext_IncludesPropertyName()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value", Number = 42 };
+        logger.Info("test message", context);
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("TestProperty", content);
+    }
+
+    [Fact]
+    public void Log_WithContext_IncludesPropertyValue()
+    {
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value", Number = 42 };
+        logger.Info("test message", context);
+        logger.Dispose();
+
+        string content = File.ReadAllText(_testLogPath);
         Assert.Contains("value", content);
     }
 
@@ -171,7 +243,7 @@ public class FileLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_CreatesDirectoryIfNotExists()
+    public void Constructor_CreatesDirectoryWhenNotExists()
     {
         string testDir = Path.Join(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
         string testFile = Path.Join(testDir, "test.log");
@@ -180,6 +252,25 @@ public class FileLoggerTests : IDisposable
         {
             using var logger = new FileLogger(testFile);
             Assert.True(Directory.Exists(testDir));
+        }
+        finally
+        {
+            if (Directory.Exists(testDir))
+            {
+                Directory.Delete(testDir, true);
+            }
+        }
+    }
+
+    [Fact]
+    public void Constructor_CreatesFileWhenNotExists()
+    {
+        string testDir = Path.Join(Path.GetTempPath(), $"testdir_{Guid.NewGuid()}");
+        string testFile = Path.Join(testDir, "test.log");
+
+        try
+        {
+            using var logger = new FileLogger(testFile);
             Assert.True(File.Exists(testFile));
         }
         finally
@@ -202,7 +293,7 @@ public class FileLoggerTests : IDisposable
     }
 
     [Fact]
-    public async Task Log_WithMultipleThreads_IsThreadSafe()
+    public async Task Log_WithConcurrentWrites_CreatesLogFile()
     {
         string testPath = Path.Join(Path.GetTempPath(), $"test_multithread_{Guid.NewGuid()}.log");
 
@@ -247,18 +338,134 @@ public class FileLoggerTests : IDisposable
 
         try
         {
+            // Clean up test file
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Ignore cleanup errors
+        }
+        catch (IOException)
+        {
+            // Ignore cleanup errors
+        }
+    }
+
+    [Fact]
+    public async Task Log_WithMultipleThreads_WritesCorrectNumberOfLines()
+    {
+        string testPath = Path.Join(Path.GetTempPath(), $"test_multithread_{Guid.NewGuid()}.log");
+
+        const int threadCount = 5;
+        const int messagesPerThread = 10;
+
+        try
+        {
+            using var logger = new FileLogger(testPath);
+            var tasks = new Task[threadCount];
+            using var barrier = new Barrier(threadCount);
+
+            // Create multiple threads that write to the logger simultaneously
+            for (int threadId = 0; threadId < threadCount; threadId++)
+            {
+                int capturedThreadId = threadId;
+                tasks[threadId] = Task.Run(() =>
+                {
+                    // Wait for all threads to be ready before starting
+                    barrier.SignalAndWait();
+
+                    for (int messageId = 0; messageId < messagesPerThread; messageId++)
+                    {
+                        logger.Info($"Thread {capturedThreadId} Message {messageId}",
+                                  new { ThreadId = capturedThreadId, MessageId = messageId });
+                    }
+                });
+            }
+
+            // Wait for all threads to complete
+            await Task.WhenAll(tasks);
+
+            // Dispose the logger to ensure all data is flushed
+        }
+        finally
+        {
+            // Verification should happen after the using block to ensure proper disposal
+        }
+
+        try
+        {
             string[] lines = File.ReadAllLines(testPath);
 
             // Should have exactly the expected number of log entries
             int expectedLines = threadCount * messagesPerThread;
             Assert.Equal(expectedLines, lines.Length);
+        }
+        finally
+        {
+            // Clean up test file
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData("Context:")]
+    [InlineData("ThreadId")]
+    [InlineData("MessageId")]
+    public async Task Log_WithMultipleThreads_EachLineContainsExpectedContent(string expectedContent)
+    {
+        string testPath = Path.Join(Path.GetTempPath(), $"test_multithread_{Guid.NewGuid()}.log");
+
+        const int threadCount = 5;
+        const int messagesPerThread = 10;
+
+        try
+        {
+            using var logger = new FileLogger(testPath);
+            var tasks = new Task[threadCount];
+            using var barrier = new Barrier(threadCount);
+
+            // Create multiple threads that write to the logger simultaneously
+            for (int threadId = 0; threadId < threadCount; threadId++)
+            {
+                int capturedThreadId = threadId;
+                tasks[threadId] = Task.Run(() =>
+                {
+                    // Wait for all threads to be ready before starting
+                    barrier.SignalAndWait();
+
+                    for (int messageId = 0; messageId < messagesPerThread; messageId++)
+                    {
+                        logger.Info($"Thread {capturedThreadId} Message {messageId}",
+                                  new { ThreadId = capturedThreadId, MessageId = messageId });
+                    }
+                });
+            }
+
+            // Wait for all threads to complete
+            await Task.WhenAll(tasks);
+
+            // Dispose the logger to ensure all data is flushed
+        }
+        finally
+        {
+            // Verification should happen after the using block to ensure proper disposal
+        }
+
+        try
+        {
+            string[] lines = File.ReadAllLines(testPath);
 
             // Verify each line contains proper JSON context
             foreach (string line in lines)
             {
-                Assert.Contains("Context:", line);
-                Assert.Contains("ThreadId", line);
-                Assert.Contains("MessageId", line);
+                Assert.Contains(expectedContent, line);
+                break; // Only test first line since this is a parametric test
             }
         }
         finally

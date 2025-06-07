@@ -217,11 +217,54 @@ npm run lint:docs
 
 ## Testing
 
+### Test Policy
+
+All tests must follow these guidelines to ensure maintainability and clarity:
+
+1. **One Test One Assert**: Each test method should contain exactly one assertion
+2. **Parametric Testing**: Use `[Theory]` and `[InlineData]` attributes to test multiple scenarios instead of
+   multiple assertions in one test
+3. **Descriptive Test Names**: Test method names should clearly describe what is being tested and the expected outcome
+4. **Focused Testing**: Each test should validate one specific behavior or outcome
+5. **No Reflection in Tests**: Avoid using reflection in tests as it is brittle and can slow test execution.
+   Access properties directly (e.g., `memory.Size`, `memory.BaseAddress`) for clearer intent and better performance
+
+### Example of Compliant Test Structure
+
+```csharp
+// ❌ Bad - Multiple assertions in one test
+[Fact]
+public void Constructor_ValidParameters_CreatesObject()
+{
+    var obj = new SomeClass(param1, param2);
+    Assert.Equal(expectedValue1, obj.Property1);
+    Assert.Equal(expectedValue2, obj.Property2);
+    Assert.Equal(expectedValue3, obj.Property3);
+}
+
+// ✅ Good - Separate tests with one assertion each
+[Theory]
+[InlineData(param1, expectedValue1)]
+[InlineData(param2, expectedValue2)]
+public void Constructor_ValidParameters_SetsProperty1(int param, int expected)
+{
+    var obj = new SomeClass(param);
+    Assert.Equal(expected, obj.Property1);
+}
+
+[Fact]
+public void Constructor_ValidParameters_SetsProperty2()
+{
+    var obj = new SomeClass(param1, param2);
+    Assert.Equal(expectedValue2, obj.Property2);
+}
+```
+
 ### .NET Tests
 
 ```bash
 # Run all tests
-./scripts/test
+./script/test
 
 # Run specific test project
 dotnet test tests/MSP430.Emulator.Tests/

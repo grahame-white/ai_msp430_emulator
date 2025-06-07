@@ -13,7 +13,7 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 public class MovInstructionTests
 {
     [Fact]
-    public void Constructor_ValidParameters_CreatesInstruction()
+    public void Constructor_ValidParameters_SetsFormat()
     {
         // Arrange & Act
         var instruction = new MovInstruction(
@@ -26,14 +26,148 @@ public class MovInstructionTests
 
         // Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsOpcode()
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(0x4, instruction.Opcode);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsInstructionWord()
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(0x4123, instruction.InstructionWord);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsMnemonic()
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal("MOV", instruction.Mnemonic);
-        Assert.False(instruction.IsByteOperation);
-        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-        Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Constructor_ValidParameters_SetsByteOperation(bool expectedByteOp)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            expectedByteOp);
+
+        // Assert
+        Assert.Equal(expectedByteOp, instruction.IsByteOperation);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R1)]
+    [InlineData(RegisterName.R2)]
+    [InlineData(RegisterName.R15)]
+    public void Constructor_ValidParameters_SetsSourceRegister(RegisterName expectedSource)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            expectedSource,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedSource, instruction.SourceRegister);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R4)]
+    [InlineData(RegisterName.R5)]
+    [InlineData(RegisterName.R15)]
+    public void Constructor_ValidParameters_SetsDestinationRegister(RegisterName expectedDest)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            expectedDest,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedDest, instruction.DestinationRegister);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Indirect)]
+    public void Constructor_ValidParameters_SetsSourceAddressingMode(AddressingMode expectedSourceMode)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            expectedSourceMode,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedSourceMode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Indexed)]
+    public void Constructor_ValidParameters_SetsDestinationAddressingMode(AddressingMode expectedDestMode)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            expectedDestMode,
+            false);
+
+        // Assert
+        Assert.Equal(expectedDestMode, instruction.DestinationAddressingMode);
     }
 
     [Fact]
@@ -69,11 +203,52 @@ public class MovInstructionTests
             false);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R4));
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_Takes1Cycle()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(1u, cycles); // Register to register takes 1 cycle
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_ReadOperandReturnsLowByte()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+
+        // Act: check what ReadOperand returns
+        ushort sourceValue = InstructionHelpers.ReadOperand(
+            RegisterName.R1,
+            AddressingMode.Register,
+            true,
+            registerFile,
+            memory,
+            0);
+
+        // Assert
+        Assert.Equal(0x34, sourceValue); // Should be 0x34 (low byte of 0x1234)
     }
 
     [Fact]
@@ -83,18 +258,6 @@ public class MovInstructionTests
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234);
         registerFile.WriteRegister(RegisterName.R3, 0x5678); // Set up R3 with a known value
-
-        // Debug: check what ReadOperand returns
-        ushort sourceValue = InstructionHelpers.ReadOperand(
-            RegisterName.R1,
-            AddressingMode.Register,
-            true,
-            registerFile,
-            memory,
-            0);
-
-        // Should be 0x34 (low byte of 0x1234)
-        Assert.Equal(0x34, sourceValue);
 
         var instruction = new MovInstruction(
             0x4000,
@@ -161,7 +324,7 @@ public class MovInstructionTests
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrement_ReadsAndIncrementsPointer()
+    public void Execute_IndirectAutoIncrement_ReadsValue()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -182,11 +345,34 @@ public class MovInstructionTests
 
         // Assert
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R2));
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrement_IncrementsPointer()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        memory[0x1000] = 0x34;
+        memory[0x1001] = 0x12;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(0x1002, registerFile.ReadRegister(RegisterName.R1)); // Incremented by 2 for word operation
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrementByte_IncrementsBy1()
+    public void Execute_IndirectAutoIncrementByte_ReadsLowByte()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -207,6 +393,28 @@ public class MovInstructionTests
 
         // Assert
         Assert.Equal(0xFF34, registerFile.ReadRegister(RegisterName.R3));
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrementByte_IncrementsBy1()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R5, 0x1000);
+        memory[0x1000] = 0x34;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R5,
+            RegisterName.R3,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(0x1001, registerFile.ReadRegister(RegisterName.R5)); // Incremented by 1 for byte operation
     }
 
@@ -287,18 +495,19 @@ public class MovInstructionTests
         Assert.Equal(0xDEAD, registerFile.ReadRegister(RegisterName.R4));
     }
 
-    [Fact]
-    public void Execute_RegisterToIndirect_WritesToMemory()
+    [Theory]
+    [InlineData(0xABCD, 0x2000, 0xCD)]
+    public void Execute_RegisterToIndirect_WritesToMemoryLowByte(ushort sourceValue, ushort address, byte expectedLowByte)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R5, 0xABCD); // Use R5 as source
-        registerFile.WriteRegister(RegisterName.R6, 0x2000); // Use R6 as address pointer
+        registerFile.WriteRegister(RegisterName.R5, sourceValue);
+        registerFile.WriteRegister(RegisterName.R6, address);
 
         var instruction = new MovInstruction(
             0x4000,
-            RegisterName.R5, // Use R5 as source
-            RegisterName.R6, // Use R6 as address pointer
+            RegisterName.R5,
+            RegisterName.R6,
             AddressingMode.Register,
             AddressingMode.Indirect,
             false);
@@ -307,17 +516,41 @@ public class MovInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(0xCD, memory[0x2000]);
-        Assert.Equal(0xAB, memory[0x2001]);
+        Assert.Equal(expectedLowByte, memory[address]);
     }
 
-    [Fact]
-    public void Execute_RegisterToIndexed_WritesToOffsetAddress()
+    [Theory]
+    [InlineData(0xABCD, 0x2000, 0xAB)]
+    public void Execute_RegisterToIndirect_WritesToMemoryHighByte(ushort sourceValue, ushort address, byte expectedHighByte)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R1, 0x1234);
-        registerFile.WriteRegister(RegisterName.R2, 0x2000);
+        registerFile.WriteRegister(RegisterName.R5, sourceValue);
+        registerFile.WriteRegister(RegisterName.R6, address);
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R5,
+            RegisterName.R6,
+            AddressingMode.Register,
+            AddressingMode.Indirect,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(expectedHighByte, memory[address + 1]);
+    }
+
+    [Theory]
+    [InlineData(0x1234, 0x2000, 0x0010, 0x34)]
+    public void Execute_RegisterToIndexed_WritesToOffsetAddressLowByte(ushort sourceValue, ushort baseAddress, ushort offset, byte expectedLowByte)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, sourceValue);
+        registerFile.WriteRegister(RegisterName.R2, baseAddress);
 
         var instruction = new MovInstruction(
             0x4000,
@@ -327,23 +560,49 @@ public class MovInstructionTests
             AddressingMode.Indexed,
             false);
 
-        ushort[] extensionWords = { 0x0010 }; // Offset
+        ushort[] extensionWords = { offset };
 
         // Act
         instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(0x34, memory[0x2010]);
-        Assert.Equal(0x12, memory[0x2011]);
+        Assert.Equal(expectedLowByte, memory[baseAddress + offset]);
     }
 
     [Theory]
-    [InlineData(0x0000, true, false)] // Zero value sets Z, clears N
-    [InlineData(0x0080, true, true)]  // Byte: bit 7 set, sets N 
-    [InlineData(0x007F, true, false)] // Byte: bit 7 clear, clears N
-    [InlineData(0x8000, false, true)] // Word: bit 15 set, sets N
-    [InlineData(0x7FFF, false, false)] // Word: bit 15 clear, clears N
-    public void Execute_FlagUpdates_SetsCorrectFlags(ushort value, bool isByteOperation, bool expectedNegative)
+    [InlineData(0x1234, 0x2000, 0x0010, 0x12)]
+    public void Execute_RegisterToIndexed_WritesToOffsetAddressHighByte(ushort sourceValue, ushort baseAddress, ushort offset, byte expectedHighByte)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, sourceValue);
+        registerFile.WriteRegister(RegisterName.R2, baseAddress);
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Indexed,
+            false);
+
+        ushort[] extensionWords = { offset };
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(expectedHighByte, memory[baseAddress + offset + 1]);
+    }
+
+    [Theory]
+    [InlineData(0x0000, true)]
+    [InlineData(0x0080, true)]
+    [InlineData(0x007F, true)]
+    [InlineData(0x8000, false)]
+    [InlineData(0x7FFF, false)]
+    [InlineData(0x1234, false)]
+    public void Execute_FlagUpdates_SetsZeroFlag(ushort value, bool isByteOperation)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -354,7 +613,7 @@ public class MovInstructionTests
         var instruction = new MovInstruction(
             0x4000,
             RegisterName.R1,
-            RegisterName.R3, // Use R3 instead of R2 to avoid status register conflicts
+            RegisterName.R3,
             AddressingMode.Register,
             AddressingMode.Register,
             isByteOperation);
@@ -364,8 +623,92 @@ public class MovInstructionTests
 
         // Assert
         Assert.Equal(value == 0, registerFile.StatusRegister.Zero);
+    }
+
+    [Theory]
+    [InlineData(0x0000, true, false)] // Zero value sets Z, clears N
+    [InlineData(0x0080, true, true)]  // Byte: bit 7 set, sets N 
+    [InlineData(0x007F, true, false)] // Byte: bit 7 clear, clears N
+    [InlineData(0x8000, false, true)] // Word: bit 15 set, sets N
+    [InlineData(0x7FFF, false, false)] // Word: bit 15 clear, clears N
+    public void Execute_FlagUpdates_SetsNegativeFlag(ushort value, bool isByteOperation, bool expectedNegative)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, value);
+        registerFile.StatusRegister.Carry = true; // Should be preserved
+        registerFile.StatusRegister.Overflow = true; // Should be cleared
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R3,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            isByteOperation);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
+    }
+
+    [Theory]
+    [InlineData(0x0000, true)]
+    [InlineData(0x0080, true)]
+    [InlineData(0x007F, true)]
+    [InlineData(0x8000, false)]
+    [InlineData(0x7FFF, false)]
+    public void Execute_FlagUpdates_ClearsOverflowFlag(ushort value, bool isByteOperation)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, value);
+        registerFile.StatusRegister.Carry = true; // Should be preserved
+        registerFile.StatusRegister.Overflow = true; // Should be cleared
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R3,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            isByteOperation);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Overflow); // Always cleared
+    }
+
+    [Theory]
+    [InlineData(0x0000, true)]
+    [InlineData(0x0080, true)]
+    [InlineData(0x007F, true)]
+    [InlineData(0x8000, false)]
+    [InlineData(0x7FFF, false)]
+    public void Execute_FlagUpdates_PreservesCarryFlag(ushort value, bool isByteOperation)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, value);
+        registerFile.StatusRegister.Carry = true; // Should be preserved
+        registerFile.StatusRegister.Overflow = true; // Should be cleared
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R3,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            isByteOperation);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Carry); // Preserved
     }
 
@@ -477,7 +820,7 @@ public class MovInstructionTests
     [InlineData(AddressingMode.Symbolic, AddressingMode.Indexed)]
     [InlineData(AddressingMode.Symbolic, AddressingMode.Absolute)]
     [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic)]
-    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode sourceMode, AddressingMode destMode)
+    public void AddressingModes_AllSupportedModes_ReturnsCorrectSourceMode(AddressingMode sourceMode, AddressingMode destMode)
     {
         // Arrange
         var instruction = new MovInstruction(
@@ -490,6 +833,28 @@ public class MovInstructionTests
 
         // Act & Assert
         Assert.Equal(sourceMode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register, AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Immediate)]
+    public void AddressingModes_AllSupportedModes_ReturnsCorrectDestinationMode(AddressingMode sourceMode, AddressingMode destMode)
+    {
+        // Arrange
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R2,
+            sourceMode,
+            destMode,
+            false);
+
+        // Act & Assert
         Assert.Equal(destMode, instruction.DestinationAddressingMode);
     }
 
@@ -589,8 +954,77 @@ public class MovInstructionTests
         // The key point: flag update logic should NOT run when destination is R2
     }
 
+    [Theory]
+    [InlineData(false)]
+    public void Execute_StatusRegisterAsSource_UpdatesNegativeFlag(bool expectedNegative)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R2, 0x0000);
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R2,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    public void Execute_StatusRegisterAsSource_UpdatesZeroFlag(bool expectedZero)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R2, 0x0000);
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R2,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(expectedZero, registerFile.StatusRegister.Zero);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    public void Execute_StatusRegisterAsSource_UpdatesOverflowFlag(bool expectedOverflow)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R2, 0x0000);
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R2,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(expectedOverflow, registerFile.StatusRegister.Overflow);
+    }
+
     [Fact]
-    public void Execute_StatusRegisterAsSource_UpdatesFlagsNormally()
+    public void Execute_StatusRegisterAsSource_MovesValueCorrectly()
     {
         // Arrange
         // This test verifies that when R2 is the source (not destination), flags are updated normally
@@ -612,18 +1046,100 @@ public class MovInstructionTests
 
         // Assert
         Assert.Equal(0x0000, registerFile.ReadRegister(RegisterName.R5)); // Value is written correctly
-        // Flags SHOULD be updated when destination is not R2
-        Assert.False(registerFile.StatusRegister.Negative); // Negative flag clear (bit 15 not set)
-        Assert.True(registerFile.StatusRegister.Zero); // Zero flag set (value is zero)
-        Assert.False(registerFile.StatusRegister.Overflow); // Overflow flag cleared by MOV
-        // Carry flag is preserved (not modified by MOV)
+    }
+
+    [Theory]
+    [InlineData(true)]
+    public void Execute_R2WithAbsoluteMode_UpdatesNegativeFlag(bool expectedNegative)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        ushort memoryAddress = 0x1000;
+        ushort valueToMove = 0x8000;
+
+        registerFile.WriteRegister(RegisterName.R3, valueToMove);
+        // Set opposite initial values to ensure the test is checking the actual update
+        registerFile.StatusRegister.Negative = false;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R3,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Absolute,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, new ushort[] { memoryAddress });
+
+        // Assert
+        Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    public void Execute_R2WithAbsoluteMode_UpdatesZeroFlag(bool expectedZero)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        ushort memoryAddress = 0x1000;
+        ushort valueToMove = 0x8000;
+
+        registerFile.WriteRegister(RegisterName.R3, valueToMove);
+        // Set opposite initial values to ensure the test is checking the actual update
+        registerFile.StatusRegister.Zero = true;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R3,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Absolute,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, new ushort[] { memoryAddress });
+
+        // Assert
+        Assert.Equal(expectedZero, registerFile.StatusRegister.Zero);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    public void Execute_R2WithAbsoluteMode_UpdatesOverflowFlag(bool expectedOverflow)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        ushort memoryAddress = 0x1000;
+        ushort valueToMove = 0x8000;
+
+        registerFile.WriteRegister(RegisterName.R3, valueToMove);
+        // Set opposite initial values to ensure the test is checking the actual update
+        registerFile.StatusRegister.Overflow = true;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R3,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Absolute,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, new ushort[] { memoryAddress });
+
+        // Assert
+        Assert.Equal(expectedOverflow, registerFile.StatusRegister.Overflow);
     }
 
     [Fact]
-    public void Execute_R2WithAbsoluteMode_UpdatesFlags()
+    public void Execute_R2WithAbsoluteMode_WritesToMemory()
     {
         // This test verifies that when R2 is used as the destination register with Absolute mode,
-        // flags are updated normally because we're not writing directly to the Status Register
+        // the value is written to memory at the absolute address
 
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -633,11 +1149,6 @@ public class MovInstructionTests
 
         // Set up R3 with the value to move
         registerFile.WriteRegister(RegisterName.R3, valueToMove);
-
-        // Clear flags to test they get updated
-        registerFile.StatusRegister.Negative = false;
-        registerFile.StatusRegister.Zero = false;
-        registerFile.StatusRegister.Overflow = true;
 
         var instruction = new MovInstruction(
             0x4000,
@@ -654,18 +1165,106 @@ public class MovInstructionTests
         // Check that value was written to memory at the absolute address (not to R2 register)
         ushort writtenValue = (ushort)(memory[memoryAddress] | (memory[memoryAddress + 1] << 8));
         Assert.Equal(valueToMove, writtenValue);
+    }
 
-        // Flags SHOULD be updated because we're using Absolute mode (not Register mode)
-        Assert.True(registerFile.StatusRegister.Negative); // Negative flag set (bit 15 set)
-        Assert.False(registerFile.StatusRegister.Zero); // Zero flag clear (value is not zero)
-        Assert.False(registerFile.StatusRegister.Overflow); // Overflow flag cleared by MOV
+    [Theory]
+    [InlineData(false)]
+    public void Execute_R2WithSymbolicMode_UpdatesNegativeFlag(bool expectedNegative)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        ushort offset = 0x0010;
+        ushort pcValue = 0x1000;
+        ushort valueToMove = 0x0000;
+
+        registerFile.WriteRegister(RegisterName.PC, pcValue);
+        registerFile.WriteRegister(RegisterName.R4, valueToMove);
+        // Set opposite initial values to ensure the test is checking the actual update
+        registerFile.StatusRegister.Negative = true;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R4,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Symbolic,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, new ushort[] { offset });
+
+        // Assert
+        Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    public void Execute_R2WithSymbolicMode_UpdatesZeroFlag(bool expectedZero)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        ushort offset = 0x0010;
+        ushort pcValue = 0x1000;
+        ushort valueToMove = 0x0000;
+
+        registerFile.WriteRegister(RegisterName.PC, pcValue);
+        registerFile.WriteRegister(RegisterName.R4, valueToMove);
+        // Set opposite initial values to ensure the test is checking the actual update
+        registerFile.StatusRegister.Zero = false;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R4,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Symbolic,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, new ushort[] { offset });
+
+        // Assert
+        Assert.Equal(expectedZero, registerFile.StatusRegister.Zero);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    public void Execute_R2WithSymbolicMode_UpdatesOverflowFlag(bool expectedOverflow)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        ushort offset = 0x0010;
+        ushort pcValue = 0x1000;
+        ushort valueToMove = 0x0000;
+
+        registerFile.WriteRegister(RegisterName.PC, pcValue);
+        registerFile.WriteRegister(RegisterName.R4, valueToMove);
+        // Set opposite initial values to ensure the test is checking the actual update
+        registerFile.StatusRegister.Overflow = true;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R4,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Symbolic,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, new ushort[] { offset });
+
+        // Assert
+        Assert.Equal(expectedOverflow, registerFile.StatusRegister.Overflow);
     }
 
     [Fact]
-    public void Execute_R2WithSymbolicMode_UpdatesFlags()
+    public void Execute_R2WithSymbolicMode_WritesToMemory()
     {
         // This test verifies that when R2 is used as the destination register with Symbolic mode,
-        // flags are updated normally because we're not writing directly to the Status Register
+        // the value is written to memory at PC + offset
 
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -677,11 +1276,6 @@ public class MovInstructionTests
         // Set up PC and source value
         registerFile.WriteRegister(RegisterName.PC, pcValue);
         registerFile.WriteRegister(RegisterName.R4, valueToMove);
-
-        // Clear flags to test they get updated
-        registerFile.StatusRegister.Negative = true;
-        registerFile.StatusRegister.Zero = false;
-        registerFile.StatusRegister.Overflow = true;
 
         var instruction = new MovInstruction(
             0x4000,
@@ -699,11 +1293,6 @@ public class MovInstructionTests
         ushort targetAddress = (ushort)(pcValue + offset);
         ushort writtenValue = (ushort)(memory[targetAddress] | (memory[targetAddress + 1] << 8));
         Assert.Equal(valueToMove, writtenValue);
-
-        // Flags SHOULD be updated because we're using Symbolic mode (not Register mode)
-        Assert.False(registerFile.StatusRegister.Negative); // Negative flag clear (bit 15 not set)
-        Assert.True(registerFile.StatusRegister.Zero); // Zero flag set (value is zero)
-        Assert.False(registerFile.StatusRegister.Overflow); // Overflow flag cleared by MOV
     }
 
     [Fact]

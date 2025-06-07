@@ -117,15 +117,65 @@ public class InstructionDecoderTests
         Instruction result = _decoder.Decode(instructionWord);
 
         Assert.Equal(InstructionFormat.FormatI, result.Format);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatI_ReturnsCorrectSourceRegister()
+    {
+        // MOV R1, R2 (word operation)
+        ushort instructionWord = 0x4102; // 0100 0001 0000 0010
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(RegisterName.R1, result.SourceRegister);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatI_ReturnsCorrectDestinationRegister()
+    {
+        // MOV R1, R2 (word operation)
+        ushort instructionWord = 0x4102; // 0100 0001 0000 0010
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(RegisterName.R2, result.DestinationRegister);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatI_ReturnsCorrectSourceAddressingMode()
+    {
+        // MOV R1, R2 (word operation)
+        ushort instructionWord = 0x4102; // 0100 0001 0000 0010
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(AddressingMode.Register, result.SourceAddressingMode);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatI_ReturnsCorrectDestinationAddressingMode()
+    {
+        // MOV R1, R2 (word operation)
+        ushort instructionWord = 0x4102; // 0100 0001 0000 0010
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(AddressingMode.Register, result.DestinationAddressingMode);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatI_ReturnsWordOperation()
+    {
+        // MOV R1, R2 (word operation)
+        ushort instructionWord = 0x4102; // 0100 0001 0000 0010
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.False(result.IsByteOperation);
     }
 
     [Fact]
-    public void Decode_ValidFormatI_ByteOperation_ReturnsCorrectInstruction()
+    public void Decode_ValidFormatI_ByteOperation_ReturnsFormatI()
     {
         // MOV.B R1, R2
         ushort instructionWord = 0x4142; // 0100 0001 0100 0010 (B/W bit set)
@@ -133,11 +183,21 @@ public class InstructionDecoderTests
         Instruction result = _decoder.Decode(instructionWord);
 
         Assert.Equal(InstructionFormat.FormatI, result.Format);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatI_ByteOperation_ReturnsByteOperation()
+    {
+        // MOV.B R1, R2
+        ushort instructionWord = 0x4142; // 0100 0001 0100 0010 (B/W bit set)
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.True(result.IsByteOperation);
     }
 
     [Fact]
-    public void Decode_ValidFormatI_WithIndexedAddressing_ReturnsCorrectInstruction()
+    public void Decode_ValidFormatI_WithIndexedAddressing_ReturnsCorrectSourceAddressingMode()
     {
         // MOV 2(R1), R2
         ushort instructionWord = 0x4112; // 0100 0001 0001 0010 (As=01 for indexed)
@@ -145,12 +205,32 @@ public class InstructionDecoderTests
         Instruction result = _decoder.Decode(instructionWord);
 
         Assert.Equal(AddressingMode.Indexed, result.SourceAddressingMode);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatI_WithIndexedAddressing_ReturnsCorrectDestinationAddressingMode()
+    {
+        // MOV 2(R1), R2
+        ushort instructionWord = 0x4112; // 0100 0001 0001 0010 (As=01 for indexed)
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(AddressingMode.Register, result.DestinationAddressingMode);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatI_WithIndexedAddressing_ReturnsCorrectExtensionWordCount()
+    {
+        // MOV 2(R1), R2
+        ushort instructionWord = 0x4112; // 0100 0001 0001 0010 (As=01 for indexed)
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(1, result.ExtensionWordCount); // One extension word for indexed mode
     }
 
     [Fact]
-    public void Decode_ValidFormatII_ReturnsFormatIIInstruction()
+    public void Decode_ValidFormatII_ReturnsFormatIIFormat()
     {
         // RRC R1
         ushort instructionWord = 0x1001; // 0001 0000 0000 0001
@@ -158,13 +238,43 @@ public class InstructionDecoderTests
         Instruction result = _decoder.Decode(instructionWord);
 
         Assert.Equal(InstructionFormat.FormatII, result.Format);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatII_ReturnsCorrectSourceRegister()
+    {
+        // RRC R1
+        ushort instructionWord = 0x1001; // 0001 0000 0000 0001
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(RegisterName.R1, result.SourceRegister);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatII_ReturnsCorrectSourceAddressingMode()
+    {
+        // RRC R1
+        ushort instructionWord = 0x1001; // 0001 0000 0000 0001
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(AddressingMode.Register, result.SourceAddressingMode);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatII_ReturnsWordOperation()
+    {
+        // RRC R1
+        ushort instructionWord = 0x1001; // 0001 0000 0000 0001
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.False(result.IsByteOperation);
     }
 
     [Fact]
-    public void Decode_ValidFormatII_ByteOperation_ReturnsCorrectInstruction()
+    public void Decode_ValidFormatII_ByteOperation_ReturnsFormatII()
     {
         // RRC.B R1
         ushort instructionWord = 0x1041; // 0001 0000 0100 0001 (B/W bit set)
@@ -172,11 +282,21 @@ public class InstructionDecoderTests
         Instruction result = _decoder.Decode(instructionWord);
 
         Assert.Equal(InstructionFormat.FormatII, result.Format);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatII_ByteOperation_ReturnsByteOperation()
+    {
+        // RRC.B R1
+        ushort instructionWord = 0x1041; // 0001 0000 0100 0001 (B/W bit set)
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.True(result.IsByteOperation);
     }
 
     [Fact]
-    public void Decode_ValidFormatIII_ReturnsFormatIIIInstruction()
+    public void Decode_ValidFormatIII_ReturnsFormatIIIFormat()
     {
         // JEQ +4 (offset = 2 words)
         ushort instructionWord = 0x2002; // 001 000 0000000010
@@ -184,6 +304,16 @@ public class InstructionDecoderTests
         Instruction result = _decoder.Decode(instructionWord);
 
         Assert.Equal(InstructionFormat.FormatIII, result.Format);
+    }
+
+    [Fact]
+    public void Decode_ValidFormatIII_ReturnsZeroExtensionWordCount()
+    {
+        // JEQ +4 (offset = 2 words)
+        ushort instructionWord = 0x2002; // 001 000 0000000010
+
+        Instruction result = _decoder.Decode(instructionWord);
+
         Assert.Equal(0, result.ExtensionWordCount); // Jump instructions don't use extension words
     }
 
@@ -204,9 +334,39 @@ public class InstructionDecoderTests
     [InlineData(0x1400)] // Invalid Format II opcode
     public void Decode_InvalidInstruction_ThrowsInvalidInstructionException(ushort instructionWord)
     {
-        InvalidInstructionException exception = Assert.Throws<InvalidInstructionException>(() => _decoder.Decode(instructionWord));
-        Assert.Equal(instructionWord, exception.InstructionWord);
-        Assert.Contains("Invalid", exception.Message);
+        Assert.Throws<InvalidInstructionException>(() => _decoder.Decode(instructionWord));
+    }
+
+    [Theory]
+    [InlineData(0x0000)] // Reserved opcode space
+    [InlineData(0x1400)] // Invalid Format II opcode
+    public void Decode_InvalidInstruction_ExceptionContainsCorrectInstructionWord(ushort instructionWord)
+    {
+        try
+        {
+            _decoder.Decode(instructionWord);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (InvalidInstructionException exception)
+        {
+            Assert.Equal(instructionWord, exception.InstructionWord);
+        }
+    }
+
+    [Theory]
+    [InlineData(0x0000)] // Reserved opcode space
+    [InlineData(0x1400)] // Invalid Format II opcode
+    public void Decode_InvalidInstruction_ExceptionContainsInvalidMessage(ushort instructionWord)
+    {
+        try
+        {
+            _decoder.Decode(instructionWord);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (InvalidInstructionException exception)
+        {
+            Assert.Contains("Invalid", exception.Message);
+        }
     }
 
     [Fact]

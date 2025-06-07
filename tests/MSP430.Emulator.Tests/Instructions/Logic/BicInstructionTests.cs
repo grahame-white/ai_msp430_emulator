@@ -14,7 +14,7 @@ public class BicInstructionTests
 {
 
     [Fact]
-    public void Constructor_ValidParameters_CreatesInstruction()
+    public void Constructor_ValidParameters_SetsFormat()
     {
         // Arrange & Act
         var instruction = new BicInstruction(
@@ -27,14 +27,136 @@ public class BicInstructionTests
 
         // Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsOpcode()
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(0xC, instruction.Opcode);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsInstructionWord()
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(0xC123, instruction.InstructionWord);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsMnemonic()
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal("BIC", instruction.Mnemonic);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsIsByteOperationToFalse()
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.False(instruction.IsByteOperation);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceRegister()
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(RegisterName.R1, instruction.SourceRegister);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsDestinationRegister()
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    public void Constructor_ValidParameters_SetsSourceAddressingMode(AddressingMode expectedMode)
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedMode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    public void Constructor_ValidParameters_SetsDestinationAddressingMode(AddressingMode expectedMode)
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedMode, instruction.DestinationAddressingMode);
     }
 
     [Fact]
@@ -51,7 +173,23 @@ public class BicInstructionTests
 
         // Assert
         Assert.True(instruction.IsByteOperation);
-        Assert.Equal("BIC.B", instruction.Mnemonic);
+    }
+
+    [Theory]
+    [InlineData("BIC.B")]
+    public void Constructor_ByteOperation_SetsByteMnemonic(string expectedMnemonic)
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC563,
+            RegisterName.R5,
+            RegisterName.R6,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
+        // Assert
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Theory]
@@ -93,7 +231,7 @@ public class BicInstructionTests
     [InlineData(AddressingMode.Immediate)]
     [InlineData(AddressingMode.Absolute)]
     [InlineData(AddressingMode.Symbolic)]
-    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode mode)
+    public void AddressingModes_AllSupportedModes_SourceAddressingModeSet(AddressingMode mode)
     {
         // Arrange & Act
         var instruction = new BicInstruction(
@@ -106,6 +244,28 @@ public class BicInstructionTests
 
         // Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void AddressingModes_AllSupportedModes_DestinationAddressingModeSet(AddressingMode mode)
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R1,
+            RegisterName.R2,
+            mode,
+            mode,
+            false);
+
+        // Assert
         Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
 
@@ -154,6 +314,32 @@ public class BicInstructionTests
     }
 
     [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void ToString_VariousAddressingModes_ContainsMnemonic(AddressingMode mode)
+    {
+        // Arrange
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R1,
+            RegisterName.R2,
+            mode,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        string result = instruction.ToString();
+
+        // Assert
+        Assert.Contains("BIC", result);
+    }
+
+    [Theory]
     [InlineData(AddressingMode.Register, "R1")]
     [InlineData(AddressingMode.Indirect, "@R1")]
     [InlineData(AddressingMode.IndirectAutoIncrement, "@R1+")]
@@ -161,7 +347,7 @@ public class BicInstructionTests
     [InlineData(AddressingMode.Indexed, "X(R1)")]
     [InlineData(AddressingMode.Absolute, "&ADDR")]
     [InlineData(AddressingMode.Symbolic, "ADDR")]
-    public void ToString_VariousAddressingModes_FormatsCorrectly(
+    public void ToString_VariousAddressingModes_ContainsSourceOperand(
         AddressingMode mode,
         string expectedOperand)
     {
@@ -178,8 +364,32 @@ public class BicInstructionTests
         string result = instruction.ToString();
 
         // Assert
-        Assert.Contains("BIC", result);
         Assert.Contains(expectedOperand, result);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void ToString_VariousAddressingModes_ContainsDestinationRegister(AddressingMode mode)
+    {
+        // Arrange
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R1,
+            RegisterName.R2,
+            mode,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        string result = instruction.ToString();
+
+        // Assert
         Assert.Contains("R2", result);
     }
 
@@ -202,8 +412,130 @@ public class BicInstructionTests
         Assert.Contains("BIC.B", result);
     }
 
+    [Theory]
+    [InlineData(0x00F0)]
+    public void Execute_BasicOperation_ClearsBitsCorrectly(ushort expectedResult)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F); // source: bits to clear
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination: all bits set
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(expectedResult, registerFile.ReadRegister(RegisterName.R5)); // cleared bits 0-3 and 8-15
+    }
+
     [Fact]
-    public void Execute_BasicOperation_ClearsBitsCorrectly()
+    public void Execute_BasicOperation_DoesNotSetZeroFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F); // source: bits to clear
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination: all bits set
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_BasicOperation_DoesNotSetNegativeFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F); // source: bits to clear
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination: all bits set
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_BasicOperation_DoesNotSetCarryFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F); // source: bits to clear
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination: all bits set
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_BasicOperation_DoesNotSetOverflowFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F); // source: bits to clear
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination: all bits set
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Theory]
+    [InlineData(1u)]
+    public void Execute_BasicOperation_Takes1Cycle(uint expectedCycles)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -223,12 +555,7 @@ public class BicInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal((ushort)0x00F0, registerFile.ReadRegister(RegisterName.R5)); // cleared bits 0-3 and 8-15
-        Assert.False(registerFile.StatusRegister.Zero);
-        Assert.False(registerFile.StatusRegister.Negative);
-        Assert.False(registerFile.StatusRegister.Carry);
-        Assert.False(registerFile.StatusRegister.Overflow);
-        Assert.Equal(1u, cycles); // 1 base + 0 source (register) + 0 dest (register)
+        Assert.Equal(expectedCycles, cycles); // 1 base + 0 source (register) + 0 dest (register)
     }
 
     [Fact]
@@ -249,13 +576,108 @@ public class BicInstructionTests
             true);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal((ushort)((0xF0) | 0x3400), registerFile.ReadRegister(RegisterName.R5)); // cleared low byte bits, high byte unchanged
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_DoesNotSetZeroFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0x340F); // source: bits to clear (byte operation uses low byte)
+        registerFile.WriteRegister(RegisterName.R5, 0x34FF); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_SetsNegativeFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0x340F); // source: bits to clear (byte operation uses low byte)
+        registerFile.WriteRegister(RegisterName.R5, 0x34FF); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Negative); // 0xF0 has bit 7 set (negative for byte)
-        Assert.Equal(1u, cycles); // 1 base + 0 source (register) + 0 dest (register)
+    }
+
+    [Theory]
+    [InlineData(1u)]
+    public void Execute_ByteOperation_Takes1Cycle(uint expectedCycles)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0x340F); // source: bits to clear (byte operation uses low byte)
+        registerFile.WriteRegister(RegisterName.R5, 0x34FF); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(expectedCycles, cycles); // 1 base + 0 source (register) + 0 dest (register)
+    }
+
+    [Theory]
+    [InlineData(0x0000)]
+    public void Execute_ResultZero_ClearsAllBits(ushort expectedResult)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFFFF); // source: clear all bits
+        registerFile.WriteRegister(RegisterName.R5, 0x5555); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(expectedResult, registerFile.ReadRegister(RegisterName.R5));
     }
 
     [Fact]
@@ -279,9 +701,80 @@ public class BicInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal((ushort)0x0000, registerFile.ReadRegister(RegisterName.R5));
         Assert.True(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_ResultZero_DoesNotSetNegativeFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0xFFFF); // source: clear all bits
+        registerFile.WriteRegister(RegisterName.R5, 0x5555); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Negative);
+    }
+
+    [Theory]
+    [InlineData(0x8000)]
+    public void Execute_NegativeResult_LeavesNegativeBit(ushort expectedResult)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0x7FFF); // source: clear bits 0-14, leave bit 15
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(expectedResult, registerFile.ReadRegister(RegisterName.R5));
+    }
+
+    [Fact]
+    public void Execute_NegativeResult_DoesNotSetZeroFlag()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        registerFile.WriteRegister(RegisterName.R4, 0x7FFF); // source: clear bits 0-14, leave bit 15
+        registerFile.WriteRegister(RegisterName.R5, 0xFFFF); // destination
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Zero);
     }
 
     [Fact]
@@ -305,8 +798,6 @@ public class BicInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal((ushort)0x8000, registerFile.ReadRegister(RegisterName.R5));
-        Assert.False(registerFile.StatusRegister.Zero);
         Assert.True(registerFile.StatusRegister.Negative);
     }
 
@@ -559,6 +1050,32 @@ public class BicInstructionTests
 
         // Assert
         Assert.Equal(3u, cycles); // 1 base + 2 source (indirect auto-increment) + 0 dest (register)
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrementToRegister_AutoIncrementsRegister()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory location
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        // Set up memory at indirect location
+        memory[0x0200] = 0x00;
+        memory[0x0201] = 0xFF;
+
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal((ushort)0x0202, registerFile.ReadRegister(RegisterName.R4)); // Auto-incremented by 2 for word
     }
 

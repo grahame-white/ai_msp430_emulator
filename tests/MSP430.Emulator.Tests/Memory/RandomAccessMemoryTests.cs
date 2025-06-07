@@ -15,23 +15,58 @@ public class RandomAccessMemoryTests
         _logger = new TestLogger();
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_CreatesMemory()
+    [Theory]
+    [InlineData(1024)]
+    public void Constructor_ValidParameters_SetsSize(int expectedSize)
+    {
+        var memory = new RandomAccessMemory(0x2000, expectedSize, _logger);
+
+        Assert.Equal(expectedSize, memory.Size);
+    }
+
+    [Theory]
+    [InlineData((ushort)0x2000)]
+    public void Constructor_ValidParameters_SetsBaseAddress(ushort expectedBaseAddress)
+    {
+        var memory = new RandomAccessMemory(expectedBaseAddress, 1024, _logger);
+
+        Assert.Equal(expectedBaseAddress, memory.BaseAddress);
+    }
+
+    [Theory]
+    [InlineData((ushort)0x23FF)]
+    public void Constructor_ValidParameters_SetsEndAddress(ushort expectedEndAddress)
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
-        Assert.Equal(1024, memory.Size);
-        Assert.Equal((ushort)0x2000, memory.BaseAddress);
-        Assert.Equal((ushort)0x23FF, memory.EndAddress);
+        Assert.Equal(expectedEndAddress, memory.EndAddress);
     }
 
-    [Fact]
-    public void Constructor_NullLogger_CreatesMemory()
+    [Theory]
+    [InlineData(1024)]
+    public void Constructor_NullLogger_SetsSize(int expectedSize)
+    {
+        var memory = new RandomAccessMemory(0x2000, expectedSize);
+
+        Assert.Equal(expectedSize, memory.Size);
+    }
+
+    [Theory]
+    [InlineData((ushort)0x2000)]
+    public void Constructor_NullLogger_SetsBaseAddress(ushort expectedBaseAddress)
+    {
+        var memory = new RandomAccessMemory(expectedBaseAddress, 1024);
+
+        Assert.Equal(expectedBaseAddress, memory.BaseAddress);
+    }
+
+    [Theory]
+    [InlineData((ushort)0x23FF)]
+    public void Constructor_NullLogger_SetsEndAddress(ushort expectedEndAddress)
     {
         var memory = new RandomAccessMemory(0x2000, 1024);
 
-        Assert.Equal(1024, memory.Size);
-        Assert.Equal((ushort)0x2000, memory.BaseAddress);
+        Assert.Equal(expectedEndAddress, memory.EndAddress);
     }
 
     [Theory]
@@ -118,13 +153,22 @@ public class RandomAccessMemoryTests
     }
 
     [Fact]
-    public void WriteWord_ValidEvenAddress_StoresLittleEndianValue()
+    public void WriteWord_ValidEvenAddress_StoresLowByte()
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
         memory.WriteWord(0x2000, 0x5678);
 
         Assert.Equal(0x78, memory.ReadByte(0x2000)); // Low byte
+    }
+
+    [Fact]
+    public void WriteWord_ValidEvenAddress_StoresHighByte()
+    {
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        memory.WriteWord(0x2000, 0x5678);
+
         Assert.Equal(0x56, memory.ReadByte(0x2001)); // High byte
     }
 
@@ -166,8 +210,11 @@ public class RandomAccessMemoryTests
         Assert.Throws<ArgumentOutOfRangeException>(() => memory.WriteWord(0x23FE, 0x1234));
     }
 
-    [Fact]
-    public void Clear_AllMemory_SetsAllBytesToZero()
+    [Theory]
+    [InlineData(0x2000)]
+    [InlineData(0x2100)]
+    [InlineData(0x23FF)]
+    public void Clear_AllMemory_SetsAllBytesToZero(ushort address)
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
@@ -178,29 +225,36 @@ public class RandomAccessMemoryTests
 
         memory.Clear();
 
-        Assert.Equal(0x00, memory.ReadByte(0x2000));
-        Assert.Equal(0x00, memory.ReadByte(0x2100));
-        Assert.Equal(0x00, memory.ReadByte(0x23FF));
+        Assert.Equal(0x00, memory.ReadByte(address));
     }
 
     [Theory]
-    [InlineData(0x00)]
-    [InlineData(0xFF)]
-    [InlineData(0xAA)]
-    [InlineData(0x55)]
-    public void Initialize_WithPattern_SetsAllBytesToPattern(byte pattern)
+    [InlineData(0x00, 0x2000)]
+    [InlineData(0x00, 0x2100)]
+    [InlineData(0x00, 0x23FF)]
+    [InlineData(0xFF, 0x2000)]
+    [InlineData(0xFF, 0x2100)]
+    [InlineData(0xFF, 0x23FF)]
+    [InlineData(0xAA, 0x2000)]
+    [InlineData(0xAA, 0x2100)]
+    [InlineData(0xAA, 0x23FF)]
+    [InlineData(0x55, 0x2000)]
+    [InlineData(0x55, 0x2100)]
+    [InlineData(0x55, 0x23FF)]
+    public void Initialize_WithPattern_SetsAllBytesToPattern(byte pattern, ushort address)
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
         memory.Initialize(pattern);
 
-        Assert.Equal(pattern, memory.ReadByte(0x2000));
-        Assert.Equal(pattern, memory.ReadByte(0x2100));
-        Assert.Equal(pattern, memory.ReadByte(0x23FF));
+        Assert.Equal(pattern, memory.ReadByte(address));
     }
 
-    [Fact]
-    public void Initialize_NoPattern_SetsAllBytesToZero()
+    [Theory]
+    [InlineData(0x2000)]
+    [InlineData(0x2100)]
+    [InlineData(0x23FF)]  // Last valid address (baseAddress + size - 1)
+    public void Initialize_NoPattern_SetsAllBytesToZero(ushort address)
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
@@ -210,8 +264,7 @@ public class RandomAccessMemoryTests
 
         memory.Initialize(); // Default pattern is 0x00
 
-        Assert.Equal(0x00, memory.ReadByte(0x2000));
-        Assert.Equal(0x00, memory.ReadByte(0x2100));
+        Assert.Equal(0x00, memory.ReadByte(address));
     }
 
     [Theory]
@@ -294,51 +347,111 @@ public class RandomAccessMemoryTests
     }
 
     [Fact]
-    public void Operations_LogCorrectMessages()
+    public void Operations_LogInitialization()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        Assert.Contains(_logger.LogEntries, entry =>
+            entry.Level == LogLevel.Debug && entry.Message.Contains("RandomAccessMemory initialized"));
+    }
+
+    [Fact]
+    public void Operations_LogWriteByte()
     {
         _logger.MinimumLevel = LogLevel.Debug;
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
         memory.WriteByte(0x2000, 0xAB);
-        memory.ReadByte(0x2000);
-        memory.WriteWord(0x2002, 0x1234);
-        memory.ReadWord(0x2002);
-        memory.Clear();
-        memory.Initialize(0xFF);
 
-        // Check that debug messages were logged
-        Assert.Contains(_logger.LogEntries, entry =>
-            entry.Level == LogLevel.Debug && entry.Message.Contains("RandomAccessMemory initialized"));
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("RAM WriteByte"));
+    }
+
+    [Fact]
+    public void Operations_LogReadByte()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        memory.ReadByte(0x2000);
+
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("RAM ReadByte"));
+    }
+
+    [Fact]
+    public void Operations_LogWriteWord()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        memory.WriteWord(0x2002, 0x1234);
+
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("RAM WriteWord"));
+    }
+
+    [Fact]
+    public void Operations_LogReadWord()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        memory.ReadWord(0x2002);
+
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("RAM ReadWord"));
+    }
+
+    [Fact]
+    public void Operations_LogClear()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        memory.Clear();
+
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("RAM cleared"));
+    }
+
+    [Fact]
+    public void Operations_LogInitialize()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        memory.Initialize(0xFF);
+
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("RAM initialized"));
     }
 
     [Fact]
-    public void BoundaryTesting_LastValidAddresses_WorksCorrectly()
+    public void BoundaryTesting_LastValidByteAddress_WorksCorrectly()
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger); // End = 0x23FF
 
         // Test last valid byte address
         memory.WriteByte(0x23FF, 0xAB);
+
         Assert.Equal(0xAB, memory.ReadByte(0x23FF));
+    }
+
+    [Fact]
+    public void BoundaryTesting_LastValidWordAddress_WorksCorrectly()
+    {
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger); // End = 0x23FF
 
         // Test last valid word address (must be even and have space for high byte)
         memory.WriteWord(0x23FE, 0x1234);
+
         Assert.Equal((ushort)0x1234, memory.ReadWord(0x23FE));
     }
 
     [Fact]
-    public void MemoryContents_PersistAcrossOperations()
+    public void MemoryContents_PersistAcrossOperations_ByteAt2000()
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
@@ -347,13 +460,60 @@ public class RandomAccessMemoryTests
         memory.WriteByte(0x2001, 0x22);
         memory.WriteWord(0x2002, 0x4433);
 
-        // Verify all values persist
         Assert.Equal(0x11, memory.ReadByte(0x2000));
+    }
+
+    [Fact]
+    public void MemoryContents_PersistAcrossOperations_ByteAt2001()
+    {
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        // Write pattern to multiple locations
+        memory.WriteByte(0x2000, 0x11);
+        memory.WriteByte(0x2001, 0x22);
+        memory.WriteWord(0x2002, 0x4433);
+
         Assert.Equal(0x22, memory.ReadByte(0x2001));
+    }
+
+    [Fact]
+    public void MemoryContents_PersistAcrossOperations_WordAt2002()
+    {
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        // Write pattern to multiple locations
+        memory.WriteByte(0x2000, 0x11);
+        memory.WriteByte(0x2001, 0x22);
+        memory.WriteWord(0x2002, 0x4433);
+
         Assert.Equal((ushort)0x4433, memory.ReadWord(0x2002));
+    }
+
+    [Fact]
+    public void MemoryContents_PersistAcrossOperations_WordLowByte()
+    {
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        // Write pattern to multiple locations
+        memory.WriteByte(0x2000, 0x11);
+        memory.WriteByte(0x2001, 0x22);
+        memory.WriteWord(0x2002, 0x4433);
 
         // Verify individual bytes of the word
         Assert.Equal(0x33, memory.ReadByte(0x2002)); // Low byte
+    }
+
+    [Fact]
+    public void MemoryContents_PersistAcrossOperations_WordHighByte()
+    {
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        // Write pattern to multiple locations
+        memory.WriteByte(0x2000, 0x11);
+        memory.WriteByte(0x2001, 0x22);
+        memory.WriteWord(0x2002, 0x4433);
+
+        // Verify individual bytes of the word
         Assert.Equal(0x44, memory.ReadByte(0x2003)); // High byte
     }
 

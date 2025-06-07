@@ -28,15 +28,46 @@ public class MemoryControllerTests
     }
 
     [Fact]
-    public void Constructor_ValidParameters_InitializesCorrectly()
+    public void Constructor_ValidParameters_InitializesMemoryMap()
     {
         // Act & Assert
         Assert.NotNull(_controller.MemoryMap);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_InitializesRam()
+    {
+        // Act & Assert
         Assert.NotNull(_controller.Ram);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_InitializesFlash()
+    {
+        // Act & Assert
         Assert.NotNull(_controller.Flash);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_InitializesInformationMemory()
+    {
+        // Act & Assert
         Assert.NotNull(_controller.InformationMemory);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_InitializesStatistics()
+    {
+        // Act & Assert
         Assert.NotNull(_controller.Statistics);
-        Assert.Equal(0ul, _controller.Statistics.TotalOperations);
+    }
+
+    [Theory]
+    [InlineData(0ul)]
+    public void Constructor_ValidParameters_InitializesStatisticsWithZeroOperations(ulong expectedOperations)
+    {
+        // Act & Assert
+        Assert.Equal(expectedOperations, _controller.Statistics.TotalOperations);
     }
 
     [Fact]
@@ -85,7 +116,37 @@ public class MemoryControllerTests
 
         // Assert
         Assert.IsType<byte>(result);
+    }
+
+    [Theory]
+    [InlineData(0x2000)] // RAM start
+    [InlineData(0x2FFF)] // RAM end
+    [InlineData(0x4000)] // Flash start
+    [InlineData(0xBFFF)] // Flash end
+    [InlineData(0x1800)] // Information memory start
+    [InlineData(0x19FF)] // Information memory end
+    public void ReadByte_ValidAddress_IncrementsReadCount(ushort address)
+    {
+        // Act
+        _controller.ReadByte(address);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalReads);
+    }
+
+    [Theory]
+    [InlineData(0x2000)] // RAM start
+    [InlineData(0x2FFF)] // RAM end
+    [InlineData(0x4000)] // Flash start
+    [InlineData(0xBFFF)] // Flash end
+    [InlineData(0x1800)] // Information memory start
+    [InlineData(0x19FF)] // Information memory end
+    public void ReadByte_ValidAddress_IncrementsCycles(ushort address)
+    {
+        // Act
+        _controller.ReadByte(address);
+
+        // Assert
         Assert.True(_controller.Statistics.TotalCycles > 0);
     }
 
@@ -103,7 +164,37 @@ public class MemoryControllerTests
 
         // Assert
         Assert.IsType<ushort>(result);
+    }
+
+    [Theory]
+    [InlineData(0x2000)] // RAM start (word-aligned)
+    [InlineData(0x2FFE)] // RAM end (word-aligned)
+    [InlineData(0x4000)] // Flash start (word-aligned)
+    [InlineData(0xBFFE)] // Flash end (word-aligned)
+    [InlineData(0x1800)] // Information memory start (word-aligned)
+    [InlineData(0x19FE)] // Information memory end (word-aligned)
+    public void ReadWord_ValidAddress_IncrementsReadCount(ushort address)
+    {
+        // Act
+        _controller.ReadWord(address);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalReads);
+    }
+
+    [Theory]
+    [InlineData(0x2000)] // RAM start (word-aligned)
+    [InlineData(0x2FFE)] // RAM end (word-aligned)
+    [InlineData(0x4000)] // Flash start (word-aligned)
+    [InlineData(0xBFFE)] // Flash end (word-aligned)
+    [InlineData(0x1800)] // Information memory start (word-aligned)
+    [InlineData(0x19FE)] // Information memory end (word-aligned)
+    public void ReadWord_ValidAddress_IncrementsCycles(ushort address)
+    {
+        // Act
+        _controller.ReadWord(address);
+
+        // Assert
         Assert.True(_controller.Statistics.TotalCycles > 0);
     }
 
@@ -120,17 +211,48 @@ public class MemoryControllerTests
     [Theory]
     [InlineData(0x2000, 0x42)] // RAM
     [InlineData(0x1800, 0x55)] // Information memory
-    public void WriteByte_ValidAddress_WritesSuccessfully(ushort address, byte value)
+    public void WriteByte_ValidAddress_ReturnsTrue(ushort address, byte value)
     {
         // Act
         bool result = _controller.WriteByte(address, value);
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
-        Assert.True(_controller.Statistics.TotalCycles > 0);
+    }
 
-        // Verify the value was written
+    [Theory]
+    [InlineData(0x2000, 0x42)] // RAM
+    [InlineData(0x1800, 0x84)] // Information memory
+    public void WriteByte_ValidAddress_IncrementsWriteCount(ushort address, byte value)
+    {
+        // Act
+        _controller.WriteByte(address, value);
+
+        // Assert
+        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Theory]
+    [InlineData(0x2000, 0x42)] // RAM
+    [InlineData(0x1800, 0x84)] // Information memory
+    public void WriteByte_ValidAddress_IncrementsCycles(ushort address, byte value)
+    {
+        // Act
+        _controller.WriteByte(address, value);
+
+        // Assert
+        Assert.True(_controller.Statistics.TotalCycles > 0);
+    }
+
+    [Theory]
+    [InlineData(0x2000, 0x42)] // RAM
+    [InlineData(0x1800, 0x84)] // Information memory
+    public void WriteByte_ValidAddress_PersistsValue(ushort address, byte value)
+    {
+        // Act
+        _controller.WriteByte(address, value);
+
+        // Assert
         byte readValue = _controller.ReadByte(address);
         Assert.Equal(value, readValue);
     }
@@ -138,17 +260,48 @@ public class MemoryControllerTests
     [Theory]
     [InlineData(0x2000, 0x1234)] // RAM (word-aligned)
     [InlineData(0x1800, 0x5678)] // Information memory (word-aligned)
-    public void WriteWord_ValidAddress_WritesSuccessfully(ushort address, ushort value)
+    public void WriteWord_ValidAddress_ReturnsTrue(ushort address, ushort value)
     {
         // Act
         bool result = _controller.WriteWord(address, value);
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
-        Assert.True(_controller.Statistics.TotalCycles > 0);
+    }
 
-        // Verify the value was written
+    [Theory]
+    [InlineData(0x2000, 0x1234)] // RAM (word-aligned)
+    [InlineData(0x1800, 0x5678)] // Information memory (word-aligned)
+    public void WriteWord_ValidAddress_IncrementsWriteCount(ushort address, ushort value)
+    {
+        // Act
+        _controller.WriteWord(address, value);
+
+        // Assert
+        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Theory]
+    [InlineData(0x2000, 0x1234)] // RAM (word-aligned)
+    [InlineData(0x1800, 0x5678)] // Information memory (word-aligned)
+    public void WriteWord_ValidAddress_IncrementsCycles(ushort address, ushort value)
+    {
+        // Act
+        _controller.WriteWord(address, value);
+
+        // Assert
+        Assert.True(_controller.Statistics.TotalCycles > 0);
+    }
+
+    [Theory]
+    [InlineData(0x2000, 0x1234)] // RAM (word-aligned)
+    [InlineData(0x1800, 0x5678)] // Information memory (word-aligned)
+    public void WriteWord_ValidAddress_PersistsValue(ushort address, ushort value)
+    {
+        // Act
+        _controller.WriteWord(address, value);
+
+        // Assert
         ushort readValue = _controller.ReadWord(address);
         Assert.Equal(value, readValue);
     }
@@ -173,7 +326,31 @@ public class MemoryControllerTests
 
         // Assert
         Assert.IsType<ushort>(result);
+    }
+
+    [Theory]
+    [InlineData(0x4000)] // Flash start
+    [InlineData(0x4002)] // Flash word-aligned
+    [InlineData(0xBFFE)] // Flash end (word-aligned)
+    public void FetchInstruction_ValidAddress_IncrementsInstructionFetches(ushort address)
+    {
+        // Act
+        _controller.FetchInstruction(address);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalInstructionFetches);
+    }
+
+    [Theory]
+    [InlineData(0x4000)] // Flash start
+    [InlineData(0x4002)] // Flash word-aligned
+    [InlineData(0xBFFE)] // Flash end (word-aligned)
+    public void FetchInstruction_ValidAddress_IncrementsCycles(ushort address)
+    {
+        // Act
+        _controller.FetchInstruction(address);
+
+        // Assert
         Assert.True(_controller.Statistics.TotalCycles > 0);
     }
 
@@ -184,6 +361,24 @@ public class MemoryControllerTests
     {
         // Arrange, Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(address));
+    }
+
+    [Theory]
+    [InlineData(0x0300)] // Invalid address (gap between peripherals and BSL)
+    [InlineData(0x1A00)] // Invalid address (gap between info memory and RAM)
+    public void ReadByte_InvalidAddress_IncrementsViolations(ushort address)
+    {
+        // Arrange, Act
+        try
+        {
+            _controller.ReadByte(address);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalViolations);
     }
 
@@ -194,6 +389,24 @@ public class MemoryControllerTests
     {
         // Arrange, Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.WriteByte(address, 0x42));
+    }
+
+    [Theory]
+    [InlineData(0x0300)] // Invalid address (gap between peripherals and BSL)
+    [InlineData(0x1A00)] // Invalid address (gap between info memory and RAM)
+    public void WriteByte_InvalidAddress_IncrementsViolations(ushort address)
+    {
+        // Arrange, Act
+        try
+        {
+            _controller.WriteByte(address, 0x42);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalViolations);
     }
 
@@ -257,11 +470,23 @@ public class MemoryControllerTests
 
         // Assert
         Assert.IsType<byte>(result);
+    }
+
+    [Fact]
+    public void ReadByte_WithContext_ValidContext_IncrementsStatistics()
+    {
+        // Arrange
+        var context = MemoryAccessContext.CreateReadByte(0x2000);
+
+        // Act
+        _controller.ReadByte(context);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalReads);
     }
 
     [Fact]
-    public void WriteWord_WithContext_ValidContext_WritesValue()
+    public void WriteWord_WithContext_ValidContext_ReturnsTrue()
     {
         // Arrange
         var context = MemoryAccessContext.CreateWriteWord(0x2000);
@@ -272,9 +497,33 @@ public class MemoryControllerTests
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
 
-        // Verify the value was written
+    [Fact]
+    public void WriteWord_WithContext_ValidContext_IncrementsStatistics()
+    {
+        // Arrange
+        var context = MemoryAccessContext.CreateWriteWord(0x2000);
+        const ushort testValue = 0x1234;
+
+        // Act
+        _controller.WriteWord(context, testValue);
+
+        // Assert
+        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Fact]
+    public void WriteWord_WithContext_ValidContext_WritesValue()
+    {
+        // Arrange
+        var context = MemoryAccessContext.CreateWriteWord(0x2000);
+        const ushort testValue = 0x1234;
+
+        // Act
+        _controller.WriteWord(context, testValue);
+
+        // Assert
         ushort readValue = _controller.ReadWord(0x2000);
         Assert.Equal(testValue, readValue);
     }
@@ -321,11 +570,23 @@ public class MemoryControllerTests
 
         // Assert
         Assert.Equal(MemoryRegion.Ram, region.Region);
+    }
+
+    [Fact]
+    public void GetRegion_ValidAddress_RegionContainsAddress()
+    {
+        // Arrange
+        const ushort ramAddress = 0x2000;
+
+        // Act
+        MemoryRegionInfo region = _controller.GetRegion(ramAddress);
+
+        // Assert
         Assert.True(region.Contains(ramAddress));
     }
 
     [Fact]
-    public void GetPermissions_ValidAddress_ReturnsCorrectPermissions()
+    public void GetPermissions_ValidAddress_AllowsRead()
     {
         // Arrange
         const ushort ramAddress = 0x2000;
@@ -335,12 +596,36 @@ public class MemoryControllerTests
 
         // Assert
         Assert.True((permissions & MemoryAccessPermissions.Read) != 0);
+    }
+
+    [Fact]
+    public void GetPermissions_ValidAddress_AllowsWrite()
+    {
+        // Arrange
+        const ushort ramAddress = 0x2000;
+
+        // Act
+        MemoryAccessPermissions permissions = _controller.GetPermissions(ramAddress);
+
+        // Assert
         Assert.True((permissions & MemoryAccessPermissions.Write) != 0);
+    }
+
+    [Fact]
+    public void GetPermissions_ValidAddress_AllowsExecute()
+    {
+        // Arrange
+        const ushort ramAddress = 0x2000;
+
+        // Act
+        MemoryAccessPermissions permissions = _controller.GetPermissions(ramAddress);
+
+        // Assert
         Assert.True((permissions & MemoryAccessPermissions.Execute) != 0);
     }
 
     [Fact]
-    public void GetAccessCycles_RamAccess_ReturnsExpectedCycles()
+    public void GetAccessCycles_RamAccess_ReturnsPositiveCycles()
     {
         // Arrange
         var context = MemoryAccessContext.CreateReadByte(0x2000);
@@ -350,6 +635,18 @@ public class MemoryControllerTests
 
         // Assert
         Assert.True(cycles > 0);
+    }
+
+    [Fact]
+    public void GetAccessCycles_RamAccess_ReturnsReasonableCycles()
+    {
+        // Arrange
+        var context = MemoryAccessContext.CreateReadByte(0x2000);
+
+        // Act
+        uint cycles = _controller.GetAccessCycles(context);
+
+        // Assert
         Assert.True(cycles <= 10); // RAM should be fast
     }
 
@@ -367,19 +664,38 @@ public class MemoryControllerTests
     }
 
     [Fact]
-    public void Reset_ClearsAllMemoryAndStatistics()
+    public void Reset_ClearsStatistics_WritesAreTracked()
+    {
+        // Arrange & Act
+        _controller.WriteByte(0x2000, 0x42); // Write to RAM
+
+        // Assert
+        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Fact]
+    public void Reset_ClearsStatistics_OperationsAreCleared()
     {
         // Arrange
         _controller.WriteByte(0x2000, 0x42); // Write to RAM
-        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
 
         // Act
         _controller.Reset();
 
         // Assert
         Assert.Equal(0ul, _controller.Statistics.TotalOperations);
+    }
 
-        // Verify RAM was cleared
+    [Fact]
+    public void Reset_ClearsMemory()
+    {
+        // Arrange
+        _controller.WriteByte(0x2000, 0x42); // Write to RAM
+
+        // Act
+        _controller.Reset();
+
+        // Assert
         byte ramValue = _controller.ReadByte(0x2000);
         Assert.Equal(0x00, ramValue);
     }
@@ -396,50 +712,316 @@ public class MemoryControllerTests
     {
         // Arrange
         bool eventRaised = false;
-        MemoryAccessEventArgs? eventArgs = null;
-
-        _controller.MemoryAccessed += (sender, args) =>
-        {
-            eventRaised = true;
-            eventArgs = args;
-        };
+        _controller.MemoryAccessed += (sender, args) => eventRaised = true;
 
         // Act
         _controller.ReadByte(0x2000);
 
         // Assert
         Assert.True(eventRaised);
-        Assert.NotNull(eventArgs);
-        Assert.Equal(0x2000, eventArgs.Context.Address);
-        Assert.Equal(MemoryAccessPermissions.Read, eventArgs.Context.AccessType);
-        Assert.Equal(MemoryRegion.Ram, eventArgs.Region.Region);
-        Assert.True(eventArgs.Cycles > 0);
     }
 
     [Fact]
-    public void AccessViolation_Event_RaisedOnInvalidAccess()
+    public void MemoryAccessed_Event_ContainsEventArgs()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAddress_IsNotNull()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAddress_HasCorrectAddress()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.Equal(0x2000, eventArgs!.Context.Address);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAccessType_IsNotNull()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAccessType_HasCorrectAccessType()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.Equal(MemoryAccessPermissions.Read, eventArgs!.Context.AccessType);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectRegion_IsNotNull()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectRegion_HasCorrectRegion()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.Equal(MemoryRegion.Ram, eventArgs!.Region.Region);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsPositiveCycles_IsNotNull()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsPositiveCycles_HasPositiveCycles()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
+        Assert.True(eventArgs!.Cycles > 0);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_ThrowsMemoryAccessException()
+    {
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_RaisesEvent_ThrowsException()
+    {
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_RaisesEvent_EventIsRaised()
     {
         // Arrange
         bool eventRaised = false;
-        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventRaised = true;
 
-        _controller.AccessViolation += (sender, args) =>
+        // Act
+        try
         {
-            eventRaised = true;
-            eventArgs = args;
-        };
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
 
-        // Act & Assert
-        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
-
+        // Assert
         Assert.True(eventRaised);
-        Assert.NotNull(eventArgs);
-        Assert.Equal(0x0300, eventArgs.Context.Address);
-        Assert.NotNull(eventArgs.Exception);
     }
 
     [Fact]
-    public void Statistics_TrackMultipleOperations()
+    public void AccessViolation_Event_ContainsEventArgs_ThrowsException()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_ContainsEventArgs_EventArgsNotNull()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsCorrectAddress_ThrowsException()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsCorrectAddress_EventArgsNotNull()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsCorrectAddress_HasCorrectAddress()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
+        Assert.Equal(0x0300, eventArgs!.Context.Address);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsException_ThrowsException()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsException_EventArgsNotNull()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
+        Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsException_ExceptionNotNull()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act
+        try
+        {
+            _controller.ReadByte(0x0300);
+        }
+        catch (MemoryAccessException)
+        {
+            // Expected
+        }
+
+        // Assert
+        Assert.NotNull(eventArgs!.Exception);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalReads()
     {
         // Arrange & Act
         _controller.ReadByte(0x2000);
@@ -448,9 +1030,53 @@ public class MemoryControllerTests
 
         // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalReads);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalWrites()
+    {
+        // Arrange & Act
+        _controller.ReadByte(0x2000);
+        _controller.WriteByte(0x2001, 0x42);
+        _controller.FetchInstruction(0x4000);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalInstructionFetches()
+    {
+        // Arrange & Act
+        _controller.ReadByte(0x2000);
+        _controller.WriteByte(0x2001, 0x42);
+        _controller.FetchInstruction(0x4000);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalInstructionFetches);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalOperations()
+    {
+        // Arrange & Act
+        _controller.ReadByte(0x2000);
+        _controller.WriteByte(0x2001, 0x42);
+        _controller.FetchInstruction(0x4000);
+
+        // Assert
         Assert.Equal(3ul, _controller.Statistics.TotalOperations);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalCycles()
+    {
+        // Arrange & Act
+        _controller.ReadByte(0x2000);
+        _controller.WriteByte(0x2001, 0x42);
+        _controller.FetchInstruction(0x4000);
+
+        // Assert
         Assert.True(_controller.Statistics.TotalCycles > 0);
     }
 
@@ -489,17 +1115,31 @@ public class MemoryControllerTests
     [InlineData(0x0000)] // SFR
     [InlineData(0x0100)] // 8-bit peripherals
     [InlineData(0x0200)] // 16-bit peripherals
-    public void PeripheralAccess_ReturnsDefaultValues(ushort address)
+    public void PeripheralAccess_ReturnsDefaultValues_ByteValue(ushort address)
     {
         // These tests verify peripheral access routing
         // Currently returns default values since peripherals are not fully implemented
 
         // Act
         byte byteValue = _controller.ReadByte(address);
-        bool writeResult = _controller.WriteByte(address, 0x42);
 
         // Assert
         Assert.Equal(0x00, byteValue); // Default value for unimplemented peripherals
+    }
+
+    [Theory]
+    [InlineData(0x0000)] // SFR
+    [InlineData(0x0100)] // 8-bit peripherals
+    [InlineData(0x0200)] // 16-bit peripherals
+    public void PeripheralAccess_ReturnsDefaultValues_WriteResult(ushort address)
+    {
+        // These tests verify peripheral access routing
+        // Currently returns default values since peripherals are not fully implemented
+
+        // Act
+        bool writeResult = _controller.WriteByte(address, 0x42);
+
+        // Assert
         Assert.True(writeResult); // Write should succeed for unimplemented peripherals
     }
 

@@ -1812,6 +1812,7 @@ scripts/release-preparation
 - **One Class Per File**: Each class, interface, or enum should be in its own file
 - **Consistent Naming**: Use PascalCase for public members, camelCase for private members
 - **Comprehensive Testing**: Minimum 80% code coverage with one assertion per test
+- **Test Policy Compliance**: All tests must follow the "one test one assert" policy (detailed in CONTRIBUTING.md)
 - **Parametric Testing**: Use xUnit theories to reduce test duplication
 - **Logging**: Include structured logging at appropriate levels
 - **Error Handling**: Implement comprehensive exception handling with custom exceptions

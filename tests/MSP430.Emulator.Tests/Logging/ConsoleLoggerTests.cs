@@ -22,25 +22,14 @@ public class ConsoleLoggerTests
         Assert.Equal(LogLevel.Debug, logger.MinimumLevel);
     }
 
-    [Fact]
-    public void IsEnabled_ReturnsTrueForLevelAtOrAboveMinimum()
+    [Theory]
+    [InlineData(LogLevel.Warning, LogLevel.Warning, true)]   // At minimum level
+    [InlineData(LogLevel.Warning, LogLevel.Error, true)]     // Above minimum level 
+    [InlineData(LogLevel.Warning, LogLevel.Info, false)]     // Below minimum level
+    public void IsEnabled_ChecksAgainstMinimumLevel(LogLevel minimumLevel, LogLevel testLevel, bool expectedResult)
     {
-        var logger = new ConsoleLogger { MinimumLevel = LogLevel.Warning };
-        Assert.True(logger.IsEnabled(LogLevel.Warning));
-    }
-
-    [Fact]
-    public void IsEnabled_ReturnsTrueForLevelAboveMinimum()
-    {
-        var logger = new ConsoleLogger { MinimumLevel = LogLevel.Warning };
-        Assert.True(logger.IsEnabled(LogLevel.Error));
-    }
-
-    [Fact]
-    public void IsEnabled_ReturnsFalseForLevelBelowMinimum()
-    {
-        var logger = new ConsoleLogger { MinimumLevel = LogLevel.Warning };
-        Assert.False(logger.IsEnabled(LogLevel.Info));
+        var logger = new ConsoleLogger { MinimumLevel = minimumLevel };
+        Assert.Equal(expectedResult, logger.IsEnabled(testLevel));
     }
 
     [Fact]
@@ -52,12 +41,20 @@ public class ConsoleLoggerTests
     }
 
     [Fact]
-    public void Debug_WithContext_CallsLogWithDebugLevelAndContext()
+    public void Debug_WithContext_CallsLogWithDebugLevel()
     {
         var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
         var context = new { TestProperty = "value" };
         logger.Debug("test message", context);
         Assert.Equal(LogLevel.Debug, logger.LastLogLevel);
+    }
+
+    [Fact]
+    public void Debug_WithContext_PassesContextCorrectly()
+    {
+        var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value" };
+        logger.Debug("test message", context);
         Assert.Equal(context, logger.LastContext);
     }
 
@@ -70,12 +67,20 @@ public class ConsoleLoggerTests
     }
 
     [Fact]
-    public void Info_WithContext_CallsLogWithInfoLevelAndContext()
+    public void Info_WithContext_CallsLogWithInfoLevel()
     {
         var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
         var context = new { TestProperty = "value" };
         logger.Info("test message", context);
         Assert.Equal(LogLevel.Info, logger.LastLogLevel);
+    }
+
+    [Fact]
+    public void Info_WithContext_PassesContextCorrectly()
+    {
+        var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value" };
+        logger.Info("test message", context);
         Assert.Equal(context, logger.LastContext);
     }
 
@@ -88,12 +93,20 @@ public class ConsoleLoggerTests
     }
 
     [Fact]
-    public void Warning_WithContext_CallsLogWithWarningLevelAndContext()
+    public void Warning_WithContext_CallsLogWithWarningLevel()
     {
         var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
         var context = new { TestProperty = "value" };
         logger.Warning("test message", context);
         Assert.Equal(LogLevel.Warning, logger.LastLogLevel);
+    }
+
+    [Fact]
+    public void Warning_WithContext_PassesContextCorrectly()
+    {
+        var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value" };
+        logger.Warning("test message", context);
         Assert.Equal(context, logger.LastContext);
     }
 
@@ -106,12 +119,20 @@ public class ConsoleLoggerTests
     }
 
     [Fact]
-    public void Error_WithContext_CallsLogWithErrorLevelAndContext()
+    public void Error_WithContext_CallsLogWithErrorLevel()
     {
         var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
         var context = new { TestProperty = "value" };
         logger.Error("test message", context);
         Assert.Equal(LogLevel.Error, logger.LastLogLevel);
+    }
+
+    [Fact]
+    public void Error_WithContext_PassesContextCorrectly()
+    {
+        var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value" };
+        logger.Error("test message", context);
         Assert.Equal(context, logger.LastContext);
     }
 
@@ -124,12 +145,20 @@ public class ConsoleLoggerTests
     }
 
     [Fact]
-    public void Fatal_WithContext_CallsLogWithFatalLevelAndContext()
+    public void Fatal_WithContext_CallsLogWithFatalLevel()
     {
         var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
         var context = new { TestProperty = "value" };
         logger.Fatal("test message", context);
         Assert.Equal(LogLevel.Fatal, logger.LastLogLevel);
+    }
+
+    [Fact]
+    public void Fatal_WithContext_PassesContextCorrectly()
+    {
+        var logger = new TestableConsoleLogger { MinimumLevel = LogLevel.Debug };
+        var context = new { TestProperty = "value" };
+        logger.Fatal("test message", context);
         Assert.Equal(context, logger.LastContext);
     }
 
@@ -190,22 +219,38 @@ public class ConsoleLoggerTests
     }
 
     [Fact]
-    public void Log_ErrorLevelWithRedirectErrorsToStdout_CallsCorrectMethod()
+    public void Log_ErrorLevelWithRedirectErrorsToStdout_StoresMessage()
     {
         // This test verifies the branch for RedirectErrorsToStdout=true with Error level
         var logger = new TestableConsoleLogger { RedirectErrorsToStdout = true };
         logger.Log(LogLevel.Error, "error message");
         Assert.Equal("error message", logger.LastMessage);
+    }
+
+    [Fact]
+    public void Log_ErrorLevelWithRedirectErrorsToStdout_StoresLogLevel()
+    {
+        // This test verifies the branch for RedirectErrorsToStdout=true with Error level
+        var logger = new TestableConsoleLogger { RedirectErrorsToStdout = true };
+        logger.Log(LogLevel.Error, "error message");
         Assert.Equal(LogLevel.Error, logger.LastLogLevel);
     }
 
     [Fact]
-    public void Log_ErrorLevelWithoutRedirectErrorsToStdout_CallsCorrectMethod()
+    public void Log_ErrorLevelWithoutRedirectErrorsToStdout_StoresMessage()
     {
         // This test verifies the branch for RedirectErrorsToStdout=false with Error level
         var logger = new TestableConsoleLogger { RedirectErrorsToStdout = false };
         logger.Log(LogLevel.Error, "error message");
         Assert.Equal("error message", logger.LastMessage);
+    }
+
+    [Fact]
+    public void Log_ErrorLevelWithoutRedirectErrorsToStdout_StoresLogLevel()
+    {
+        // This test verifies the branch for RedirectErrorsToStdout=false with Error level
+        var logger = new TestableConsoleLogger { RedirectErrorsToStdout = false };
+        logger.Log(LogLevel.Error, "error message");
         Assert.Equal(LogLevel.Error, logger.LastLogLevel);
     }
 

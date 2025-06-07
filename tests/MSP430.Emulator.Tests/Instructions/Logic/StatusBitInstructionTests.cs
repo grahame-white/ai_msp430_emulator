@@ -17,16 +17,52 @@ public class StatusBitInstructionTests
     public class SetcInstructionTests
     {
         [Fact]
-        public void Constructor_ValidParameters_CreatesInstruction()
+        public void Constructor_ValidParameters_SetsFormat()
         {
             // Arrange & Act
             var instruction = new SetcInstruction(0x0000);
 
             // Assert
             Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        }
+
+        [Fact]
+        public void Constructor_ValidParameters_SetsOpcode()
+        {
+            // Arrange & Act
+            var instruction = new SetcInstruction(0x0000);
+
+            // Assert
             Assert.Equal(0x4, instruction.Opcode); // MOV instruction opcode
+        }
+
+        [Fact]
+        public void Constructor_ValidParameters_SetsMnemonic()
+        {
+            // Arrange & Act
+            var instruction = new SetcInstruction(0x0000);
+
+            // Assert
             Assert.Equal("SETC", instruction.Mnemonic);
+        }
+
+        [Fact]
+        public void Constructor_ValidParameters_SetsByteOperation()
+        {
+            // Arrange & Act
+            var instruction = new SetcInstruction(0x0000);
+
+            // Assert
             Assert.False(instruction.IsByteOperation);
+        }
+
+        [Fact]
+        public void Constructor_ValidParameters_SetsExtensionWordCount()
+        {
+            // Arrange & Act
+            var instruction = new SetcInstruction(0x0000);
+
+            // Assert
             Assert.Equal(0, instruction.ExtensionWordCount);
         }
 
@@ -42,10 +78,24 @@ public class StatusBitInstructionTests
             registerFile.StatusRegister.Carry = false;
 
             // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
             Assert.True(registerFile.StatusRegister.Carry);
+        }
+
+        [Fact]
+        public void Execute_SetCarryFlag_Takes1Cycle()
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new SetcInstruction(0x0000);
+
+            // Act
+            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.Equal(1u, cycles);
         }
 
@@ -68,7 +118,7 @@ public class StatusBitInstructionTests
         }
 
         [Fact]
-        public void Execute_DoesNotAffectOtherFlags()
+        public void Execute_SetsCarryFlag()
         {
             // Arrange
             var registerFile = new RegisterFile();
@@ -85,9 +135,66 @@ public class StatusBitInstructionTests
 
             // Assert
             Assert.True(registerFile.StatusRegister.Carry);
-            Assert.True(registerFile.StatusRegister.Zero);
-            Assert.True(registerFile.StatusRegister.Negative);
-            Assert.True(registerFile.StatusRegister.Overflow);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Execute_DoesNotAffectZeroFlag(bool expectedZero)
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new SetcInstruction(0x0000);
+
+            // Set zero flag
+            registerFile.StatusRegister.Zero = expectedZero;
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(expectedZero, registerFile.StatusRegister.Zero);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Execute_DoesNotAffectNegativeFlag(bool expectedNegative)
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new SetcInstruction(0x0000);
+
+            // Set negative flag
+            registerFile.StatusRegister.Negative = expectedNegative;
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Execute_DoesNotAffectOverflowFlag(bool expectedOverflow)
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new SetcInstruction(0x0000);
+
+            // Set overflow flag
+            registerFile.StatusRegister.Overflow = expectedOverflow;
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(expectedOverflow, registerFile.StatusRegister.Overflow);
         }
 
         [Fact]
@@ -110,16 +217,52 @@ public class StatusBitInstructionTests
     public class ClrcInstructionTests
     {
         [Fact]
-        public void Constructor_ValidParameters_CreatesInstruction()
+        public void Constructor_ValidParameters_SetsFormat()
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
             Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-            Assert.Equal(0x4, instruction.Opcode); // MOV instruction opcode
+        }
+
+        [Fact]
+        public void Constructor_ValidParameters_SetsMnemonic()
+        {
+            // Arrange & Act
+            var instruction = new ClrcInstruction(0x0000);
+
+            // Assert
             Assert.Equal("CLRC", instruction.Mnemonic);
+        }
+
+        [Fact]
+        public void Constructor_ValidParameters_SetsIsByteOperation()
+        {
+            // Arrange & Act
+            var instruction = new ClrcInstruction(0x0000);
+
+            // Assert
             Assert.False(instruction.IsByteOperation);
+        }
+
+        [Fact]
+        public void Constructor_ValidParameters_SetsOpcode()
+        {
+            // Arrange & Act
+            var instruction = new ClrcInstruction(0x0000);
+
+            // Assert
+            Assert.Equal(0x4, instruction.Opcode);
+        }
+
+        [Fact]
+        public void Constructor_ValidParameters_SetsExtensionWordCount()
+        {
+            // Arrange & Act
+            var instruction = new ClrcInstruction(0x0000);
+
+            // Assert
             Assert.Equal(0, instruction.ExtensionWordCount);
         }
 
@@ -135,10 +278,27 @@ public class StatusBitInstructionTests
             registerFile.StatusRegister.Carry = true;
 
             // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
             Assert.False(registerFile.StatusRegister.Carry);
+        }
+
+        [Fact]
+        public void Execute_SetCarryFlag_Returns1Cycle()
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new ClrcInstruction(0x0000);
+
+            // Set carry initially
+            registerFile.StatusRegister.Carry = true;
+
+            // Act
+            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.Equal(1u, cycles);
         }
 
@@ -368,39 +528,120 @@ public class StatusBitInstructionTests
     public class StatusBitIntegrationTests
     {
         [Fact]
-        public void Execute_MultipleStatusBitOperations_WorkCorrectly()
+        public void Execute_SetcInstruction_SetsCarryFlag()
         {
             // Arrange
             var registerFile = new RegisterFile();
             byte[] memory = new byte[65536];
-
             var setcInstruction = new SetcInstruction(0x0000);
-            var setzInstruction = new SetzInstruction(0x0000);
-            var setnInstruction = new SetnInstruction(0x0000);
-            var clrcInstruction = new ClrcInstruction(0x0000);
 
-            // Ensure all flags are initially clear
+            // Ensure carry is initially clear
             registerFile.StatusRegister.Carry = false;
+
+            // Act
+            setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.True(registerFile.StatusRegister.Carry);
+        }
+
+        [Fact]
+        public void Execute_SetzInstruction_SetsZeroFlag()
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var setzInstruction = new SetzInstruction(0x0000);
+
+            // Ensure zero is initially clear
             registerFile.StatusRegister.Zero = false;
+
+            // Act
+            setzInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.True(registerFile.StatusRegister.Zero);
+        }
+
+        [Fact]
+        public void Execute_SetnInstruction_SetsNegativeFlag()
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var setnInstruction = new SetnInstruction(0x0000);
+
+            // Ensure negative is initially clear
             registerFile.StatusRegister.Negative = false;
 
-            // Act & Assert - Set flags
-            setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-            Assert.True(registerFile.StatusRegister.Carry);
-
-            setzInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-            Assert.True(registerFile.StatusRegister.Zero);
-
+            // Act
             setnInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-            Assert.True(registerFile.StatusRegister.Negative);
 
-            // Clear carry flag
+            // Assert
+            Assert.True(registerFile.StatusRegister.Negative);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        public void Execute_ClrcInstruction_AffectsCarryFlag(bool expectedCarry)
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var clrcInstruction = new ClrcInstruction(0x0000);
+
+            // Set all flags initially to opposite values to ensure proper testing
+            registerFile.StatusRegister.Carry = true;
+            registerFile.StatusRegister.Zero = true;
+            registerFile.StatusRegister.Negative = true;
+
+            // Act
             clrcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-            Assert.False(registerFile.StatusRegister.Carry);
 
-            // Other flags should remain set
-            Assert.True(registerFile.StatusRegister.Zero);
-            Assert.True(registerFile.StatusRegister.Negative);
+            // Assert
+            Assert.Equal(expectedCarry, registerFile.StatusRegister.Carry);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        public void Execute_ClrcInstruction_AffectsZeroFlag(bool expectedZero)
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var clrcInstruction = new ClrcInstruction(0x0000);
+
+            // Set all flags initially to opposite values to ensure proper testing
+            registerFile.StatusRegister.Carry = true;
+            registerFile.StatusRegister.Zero = true;
+            registerFile.StatusRegister.Negative = true;
+
+            // Act
+            clrcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(expectedZero, registerFile.StatusRegister.Zero);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        public void Execute_ClrcInstruction_AffectsNegativeFlag(bool expectedNegative)
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var clrcInstruction = new ClrcInstruction(0x0000);
+
+            // Set all flags initially to opposite values to ensure proper testing
+            registerFile.StatusRegister.Carry = true;
+            registerFile.StatusRegister.Zero = true;
+            registerFile.StatusRegister.Negative = true;
+
+            // Act
+            clrcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
         }
 
         [Fact]

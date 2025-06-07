@@ -18,18 +18,30 @@ public class RegisterFileTests
     }
 
     [Fact]
-    public void Constructor_WithoutLogger_CreatesRegisterFile()
+    public void Constructor_WithoutLogger_CreatesValidInstance()
     {
         var registerFile = new RegisterFile();
         Assert.NotNull(registerFile);
+    }
+
+    [Fact]
+    public void Constructor_WithoutLogger_CreatesStatusRegister()
+    {
+        var registerFile = new RegisterFile();
         Assert.NotNull(registerFile.StatusRegister);
     }
 
     [Fact]
-    public void Constructor_WithLogger_CreatesRegisterFile()
+    public void Constructor_WithLogger_CreatesValidInstance()
     {
         var registerFile = new RegisterFile(_logger);
         Assert.NotNull(registerFile);
+    }
+
+    [Fact]
+    public void Constructor_WithLogger_CreatesStatusRegister()
+    {
+        var registerFile = new RegisterFile(_logger);
         Assert.NotNull(registerFile.StatusRegister);
     }
 
@@ -91,15 +103,47 @@ public class RegisterFileTests
     }
 
     [Fact]
-    public void WriteRegister_StatusRegister_UpdatesStatusRegisterObject()
+    public void WriteRegister_StatusRegister_UpdatesRegisterValue()
     {
         ushort testValue = 0x0007; // Set C, Z, N flags
         _registerFile.WriteRegister(RegisterName.R2, testValue);
 
         Assert.Equal(testValue, _registerFile.ReadRegister(RegisterName.R2));
+    }
+
+    [Fact]
+    public void WriteRegister_StatusRegister_UpdatesStatusRegisterValue()
+    {
+        ushort testValue = 0x0007; // Set C, Z, N flags
+        _registerFile.WriteRegister(RegisterName.R2, testValue);
+
         Assert.Equal(testValue, _registerFile.StatusRegister.Value);
+    }
+
+    [Fact]
+    public void WriteRegister_StatusRegister_SetsCarryFlag()
+    {
+        ushort testValue = 0x0007; // Set C, Z, N flags
+        _registerFile.WriteRegister(RegisterName.R2, testValue);
+
         Assert.True(_registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void WriteRegister_StatusRegister_SetsZeroFlag()
+    {
+        ushort testValue = 0x0007; // Set C, Z, N flags
+        _registerFile.WriteRegister(RegisterName.R2, testValue);
+
         Assert.True(_registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void WriteRegister_StatusRegister_SetsNegativeFlag()
+    {
+        ushort testValue = 0x0007; // Set C, Z, N flags
+        _registerFile.WriteRegister(RegisterName.R2, testValue);
+
         Assert.True(_registerFile.StatusRegister.Negative);
     }
 
@@ -238,21 +282,123 @@ public class RegisterFileTests
     [Fact]
     public void ReadRegister_InvalidRegister_ThrowsArgumentException()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        Assert.Throws<ArgumentException>(() =>
             _registerFile.ReadRegister((RegisterName)16));
+    }
 
-        Assert.Contains("Invalid register", exception.Message);
-        Assert.Equal("register", exception.ParamName);
+    [Fact]
+    public void ReadRegister_InvalidRegister_ExceptionMessageContainsExpectedText()
+    {
+        try
+        {
+            _registerFile.ReadRegister((RegisterName)16);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (ArgumentException exception)
+        {
+            Assert.Contains("Invalid register", exception.Message);
+        }
+    }
+
+    [Fact]
+    public void ReadRegister_InvalidRegister_ExceptionParameterNameIsCorrect()
+    {
+        try
+        {
+            _registerFile.ReadRegister((RegisterName)16);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (ArgumentException exception)
+        {
+            Assert.Equal("register", exception.ParamName);
+        }
     }
 
     [Fact]
     public void WriteRegister_InvalidRegister_ThrowsArgumentException()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        Assert.Throws<ArgumentException>(() =>
             _registerFile.WriteRegister((RegisterName)16, 0x1234));
+    }
 
-        Assert.Contains("Invalid register", exception.Message);
-        Assert.Equal("register", exception.ParamName);
+    [Fact]
+    public void WriteRegister_InvalidRegister_ExceptionContainsCorrectMessage()
+    {
+        try
+        {
+            _registerFile.WriteRegister((RegisterName)16, 0x1234);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (ArgumentException exception)
+        {
+            Assert.Contains("Invalid register", exception.Message);
+        }
+    }
+
+    [Fact]
+    public void WriteRegister_InvalidRegister_ExceptionHasCorrectParameterName()
+    {
+        try
+        {
+            _registerFile.WriteRegister((RegisterName)16, 0x1234);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (ArgumentException exception)
+        {
+            Assert.Equal("register", exception.ParamName);
+        }
+    }
+
+    [Fact]
+    public void GetAllRegisters_ReturnsCorrectArrayLength()
+    {
+        // Set some test values
+        _registerFile.WriteRegister(RegisterName.R0, 0x1000);
+        _registerFile.WriteRegister(RegisterName.R4, 0x4000);
+        _registerFile.WriteRegister(RegisterName.R15, 0xF000);
+
+        ushort[] snapshot = _registerFile.GetAllRegisters();
+
+        Assert.Equal(16, snapshot.Length);
+    }
+
+    [Fact]
+    public void GetAllRegisters_ReturnsCorrectR0Value()
+    {
+        // Set some test values
+        _registerFile.WriteRegister(RegisterName.R0, 0x1000);
+        _registerFile.WriteRegister(RegisterName.R4, 0x4000);
+        _registerFile.WriteRegister(RegisterName.R15, 0xF000);
+
+        ushort[] snapshot = _registerFile.GetAllRegisters();
+
+        Assert.Equal((ushort)0x1000, snapshot[0]);
+    }
+
+    [Fact]
+    public void GetAllRegisters_ReturnsCorrectR4Value()
+    {
+        // Set some test values
+        _registerFile.WriteRegister(RegisterName.R0, 0x1000);
+        _registerFile.WriteRegister(RegisterName.R4, 0x4000);
+        _registerFile.WriteRegister(RegisterName.R15, 0xF000);
+
+        ushort[] snapshot = _registerFile.GetAllRegisters();
+
+        Assert.Equal((ushort)0x4000, snapshot[4]);
+    }
+
+    [Fact]
+    public void GetAllRegisters_ReturnsCorrectR15Value()
+    {
+        // Set some test values
+        _registerFile.WriteRegister(RegisterName.R0, 0x1000);
+        _registerFile.WriteRegister(RegisterName.R4, 0x4000);
+        _registerFile.WriteRegister(RegisterName.R15, 0xF000);
+
+        ushort[] snapshot = _registerFile.GetAllRegisters();
+
+        Assert.Equal((ushort)0xF000, snapshot[15]);
     }
 
     [Fact]
@@ -265,18 +411,13 @@ public class RegisterFileTests
 
         ushort[] snapshot = _registerFile.GetAllRegisters();
 
-        Assert.Equal(16, snapshot.Length);
-        Assert.Equal((ushort)0x1000, snapshot[0]);
-        Assert.Equal((ushort)0x4000, snapshot[4]);
-        Assert.Equal((ushort)0xF000, snapshot[15]);
-
         // Verify it's a copy, not the original array
         snapshot[0] = 0x9999;
         Assert.NotEqual((ushort)0x9999, _registerFile.ReadRegister(RegisterName.R0));
     }
 
     [Fact]
-    public void RegisterAccess_WithDebugLogging_LogsOperations()
+    public void RegisterAccess_WithDebugLogging_LogsWriteOperation()
     {
         _logger.MinimumLevel = LogLevel.Debug;
 
@@ -286,6 +427,15 @@ public class RegisterFileTests
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug &&
             entry.Message.Contains("Register write: R4 = 0x1234"));
+    }
+
+    [Fact]
+    public void RegisterAccess_WithDebugLogging_LogsReadOperation()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+
+        _registerFile.WriteRegister(RegisterName.R4, 0x1234);
+        _registerFile.ReadRegister(RegisterName.R4);
 
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug &&

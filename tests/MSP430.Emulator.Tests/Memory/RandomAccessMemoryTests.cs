@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using MSP430.Emulator.Logging;
 using MSP430.Emulator.Memory;
@@ -15,52 +16,28 @@ public class RandomAccessMemoryTests
         _logger = new TestLogger();
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsSize()
+    [Theory]
+    [InlineData("Size", 1024)]
+    [InlineData("BaseAddress", (ushort)0x2000)]
+    [InlineData("EndAddress", (ushort)0x23FF)]
+    public void Constructor_ValidParameters_SetsProperty(string propertyName, object expectedValue)
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
-        Assert.Equal(1024, memory.Size);
+        object? propertyValue = typeof(RandomAccessMemory).GetProperty(propertyName)?.GetValue(memory);
+        Assert.Equal(expectedValue, propertyValue);
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsBaseAddress()
-    {
-        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
-
-        Assert.Equal((ushort)0x2000, memory.BaseAddress);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsEndAddress()
-    {
-        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
-
-        Assert.Equal((ushort)0x23FF, memory.EndAddress);
-    }
-
-    [Fact]
-    public void Constructor_NullLogger_SetsSize()
+    [Theory]
+    [InlineData("Size", 1024)]
+    [InlineData("BaseAddress", (ushort)0x2000)]
+    [InlineData("EndAddress", (ushort)0x23FF)]
+    public void Constructor_NullLogger_SetsProperty(string propertyName, object expectedValue)
     {
         var memory = new RandomAccessMemory(0x2000, 1024);
 
-        Assert.Equal(1024, memory.Size);
-    }
-
-    [Fact]
-    public void Constructor_NullLogger_SetsBaseAddress()
-    {
-        var memory = new RandomAccessMemory(0x2000, 1024);
-
-        Assert.Equal((ushort)0x2000, memory.BaseAddress);
-    }
-
-    [Fact]
-    public void Constructor_NullLogger_SetsEndAddress()
-    {
-        var memory = new RandomAccessMemory(0x2000, 1024);
-
-        Assert.Equal((ushort)0x23FF, memory.EndAddress);
+        object? propertyValue = typeof(RandomAccessMemory).GetProperty(propertyName)?.GetValue(memory);
+        Assert.Equal(expectedValue, propertyValue);
     }
 
     [Theory]

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
@@ -184,54 +185,40 @@ public class StatusBitInstructionTests
     /// </summary>
     public class ClrcInstructionTests
     {
-        [Fact]
-        public void Constructor_ValidParameters_SetsFormat()
+        [Theory]
+        [InlineData("Format", InstructionFormat.FormatI)]
+        [InlineData("Mnemonic", "CLRC")]
+        [InlineData("IsByteOperation", false)]
+        public void Constructor_ValidParameters_SetsProperty(string propertyName, object expectedValue)
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+            object? propertyValue = typeof(ClrcInstruction).GetProperty(propertyName)?.GetValue(instruction);
+            Assert.Equal(expectedValue, propertyValue);
         }
 
-        [Fact]
-        public void Constructor_ValidParameters_SetsOpcode()
+        [Theory]
+        [InlineData(0x4)]
+        public void Constructor_ValidParameters_SetsOpcode(int expectedOpcode)
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
-            Assert.Equal(0x4, instruction.Opcode); // MOV instruction opcode
+            Assert.Equal(expectedOpcode, instruction.Opcode);
         }
 
-        [Fact]
-        public void Constructor_ValidParameters_SetsMnemonic()
+        [Theory]
+        [InlineData(0)]
+        public void Constructor_ValidParameters_SetsExtensionWordCount(int expectedCount)
         {
             // Arrange & Act
             var instruction = new ClrcInstruction(0x0000);
 
             // Assert
-            Assert.Equal("CLRC", instruction.Mnemonic);
-        }
-
-        [Fact]
-        public void Constructor_ValidParameters_SetsIsByteOperation()
-        {
-            // Arrange & Act
-            var instruction = new ClrcInstruction(0x0000);
-
-            // Assert
-            Assert.False(instruction.IsByteOperation);
-        }
-
-        [Fact]
-        public void Constructor_ValidParameters_SetsExtensionWordCount()
-        {
-            // Arrange & Act
-            var instruction = new ClrcInstruction(0x0000);
-
-            // Assert
-            Assert.Equal(0, instruction.ExtensionWordCount);
+            Assert.Equal(expectedCount, instruction.ExtensionWordCount);
         }
 
         [Fact]
@@ -549,60 +536,28 @@ public class StatusBitInstructionTests
             Assert.True(registerFile.StatusRegister.Negative);
         }
 
-        [Fact]
-        public void Execute_ClrcInstruction_ClearsCarryFlag()
+        [Theory]
+        [InlineData("Carry", false)]
+        [InlineData("Zero", true)]
+        [InlineData("Negative", true)]
+        public void Execute_ClrcInstruction_AffectsFlags(string flagName, bool expectedValue)
         {
             // Arrange
             var registerFile = new RegisterFile();
             byte[] memory = new byte[65536];
             var clrcInstruction = new ClrcInstruction(0x0000);
 
-            // Set carry initially
+            // Set all flags initially to opposite values to ensure proper testing
             registerFile.StatusRegister.Carry = true;
-
-            // Act
-            clrcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-            // Assert
-            Assert.False(registerFile.StatusRegister.Carry);
-        }
-
-        [Fact]
-        public void Execute_ClrcInstruction_DoesNotAffectZeroFlag()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
-            var clrcInstruction = new ClrcInstruction(0x0000);
-
-            // Set other flags
             registerFile.StatusRegister.Zero = true;
-            registerFile.StatusRegister.Carry = true;
-
-            // Act
-            clrcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-            // Assert
-            Assert.True(registerFile.StatusRegister.Zero);
-        }
-
-        [Fact]
-        public void Execute_ClrcInstruction_DoesNotAffectNegativeFlag()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
-            var clrcInstruction = new ClrcInstruction(0x0000);
-
-            // Set other flags
             registerFile.StatusRegister.Negative = true;
-            registerFile.StatusRegister.Carry = true;
 
             // Act
             clrcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.True(registerFile.StatusRegister.Negative);
+            object? flagValue = typeof(StatusRegister).GetProperty(flagName)?.GetValue(registerFile.StatusRegister);
+            Assert.Equal(expectedValue, flagValue);
         }
 
         [Fact]

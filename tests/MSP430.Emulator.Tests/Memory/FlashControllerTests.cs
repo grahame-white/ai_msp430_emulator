@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using MSP430.Emulator.Logging;
 using MSP430.Emulator.Memory;
@@ -15,36 +16,17 @@ public class FlashControllerTests
         _logger = new TestLogger();
     }
 
-    [Fact]
-    public void Constructor_SetsStateToLocked()
+    [Theory]
+    [InlineData("State", FlashControllerState.Locked)]
+    [InlineData("ProtectionLevel", FlashProtectionLevel.None)]
+    [InlineData("CurrentOperation", FlashOperation.None)]
+    [InlineData("IsOperationInProgress", false)]
+    public void Constructor_SetsProperty(string propertyName, object expectedValue)
     {
         var controller = new FlashController(_logger);
 
-        Assert.Equal(FlashControllerState.Locked, controller.State);
-    }
-
-    [Fact]
-    public void Constructor_SetsProtectionLevelToNone()
-    {
-        var controller = new FlashController(_logger);
-
-        Assert.Equal(FlashProtectionLevel.None, controller.ProtectionLevel);
-    }
-
-    [Fact]
-    public void Constructor_SetsCurrentOperationToNone()
-    {
-        var controller = new FlashController(_logger);
-
-        Assert.Equal(FlashOperation.None, controller.CurrentOperation);
-    }
-
-    [Fact]
-    public void Constructor_SetsIsOperationInProgressToFalse()
-    {
-        var controller = new FlashController(_logger);
-
-        Assert.False(controller.IsOperationInProgress);
+        object? propertyValue = typeof(FlashController).GetProperty(propertyName)?.GetValue(controller);
+        Assert.Equal(expectedValue, propertyValue);
     }
 
     [Theory]
@@ -200,37 +182,33 @@ public class FlashControllerTests
         Assert.Equal(FlashControllerState.Programming, controller.State);
     }
 
-    [Fact]
-    public void StartProgramming_ByteOperation_ReturnsTrue()
+    [Theory]
+    [InlineData("ReturnsTrue", true)]
+    [InlineData("State", FlashControllerState.Programming)]
+    [InlineData("CurrentOperation", FlashOperation.Program)]
+    [InlineData("IsOperationInProgress", true)]
+    public void StartProgramming_ByteOperation_SetsProperty(string testCase, object expectedValue)
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
 
         bool result = controller.StartProgramming(false);
 
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void StartProgramming_ByteOperation_SetsStateToProgramming()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartProgramming(false);
-
-        Assert.Equal(FlashControllerState.Programming, controller.State);
-    }
-
-    [Fact]
-    public void StartProgramming_ByteOperation_SetsCurrentOperationToProgram()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartProgramming(false);
-
-        Assert.Equal(FlashOperation.Program, controller.CurrentOperation);
+        switch (testCase)
+        {
+            case "ReturnsTrue":
+                Assert.Equal(expectedValue, result);
+                break;
+            case "State":
+                Assert.Equal(expectedValue, controller.State);
+                break;
+            case "CurrentOperation":
+                Assert.Equal(expectedValue, controller.CurrentOperation);
+                break;
+            case "IsOperationInProgress":
+                Assert.Equal(expectedValue, controller.IsOperationInProgress);
+                break;
+        }
     }
 
     [Fact]
@@ -244,48 +222,29 @@ public class FlashControllerTests
         Assert.Equal(FlashController.ByteProgramCycles, controller.OperationCyclesRemaining);
     }
 
-    [Fact]
-    public void StartProgramming_ByteOperation_SetsIsOperationInProgressToTrue()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartProgramming(false);
-
-        Assert.True(controller.IsOperationInProgress);
-    }
-
-    [Fact]
-    public void StartProgramming_WordOperation_ReturnsTrue()
+    [Theory]
+    [InlineData("ReturnsTrue", true)]
+    [InlineData("State", FlashControllerState.Programming)]
+    [InlineData("CurrentOperation", FlashOperation.Program)]
+    public void StartProgramming_WordOperation_SetsProperty(string testCase, object expectedValue)
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
 
         bool result = controller.StartProgramming(true);
 
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void StartProgramming_WordOperation_SetsStateToProgramming()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartProgramming(true);
-
-        Assert.Equal(FlashControllerState.Programming, controller.State);
-    }
-
-    [Fact]
-    public void StartProgramming_WordOperation_SetsCurrentOperationToProgram()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartProgramming(true);
-
-        Assert.Equal(FlashOperation.Program, controller.CurrentOperation);
+        switch (testCase)
+        {
+            case "ReturnsTrue":
+                Assert.Equal(expectedValue, result);
+                break;
+            case "State":
+                Assert.Equal(expectedValue, controller.State);
+                break;
+            case "CurrentOperation":
+                Assert.Equal(expectedValue, controller.CurrentOperation);
+                break;
+        }
     }
 
     [Fact]
@@ -299,34 +258,28 @@ public class FlashControllerTests
         Assert.Equal(FlashController.WordProgramCycles, controller.OperationCyclesRemaining);
     }
 
-    [Fact]
-    public void StartProgramming_WhenLocked_ReturnsFalse()
+    [Theory]
+    [InlineData("ReturnsFalse", false)]
+    [InlineData("State", FlashControllerState.Locked)]
+    [InlineData("CurrentOperation", FlashOperation.None)]
+    public void StartProgramming_WhenLocked_BehavesCorrectly(string testCase, object expectedValue)
     {
         var controller = new FlashController(_logger);
 
         bool result = controller.StartProgramming(false);
 
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void StartProgramming_WhenLocked_KeepsStateAsLocked()
-    {
-        var controller = new FlashController(_logger);
-
-        controller.StartProgramming(false);
-
-        Assert.Equal(FlashControllerState.Locked, controller.State);
-    }
-
-    [Fact]
-    public void StartProgramming_WhenLocked_KeepsCurrentOperationAsNone()
-    {
-        var controller = new FlashController(_logger);
-
-        controller.StartProgramming(false);
-
-        Assert.Equal(FlashOperation.None, controller.CurrentOperation);
+        switch (testCase)
+        {
+            case "ReturnsFalse":
+                Assert.Equal(expectedValue, result);
+                break;
+            case "State":
+                Assert.Equal(expectedValue, controller.State);
+                break;
+            case "CurrentOperation":
+                Assert.Equal(expectedValue, controller.CurrentOperation);
+                break;
+        }
     }
 
     [Fact]
@@ -341,37 +294,29 @@ public class FlashControllerTests
         Assert.False(result);
     }
 
-    [Fact]
-    public void StartSectorErase_WhenUnlocked_ReturnsTrue()
+    [Theory]
+    [InlineData("ReturnsTrue", true)]
+    [InlineData("State", FlashControllerState.Erasing)]
+    [InlineData("CurrentOperation", FlashOperation.SectorErase)]
+    public void StartSectorErase_WhenUnlocked_SetsProperty(string testCase, object expectedValue)
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
 
         bool result = controller.StartSectorErase();
 
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void StartSectorErase_WhenUnlocked_SetsStateToErasing()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartSectorErase();
-
-        Assert.Equal(FlashControllerState.Erasing, controller.State);
-    }
-
-    [Fact]
-    public void StartSectorErase_WhenUnlocked_SetsCurrentOperationToSectorErase()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartSectorErase();
-
-        Assert.Equal(FlashOperation.SectorErase, controller.CurrentOperation);
+        switch (testCase)
+        {
+            case "ReturnsTrue":
+                Assert.Equal(expectedValue, result);
+                break;
+            case "State":
+                Assert.Equal(expectedValue, controller.State);
+                break;
+            case "CurrentOperation":
+                Assert.Equal(expectedValue, controller.CurrentOperation);
+                break;
+        }
     }
 
     [Fact]
@@ -405,37 +350,29 @@ public class FlashControllerTests
         Assert.Equal(FlashControllerState.Locked, controller.State);
     }
 
-    [Fact]
-    public void StartMassErase_WhenUnlocked_ReturnsTrue()
+    [Theory]
+    [InlineData("ReturnsTrue", true)]
+    [InlineData("State", FlashControllerState.Erasing)]
+    [InlineData("CurrentOperation", FlashOperation.MassErase)]
+    public void StartMassErase_WhenUnlocked_SetsProperty(string testCase, object expectedValue)
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
 
         bool result = controller.StartMassErase();
 
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void StartMassErase_WhenUnlocked_SetsStateToErasing()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartMassErase();
-
-        Assert.Equal(FlashControllerState.Erasing, controller.State);
-    }
-
-    [Fact]
-    public void StartMassErase_WhenUnlocked_SetsCurrentOperationToMassErase()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-
-        controller.StartMassErase();
-
-        Assert.Equal(FlashOperation.MassErase, controller.CurrentOperation);
+        switch (testCase)
+        {
+            case "ReturnsTrue":
+                Assert.Equal(expectedValue, result);
+                break;
+            case "State":
+                Assert.Equal(expectedValue, controller.State);
+                break;
+            case "CurrentOperation":
+                Assert.Equal(expectedValue, controller.CurrentOperation);
+                break;
+        }
     }
 
     [Fact]
@@ -449,8 +386,12 @@ public class FlashControllerTests
         Assert.Equal(FlashController.MassEraseCycles, controller.OperationCyclesRemaining);
     }
 
-    [Fact]
-    public void Update_CompletesOperationWhenCyclesElapse_SetsStateToUnlocked()
+    [Theory]
+    [InlineData("State", FlashControllerState.Unlocked)]
+    [InlineData("CurrentOperation", FlashOperation.None)]
+    [InlineData("OperationCyclesRemaining", 0u)]
+    [InlineData("IsOperationInProgress", false)]
+    public void Update_CompletesOperationWhenCyclesElapse_SetsProperty(string propertyName, object expectedValue)
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
@@ -459,50 +400,14 @@ public class FlashControllerTests
 
         controller.Update(initialCycles);
 
-        Assert.Equal(FlashControllerState.Unlocked, controller.State);
+        object? propertyValue = typeof(FlashController).GetProperty(propertyName)?.GetValue(controller);
+        Assert.Equal(expectedValue, propertyValue);
     }
 
-    [Fact]
-    public void Update_CompletesOperationWhenCyclesElapse_SetsCurrentOperationToNone()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-        controller.StartProgramming(false);
-        uint initialCycles = controller.OperationCyclesRemaining;
-
-        controller.Update(initialCycles);
-
-        Assert.Equal(FlashOperation.None, controller.CurrentOperation);
-    }
-
-    [Fact]
-    public void Update_CompletesOperationWhenCyclesElapse_SetsOperationCyclesRemainingToZero()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-        controller.StartProgramming(false);
-        uint initialCycles = controller.OperationCyclesRemaining;
-
-        controller.Update(initialCycles);
-
-        Assert.Equal(0u, controller.OperationCyclesRemaining);
-    }
-
-    [Fact]
-    public void Update_CompletesOperationWhenCyclesElapse_SetsIsOperationInProgressToFalse()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-        controller.StartProgramming(false);
-        uint initialCycles = controller.OperationCyclesRemaining;
-
-        controller.Update(initialCycles);
-
-        Assert.False(controller.IsOperationInProgress);
-    }
-
-    [Fact]
-    public void Update_PartialCycles_KeepsStateProgramming()
+    [Theory]
+    [InlineData("State", FlashControllerState.Programming)]
+    [InlineData("IsOperationInProgress", true)]
+    public void Update_PartialCycles_KeepsProperty(string propertyName, object expectedValue)
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
@@ -510,7 +415,8 @@ public class FlashControllerTests
 
         controller.Update(10);
 
-        Assert.Equal(FlashControllerState.Programming, controller.State);
+        object? propertyValue = typeof(FlashController).GetProperty(propertyName)?.GetValue(controller);
+        Assert.Equal(expectedValue, propertyValue);
     }
 
     [Fact]
@@ -524,18 +430,6 @@ public class FlashControllerTests
         controller.Update(10);
 
         Assert.Equal(initialCycles - 10, controller.OperationCyclesRemaining);
-    }
-
-    [Fact]
-    public void Update_PartialCycles_KeepsIsOperationInProgressTrue()
-    {
-        var controller = new FlashController(_logger);
-        controller.TryUnlock(0xA555);
-        controller.StartProgramming(false);
-
-        controller.Update(10);
-
-        Assert.True(controller.IsOperationInProgress);
     }
 
     [Fact]

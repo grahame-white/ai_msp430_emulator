@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
@@ -13,8 +14,15 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 public class BisInstructionTests
 {
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsFormat()
+    [Theory]
+    [InlineData("Format", InstructionFormat.FormatI)]
+    [InlineData("Mnemonic", "BIS")]
+    [InlineData("IsByteOperation", false)]
+    [InlineData("SourceRegister", RegisterName.R1)]
+    [InlineData("DestinationRegister", RegisterName.R2)]
+    [InlineData("SourceAddressingMode", AddressingMode.Register)]
+    [InlineData("DestinationAddressingMode", AddressingMode.Register)]
+    public void Constructor_ValidParameters_SetsProperty(string propertyName, object expectedValue)
     {
         // Arrange & Act
         var instruction = new BisInstruction(
@@ -26,11 +34,13 @@ public class BisInstructionTests
             false);
 
         // Assert
-        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        object? propertyValue = typeof(BisInstruction).GetProperty(propertyName)?.GetValue(instruction);
+        Assert.Equal(expectedValue, propertyValue);
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsOpcode()
+    [Theory]
+    [InlineData(0xD)]
+    public void Constructor_ValidParameters_SetsOpcode(int expectedOpcode)
     {
         // Arrange & Act
         var instruction = new BisInstruction(
@@ -42,11 +52,12 @@ public class BisInstructionTests
             false);
 
         // Assert
-        Assert.Equal(0xD, instruction.Opcode);
+        Assert.Equal(expectedOpcode, instruction.Opcode);
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsInstructionWord()
+    [Theory]
+    [InlineData(0xD123)]
+    public void Constructor_ValidParameters_SetsInstructionWord(ushort expectedWord)
     {
         // Arrange & Act
         var instruction = new BisInstruction(
@@ -58,103 +69,7 @@ public class BisInstructionTests
             false);
 
         // Assert
-        Assert.Equal(0xD123, instruction.InstructionWord);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsMnemonic()
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal("BIS", instruction.Mnemonic);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsIsByteOperation()
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.False(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceRegister()
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationRegister()
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceAddressingMode()
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+        Assert.Equal(expectedWord, instruction.InstructionWord);
     }
 
     [Fact]
@@ -359,6 +274,35 @@ public class BisInstructionTests
 
     #region Execute Method Tests
 
+    [Theory]
+    [InlineData("Zero", false)]
+    [InlineData("Negative", false)]
+    [InlineData("Carry", false)]
+    [InlineData("Overflow", false)]
+    public void Execute_RegisterToRegister_SetsStatusFlag(string flagName, bool expectedValue)
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
+        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
+
+        var instruction = new BisInstruction(
+            0xD000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        object? flagValue = typeof(StatusRegister).GetProperty(flagName)?.GetValue(registerFile.StatusRegister);
+        Assert.Equal(expectedValue, flagValue);
+    }
+
     [Fact]
     public void Execute_RegisterToRegister_PerformsBisOperation()
     {
@@ -381,102 +325,6 @@ public class BisInstructionTests
 
         // Assert - BIS is OR operation: 0x00F0 | 0x0F00 = 0x0FF0
         Assert.Equal(0x0FF0, registerFile.ReadRegister(RegisterName.R5));
-    }
-
-    [Fact]
-    public void Execute_RegisterToRegister_SetsZeroFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
-        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Zero);
-    }
-
-    [Fact]
-    public void Execute_RegisterToRegister_SetsNegativeFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
-        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Negative);
-    }
-
-    [Fact]
-    public void Execute_RegisterToRegister_SetsCarryFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
-        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Carry);
-    }
-
-    [Fact]
-    public void Execute_RegisterToRegister_SetsOverflowFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
-        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Overflow);
     }
 
     /// <summary>
@@ -622,6 +470,33 @@ public class BisInstructionTests
         Assert.Equal(1u, cycles);
     }
 
+    [Theory]
+    [InlineData("Zero", false)]
+    [InlineData("Negative", true)]
+    public void Execute_ByteOperation_SetsStatusFlag(string flagName, bool expectedValue)
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x120F);
+        registerFile.WriteRegister(RegisterName.R5, 0x34F0);
+
+        var instruction = new BisInstruction(
+            0xD000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true); // Byte operation
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        object? flagValue = typeof(StatusRegister).GetProperty(flagName)?.GetValue(registerFile.StatusRegister);
+        Assert.Equal(expectedValue, flagValue);
+    }
+
     [Fact]
     public void Execute_ByteOperation_PerformsBisOnBytes()
     {
@@ -644,54 +519,6 @@ public class BisInstructionTests
 
         // Assert - only low byte should be affected: (0x0F | 0xF0) | 0x3400 = 0x34FF
         Assert.Equal((ushort)((0x0F | 0xF0) | 0x3400), registerFile.ReadRegister(RegisterName.R5));
-    }
-
-    [Fact]
-    public void Execute_ByteOperation_SetsZeroFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x120F);
-        registerFile.WriteRegister(RegisterName.R5, 0x34F0);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true); // Byte operation
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Zero);
-    }
-
-    [Fact]
-    public void Execute_ByteOperation_SetsNegativeFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x120F);
-        registerFile.WriteRegister(RegisterName.R5, 0x34F0);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true); // Byte operation
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.True(registerFile.StatusRegister.Negative); // 0xFF has bit 7 set (negative for byte)
     }
 
     [Fact]

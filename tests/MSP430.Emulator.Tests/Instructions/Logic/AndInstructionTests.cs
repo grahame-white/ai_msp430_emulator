@@ -231,7 +231,7 @@ public class AndInstructionTests
     #region Execute Method Tests
 
     [Fact]
-    public void Execute_RegisterToRegister_PerformsAndOperation_ResultValue()
+    public void Execute_RegisterToRegister_PerformsAndOperation()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -248,110 +248,14 @@ public class AndInstructionTests
             false);
 
         // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0xFF0F & 0x0FF0, registerFile.ReadRegister(RegisterName.R5)); // 0x0F00
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_PerformsAndOperation_ZeroFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
-        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
-
-        var instruction = new AndInstruction(
-            0xF000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Zero);
-    }
-
-    [Fact]
-    public void Execute_RegisterToRegister_PerformsAndOperation_NegativeFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
-        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
-
-        var instruction = new AndInstruction(
-            0xF000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Negative);
-    }
-
-    [Fact]
-    public void Execute_RegisterToRegister_PerformsAndOperation_CarryFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
-        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
-
-        var instruction = new AndInstruction(
-            0xF000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Carry);
-    }
-
-    [Fact]
-    public void Execute_RegisterToRegister_PerformsAndOperation_OverflowFlag()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
-        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
-
-        var instruction = new AndInstruction(
-            0xF000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.False(registerFile.StatusRegister.Overflow);
-    }
-
-    [Fact]
-    public void Execute_RegisterToRegister_PerformsAndOperation_Cycles()
+    public void Execute_RegisterToRegister_ReturnsOneCycle()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -375,7 +279,103 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_ResultIsZero_SetsZeroFlag_ResultValue()
+    public void Execute_RegisterToRegister_SetsZeroFlagCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_SetsNegativeFlagCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Negative);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_SetsCarryFlagCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_SetsOverflowFlagCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_ResultIsZero_ComputesCorrectResult()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -399,7 +399,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_ResultIsZero_SetsZeroFlag_ZeroFlag()
+    public void Execute_ResultIsZero_SetsZeroFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -423,7 +423,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_ResultIsZero_SetsZeroFlag_NegativeFlag()
+    public void Execute_ResultIsZero_ClearsNegativeFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -447,7 +447,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_ResultIsZero_SetsZeroFlag_CarryFlag()
+    public void Execute_ResultIsZero_ClearsCarryFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -471,7 +471,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_ResultIsZero_SetsZeroFlag_OverflowFlag()
+    public void Execute_ResultIsZero_ClearsOverflowFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -495,7 +495,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_WordResultNegative_SetsNegativeFlag_ResultValue()
+    public void Execute_WordResultNegative_ComputesCorrectResult()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -519,7 +519,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_WordResultNegative_SetsNegativeFlag_ZeroFlag()
+    public void Execute_WordResultNegative_ClearsZeroFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -543,7 +543,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_WordResultNegative_SetsNegativeFlag_NegativeFlag()
+    public void Execute_WordResultNegative_SetsNegativeFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -567,7 +567,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_WordResultNegative_SetsNegativeFlag_CarryFlag()
+    public void Execute_WordResultNegative_ClearsCarryFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -591,7 +591,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_WordResultNegative_SetsNegativeFlag_OverflowFlag()
+    public void Execute_WordResultNegative_ClearsOverflowFlag()
     {
         // Arrange
         var registerFile = new RegisterFile();

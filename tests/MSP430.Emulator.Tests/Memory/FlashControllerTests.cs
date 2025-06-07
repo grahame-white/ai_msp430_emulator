@@ -15,49 +15,44 @@ public class FlashControllerTests
         _logger = new TestLogger();
     }
 
-    [Theory]
-    [InlineData(FlashControllerState.Locked)]
-    public void Constructor_SetsState(FlashControllerState expectedState)
+    [Fact]
+    public void Constructor_SetsState()
     {
         var controller = new FlashController(_logger);
 
-        Assert.Equal(expectedState, controller.State);
+        Assert.Equal(FlashControllerState.Locked, controller.State);
     }
 
-    [Theory]
-    [InlineData(FlashProtectionLevel.None)]
-    public void Constructor_SetsProtectionLevel(FlashProtectionLevel expectedLevel)
+    [Fact]
+    public void Constructor_SetsProtectionLevel()
     {
         var controller = new FlashController(_logger);
 
-        Assert.Equal(expectedLevel, controller.ProtectionLevel);
+        Assert.Equal(FlashProtectionLevel.None, controller.ProtectionLevel);
     }
 
-    [Theory]
-    [InlineData(FlashOperation.None)]
-    public void Constructor_SetsCurrentOperation(FlashOperation expectedOperation)
+    [Fact]
+    public void Constructor_SetsCurrentOperation()
     {
         var controller = new FlashController(_logger);
 
-        Assert.Equal(expectedOperation, controller.CurrentOperation);
+        Assert.Equal(FlashOperation.None, controller.CurrentOperation);
     }
 
-    [Theory]
-    [InlineData(false)]
-    public void Constructor_SetsIsOperationInProgress(bool expectedInProgress)
+    [Fact]
+    public void Constructor_SetsIsOperationInProgress()
     {
         var controller = new FlashController(_logger);
 
-        Assert.Equal(expectedInProgress, controller.IsOperationInProgress);
+        Assert.False(controller.IsOperationInProgress);
     }
 
-    [Theory]
-    [InlineData(0u)]
-    public void Constructor_SetsOperationCyclesRemaining(uint expectedCycles)
+    [Fact]
+    public void Constructor_SetsOperationCyclesRemaining()
     {
         var controller = new FlashController(_logger);
 
-        Assert.Equal(expectedCycles, controller.OperationCyclesRemaining);
+        Assert.Equal(0u, controller.OperationCyclesRemaining);
     }
 
     [Fact]

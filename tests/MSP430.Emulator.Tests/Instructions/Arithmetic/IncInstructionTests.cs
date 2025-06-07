@@ -417,7 +417,7 @@ public class IncInstructionTests
 
     /// <summary>
     /// Tests all valid addressing modes for INC instruction (single operand).
-    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
+    /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4: "CPUX"
     /// Testing all 6 valid addressing modes for single-operand instructions (excluding Immediate for destination).
     /// </summary>
     [Theory]
@@ -474,7 +474,7 @@ public class IncInstructionTests
 
     /// <summary>
     /// Tests that cycle count for all INC instruction addressing modes is reasonable.
-    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.4: "Instruction Set"
+    /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5: "MSP430 and MSP430X Instructions"
     /// </summary>
     [Theory]
     [InlineData(AddressingMode.Register)]
@@ -530,7 +530,7 @@ public class IncInstructionTests
 
     /// <summary>
     /// Tests cycle counts for INC instruction addressing modes.
-    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.4: "Instruction Set"
+    /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5: "MSP430 and MSP430X Instructions"
     /// Cycle counts per TI specification: base (1) + destination cycles.
     /// Note: Immediate mode excluded as destination (cannot write to immediate values).
     /// </summary>

@@ -13,8 +13,8 @@ namespace MSP430.Emulator.Memory;
 /// The controller integrates RAM, Flash, and Information memory into a cohesive system
 /// while maintaining proper access control and timing characteristics.
 /// 
-/// Implementation based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 2:
-/// "System Architecture" - Memory controller and address space organization.
+/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 1.9.1:
+/// "Memory Map" - Memory controller and address space organization.
 /// </summary>
 public class MemoryController : IMemoryController
 {

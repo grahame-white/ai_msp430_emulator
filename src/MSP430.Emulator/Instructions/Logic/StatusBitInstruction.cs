@@ -11,7 +11,7 @@ namespace MSP430.Emulator.Instructions.Logic;
 /// 
 /// References:
 /// - MSP430 Assembly Language Tools User's Guide (SLAU131), Section 5.3.3: "Emulated Instructions"
-/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.4: "Emulated Instructions"
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5.1.4: "Emulated Instructions"
 /// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Status register bit definitions
 /// </summary>
 public abstract class StatusBitInstruction : Instruction, IExecutableInstruction

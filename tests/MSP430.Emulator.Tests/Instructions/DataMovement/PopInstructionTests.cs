@@ -9,7 +9,7 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 /// <summary>
 /// Unit tests for the PopInstruction class.
 /// Tests all addressing modes, byte/word operations, and stack management behavior.
-/// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
+/// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4: "CPUX"
 /// </summary>
 public class PopInstructionTests
 {
@@ -322,7 +322,7 @@ public class PopInstructionTests
 
     /// <summary>
     /// Tests all valid addressing modes for POP instruction (single operand).
-    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
+    /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4: "CPUX"
     /// Testing all 6 valid addressing modes for single-operand destination instructions (excluding Immediate).
     /// </summary>
     [Theory]

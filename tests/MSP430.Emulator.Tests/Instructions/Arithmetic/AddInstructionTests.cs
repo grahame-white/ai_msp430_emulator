@@ -468,7 +468,7 @@ public class AddInstructionTests
     // Cycle count tests for key addressing mode combinations
     /// <summary>
     /// Tests all valid source/destination addressing mode combinations for ADD instruction.
-    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
+    /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4: "CPUX"
     /// Testing all 42 valid combinations (7 source × 6 destination modes).
     /// </summary>
     [Theory]
@@ -586,7 +586,7 @@ public class AddInstructionTests
 
     /// <summary>
     /// Tests that cycle count for all ADD instruction addressing mode combinations is reasonable.
-    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.4: "Instruction Set"
+    /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5: "MSP430 and MSP430X Instructions"
     /// </summary>
     [Theory]
     [InlineData(AddressingMode.Register, AddressingMode.Register)]
@@ -703,7 +703,7 @@ public class AddInstructionTests
 
     /// <summary>
     /// Tests cycle counts for ADD instruction addressing mode combinations.
-    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.4: "Instruction Set"
+    /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5: "MSP430 and MSP430X Instructions"
     /// Cycle counts per TI specification: base (1) + source cycles + destination cycles.
     /// </summary>
     [Theory]

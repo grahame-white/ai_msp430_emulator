@@ -117,7 +117,7 @@ public class MemoryMap : IMemoryMap
     /// 
     /// References:
     /// - MSP430FR2355 Datasheet (SLAS847G), Table 6-4 "Memory Organization"
-    /// - MSP430FR2xx Family User's Guide (SLAU445I), Section 1.4 "Memory Organization"
+    /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 1.9.1: "Memory Map"
     /// </summary>
     /// <returns>A list of default memory regions for the MSP430FR2355.</returns>
     private static List<MemoryRegionInfo> CreateDefaultRegions()

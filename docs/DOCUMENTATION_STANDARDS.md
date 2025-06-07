@@ -25,6 +25,8 @@ MSP430FR2355 Mixed-Signal Microcontroller Datasheet (SLAS847G, October 2016 - Re
 
 - **MSP430FR2355 Datasheet** (SLAS847G): Hardware specifications and electrical characteristics
 - **MSP430FR2xx/FR4xx Family User's Guide** (SLAU445I): Programming model and architecture details
+  - Use `docs/references/MSP430FR2xx_FR4xx_Family_Users_Guide_(SLAU445I).md` for section number validation
+  - Document version: "MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019"
 - **MSP430 Assembly Language Tools User's Guide** (SLAU131): Instruction set and assembly syntax
 
 **Secondary Source Usage:**

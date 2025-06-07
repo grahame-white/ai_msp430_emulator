@@ -13,7 +13,7 @@ namespace MSP430.Emulator.Instructions.Arithmetic;
 /// 
 /// References:
 /// - MSP430 Assembly Language Tools User's Guide (SLAU131), Section 5.3.2: "SUB - Subtract" - Instruction format and operation
-/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.3.1: "Format I Instructions" - Instruction encoding
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5.1.1: "MSP430 Double-Operand (Format I) Instructions" - Instruction encoding
 /// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
 /// </summary>
 public class SubInstruction : ArithmeticInstruction

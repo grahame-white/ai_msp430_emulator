@@ -11,8 +11,8 @@ namespace MSP430.Emulator.Memory;
 /// typical of MSP430 devices.
 /// 
 /// Implementation is based on MSP430 flash memory specifications:
-/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, June 2015 - Revised October 2019)
-///   Section 6: "FRAM Memory" - Flash controller behavior and programming model
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
+///   Section 6: "FRAM Controller (FRCTL)" - Flash controller behavior and programming model
 /// - MSP430x2xx Family User's Guide (SLAU144J, February 2007 - Revised December 2013)
 ///   Section 5: "Flash Memory Controller" - Flash operations and timing characteristics
 /// </summary>

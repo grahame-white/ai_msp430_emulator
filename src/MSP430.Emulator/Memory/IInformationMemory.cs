@@ -10,8 +10,8 @@ namespace MSP430.Emulator.Memory;
 /// information in MSP430 devices. It supports segment-based organization with
 /// individual write protection controls for each segment.
 /// 
-/// Interface design based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I, June 2013 - Revised July 2019) - Section 7.2.4:
-/// "Information Memory" - Programming model and protection mechanisms.
+/// Interface design based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019 - Section 1.9.1:
+/// "Memory Map" - Programming model and protection mechanisms.
 /// </summary>
 public interface IInformationMemory
 {

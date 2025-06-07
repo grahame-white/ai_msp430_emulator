@@ -9,6 +9,7 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 /// <summary>
 /// Unit tests for the PopInstruction class.
 /// Tests all addressing modes, byte/word operations, and stack management behavior.
+/// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
 /// </summary>
 public class PopInstructionTests
 {
@@ -317,6 +318,62 @@ public class PopInstructionTests
 
         // Assert
         Assert.Equal("POP.B R4", result);
+    }
+
+    /// <summary>
+    /// Tests all valid addressing modes for POP instruction (single operand).
+    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
+    /// Testing all 6 valid addressing modes for single-operand destination instructions (excluding Immediate).
+    /// </summary>
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void Execute_AllDestinationAddressingModes_ExecutesSuccessfully(AddressingMode destMode)
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set up initial values
+        registerFile.SetStackPointer(0x1000);
+        registerFile.WriteRegister(RegisterName.R4, 0x0200);
+
+        // Set up stack value to pop
+        memory[0x1000] = 0x34;
+        memory[0x1001] = 0x12;
+
+        // Ensure memory is available for destination writes
+        for (int i = 0x0200; i < 0x0300; i++)
+        {
+            memory[i] = 0x00;
+        }
+
+        var instruction = new PopInstruction(
+            0x1304,
+            RegisterName.R4,
+            destMode,
+            false);
+
+        ushort[] extensionWords = destMode switch
+        {
+            AddressingMode.Indexed => [0x0100],
+            AddressingMode.Absolute => [0x0250],
+            AddressingMode.Symbolic => [0x0250],
+            _ => []
+        };
+
+        // Act & Assert - Should not throw
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Verify stack pointer was incremented
+        Assert.Equal(0x1002, registerFile.GetStackPointer());
+
+        // Verify cycle count is reasonable
+        Assert.True(cycles > 0 && cycles <= 6);
     }
 
     [Fact]

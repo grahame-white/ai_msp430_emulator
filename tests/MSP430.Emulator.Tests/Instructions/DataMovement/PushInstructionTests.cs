@@ -9,6 +9,7 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 /// <summary>
 /// Unit tests for the PushInstruction class.
 /// Tests all addressing modes, byte/word operations, and stack management behavior.
+/// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
 /// </summary>
 public class PushInstructionTests
 {
@@ -352,6 +353,58 @@ public class PushInstructionTests
 
         // Assert
         Assert.Equal("PUSH.B R4", result);
+    }
+
+    /// <summary>
+    /// Tests all valid addressing modes for PUSH instruction (single operand).
+    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
+    /// Testing all 7 valid addressing modes for single-operand source instructions.
+    /// </summary>
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Immediate)]
+    public void Execute_AllSourceAddressingModes_ExecutesSuccessfully(AddressingMode sourceMode)
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set up initial values
+        registerFile.SetStackPointer(0x1000);
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        // Set up memory for addressing modes that need it
+        memory[0x0200] = 0x56;
+        memory[0x0201] = 0x78;
+
+        var instruction = new PushInstruction(
+            0x1204,
+            RegisterName.R4,
+            sourceMode,
+            false);
+
+        ushort[] extensionWords = sourceMode switch
+        {
+            AddressingMode.Indexed => [0x0100],
+            AddressingMode.Absolute => [0x0200],
+            AddressingMode.Symbolic => [0x0200],
+            AddressingMode.Immediate => [0xABCD],
+            _ => []
+        };
+
+        // Act & Assert - Should not throw
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Verify stack pointer was decremented
+        Assert.Equal(0x0FFE, registerFile.GetStackPointer());
+
+        // Verify cycle count is reasonable
+        Assert.True(cycles > 0 && cycles <= 6);
     }
 
     [Fact]

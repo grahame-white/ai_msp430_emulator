@@ -12,8 +12,9 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 /// </summary>
 public class MovInstructionTests
 {
-    [Fact]
-    public void Constructor_ValidParameters_CreatesInstruction()
+    [Theory]
+    [InlineData(InstructionFormat.FormatI)]
+    public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
     {
         // Arrange & Act
         var instruction = new MovInstruction(
@@ -25,15 +26,152 @@ public class MovInstructionTests
             false);
 
         // Assert
-        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-        Assert.Equal(0x4, instruction.Opcode);
-        Assert.Equal(0x4123, instruction.InstructionWord);
-        Assert.Equal("MOV", instruction.Mnemonic);
-        Assert.False(instruction.IsByteOperation);
-        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-        Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
+        Assert.Equal(expectedFormat, instruction.Format);
+    }
+
+    [Theory]
+    [InlineData(0x4)]
+    public void Constructor_ValidParameters_SetsOpcode(ushort expectedOpcode)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedOpcode, instruction.Opcode);
+    }
+
+    [Theory]
+    [InlineData(0x4123)]
+    public void Constructor_ValidParameters_SetsInstructionWord(ushort expectedWord)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            expectedWord,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedWord, instruction.InstructionWord);
+    }
+
+    [Theory]
+    [InlineData("MOV")]
+    public void Constructor_ValidParameters_SetsMnemonic(string expectedMnemonic)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Constructor_ValidParameters_SetsByteOperation(bool expectedByteOp)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            expectedByteOp);
+
+        // Assert
+        Assert.Equal(expectedByteOp, instruction.IsByteOperation);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R1)]
+    [InlineData(RegisterName.R2)]
+    [InlineData(RegisterName.R15)]
+    public void Constructor_ValidParameters_SetsSourceRegister(RegisterName expectedSource)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            expectedSource,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedSource, instruction.SourceRegister);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R4)]
+    [InlineData(RegisterName.R5)]
+    [InlineData(RegisterName.R15)]
+    public void Constructor_ValidParameters_SetsDestinationRegister(RegisterName expectedDest)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            expectedDest,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedDest, instruction.DestinationRegister);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Indirect)]
+    public void Constructor_ValidParameters_SetsSourceAddressingMode(AddressingMode expectedSourceMode)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            expectedSourceMode,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal(expectedSourceMode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Indexed)]
+    public void Constructor_ValidParameters_SetsDestinationAddressingMode(AddressingMode expectedDestMode)
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            expectedDestMode,
+            false);
+
+        // Assert
+        Assert.Equal(expectedDestMode, instruction.DestinationAddressingMode);
     }
 
     [Fact]
@@ -69,11 +207,52 @@ public class MovInstructionTests
             false);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R4));
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_Takes1Cycle()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(1u, cycles); // Register to register takes 1 cycle
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_ReadOperandReturnsLowByte()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1234);
+
+        // Act: check what ReadOperand returns
+        ushort sourceValue = InstructionHelpers.ReadOperand(
+            RegisterName.R1,
+            AddressingMode.Register,
+            true,
+            registerFile,
+            memory,
+            0);
+
+        // Assert
+        Assert.Equal(0x34, sourceValue); // Should be 0x34 (low byte of 0x1234)
     }
 
     [Fact]
@@ -83,18 +262,6 @@ public class MovInstructionTests
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1234);
         registerFile.WriteRegister(RegisterName.R3, 0x5678); // Set up R3 with a known value
-
-        // Debug: check what ReadOperand returns
-        ushort sourceValue = InstructionHelpers.ReadOperand(
-            RegisterName.R1,
-            AddressingMode.Register,
-            true,
-            registerFile,
-            memory,
-            0);
-
-        // Should be 0x34 (low byte of 0x1234)
-        Assert.Equal(0x34, sourceValue);
 
         var instruction = new MovInstruction(
             0x4000,

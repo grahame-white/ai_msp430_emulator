@@ -143,25 +143,62 @@ public class StatusBitInstructionTests
         }
 
         [Theory]
-        [InlineData(true, true, true)] // Zero, Negative, Overflow
-        public void Execute_DoesNotAffectOtherFlags(bool expectedZero, bool expectedNegative, bool expectedOverflow)
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Execute_DoesNotAffectZeroFlag(bool expectedZero)
         {
             // Arrange
             var registerFile = new RegisterFile();
             byte[] memory = new byte[65536];
             var instruction = new SetcInstruction(0x0000);
 
-            // Set other flags
+            // Set zero flag
             registerFile.StatusRegister.Zero = expectedZero;
-            registerFile.StatusRegister.Negative = expectedNegative;
-            registerFile.StatusRegister.Overflow = expectedOverflow;
 
             // Act
             instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
             Assert.Equal(expectedZero, registerFile.StatusRegister.Zero);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Execute_DoesNotAffectNegativeFlag(bool expectedNegative)
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new SetcInstruction(0x0000);
+
+            // Set negative flag
+            registerFile.StatusRegister.Negative = expectedNegative;
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Execute_DoesNotAffectOverflowFlag(bool expectedOverflow)
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new SetcInstruction(0x0000);
+
+            // Set overflow flag
+            registerFile.StatusRegister.Overflow = expectedOverflow;
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.Equal(expectedOverflow, registerFile.StatusRegister.Overflow);
         }
 

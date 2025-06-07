@@ -520,17 +520,31 @@ public class StatusRegisterTests
     }
 
     [Theory]
-    [InlineData(0x0000, false, false)]  // Zero result, no special flags
-    [InlineData(0x8000, false, false)]  // Negative result
-    [InlineData(0x0000, true, false)]   // Zero result with carry update
-    [InlineData(0x0000, false, true)]   // Zero result with overflow update
-    public void UpdateFlags_VariousScenarios_UpdatesCorrectly(ushort result, bool updateCarry, bool updateOverflow)
+    [InlineData(0x0000, false, false, true)]   // Zero result, no special flags
+    [InlineData(0x8000, false, false, false)]  // Negative result
+    [InlineData(0x0000, true, false, true)]    // Zero result with carry update
+    [InlineData(0x0000, false, true, true)]    // Zero result with overflow update
+    [InlineData(0x1234, false, false, false)]  // Non-zero, non-negative result
+    public void UpdateFlags_VariousScenarios_SetsZeroFlag(ushort result, bool updateCarry, bool updateOverflow, bool expectedZero)
     {
         var sr = new StatusRegister();
         sr.UpdateFlags(result, updateCarry, updateOverflow);
 
-        Assert.Equal(result == 0, sr.Zero);
-        Assert.Equal((result & 0x8000) != 0, sr.Negative);
+        Assert.Equal(expectedZero, sr.Zero);
+    }
+
+    [Theory]
+    [InlineData(0x0000, false, false, false)]  // Zero result, no special flags
+    [InlineData(0x8000, false, false, true)]   // Negative result
+    [InlineData(0x0000, true, false, false)]   // Zero result with carry update
+    [InlineData(0x0000, false, true, false)]   // Zero result with overflow update
+    [InlineData(0x1234, false, false, false)]  // Non-zero, non-negative result
+    public void UpdateFlags_VariousScenarios_SetsNegativeFlag(ushort result, bool updateCarry, bool updateOverflow, bool expectedNegative)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlags(result, updateCarry, updateOverflow);
+
+        Assert.Equal(expectedNegative, sr.Negative);
     }
 
     [Fact]
@@ -628,117 +642,280 @@ public class StatusRegisterTests
     }
 
     [Theory]
-    [InlineData(0x0001)]  // Only Carry
-    [InlineData(0x0007)]  // C, Z, N
-    [InlineData(0x00FF)]  // All low byte flags
-    [InlineData(0xFFFF)]  // All flags
-    public void FlagOperations_PreserveOtherBits(ushort initialValue)
+    [InlineData(0x0001, true)]   // Only Carry - Zero flag should be false
+    [InlineData(0x0007, true)]   // C, Z, N - Zero flag should be true
+    [InlineData(0x00FF, true)]   // All low byte flags - Zero flag should be true
+    [InlineData(0xFFFF, true)]   // All flags - Zero flag should be true
+    [InlineData(0x0000, false)]  // No flags - Zero flag should be false
+    [InlineData(0x0005, false)]  // C and N only - Zero flag should be false
+    public void FlagOperations_PreserveOtherBits_ZeroFlag(ushort initialValue, bool expectedZero)
     {
         var sr = new StatusRegister(initialValue);
 
-        // Toggle one flag and verify others are preserved
+        // Toggle carry flag and verify Zero flag is preserved
         bool originalCarry = sr.Carry;
         sr.Carry = !originalCarry;
 
-        // All other flags should remain the same
-        Assert.Equal((initialValue & 0x0002) != 0, sr.Zero);
-        Assert.Equal((initialValue & 0x0004) != 0, sr.Negative);
-        Assert.Equal((initialValue & 0x0008) != 0, sr.GeneralInterruptEnable);
+        Assert.Equal(expectedZero, sr.Zero);
     }
 
     [Theory]
-    [InlineData(0x1000, 0x2000, 0x3000, false, false, false, false, false)] // Normal addition
-    [InlineData(0x0000, 0x0000, 0x0000, false, true, false, false, false)]  // Zero result
-    [InlineData(0x8000, 0x1000, 0x9000, false, false, true, false, false)]  // Negative result
-    [InlineData(0xFFFF, 0x0001, 0x10000, false, true, false, true, false)]  // Carry out, zero result
-    [InlineData(0x7FFF, 0x0001, 0x8000, false, false, true, false, true)]   // Overflow: positive + positive = negative
-    [InlineData(0x8000, 0x8000, 0x10000, false, true, false, true, true)]   // Overflow: negative + negative = positive (with carry)
-    public void UpdateFlagsAfterAddition_WordOperation_SetsCorrectFlags(
-        ushort operand1, ushort operand2, uint result, bool isByteOp,
-        bool expectedZero, bool expectedNegative, bool expectedCarry, bool expectedOverflow)
+    [InlineData(0x0001, false)]  // Only Carry - Negative flag should be false
+    [InlineData(0x0007, true)]   // C, Z, N - Negative flag should be true
+    [InlineData(0x00FF, true)]   // All low byte flags - Negative flag should be true
+    [InlineData(0xFFFF, true)]   // All flags - Negative flag should be true
+    [InlineData(0x0000, false)]  // No flags - Negative flag should be false
+    [InlineData(0x0003, false)]  // C and Z only - Negative flag should be false
+    public void FlagOperations_PreserveOtherBits_NegativeFlag(ushort initialValue, bool expectedNegative)
     {
-        // Arrange
-        var sr = new StatusRegister();
+        var sr = new StatusRegister(initialValue);
 
-        // Act
+        // Toggle carry flag and verify Negative flag is preserved
+        bool originalCarry = sr.Carry;
+        sr.Carry = !originalCarry;
+
+        Assert.Equal(expectedNegative, sr.Negative);
+    }
+
+    [Theory]
+    [InlineData(0x0001, false)]  // Only Carry - GIE flag should be false
+    [InlineData(0x0007, false)]  // C, Z, N - GIE flag should be false
+    [InlineData(0x00FF, true)]   // All low byte flags - GIE flag should be true
+    [InlineData(0xFFFF, true)]   // All flags - GIE flag should be true
+    [InlineData(0x0008, true)]   // Only GIE set - GIE flag should be true
+    [InlineData(0x0000, false)]  // No flags - GIE flag should be false
+    public void FlagOperations_PreserveOtherBits_GeneralInterruptEnableFlag(ushort initialValue, bool expectedGIE)
+    {
+        var sr = new StatusRegister(initialValue);
+
+        // Toggle carry flag and verify GIE flag is preserved
+        bool originalCarry = sr.Carry;
+        sr.Carry = !originalCarry;
+
+        Assert.Equal(expectedGIE, sr.GeneralInterruptEnable);
+    }
+
+    [Theory]
+    [InlineData(0x1000, 0x2000, 0x3000, false, false)] // Normal addition
+    [InlineData(0x0000, 0x0000, 0x0000, false, true)]  // Zero result
+    [InlineData(0xFFFF, 0x0001, 0x10000, false, true)] // Carry out, zero result
+    [InlineData(0x8000, 0x8000, 0x10000, false, true)] // Overflow: negative + negative = positive (with carry)
+    public void UpdateFlagsAfterAddition_WordOperation_SetsZeroFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedZero)
+    {
+        var sr = new StatusRegister();
         sr.UpdateFlagsAfterAddition(operand1, operand2, result, isByteOp);
 
-        // Assert
         Assert.Equal(expectedZero, sr.Zero);
-        Assert.Equal(expectedNegative, sr.Negative);
-        Assert.Equal(expectedCarry, sr.Carry);
-        Assert.Equal(expectedOverflow, sr.Overflow);
     }
 
     [Theory]
-    [InlineData(0x10, 0x20, 0x30, true, false, false, false, false)]    // Normal byte addition
-    [InlineData(0x00, 0x00, 0x00, true, true, false, false, false)]     // Zero result
-    [InlineData(0x80, 0x10, 0x90, true, false, true, false, false)]     // Negative result
-    [InlineData(0xFF, 0x01, 0x100, true, true, false, true, false)]     // Carry out, zero result
-    [InlineData(0x7F, 0x01, 0x80, true, false, true, false, true)]      // Overflow: positive + positive = negative
-    [InlineData(0x80, 0x80, 0x100, true, true, false, true, true)]      // Overflow: negative + negative = positive (with carry)
-    public void UpdateFlagsAfterAddition_ByteOperation_SetsCorrectFlags(
-        ushort operand1, ushort operand2, uint result, bool isByteOp,
-        bool expectedZero, bool expectedNegative, bool expectedCarry, bool expectedOverflow)
+    [InlineData(0x1000, 0x2000, 0x3000, false, false)] // Normal addition
+    [InlineData(0x8000, 0x1000, 0x9000, false, true)]  // Negative result
+    [InlineData(0x7FFF, 0x0001, 0x8000, false, true)]  // Overflow: positive + positive = negative
+    [InlineData(0x0000, 0x0000, 0x0000, false, false)] // Zero result
+    public void UpdateFlagsAfterAddition_WordOperation_SetsNegativeFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedNegative)
     {
-        // Arrange
         var sr = new StatusRegister();
-
-        // Act
         sr.UpdateFlagsAfterAddition(operand1, operand2, result, isByteOp);
 
-        // Assert
-        Assert.Equal(expectedZero, sr.Zero);
         Assert.Equal(expectedNegative, sr.Negative);
+    }
+
+    [Theory]
+    [InlineData(0x1000, 0x2000, 0x3000, false, false)]  // Normal addition
+    [InlineData(0xFFFF, 0x0001, 0x10000, false, true)]  // Carry out
+    [InlineData(0x8000, 0x8000, 0x10000, false, true)]  // Overflow: negative + negative = positive (with carry)
+    [InlineData(0x0000, 0x0000, 0x0000, false, false)]  // Zero result
+    public void UpdateFlagsAfterAddition_WordOperation_SetsCarryFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedCarry)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterAddition(operand1, operand2, result, isByteOp);
+
         Assert.Equal(expectedCarry, sr.Carry);
+    }
+
+    [Theory]
+    [InlineData(0x1000, 0x2000, 0x3000, false, false)]  // Normal addition
+    [InlineData(0x7FFF, 0x0001, 0x8000, false, true)]   // Overflow: positive + positive = negative
+    [InlineData(0x8000, 0x8000, 0x10000, false, true)]  // Overflow: negative + negative = positive (with carry)
+    [InlineData(0x0000, 0x0000, 0x0000, false, false)]  // Zero result
+    public void UpdateFlagsAfterAddition_WordOperation_SetsOverflowFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedOverflow)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterAddition(operand1, operand2, result, isByteOp);
+
         Assert.Equal(expectedOverflow, sr.Overflow);
     }
 
     [Theory]
-    [InlineData(0x3000, 0x1000, 0x2000, false, false, false, true, false)]  // Normal subtraction
-    [InlineData(0x1000, 0x1000, 0x0000, false, true, false, true, false)]   // Zero result
-    [InlineData(0x1000, 0x2000, 0xFFFF, false, false, true, false, false)]  // Negative result, borrow needed
-    [InlineData(0x0000, 0x0001, 0xFFFF, false, false, true, false, false)]  // Underflow
-    [InlineData(0x8000, 0x0001, 0x7FFF, false, false, false, true, true)]   // Overflow: negative - positive = positive
-    [InlineData(0x7FFF, 0x8000, 0xFFFF, false, false, true, false, true)]   // Overflow: positive - negative = negative
-    public void UpdateFlagsAfterSubtraction_WordOperation_SetsCorrectFlags(
-        ushort operand1, ushort operand2, uint result, bool isByteOp,
-        bool expectedZero, bool expectedNegative, bool expectedCarry, bool expectedOverflow)
+    [InlineData(0x10, 0x20, 0x30, true, false)]     // Normal byte addition
+    [InlineData(0x00, 0x00, 0x00, true, true)]      // Zero result
+    [InlineData(0xFF, 0x01, 0x100, true, true)]     // Carry out, zero result
+    [InlineData(0x80, 0x80, 0x100, true, true)]     // Overflow: negative + negative = positive (with carry)
+    public void UpdateFlagsAfterAddition_ByteOperation_SetsZeroFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedZero)
     {
-        // Arrange
         var sr = new StatusRegister();
+        sr.UpdateFlagsAfterAddition(operand1, operand2, result, isByteOp);
 
-        // Act
-        sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
-
-        // Assert
         Assert.Equal(expectedZero, sr.Zero);
+    }
+
+    [Theory]
+    [InlineData(0x10, 0x20, 0x30, true, false)]     // Normal byte addition
+    [InlineData(0x80, 0x10, 0x90, true, true)]      // Negative result
+    [InlineData(0x7F, 0x01, 0x80, true, true)]      // Overflow: positive + positive = negative
+    [InlineData(0x00, 0x00, 0x00, true, false)]     // Zero result
+    public void UpdateFlagsAfterAddition_ByteOperation_SetsNegativeFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedNegative)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterAddition(operand1, operand2, result, isByteOp);
+
         Assert.Equal(expectedNegative, sr.Negative);
+    }
+
+    [Theory]
+    [InlineData(0x10, 0x20, 0x30, true, false)]     // Normal byte addition
+    [InlineData(0xFF, 0x01, 0x100, true, true)]     // Carry out, zero result
+    [InlineData(0x80, 0x80, 0x100, true, true)]     // Overflow: negative + negative = positive (with carry)
+    [InlineData(0x00, 0x00, 0x00, true, false)]     // Zero result
+    public void UpdateFlagsAfterAddition_ByteOperation_SetsCarryFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedCarry)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterAddition(operand1, operand2, result, isByteOp);
+
         Assert.Equal(expectedCarry, sr.Carry);
+    }
+
+    [Theory]
+    [InlineData(0x10, 0x20, 0x30, true, false)]     // Normal byte addition
+    [InlineData(0x7F, 0x01, 0x80, true, true)]      // Overflow: positive + positive = negative
+    [InlineData(0x80, 0x80, 0x100, true, true)]     // Overflow: negative + negative = positive (with carry)
+    [InlineData(0x00, 0x00, 0x00, true, false)]     // Zero result
+    public void UpdateFlagsAfterAddition_ByteOperation_SetsOverflowFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedOverflow)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterAddition(operand1, operand2, result, isByteOp);
+
         Assert.Equal(expectedOverflow, sr.Overflow);
     }
 
     [Theory]
-    [InlineData(0x30, 0x10, 0x20, true, false, false, true, false)]     // Normal byte subtraction
-    [InlineData(0x10, 0x10, 0x00, true, true, false, true, false)]      // Zero result
-    [InlineData(0x10, 0x20, 0xF0, true, false, true, false, false)]     // Negative result, borrow needed
-    [InlineData(0x00, 0x01, 0xFF, true, false, true, false, false)]     // Underflow
-    [InlineData(0x80, 0x01, 0x7F, true, false, false, true, true)]      // Overflow: negative - positive = positive
-    [InlineData(0x7F, 0x80, 0xFF, true, false, true, false, true)]      // Overflow: positive - negative = negative
-    public void UpdateFlagsAfterSubtraction_ByteOperation_SetsCorrectFlags(
-        ushort operand1, ushort operand2, uint result, bool isByteOp,
-        bool expectedZero, bool expectedNegative, bool expectedCarry, bool expectedOverflow)
+    [InlineData(0x3000, 0x1000, 0x2000, false, false)]  // Normal subtraction
+    [InlineData(0x1000, 0x1000, 0x0000, false, true)]   // Zero result
+    [InlineData(0x0000, 0x0001, 0xFFFF, false, false)]  // Underflow
+    [InlineData(0x8000, 0x0001, 0x7FFF, false, false)]  // Overflow: negative - positive = positive
+    public void UpdateFlagsAfterSubtraction_WordOperation_SetsZeroFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedZero)
     {
-        // Arrange
         var sr = new StatusRegister();
-
-        // Act
         sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
 
-        // Assert
         Assert.Equal(expectedZero, sr.Zero);
+    }
+
+    [Theory]
+    [InlineData(0x3000, 0x1000, 0x2000, false, false)]  // Normal subtraction
+    [InlineData(0x1000, 0x2000, 0xFFFF, false, true)]   // Negative result, borrow needed
+    [InlineData(0x0000, 0x0001, 0xFFFF, false, true)]   // Underflow
+    [InlineData(0x7FFF, 0x8000, 0xFFFF, false, true)]   // Overflow: positive - negative = negative
+    public void UpdateFlagsAfterSubtraction_WordOperation_SetsNegativeFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedNegative)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
+
         Assert.Equal(expectedNegative, sr.Negative);
+    }
+
+    [Theory]
+    [InlineData(0x3000, 0x1000, 0x2000, false, true)]   // Normal subtraction
+    [InlineData(0x1000, 0x1000, 0x0000, false, true)]   // Zero result
+    [InlineData(0x8000, 0x0001, 0x7FFF, false, true)]   // Overflow: negative - positive = positive
+    [InlineData(0x1000, 0x2000, 0xFFFF, false, false)]  // Negative result, borrow needed
+    public void UpdateFlagsAfterSubtraction_WordOperation_SetsCarryFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedCarry)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
+
         Assert.Equal(expectedCarry, sr.Carry);
+    }
+
+    [Theory]
+    [InlineData(0x3000, 0x1000, 0x2000, false, false)]  // Normal subtraction
+    [InlineData(0x8000, 0x0001, 0x7FFF, false, true)]   // Overflow: negative - positive = positive
+    [InlineData(0x7FFF, 0x8000, 0xFFFF, false, true)]   // Overflow: positive - negative = negative
+    [InlineData(0x1000, 0x1000, 0x0000, false, false)]  // Zero result
+    public void UpdateFlagsAfterSubtraction_WordOperation_SetsOverflowFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedOverflow)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
+
+        Assert.Equal(expectedOverflow, sr.Overflow);
+    }
+
+    [Theory]
+    [InlineData(0x30, 0x10, 0x20, true, false)]     // Normal byte subtraction
+    [InlineData(0x10, 0x10, 0x00, true, true)]      // Zero result
+    [InlineData(0x10, 0x20, 0xF0, true, false)]     // Negative result, borrow needed
+    [InlineData(0x00, 0x01, 0xFF, true, false)]     // Underflow
+    public void UpdateFlagsAfterSubtraction_ByteOperation_SetsZeroFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedZero)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
+
+        Assert.Equal(expectedZero, sr.Zero);
+    }
+
+    [Theory]
+    [InlineData(0x30, 0x10, 0x20, true, false)]     // Normal byte subtraction
+    [InlineData(0x10, 0x20, 0xF0, true, true)]      // Negative result, borrow needed
+    [InlineData(0x00, 0x01, 0xFF, true, true)]      // Underflow
+    [InlineData(0x7F, 0x80, 0xFF, true, true)]      // Overflow: positive - negative = negative
+    public void UpdateFlagsAfterSubtraction_ByteOperation_SetsNegativeFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedNegative)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
+
+        Assert.Equal(expectedNegative, sr.Negative);
+    }
+
+    [Theory]
+    [InlineData(0x30, 0x10, 0x20, true, true)]      // Normal byte subtraction
+    [InlineData(0x10, 0x10, 0x00, true, true)]      // Zero result
+    [InlineData(0x80, 0x01, 0x7F, true, true)]      // Overflow: negative - positive = positive
+    [InlineData(0x10, 0x20, 0xF0, true, false)]     // Negative result, borrow needed
+    public void UpdateFlagsAfterSubtraction_ByteOperation_SetsCarryFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedCarry)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
+
+        Assert.Equal(expectedCarry, sr.Carry);
+    }
+
+    [Theory]
+    [InlineData(0x30, 0x10, 0x20, true, false)]     // Normal byte subtraction
+    [InlineData(0x80, 0x01, 0x7F, true, true)]      // Overflow: negative - positive = positive
+    [InlineData(0x7F, 0x80, 0xFF, true, true)]      // Overflow: positive - negative = negative
+    [InlineData(0x10, 0x10, 0x00, true, false)]     // Zero result
+    public void UpdateFlagsAfterSubtraction_ByteOperation_SetsOverflowFlag(
+        ushort operand1, ushort operand2, uint result, bool isByteOp, bool expectedOverflow)
+    {
+        var sr = new StatusRegister();
+        sr.UpdateFlagsAfterSubtraction(operand1, operand2, result, isByteOp);
+
         Assert.Equal(expectedOverflow, sr.Overflow);
     }
 

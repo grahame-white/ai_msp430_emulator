@@ -16,37 +16,87 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void Constructor_WithLogger_CreatesInformationMemory()
+    public void Constructor_WithLogger_SetsSize()
     {
         var infoMemory = new InformationMemory(_logger);
 
         Assert.Equal(512, infoMemory.Size);
+    }
+
+    [Fact]
+    public void Constructor_WithLogger_SetsBaseAddress()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
         Assert.Equal((ushort)0x1800, infoMemory.BaseAddress);
+    }
+
+    [Fact]
+    public void Constructor_WithLogger_SetsEndAddress()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
         Assert.Equal((ushort)0x19FF, infoMemory.EndAddress);
+    }
+
+    [Fact]
+    public void Constructor_WithLogger_SetsSegmentSize()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
         Assert.Equal(128, infoMemory.SegmentSize);
+    }
+
+    [Fact]
+    public void Constructor_WithLogger_SetsSegmentCount()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
         Assert.Equal(4, infoMemory.Segments.Count);
     }
 
     [Fact]
-    public void Constructor_WithoutLogger_CreatesInformationMemory()
+    public void Constructor_WithoutLogger_SetsSize()
     {
         var infoMemory = new InformationMemory();
 
         Assert.Equal(512, infoMemory.Size);
+    }
+
+    [Fact]
+    public void Constructor_WithoutLogger_SetsBaseAddress()
+    {
+        var infoMemory = new InformationMemory();
+
         Assert.Equal((ushort)0x1800, infoMemory.BaseAddress);
+    }
+
+    [Fact]
+    public void Constructor_WithoutLogger_SetsEndAddress()
+    {
+        var infoMemory = new InformationMemory();
+
         Assert.Equal((ushort)0x19FF, infoMemory.EndAddress);
     }
 
     [Fact]
-    public void Segments_ContainsAllFourSegments()
+    public void Segments_HasCorrectCount()
     {
         var infoMemory = new InformationMemory(_logger);
 
         Assert.Equal(4, infoMemory.Segments.Count);
-        Assert.Contains(infoMemory.Segments, s => s.Segment == InformationSegment.SegmentA);
-        Assert.Contains(infoMemory.Segments, s => s.Segment == InformationSegment.SegmentB);
-        Assert.Contains(infoMemory.Segments, s => s.Segment == InformationSegment.SegmentC);
-        Assert.Contains(infoMemory.Segments, s => s.Segment == InformationSegment.SegmentD);
+    }
+
+    [Theory]
+    [InlineData(InformationSegment.SegmentA)]
+    [InlineData(InformationSegment.SegmentB)]
+    [InlineData(InformationSegment.SegmentC)]
+    [InlineData(InformationSegment.SegmentD)]
+    public void Segments_ContainsSegment(InformationSegment expectedSegment)
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        Assert.Contains(infoMemory.Segments, s => s.Segment == expectedSegment);
     }
 
     [Theory]
@@ -149,7 +199,7 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void WriteByte_ToUnprotectedSegment_Succeeds()
+    public void WriteByte_ToUnprotectedSegment_ReturnsTrue()
     {
         var infoMemory = new InformationMemory(_logger);
         const ushort address = 0x1800; // Segment D (unprotected)
@@ -158,6 +208,17 @@ public class InformationMemoryTests
         bool result = infoMemory.WriteByte(address, testValue);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void WriteByte_ToUnprotectedSegment_WritesValue()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        const ushort address = 0x1800; // Segment D (unprotected)
+        const byte testValue = 0x42;
+
+        infoMemory.WriteByte(address, testValue);
+
         Assert.Equal(testValue, infoMemory.ReadByte(address));
     }
 

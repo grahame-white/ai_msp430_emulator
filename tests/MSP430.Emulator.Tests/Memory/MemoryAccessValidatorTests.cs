@@ -48,24 +48,14 @@ public class MemoryAccessValidatorTests
         Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(0x0300));
     }
 
-    [Fact]
-    public void ValidateRead_InvalidAddress_ExceptionHasCorrectAddress()
+    [Theory]
+    [InlineData(0x0300, MemoryAccessPermissions.Read)]
+    public void ValidateRead_InvalidAddress_ExceptionHasCorrectProperties(ushort invalidAddress, MemoryAccessPermissions expectedAccessType)
     {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(0x0300));
-        Assert.Equal((ushort)0x0300, exception.Address);
-    }
+        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(invalidAddress));
 
-    [Fact]
-    public void ValidateRead_InvalidAddress_ExceptionHasCorrectAccessType()
-    {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(0x0300));
-        Assert.Equal(MemoryAccessPermissions.Read, exception.AccessType);
-    }
-
-    [Fact]
-    public void ValidateRead_InvalidAddress_ExceptionHasCorrectMessage()
-    {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(0x0300));
+        Assert.Equal(invalidAddress, exception.Address);
+        Assert.Equal(expectedAccessType, exception.AccessType);
         Assert.Contains("Invalid memory address", exception.Message);
     }
 
@@ -85,24 +75,14 @@ public class MemoryAccessValidatorTests
         Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x1000)); // Bootstrap Loader FRAM - read/execute only
     }
 
-    [Fact]
-    public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectAddress()
+    [Theory]
+    [InlineData(0x1000, MemoryAccessPermissions.Write)]  // Bootstrap Loader FRAM - read/execute only
+    public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectProperties(ushort readOnlyAddress, MemoryAccessPermissions expectedAccessType)
     {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x1000)); // Bootstrap Loader FRAM - read/execute only
-        Assert.Equal((ushort)0x1000, exception.Address);
-    }
+        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(readOnlyAddress));
 
-    [Fact]
-    public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectAccessType()
-    {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x1000)); // Bootstrap Loader FRAM - read/execute only
-        Assert.Equal(MemoryAccessPermissions.Write, exception.AccessType);
-    }
-
-    [Fact]
-    public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectMessage()
-    {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(0x1000)); // Bootstrap Loader FRAM - read/execute only
+        Assert.Equal(readOnlyAddress, exception.Address);
+        Assert.Equal(expectedAccessType, exception.AccessType);
         Assert.Contains("Access denied", exception.Message);
     }
 

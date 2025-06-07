@@ -52,25 +52,14 @@ public class FileLoggerTests : IDisposable
         Assert.Equal(LogLevel.Debug, logger.MinimumLevel);
     }
 
-    [Fact]
-    public void IsEnabled_ReturnsTrueForLevelAtOrAboveMinimum()
+    [Theory]
+    [InlineData(LogLevel.Warning, LogLevel.Warning, true)]   // At minimum level
+    [InlineData(LogLevel.Warning, LogLevel.Error, true)]     // Above minimum level 
+    [InlineData(LogLevel.Warning, LogLevel.Info, false)]     // Below minimum level
+    public void IsEnabled_ChecksAgainstMinimumLevel(LogLevel minimumLevel, LogLevel testLevel, bool expectedResult)
     {
-        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Warning };
-        Assert.True(logger.IsEnabled(LogLevel.Warning));
-    }
-
-    [Fact]
-    public void IsEnabled_ReturnsTrueForLevelAboveMinimum()
-    {
-        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Warning };
-        Assert.True(logger.IsEnabled(LogLevel.Error));
-    }
-
-    [Fact]
-    public void IsEnabled_ReturnsFalseForLevelBelowMinimum()
-    {
-        using var logger = new FileLogger(_testLogPath) { MinimumLevel = LogLevel.Warning };
-        Assert.False(logger.IsEnabled(LogLevel.Info));
+        using var logger = new FileLogger(_testLogPath) { MinimumLevel = minimumLevel };
+        Assert.Equal(expectedResult, logger.IsEnabled(testLevel));
     }
 
     [Fact]

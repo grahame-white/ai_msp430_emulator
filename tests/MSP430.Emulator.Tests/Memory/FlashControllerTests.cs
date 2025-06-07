@@ -873,7 +873,9 @@ public class FlashControllerTests
     public void StateTransitions_LogsInitializationMessage()
     {
         _logger.MinimumLevel = LogLevel.Debug;
-        _ = new FlashController(_logger);
+#pragma warning disable S1481 // Unused local variables should be removed
+        var controller = new FlashController(_logger);
+#pragma warning restore S1481
 
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("FlashController initialized"));

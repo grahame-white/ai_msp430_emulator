@@ -242,7 +242,7 @@
     - 12.9.1 Generating a Memory Image
     - 12.9.2 Specifying a Fill Value
     - 12.9.3 Steps to Follow in Using Image Mode
-  - 12.10 Array Output Format 
+  - 12.10 Array Output Format
   - 12.11 Controlling the ROM Device Address
   - 12.12 Control Hex Conversion Utility Diagnostics
   - 12.13 Description of the Object Formats

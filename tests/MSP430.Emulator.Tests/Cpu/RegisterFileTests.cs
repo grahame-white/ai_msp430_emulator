@@ -289,17 +289,29 @@ public class RegisterFileTests
     [Fact]
     public void ReadRegister_InvalidRegister_ExceptionMessageContainsExpectedText()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
-            _registerFile.ReadRegister((RegisterName)16));
-        Assert.Contains("Invalid register", exception.Message);
+        try
+        {
+            _registerFile.ReadRegister((RegisterName)16);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (ArgumentException exception)
+        {
+            Assert.Contains("Invalid register", exception.Message);
+        }
     }
 
     [Fact]
     public void ReadRegister_InvalidRegister_ExceptionParameterNameIsCorrect()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
-            _registerFile.ReadRegister((RegisterName)16));
-        Assert.Equal("register", exception.ParamName);
+        try
+        {
+            _registerFile.ReadRegister((RegisterName)16);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (ArgumentException exception)
+        {
+            Assert.Equal("register", exception.ParamName);
+        }
     }
 
     [Fact]
@@ -312,17 +324,29 @@ public class RegisterFileTests
     [Fact]
     public void WriteRegister_InvalidRegister_ExceptionContainsCorrectMessage()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
-            _registerFile.WriteRegister((RegisterName)16, 0x1234));
-        Assert.Contains("Invalid register", exception.Message);
+        try
+        {
+            _registerFile.WriteRegister((RegisterName)16, 0x1234);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (ArgumentException exception)
+        {
+            Assert.Contains("Invalid register", exception.Message);
+        }
     }
 
     [Fact]
     public void WriteRegister_InvalidRegister_ExceptionHasCorrectParameterName()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
-            _registerFile.WriteRegister((RegisterName)16, 0x1234));
-        Assert.Equal("register", exception.ParamName);
+        try
+        {
+            _registerFile.WriteRegister((RegisterName)16, 0x1234);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (ArgumentException exception)
+        {
+            Assert.Equal("register", exception.ParamName);
+        }
     }
 
     [Fact]

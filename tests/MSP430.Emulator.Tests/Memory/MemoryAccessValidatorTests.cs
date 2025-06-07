@@ -52,27 +52,45 @@ public class MemoryAccessValidatorTests
     [InlineData(0x0300)]
     public void ValidateRead_InvalidAddress_ExceptionHasCorrectAddress(ushort invalidAddress)
     {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(invalidAddress));
-
-        Assert.Equal(invalidAddress, exception.Address);
+        try
+        {
+            _validator.ValidateRead(invalidAddress);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (MemoryAccessException exception)
+        {
+            Assert.Equal(invalidAddress, exception.Address);
+        }
     }
 
     [Theory]
     [InlineData(0x0300, MemoryAccessPermissions.Read)]
     public void ValidateRead_InvalidAddress_ExceptionHasCorrectAccessType(ushort invalidAddress, MemoryAccessPermissions expectedAccessType)
     {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(invalidAddress));
-
-        Assert.Equal(expectedAccessType, exception.AccessType);
+        try
+        {
+            _validator.ValidateRead(invalidAddress);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (MemoryAccessException exception)
+        {
+            Assert.Equal(expectedAccessType, exception.AccessType);
+        }
     }
 
     [Theory]
     [InlineData(0x0300)]
     public void ValidateRead_InvalidAddress_ExceptionContainsCorrectMessage(ushort invalidAddress)
     {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(invalidAddress));
-
-        Assert.Contains("Invalid memory address", exception.Message);
+        try
+        {
+            _validator.ValidateRead(invalidAddress);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (MemoryAccessException exception)
+        {
+            Assert.Contains("Invalid memory address", exception.Message);
+        }
     }
 
     [Fact]
@@ -95,27 +113,45 @@ public class MemoryAccessValidatorTests
     [InlineData(0x1000)]  // Bootstrap Loader FRAM - read/execute only
     public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectAddress(ushort readOnlyAddress)
     {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(readOnlyAddress));
-
-        Assert.Equal(readOnlyAddress, exception.Address);
+        try
+        {
+            _validator.ValidateWrite(readOnlyAddress);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (MemoryAccessException exception)
+        {
+            Assert.Equal(readOnlyAddress, exception.Address);
+        }
     }
 
     [Theory]
     [InlineData(0x1000, MemoryAccessPermissions.Write)]  // Bootstrap Loader FRAM - read/execute only
     public void ValidateWrite_ReadOnlyRegion_ExceptionHasCorrectAccessType(ushort readOnlyAddress, MemoryAccessPermissions expectedAccessType)
     {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(readOnlyAddress));
-
-        Assert.Equal(expectedAccessType, exception.AccessType);
+        try
+        {
+            _validator.ValidateWrite(readOnlyAddress);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (MemoryAccessException exception)
+        {
+            Assert.Equal(expectedAccessType, exception.AccessType);
+        }
     }
 
     [Theory]
     [InlineData(0x1000)]  // Bootstrap Loader FRAM - read/execute only
     public void ValidateWrite_ReadOnlyRegion_ExceptionContainsCorrectMessage(ushort readOnlyAddress)
     {
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => _validator.ValidateWrite(readOnlyAddress));
-
-        Assert.Contains("Access denied", exception.Message);
+        try
+        {
+            _validator.ValidateWrite(readOnlyAddress);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (MemoryAccessException exception)
+        {
+            Assert.Contains("Access denied", exception.Message);
+        }
     }
 
     [Fact]
@@ -153,8 +189,15 @@ public class MemoryAccessValidatorTests
         var customMap = new MemoryMap(customRegions);
         var customValidator = new MemoryAccessValidator(customMap, _logger);
 
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => customValidator.ValidateExecute(0x0000));
-        Assert.Equal((ushort)0x0000, exception.Address);
+        try
+        {
+            customValidator.ValidateExecute(0x0000);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (MemoryAccessException exception)
+        {
+            Assert.Equal((ushort)0x0000, exception.Address);
+        }
     }
 
     [Fact]
@@ -168,8 +211,15 @@ public class MemoryAccessValidatorTests
         var customMap = new MemoryMap(customRegions);
         var customValidator = new MemoryAccessValidator(customMap, _logger);
 
-        MemoryAccessException exception = Assert.Throws<MemoryAccessException>(() => customValidator.ValidateExecute(0x0000));
-        Assert.Equal(MemoryAccessPermissions.Execute, exception.AccessType);
+        try
+        {
+            customValidator.ValidateExecute(0x0000);
+            throw new InvalidOperationException("Expected exception was not thrown");
+        }
+        catch (MemoryAccessException exception)
+        {
+            Assert.Equal(MemoryAccessPermissions.Execute, exception.AccessType);
+        }
     }
 
     [Fact]

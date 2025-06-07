@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Arithmetic;
+using MSP430.Emulator.Tests.TestUtilities;
 
 namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 
@@ -480,6 +482,122 @@ public class IncInstructionTests
 
         // Assert
         Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    /// <summary>
+    /// Tests all valid addressing modes for INC instruction (single operand).
+    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
+    /// Testing all 6 valid addressing modes for single-operand instructions (excluding Immediate for destination).
+    /// </summary>
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void Execute_AllAddressingModes_ExecutesSuccessfully(AddressingMode destMode)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.SetProgramCounter(0x8000);
+
+        // Set up memory for addressing modes that access memory
+        memory[0x1000] = 0x34; // For indirect modes
+        memory[0x1001] = 0x12;
+        memory[0x1010] = 0xBC; // For indexed modes
+        memory[0x1011] = 0x9A;
+        memory[0x3000] = 0xEF; // For absolute modes
+        memory[0x3001] = 0xCD;
+
+        var instruction = new IncInstruction(
+            0xA000,
+            RegisterName.R1,
+            destMode,
+            false);
+
+        // Set up extension words based on addressing mode
+        List<ushort> extensionWords = [];
+        if (destMode == AddressingMode.Indexed)
+        {
+            extensionWords.Add(0x0010);
+        }
+
+        if (destMode == AddressingMode.Absolute)
+        {
+            extensionWords.Add(0x3000);
+        }
+
+        if (destMode == AddressingMode.Symbolic)
+        {
+            extensionWords.Add(0x1000);
+        }
+
+        // Act - instruction should execute without throwing exceptions
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords.ToArray());
+
+        // Assert - verify instruction executed and returned valid cycle count
+        Assert.True(cycles > 0, $"Expected positive cycle count for {destMode}");
+        Assert.True(cycles <= 7, $"Cycle count {cycles} seems too high for {destMode}");
+    }
+
+    /// <summary>
+    /// Tests cycle counts for INC instruction addressing modes.
+    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.4: "Instruction Set"
+    /// Cycle counts per TI specification: base (1) + destination cycles.
+    /// Note: Immediate mode excluded as destination (cannot write to immediate values).
+    /// </summary>
+    [Theory]
+    [InlineData(AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Indirect, 3u)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, 3u)]
+    [InlineData(AddressingMode.Indexed, 4u)]
+    [InlineData(AddressingMode.Absolute, 4u)]
+    [InlineData(AddressingMode.Symbolic, 4u)]
+    public void Execute_CycleCounts_AreCorrect(AddressingMode destMode, uint expectedCycles)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.SetProgramCounter(0x8000);
+
+        // Set up memory for addressing modes that access memory
+        memory[0x1000] = 0x34; // For indirect modes
+        memory[0x1001] = 0x12;
+        memory[0x1010] = 0xBC; // For indexed modes
+        memory[0x1011] = 0x9A;
+        memory[0x3000] = 0xEF; // For absolute modes
+        memory[0x3001] = 0xCD;
+
+        var instruction = new IncInstruction(
+            0xA000,
+            RegisterName.R1,
+            destMode,
+            false);
+
+        // Set up extension words based on addressing mode
+        List<ushort> extensionWords = [];
+        if (destMode == AddressingMode.Indexed)
+        {
+            extensionWords.Add(0x0010);
+        }
+
+        if (destMode == AddressingMode.Absolute)
+        {
+            extensionWords.Add(0x3000);
+        }
+
+        if (destMode == AddressingMode.Symbolic)
+        {
+            extensionWords.Add(0x1000);
+        }
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords.ToArray());
+
+        // Assert
+        Assert.Equal(expectedCycles, cycles);
     }
 
     [Fact]

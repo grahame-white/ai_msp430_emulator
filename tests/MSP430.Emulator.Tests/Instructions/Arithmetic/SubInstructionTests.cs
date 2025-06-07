@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Arithmetic;
@@ -647,20 +648,71 @@ public class SubInstructionTests
         Assert.Equal(1u, cycles);
     }
 
-    // Cycle count tests
+    /// <summary>
+    /// Tests all valid source/destination addressing mode combinations for SUB instruction.
+    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3: "CPU"
+    /// Testing all 42 valid combinations (7 source × 6 destination modes).
+    /// </summary>
     [Theory]
-    [InlineData(AddressingMode.Register, AddressingMode.Register, 1u)]
-    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 1u)]
-    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 4u)]
-    [InlineData(AddressingMode.Register, AddressingMode.Indirect, 3u)]
-    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 7u)]
-    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 7u)]
-    public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
+    [InlineData(AddressingMode.Register, AddressingMode.Register)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Register, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Register, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Register, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Register)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Register)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Register)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Register)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic)]
+    public void Execute_AllAddressingModeCombinations_ExecutesSuccessfully(AddressingMode sourceMode, AddressingMode destMode)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
         registerFile.WriteRegister(RegisterName.R1, 0x1000);
         registerFile.WriteRegister(RegisterName.R4, 0x2000);
+        registerFile.SetProgramCounter(0x8000);
+
+        // Set up memory for addressing modes that access memory
+        memory[0x1000] = 0x34; // For indirect modes
+        memory[0x1001] = 0x12;
+        memory[0x2000] = 0x78;
+        memory[0x2001] = 0x56;
+        memory[0x1010] = 0xBC; // For indexed modes
+        memory[0x1011] = 0x9A;
+        memory[0x3000] = 0xEF; // For absolute modes
+        memory[0x3001] = 0xCD;
 
         var instruction = new SubInstruction(
             0x8000,
@@ -670,19 +722,139 @@ public class SubInstructionTests
             destMode,
             false);
 
-        // Set up extension words for modes that need them
-        ushort[] extensionWords = sourceMode switch
+        // Set up extension words based on addressing modes
+        List<ushort> extensionWords = [];
+        if (sourceMode == AddressingMode.Immediate)
         {
-            AddressingMode.Immediate when destMode == AddressingMode.Register => [0x0100],
-            AddressingMode.Absolute when destMode == AddressingMode.Absolute => [0x1000, 0x2000],
-            AddressingMode.Symbolic when destMode == AddressingMode.Symbolic => [0x1000, 0x2000],
-            AddressingMode.Register when destMode == AddressingMode.Indexed => [0x0010],
-            AddressingMode.Register when destMode == AddressingMode.Indirect => Array.Empty<ushort>(),
-            _ => Array.Empty<ushort>()
-        };
+            extensionWords.Add(0x0100);
+        }
+
+        if (sourceMode == AddressingMode.Indexed)
+        {
+            extensionWords.Add(0x0010);
+        }
+
+        if (sourceMode == AddressingMode.Absolute)
+        {
+            extensionWords.Add(0x3000);
+        }
+
+        if (sourceMode == AddressingMode.Symbolic)
+        {
+            extensionWords.Add(0x1000);
+        }
+
+        if (destMode == AddressingMode.Indexed)
+        {
+            extensionWords.Add(0x0010);
+        }
+
+        if (destMode == AddressingMode.Absolute)
+        {
+            extensionWords.Add(0x3000);
+        }
+
+        if (destMode == AddressingMode.Symbolic)
+        {
+            extensionWords.Add(0x1000);
+        }
+
+        // Act - instruction should execute without throwing exceptions
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords.ToArray());
+
+        // Assert - verify instruction executed and returned valid cycle count
+        Assert.True(cycles > 0, $"Expected positive cycle count for {sourceMode} to {destMode}");
+        Assert.True(cycles <= 10, $"Cycle count {cycles} seems too high for {sourceMode} to {destMode}");
+    }
+
+    /// <summary>
+    /// Tests cycle counts for SUB instruction addressing mode combinations.
+    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.4: "Instruction Set"
+    /// Cycle counts per TI specification: base (1) + source cycles + destination cycles.
+    /// </summary>
+    [Theory]
+    [InlineData(AddressingMode.Register, AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 1u)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Register, 3u)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Register, 3u)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Register, 4u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Register, 4u)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Register, 4u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indirect, 3u)]
+    [InlineData(AddressingMode.Register, AddressingMode.IndirectAutoIncrement, 3u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 4u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Absolute, 4u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Symbolic, 4u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Indexed, 4u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Absolute, 4u)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Indexed, 7u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 7u)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 7u)]
+    public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.WriteRegister(RegisterName.R4, 0x2000);
+        registerFile.SetProgramCounter(0x8000);
+
+        // Set up memory for addressing modes that access memory
+        memory[0x1000] = 0x34; // For indirect modes
+        memory[0x1001] = 0x12;
+        memory[0x2000] = 0x78;
+        memory[0x2001] = 0x56;
+        memory[0x1010] = 0xBC; // For indexed modes  
+        memory[0x1011] = 0x9A;
+        memory[0x3000] = 0xEF; // For absolute modes
+        memory[0x3001] = 0xCD;
+
+        var instruction = new SubInstruction(
+            0x8000,
+            RegisterName.R1,
+            RegisterName.R4,
+            sourceMode,
+            destMode,
+            false);
+
+        // Set up extension words based on addressing modes
+        List<ushort> extensionWords = [];
+        if (sourceMode == AddressingMode.Immediate)
+        {
+            extensionWords.Add(0x0100);
+        }
+
+        if (sourceMode == AddressingMode.Indexed)
+        {
+            extensionWords.Add(0x0010);
+        }
+
+        if (sourceMode == AddressingMode.Absolute)
+        {
+            extensionWords.Add(0x3000);
+        }
+
+        if (sourceMode == AddressingMode.Symbolic)
+        {
+            extensionWords.Add(0x1000);
+        }
+
+        if (destMode == AddressingMode.Indexed)
+        {
+            extensionWords.Add(0x0010);
+        }
+
+        if (destMode == AddressingMode.Absolute)
+        {
+            extensionWords.Add(0x3000);
+        }
+
+        if (destMode == AddressingMode.Symbolic)
+        {
+            extensionWords.Add(0x1000);
+        }
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords.ToArray());
 
         // Assert
         Assert.Equal(expectedCycles, cycles);

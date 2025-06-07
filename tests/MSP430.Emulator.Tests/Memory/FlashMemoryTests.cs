@@ -301,14 +301,28 @@ public class FlashMemoryTests
 
         // Program some data first
         flash.ProgramByte(0x8000, 0xAB);
-        flash.ProgramByte(0x8500, 0xCD); // Different sector
 
         bool result = flash.MassErase();
 
         Assert.True(result);
-        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8000));
-        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8500));
-        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8FFF)); // End of flash
+    }
+
+    [Theory]
+    [InlineData(0x8000)] // Start of flash
+    [InlineData(0x8500)] // Different sector
+    [InlineData(0x8FFF)] // End of flash
+    public void MassErase_WhenUnlocked_ErasesAllMemory(ushort address)
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+        flash.Unlock(0xA555);
+
+        // Program some data first
+        flash.ProgramByte(0x8000, 0xAB);
+        flash.ProgramByte(0x8500, 0xCD);
+
+        flash.MassErase();
+
+        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(address));
     }
 
     [Fact]
@@ -319,6 +333,15 @@ public class FlashMemoryTests
         bool result = flash.Unlock(0xA555);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void Unlock_ValidKey_SetsControllerState()
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+
+        flash.Unlock(0xA555);
+
         Assert.Equal(FlashControllerState.Unlocked, flash.ControllerState);
     }
 
@@ -348,80 +371,105 @@ public class FlashMemoryTests
     }
 
     [Fact]
-    public void SetProtectionLevel_WriteProtected_BlocksOperations()
+    public void SetProtectionLevel_WriteProtected_ReturnsTrue()
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
         bool protectionResult = flash.SetProtectionLevel(FlashProtectionLevel.WriteProtected);
+
         Assert.True(protectionResult);
+    }
+
+    [Fact]
+    public void SetProtectionLevel_WriteProtected_BlocksProgramming()
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+        flash.SetProtectionLevel(FlashProtectionLevel.WriteProtected);
 
         flash.Unlock(0xA555);
         bool programResult = flash.ProgramByte(0x8000, 0xAB);
 
         Assert.False(programResult);
+    }
+
+    [Fact]
+    public void SetProtectionLevel_WriteProtected_DoesNotChangeMemory()
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+        flash.SetProtectionLevel(FlashProtectionLevel.WriteProtected);
+
+        flash.Unlock(0xA555);
+        flash.ProgramByte(0x8000, 0xAB);
+
         Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8000));
     }
 
-    [Fact]
-    public void GetSectorNumber_ValidAddress_ReturnsCorrectSector()
+    [Theory]
+    [InlineData(0x8000, 0)] // First sector
+    [InlineData(0x81FF, 0)] // Still first sector
+    [InlineData(0x8200, 1)] // Second sector
+    [InlineData(0x8FFF, 7)] // Last sector
+    public void GetSectorNumber_ValidAddress_ReturnsCorrectSector(ushort address, int expectedSector)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.Equal(0, flash.GetSectorNumber(0x8000)); // First sector
-        Assert.Equal(0, flash.GetSectorNumber(0x81FF)); // Still first sector
-        Assert.Equal(1, flash.GetSectorNumber(0x8200)); // Second sector
-        Assert.Equal(7, flash.GetSectorNumber(0x8FFF)); // Last sector
+        Assert.Equal(expectedSector, flash.GetSectorNumber(address));
     }
 
-    [Fact]
-    public void GetSectorBaseAddress_ValidAddress_ReturnsCorrectBase()
+    [Theory]
+    [InlineData(0x8000, 0x8000)]
+    [InlineData(0x81FF, 0x8000)]
+    [InlineData(0x8200, 0x8200)]
+    [InlineData(0x8FFF, 0x8E00)]
+    public void GetSectorBaseAddress_ValidAddress_ReturnsCorrectBase(ushort address, ushort expectedBase)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.Equal((ushort)0x8000, flash.GetSectorBaseAddress(0x8000));
-        Assert.Equal((ushort)0x8000, flash.GetSectorBaseAddress(0x81FF));
-        Assert.Equal((ushort)0x8200, flash.GetSectorBaseAddress(0x8200));
-        Assert.Equal((ushort)0x8E00, flash.GetSectorBaseAddress(0x8FFF));
+        Assert.Equal(expectedBase, flash.GetSectorBaseAddress(address));
     }
 
-    [Fact]
-    public void IsAddressInBounds_ValidAddresses_ReturnsTrue()
+    [Theory]
+    [InlineData(0x8000)]
+    [InlineData(0x8FFF)]
+    [InlineData(0x8500)]
+    public void IsAddressInBounds_ValidAddresses_ReturnsTrue(ushort address)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.True(flash.IsAddressInBounds(0x8000));
-        Assert.True(flash.IsAddressInBounds(0x8FFF));
-        Assert.True(flash.IsAddressInBounds(0x8500));
+        Assert.True(flash.IsAddressInBounds(address));
     }
 
-    [Fact]
-    public void IsAddressInBounds_InvalidAddresses_ReturnsFalse()
+    [Theory]
+    [InlineData(0x7FFF)]
+    [InlineData(0x9000)]
+    public void IsAddressInBounds_InvalidAddresses_ReturnsFalse(ushort address)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.False(flash.IsAddressInBounds(0x7FFF));
-        Assert.False(flash.IsAddressInBounds(0x9000));
+        Assert.False(flash.IsAddressInBounds(address));
     }
 
-    [Fact]
-    public void IsRangeInBounds_ValidRanges_ReturnsTrue()
+    [Theory]
+    [InlineData(0x8000, 100)]
+    [InlineData(0x8000, 4096)]
+    [InlineData(0x8FFF, 1)]
+    public void IsRangeInBounds_ValidRanges_ReturnsTrue(ushort address, int length)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.True(flash.IsRangeInBounds(0x8000, 100));
-        Assert.True(flash.IsRangeInBounds(0x8000, 4096));
-        Assert.True(flash.IsRangeInBounds(0x8FFF, 1));
+        Assert.True(flash.IsRangeInBounds(address, length));
     }
 
-    [Fact]
-    public void IsRangeInBounds_InvalidRanges_ReturnsFalse()
+    [Theory]
+    [InlineData(0x7FFF, 100)]  // Starts outside
+    [InlineData(0x8000, 4097)] // Extends beyond
+    [InlineData(0x8000, 0)]    // Zero length
+    [InlineData(0x8000, -1)]   // Negative length
+    public void IsRangeInBounds_InvalidRanges_ReturnsFalse(ushort address, int length)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.False(flash.IsRangeInBounds(0x7FFF, 100)); // Starts outside
-        Assert.False(flash.IsRangeInBounds(0x8000, 4097)); // Extends beyond
-        Assert.False(flash.IsRangeInBounds(0x8000, 0)); // Zero length
-        Assert.False(flash.IsRangeInBounds(0x8000, -1)); // Negative length
+        Assert.False(flash.IsRangeInBounds(address, length));
     }
 
     [Fact]
@@ -434,54 +482,61 @@ public class FlashMemoryTests
         Assert.Equal(FlashMemory.DefaultReadCycles, cycles);
     }
 
-    [Fact]
-    public void GetProgramCycles_ReturnsCorrectCycles()
+    [Theory]
+    [InlineData(false, FlashController.ByteProgramCycles)]
+    [InlineData(true, FlashController.WordProgramCycles)]
+    public void GetProgramCycles_ReturnsCorrectCycles(bool isWord, uint expectedCycles)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        uint byteCycles = flash.GetProgramCycles(0x8000, false);
-        uint wordCycles = flash.GetProgramCycles(0x8000, true);
+        uint cycles = flash.GetProgramCycles(0x8000, isWord);
 
-        Assert.Equal(FlashController.ByteProgramCycles, byteCycles);
-        Assert.Equal(FlashController.WordProgramCycles, wordCycles);
+        Assert.Equal(expectedCycles, cycles);
     }
 
-    [Fact]
-    public void GetEraseCycles_ReturnsCorrectCycles()
+    [Theory]
+    [InlineData(FlashOperation.SectorErase, FlashController.SectorEraseCycles)]
+    [InlineData(FlashOperation.MassErase, FlashController.MassEraseCycles)]
+    public void GetEraseCycles_ReturnsCorrectCycles(FlashOperation operation, uint expectedCycles)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        uint sectorCycles = flash.GetEraseCycles(FlashOperation.SectorErase);
-        uint massCycles = flash.GetEraseCycles(FlashOperation.MassErase);
+        uint cycles = flash.GetEraseCycles(operation);
 
-        Assert.Equal(FlashController.SectorEraseCycles, sectorCycles);
-        Assert.Equal(FlashController.MassEraseCycles, massCycles);
+        Assert.Equal(expectedCycles, cycles);
     }
 
-    [Fact]
-    public void Clear_SetsAllBytesToErasedPattern()
+    [Theory]
+    [InlineData(0x8000)]
+    [InlineData(0x8FFF)]
+    public void Clear_SetsAllBytesToErasedPattern(ushort address)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
         flash.Clear();
 
-        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8000));
-        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8FFF));
+        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(address));
     }
 
-    [Fact]
-    public void Initialize_SetsAllBytesToPattern()
+    [Theory]
+    [InlineData(0x8000)]
+    [InlineData(0x8FFF)]
+    public void Initialize_SetsAllBytesToPattern(ushort address)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
         flash.Initialize(0xAA);
 
-        Assert.Equal(0xAA, flash.ReadByte(0x8000));
-        Assert.Equal(0xAA, flash.ReadByte(0x8FFF));
+        Assert.Equal(0xAA, flash.ReadByte(address));
     }
 
-    [Fact]
-    public void Operations_LogCorrectMessages()
+    [Theory]
+    [InlineData("FlashMemory initialized")]
+    [InlineData("Flash ReadByte")]
+    [InlineData("Flash controller unlocked")]
+    [InlineData("Flash ProgramByte")]
+    [InlineData("Flash EraseSector")]
+    public void Operations_LogCorrectMessages(string expectedMessage)
     {
         _logger.MinimumLevel = LogLevel.Debug;
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
@@ -491,17 +546,9 @@ public class FlashMemoryTests
         flash.ProgramByte(0x8000, 0xAB);
         flash.EraseSector(0x8000);
 
-        // Check that debug messages were logged
+        // Check that debug message was logged
         Assert.Contains(_logger.LogEntries, entry =>
-            entry.Level == LogLevel.Debug && entry.Message.Contains("FlashMemory initialized"));
-        Assert.Contains(_logger.LogEntries, entry =>
-            entry.Level == LogLevel.Debug && entry.Message.Contains("Flash ReadByte"));
-        Assert.Contains(_logger.LogEntries, entry =>
-            entry.Level == LogLevel.Debug && entry.Message.Contains("Flash controller unlocked"));
-        Assert.Contains(_logger.LogEntries, entry =>
-            entry.Level == LogLevel.Debug && entry.Message.Contains("Flash ProgramByte"));
-        Assert.Contains(_logger.LogEntries, entry =>
-            entry.Level == LogLevel.Debug && entry.Message.Contains("Flash EraseSector"));
+            entry.Level == LogLevel.Debug && entry.Message.Contains(expectedMessage));
     }
 
     private class TestLogger : ILogger

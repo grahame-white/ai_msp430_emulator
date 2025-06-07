@@ -15,8 +15,7 @@ namespace MSP430.Emulator.Instructions.DataMovement;
 /// Flags: Not affected
 /// 
 /// References:
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131), Section 5.3: "PUSH - Push onto stack" - Instruction format and operation
-/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 3: "CPU" - Instruction execution behavior  
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131), Section 5.3: "PUSH" - Instruction format and operation
 /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.3.2: "Format II Instructions" - Instruction encoding
 /// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and stack behavior
 /// </summary>

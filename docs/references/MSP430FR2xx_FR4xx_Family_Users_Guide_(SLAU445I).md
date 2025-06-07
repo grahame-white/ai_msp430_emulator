@@ -297,17 +297,17 @@
       - 4.6.3.36 TSTX
       - 4.6.3.37 XORX
     - 4.6.4 Address Instructions
-       - 4.6.4.1 ADDA
-       - 4.6.4.2 BRA
-       - 4.6.4.3 CALLA
-       - 4.6.4.4 CLRA
-       - 4.6.4.5 CMPA
-       - 4.6.4.6 DECDA
-       - 4.6.4.7 INCDA
-       - 4.6.4.8 MOVA
-       - 4.6.4.9 RETA
-       - 4.6.4.10 SUBA
-       - 4.6.4.11 TSTA
+      - 4.6.4.1 ADDA
+      - 4.6.4.2 BRA
+      - 4.6.4.3 CALLA
+      - 4.6.4.4 CLRA
+      - 4.6.4.5 CMPA
+      - 4.6.4.6 DECDA
+      - 4.6.4.7 INCDA
+      - 4.6.4.8 MOVA
+      - 4.6.4.9 RETA
+      - 4.6.4.10 SUBA
+      - 4.6.4.11 TSTA
 - 5 Interrupt Compare Controller (ICC)
   - 5.1 Interrupt Compare Controller (ICC) Introduction
   - 5.2 ICC Operation

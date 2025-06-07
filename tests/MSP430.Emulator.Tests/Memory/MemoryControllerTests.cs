@@ -288,11 +288,23 @@ public class MemoryControllerTests
 
         // Assert
         Assert.IsType<byte>(result);
+    }
+
+    [Fact]
+    public void ReadByte_WithContext_ValidContext_IncrementsStatistics()
+    {
+        // Arrange
+        var context = MemoryAccessContext.CreateReadByte(0x2000);
+
+        // Act
+        _controller.ReadByte(context);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalReads);
     }
 
     [Fact]
-    public void WriteWord_WithContext_ValidContext_WritesValue()
+    public void WriteWord_WithContext_ValidContext_ReturnsTrue()
     {
         // Arrange
         var context = MemoryAccessContext.CreateWriteWord(0x2000);
@@ -303,9 +315,33 @@ public class MemoryControllerTests
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
 
-        // Verify the value was written
+    [Fact]
+    public void WriteWord_WithContext_ValidContext_IncrementsStatistics()
+    {
+        // Arrange
+        var context = MemoryAccessContext.CreateWriteWord(0x2000);
+        const ushort testValue = 0x1234;
+
+        // Act
+        _controller.WriteWord(context, testValue);
+
+        // Assert
+        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Fact]
+    public void WriteWord_WithContext_ValidContext_WritesValue()
+    {
+        // Arrange
+        var context = MemoryAccessContext.CreateWriteWord(0x2000);
+        const ushort testValue = 0x1234;
+
+        // Act
+        _controller.WriteWord(context, testValue);
+
+        // Assert
         ushort readValue = _controller.ReadWord(0x2000);
         Assert.Equal(testValue, readValue);
     }
@@ -352,11 +388,23 @@ public class MemoryControllerTests
 
         // Assert
         Assert.Equal(MemoryRegion.Ram, region.Region);
+    }
+
+    [Fact]
+    public void GetRegion_ValidAddress_RegionContainsAddress()
+    {
+        // Arrange
+        const ushort ramAddress = 0x2000;
+
+        // Act
+        MemoryRegionInfo region = _controller.GetRegion(ramAddress);
+
+        // Assert
         Assert.True(region.Contains(ramAddress));
     }
 
     [Fact]
-    public void GetPermissions_ValidAddress_ReturnsCorrectPermissions()
+    public void GetPermissions_ValidAddress_AllowsRead()
     {
         // Arrange
         const ushort ramAddress = 0x2000;
@@ -366,12 +414,36 @@ public class MemoryControllerTests
 
         // Assert
         Assert.True((permissions & MemoryAccessPermissions.Read) != 0);
+    }
+
+    [Fact]
+    public void GetPermissions_ValidAddress_AllowsWrite()
+    {
+        // Arrange
+        const ushort ramAddress = 0x2000;
+
+        // Act
+        MemoryAccessPermissions permissions = _controller.GetPermissions(ramAddress);
+
+        // Assert
         Assert.True((permissions & MemoryAccessPermissions.Write) != 0);
+    }
+
+    [Fact]
+    public void GetPermissions_ValidAddress_AllowsExecute()
+    {
+        // Arrange
+        const ushort ramAddress = 0x2000;
+
+        // Act
+        MemoryAccessPermissions permissions = _controller.GetPermissions(ramAddress);
+
+        // Assert
         Assert.True((permissions & MemoryAccessPermissions.Execute) != 0);
     }
 
     [Fact]
-    public void GetAccessCycles_RamAccess_ReturnsExpectedCycles()
+    public void GetAccessCycles_RamAccess_ReturnsPositiveCycles()
     {
         // Arrange
         var context = MemoryAccessContext.CreateReadByte(0x2000);
@@ -381,6 +453,18 @@ public class MemoryControllerTests
 
         // Assert
         Assert.True(cycles > 0);
+    }
+
+    [Fact]
+    public void GetAccessCycles_RamAccess_ReturnsReasonableCycles()
+    {
+        // Arrange
+        var context = MemoryAccessContext.CreateReadByte(0x2000);
+
+        // Act
+        uint cycles = _controller.GetAccessCycles(context);
+
+        // Assert
         Assert.True(cycles <= 10); // RAM should be fast
     }
 
@@ -398,7 +482,7 @@ public class MemoryControllerTests
     }
 
     [Fact]
-    public void Reset_ClearsAllMemoryAndStatistics()
+    public void Reset_ClearsStatistics()
     {
         // Arrange
         _controller.WriteByte(0x2000, 0x42); // Write to RAM
@@ -409,8 +493,18 @@ public class MemoryControllerTests
 
         // Assert
         Assert.Equal(0ul, _controller.Statistics.TotalOperations);
+    }
 
-        // Verify RAM was cleared
+    [Fact]
+    public void Reset_ClearsMemory()
+    {
+        // Arrange
+        _controller.WriteByte(0x2000, 0x42); // Write to RAM
+
+        // Act
+        _controller.Reset();
+
+        // Assert
         byte ramValue = _controller.ReadByte(0x2000);
         Assert.Equal(0x00, ramValue);
     }
@@ -427,50 +521,142 @@ public class MemoryControllerTests
     {
         // Arrange
         bool eventRaised = false;
-        MemoryAccessEventArgs? eventArgs = null;
-
-        _controller.MemoryAccessed += (sender, args) =>
-        {
-            eventRaised = true;
-            eventArgs = args;
-        };
+        _controller.MemoryAccessed += (sender, args) => eventRaised = true;
 
         // Act
         _controller.ReadByte(0x2000);
 
         // Assert
         Assert.True(eventRaised);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_ContainsEventArgs()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
         Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAddress()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
         Assert.Equal(0x2000, eventArgs.Context.Address);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectAccessType()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
         Assert.Equal(MemoryAccessPermissions.Read, eventArgs.Context.AccessType);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsCorrectRegion()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
         Assert.Equal(MemoryRegion.Ram, eventArgs.Region.Region);
+    }
+
+    [Fact]
+    public void MemoryAccessed_Event_EventArgsContainsPositiveCycles()
+    {
+        // Arrange
+        MemoryAccessEventArgs? eventArgs = null;
+        _controller.MemoryAccessed += (sender, args) => eventArgs = args;
+
+        // Act
+        _controller.ReadByte(0x2000);
+
+        // Assert
         Assert.True(eventArgs.Cycles > 0);
     }
 
     [Fact]
-    public void AccessViolation_Event_RaisedOnInvalidAccess()
+    public void AccessViolation_Event_ThrowsMemoryAccessException()
+    {
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
+    }
+
+    [Fact]
+    public void AccessViolation_Event_RaisesEvent()
     {
         // Arrange
         bool eventRaised = false;
-        MemoryAccessViolationEventArgs? eventArgs = null;
-
-        _controller.AccessViolation += (sender, args) =>
-        {
-            eventRaised = true;
-            eventArgs = args;
-        };
+        _controller.AccessViolation += (sender, args) => eventRaised = true;
 
         // Act & Assert
         Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
-
         Assert.True(eventRaised);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_ContainsEventArgs()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
         Assert.NotNull(eventArgs);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsCorrectAddress()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
         Assert.Equal(0x0300, eventArgs.Context.Address);
+    }
+
+    [Fact]
+    public void AccessViolation_Event_EventArgsContainsException()
+    {
+        // Arrange
+        MemoryAccessViolationEventArgs? eventArgs = null;
+        _controller.AccessViolation += (sender, args) => eventArgs = args;
+
+        // Act & Assert
+        Assert.Throws<MemoryAccessException>(() => _controller.ReadByte(0x0300));
         Assert.NotNull(eventArgs.Exception);
     }
 
     [Fact]
-    public void Statistics_TrackMultipleOperations()
+    public void Statistics_TrackMultipleOperations_TracksTotalReads()
     {
         // Arrange & Act
         _controller.ReadByte(0x2000);
@@ -479,9 +665,53 @@ public class MemoryControllerTests
 
         // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalReads);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalWrites()
+    {
+        // Arrange & Act
+        _controller.ReadByte(0x2000);
+        _controller.WriteByte(0x2001, 0x42);
+        _controller.FetchInstruction(0x4000);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalInstructionFetches()
+    {
+        // Arrange & Act
+        _controller.ReadByte(0x2000);
+        _controller.WriteByte(0x2001, 0x42);
+        _controller.FetchInstruction(0x4000);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalInstructionFetches);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalOperations()
+    {
+        // Arrange & Act
+        _controller.ReadByte(0x2000);
+        _controller.WriteByte(0x2001, 0x42);
+        _controller.FetchInstruction(0x4000);
+
+        // Assert
         Assert.Equal(3ul, _controller.Statistics.TotalOperations);
+    }
+
+    [Fact]
+    public void Statistics_TrackMultipleOperations_TracksTotalCycles()
+    {
+        // Arrange & Act
+        _controller.ReadByte(0x2000);
+        _controller.WriteByte(0x2001, 0x42);
+        _controller.FetchInstruction(0x4000);
+
+        // Assert
         Assert.True(_controller.Statistics.TotalCycles > 0);
     }
 

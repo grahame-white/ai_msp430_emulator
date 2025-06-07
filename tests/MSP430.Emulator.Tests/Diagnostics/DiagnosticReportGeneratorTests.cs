@@ -107,8 +107,12 @@ public class DiagnosticReportGeneratorTests
         Assert.Contains("**Instructions for GitHub Issue:**", report);
     }
 
-    [Fact]
-    public void GenerateReport_ShouldIncludeSystemInfo()
+    [Theory]
+    [InlineData("**Operating System:**")]
+    [InlineData("**Architecture:**")]
+    [InlineData("**Machine Name:**")]
+    [InlineData("**Processor Count:**")]
+    public void GenerateReport_ShouldIncludeSystemInfo_ContainsSystemProperty(string expectedProperty)
     {
         // Arrange
         var logger = new ConsoleLogger { IsOutputSuppressed = true };
@@ -118,14 +122,14 @@ public class DiagnosticReportGeneratorTests
         string report = generator.GenerateReport();
 
         // Assert
-        Assert.Contains("**Operating System:**", report);
-        Assert.Contains("**Architecture:**", report);
-        Assert.Contains("**Machine Name:**", report);
-        Assert.Contains("**Processor Count:**", report);
+        Assert.Contains(expectedProperty, report);
     }
 
-    [Fact]
-    public void GenerateReport_ShouldIncludeApplicationInfo()
+    [Theory]
+    [InlineData("**Assembly:**")]
+    [InlineData("**Version:**")]
+    [InlineData("**Framework:**")]
+    public void GenerateReport_ShouldIncludeApplicationInfo_ContainsApplicationProperty(string expectedProperty)
     {
         // Arrange
         var logger = new ConsoleLogger { IsOutputSuppressed = true };
@@ -135,13 +139,15 @@ public class DiagnosticReportGeneratorTests
         string report = generator.GenerateReport();
 
         // Assert
-        Assert.Contains("**Assembly:**", report);
-        Assert.Contains("**Version:**", report);
-        Assert.Contains("**Framework:**", report);
+        Assert.Contains(expectedProperty, report);
     }
 
-    [Fact]
-    public void GenerateReport_ShouldIncludeRuntimeInfo()
+    [Theory]
+    [InlineData("**.NET Version:**")]
+    [InlineData("**Runtime Identifier:**")]
+    [InlineData("**GC Memory (bytes):**")]
+    [InlineData("**Working Set (bytes):**")]
+    public void GenerateReport_ShouldIncludeRuntimeInfo_ContainsRuntimeProperty(string expectedProperty)
     {
         // Arrange
         var logger = new ConsoleLogger { IsOutputSuppressed = true };
@@ -151,10 +157,7 @@ public class DiagnosticReportGeneratorTests
         string report = generator.GenerateReport();
 
         // Assert
-        Assert.Contains("**.NET Version:**", report);
-        Assert.Contains("**Runtime Identifier:**", report);
-        Assert.Contains("**GC Memory (bytes):**", report);
-        Assert.Contains("**Working Set (bytes):**", report);
+        Assert.Contains(expectedProperty, report);
     }
 
     [Fact]
@@ -198,7 +201,7 @@ public class DiagnosticReportGeneratorTests
     }
 
     [Fact]
-    public void GenerateReport_WithStandardLogger_ShouldIndicateNoRecentEntries()
+    public void GenerateReport_WithStandardLogger_ShouldIndicateNoRecentEntries_ContainsSection()
     {
         // Arrange
         var logger = new ConsoleLogger { IsOutputSuppressed = true };
@@ -209,6 +212,19 @@ public class DiagnosticReportGeneratorTests
 
         // Assert
         Assert.Contains("## Recent Log Entries", report);
+    }
+
+    [Fact]
+    public void GenerateReport_WithStandardLogger_ShouldIndicateNoRecentEntries_ContainsMessage()
+    {
+        // Arrange
+        var logger = new ConsoleLogger { IsOutputSuppressed = true };
+        var generator = new DiagnosticReportGenerator(logger);
+
+        // Act
+        string report = generator.GenerateReport();
+
+        // Assert
         Assert.Contains("Recent log entries not available", report);
     }
 

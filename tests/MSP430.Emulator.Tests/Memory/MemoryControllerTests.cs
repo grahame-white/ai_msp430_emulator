@@ -116,7 +116,37 @@ public class MemoryControllerTests
 
         // Assert
         Assert.IsType<byte>(result);
+    }
+
+    [Theory]
+    [InlineData(0x2000)] // RAM start
+    [InlineData(0x2FFF)] // RAM end
+    [InlineData(0x4000)] // Flash start
+    [InlineData(0xBFFF)] // Flash end
+    [InlineData(0x1800)] // Information memory start
+    [InlineData(0x19FF)] // Information memory end
+    public void ReadByte_ValidAddress_IncrementsReadCount(ushort address)
+    {
+        // Act
+        _controller.ReadByte(address);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalReads);
+    }
+
+    [Theory]
+    [InlineData(0x2000)] // RAM start
+    [InlineData(0x2FFF)] // RAM end
+    [InlineData(0x4000)] // Flash start
+    [InlineData(0xBFFF)] // Flash end
+    [InlineData(0x1800)] // Information memory start
+    [InlineData(0x19FF)] // Information memory end
+    public void ReadByte_ValidAddress_IncrementsCycles(ushort address)
+    {
+        // Act
+        _controller.ReadByte(address);
+
+        // Assert
         Assert.True(_controller.Statistics.TotalCycles > 0);
     }
 
@@ -134,7 +164,37 @@ public class MemoryControllerTests
 
         // Assert
         Assert.IsType<ushort>(result);
+    }
+
+    [Theory]
+    [InlineData(0x2000)] // RAM start (word-aligned)
+    [InlineData(0x2FFE)] // RAM end (word-aligned)
+    [InlineData(0x4000)] // Flash start (word-aligned)
+    [InlineData(0xBFFE)] // Flash end (word-aligned)
+    [InlineData(0x1800)] // Information memory start (word-aligned)
+    [InlineData(0x19FE)] // Information memory end (word-aligned)
+    public void ReadWord_ValidAddress_IncrementsReadCount(ushort address)
+    {
+        // Act
+        _controller.ReadWord(address);
+
+        // Assert
         Assert.Equal(1ul, _controller.Statistics.TotalReads);
+    }
+
+    [Theory]
+    [InlineData(0x2000)] // RAM start (word-aligned)
+    [InlineData(0x2FFE)] // RAM end (word-aligned)
+    [InlineData(0x4000)] // Flash start (word-aligned)
+    [InlineData(0xBFFE)] // Flash end (word-aligned)
+    [InlineData(0x1800)] // Information memory start (word-aligned)
+    [InlineData(0x19FE)] // Information memory end (word-aligned)
+    public void ReadWord_ValidAddress_IncrementsCycles(ushort address)
+    {
+        // Act
+        _controller.ReadWord(address);
+
+        // Assert
         Assert.True(_controller.Statistics.TotalCycles > 0);
     }
 
@@ -151,17 +211,48 @@ public class MemoryControllerTests
     [Theory]
     [InlineData(0x2000, 0x42)] // RAM
     [InlineData(0x1800, 0x55)] // Information memory
-    public void WriteByte_ValidAddress_WritesSuccessfully(ushort address, byte value)
+    public void WriteByte_ValidAddress_ReturnsTrue(ushort address, byte value)
     {
         // Act
         bool result = _controller.WriteByte(address, value);
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
-        Assert.True(_controller.Statistics.TotalCycles > 0);
+    }
 
-        // Verify the value was written
+    [Theory]
+    [InlineData(0x2000, 0x42)] // RAM
+    [InlineData(0x1800, 0x84)] // Information memory
+    public void WriteByte_ValidAddress_IncrementsWriteCount(ushort address, byte value)
+    {
+        // Act
+        _controller.WriteByte(address, value);
+
+        // Assert
+        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Theory]
+    [InlineData(0x2000, 0x42)] // RAM
+    [InlineData(0x1800, 0x84)] // Information memory
+    public void WriteByte_ValidAddress_IncrementsCycles(ushort address, byte value)
+    {
+        // Act
+        _controller.WriteByte(address, value);
+
+        // Assert
+        Assert.True(_controller.Statistics.TotalCycles > 0);
+    }
+
+    [Theory]
+    [InlineData(0x2000, 0x42)] // RAM
+    [InlineData(0x1800, 0x84)] // Information memory
+    public void WriteByte_ValidAddress_PersistsValue(ushort address, byte value)
+    {
+        // Act
+        _controller.WriteByte(address, value);
+
+        // Assert
         byte readValue = _controller.ReadByte(address);
         Assert.Equal(value, readValue);
     }
@@ -169,17 +260,48 @@ public class MemoryControllerTests
     [Theory]
     [InlineData(0x2000, 0x1234)] // RAM (word-aligned)
     [InlineData(0x1800, 0x5678)] // Information memory (word-aligned)
-    public void WriteWord_ValidAddress_WritesSuccessfully(ushort address, ushort value)
+    public void WriteWord_ValidAddress_ReturnsTrue(ushort address, ushort value)
     {
         // Act
         bool result = _controller.WriteWord(address, value);
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
-        Assert.True(_controller.Statistics.TotalCycles > 0);
+    }
 
-        // Verify the value was written
+    [Theory]
+    [InlineData(0x2000, 0x1234)] // RAM (word-aligned)
+    [InlineData(0x1800, 0x5678)] // Information memory (word-aligned)
+    public void WriteWord_ValidAddress_IncrementsWriteCount(ushort address, ushort value)
+    {
+        // Act
+        _controller.WriteWord(address, value);
+
+        // Assert
+        Assert.Equal(1ul, _controller.Statistics.TotalWrites);
+    }
+
+    [Theory]
+    [InlineData(0x2000, 0x1234)] // RAM (word-aligned)
+    [InlineData(0x1800, 0x5678)] // Information memory (word-aligned)
+    public void WriteWord_ValidAddress_IncrementsCycles(ushort address, ushort value)
+    {
+        // Act
+        _controller.WriteWord(address, value);
+
+        // Assert
+        Assert.True(_controller.Statistics.TotalCycles > 0);
+    }
+
+    [Theory]
+    [InlineData(0x2000, 0x1234)] // RAM (word-aligned)
+    [InlineData(0x1800, 0x5678)] // Information memory (word-aligned)
+    public void WriteWord_ValidAddress_PersistsValue(ushort address, ushort value)
+    {
+        // Act
+        _controller.WriteWord(address, value);
+
+        // Assert
         ushort readValue = _controller.ReadWord(address);
         Assert.Equal(value, readValue);
     }

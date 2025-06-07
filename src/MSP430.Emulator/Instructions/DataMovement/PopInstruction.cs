@@ -86,7 +86,9 @@ public class PopInstruction : Instruction, IExecutableInstruction
         ushort currentSP = registerFile.GetStackPointer();
 
         // Check for stack underflow - ensure SP is within valid memory range
-        if (currentSP + 1 >= memory.Length)
+        // For byte operations, only need to check one byte; for word operations, check two bytes
+        int bytesToCheck = _isByteOperation ? 1 : 2;
+        if (currentSP + bytesToCheck - 1 >= memory.Length)
         {
             throw new InvalidOperationException($"Stack underflow detected: Stack pointer 0x{currentSP:X4} accesses memory beyond bounds");
         }
@@ -109,7 +111,7 @@ public class PopInstruction : Instruction, IExecutableInstruction
 
         // Prepare value for destination based on operation type
         // For byte operations, apply sign extension for consistency with PUSH.B
-        ushort destinationValue = _isByteOperation ? SignExtendByte(stackValue) : stackValue;
+        ushort destinationValue = _isByteOperation ? InstructionHelpers.SignExtendByte(stackValue) : stackValue;
 
         // Write value to destination operand
         InstructionHelpers.WriteOperand(
@@ -164,16 +166,5 @@ public class PopInstruction : Instruction, IExecutableInstruction
             // MSP430 is little-endian
             return (ushort)(memory[address] | (memory[address + 1] << 8));
         }
-    }
-
-    /// <summary>
-    /// Sign-extends an 8-bit value to 16 bits for byte POP operations.
-    /// This ensures consistency with PUSH.B behavior.
-    /// </summary>
-    /// <param name="byteValue">The 8-bit value to sign-extend.</param>
-    /// <returns>The sign-extended 16-bit value.</returns>
-    private static ushort SignExtendByte(ushort byteValue)
-    {
-        return (ushort)((sbyte)(byte)(byteValue & 0xFF));
     }
 }

@@ -115,7 +115,7 @@ public class PushInstruction : Instruction, IExecutableInstruction
         // Store the value at the new stack location
         // Note: PUSH always stores a full word (16-bit), even for byte operations
         // For byte operations, the byte value is sign-extended to 16 bits
-        ushort valueToStore = _isByteOperation ? SignExtendByte(sourceValue) : sourceValue;
+        ushort valueToStore = _isByteOperation ? InstructionHelpers.SignExtendByte(sourceValue) : sourceValue;
 
         // Write to stack (always as word) - direct memory access for stack operations
         // MSP430 is little-endian
@@ -134,15 +134,5 @@ public class PushInstruction : Instruction, IExecutableInstruction
     {
         string suffix = IsByteOperation ? ".B" : "";
         return $"{Mnemonic.Split('.')[0]}{suffix} {InstructionHelpers.FormatOperand(_sourceRegister, _sourceAddressingMode)}";
-    }
-
-    /// <summary>
-    /// Sign-extends an 8-bit value to 16 bits for byte PUSH operations.
-    /// </summary>
-    /// <param name="byteValue">The 8-bit value to sign-extend.</param>
-    /// <returns>The sign-extended 16-bit value.</returns>
-    private static ushort SignExtendByte(ushort byteValue)
-    {
-        return (ushort)((sbyte)(byte)(byteValue & 0xFF));
     }
 }

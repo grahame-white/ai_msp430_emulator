@@ -28,12 +28,32 @@ public class EmulatorCoreTests
     }
 
     [Fact]
-    public void Constructor_WithValidParameters_InitializesSuccessfully()
+    public void Constructor_WithValidParameters_CreatesValidInstance()
     {
         Assert.NotNull(_emulatorCore);
+    }
+
+    [Fact]
+    public void Constructor_WithValidParameters_InitializesToResetState()
+    {
         Assert.Equal(ExecutionState.Reset, _emulatorCore.State);
+    }
+
+    [Fact]
+    public void Constructor_WithValidParameters_IsNotRunning()
+    {
         Assert.False(_emulatorCore.IsRunning);
+    }
+
+    [Fact]
+    public void Constructor_WithValidParameters_IsNotHalted()
+    {
         Assert.False(_emulatorCore.IsHalted);
+    }
+
+    [Fact]
+    public void Constructor_WithValidParameters_HasEmptyBreakpoints()
+    {
         Assert.Empty(_emulatorCore.Breakpoints);
     }
 
@@ -59,12 +79,26 @@ public class EmulatorCoreTests
     }
 
     [Fact]
-    public void Reset_ResetsRegisterFileAndState()
+    public void Reset_SetsStateToReset()
     {
         _emulatorCore.Reset();
 
         Assert.Equal(ExecutionState.Reset, _emulatorCore.State);
+    }
+
+    [Fact]
+    public void Reset_ClearsInstructionStatistics()
+    {
+        _emulatorCore.Reset();
+
         Assert.Equal(0UL, _emulatorCore.Statistics.InstructionsExecuted);
+    }
+
+    [Fact]
+    public void Reset_ResetsProgramCounter()
+    {
+        _emulatorCore.Reset();
+
         // Verify register file was reset by checking PC is 0
         Assert.Equal((ushort)0, _registerFile.GetProgramCounter());
     }
@@ -78,11 +112,21 @@ public class EmulatorCoreTests
         _emulatorCore.Reset();
 
         Assert.NotNull(eventArgs);
-        Assert.Equal(ExecutionState.Reset, eventArgs.NewState);
     }
 
     [Fact]
-    public void Step_FromResetState_ChangesToSingleStepState()
+    public void Reset_StateChangedEventHasCorrectNewState()
+    {
+        ExecutionStateChangedEventArgs? eventArgs = null;
+        _emulatorCore.StateChanged += (sender, args) => eventArgs = args;
+
+        _emulatorCore.Reset();
+
+        Assert.Equal(ExecutionState.Reset, eventArgs?.NewState);
+    }
+
+    [Fact]
+    public void Step_FromResetState_ThrowsInvalidInstructionException()
     {
         // Set PC to a valid executable address (typical MSP430 program memory starts around 0x8000)
         _registerFile.SetProgramCounter(0x8000);
@@ -90,19 +134,55 @@ public class EmulatorCoreTests
         // Since we don't have valid instructions in memory, this should throw InvalidInstructionException
         // when the decoder tries to decode the 0x0000 instruction word
         Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Step());
+    }
+
+    [Fact]
+    public void Step_FromResetState_TransitionsToSingleStepState()
+    {
+        // Set PC to a valid executable address (typical MSP430 program memory starts around 0x8000)
+        _registerFile.SetProgramCounter(0x8000);
+
+        // Since we don't have valid instructions in memory, this should throw InvalidInstructionException
+        // when the decoder tries to decode the 0x0000 instruction word
+        try
+        {
+            _emulatorCore.Step();
+        }
+        catch (InvalidInstructionException)
+        {
+            // Expected exception, check state after exception
+        }
 
         Assert.Equal(ExecutionState.SingleStep, _emulatorCore.State);
     }
 
     [Fact]
-    public void AddBreakpoint_AddsBreakpointToCollection()
+    public void AddBreakpoint_AddsBreakpointSuccessfully()
     {
         ushort address = 0x8000;
 
         bool added = _emulatorCore.AddBreakpoint(address);
 
         Assert.True(added);
+    }
+
+    [Fact]
+    public void AddBreakpoint_BreakpointCanBeFound()
+    {
+        ushort address = 0x8000;
+
+        _emulatorCore.AddBreakpoint(address);
+
         Assert.True(_emulatorCore.HasBreakpoint(address));
+    }
+
+    [Fact]
+    public void AddBreakpoint_BreakpointInCollection()
+    {
+        ushort address = 0x8000;
+
+        _emulatorCore.AddBreakpoint(address);
+
         Assert.Contains(address, _emulatorCore.Breakpoints);
     }
 
@@ -115,11 +195,21 @@ public class EmulatorCoreTests
         bool added = _emulatorCore.AddBreakpoint(address);
 
         Assert.False(added);
+    }
+
+    [Fact]
+    public void AddBreakpoint_DuplicateAddress_KeepsSingleBreakpoint()
+    {
+        ushort address = 0x8000;
+        _emulatorCore.AddBreakpoint(address);
+
+        _emulatorCore.AddBreakpoint(address);
+
         Assert.Single(_emulatorCore.Breakpoints);
     }
 
     [Fact]
-    public void RemoveBreakpoint_ExistingBreakpoint_RemovesAndReturnsTrue()
+    public void RemoveBreakpoint_ExistingBreakpoint_ReturnsTrue()
     {
         ushort address = 0x8000;
         _emulatorCore.AddBreakpoint(address);
@@ -127,7 +217,27 @@ public class EmulatorCoreTests
         bool removed = _emulatorCore.RemoveBreakpoint(address);
 
         Assert.True(removed);
+    }
+
+    [Fact]
+    public void RemoveBreakpoint_ExistingBreakpoint_BreakpointNotFound()
+    {
+        ushort address = 0x8000;
+        _emulatorCore.AddBreakpoint(address);
+
+        _emulatorCore.RemoveBreakpoint(address);
+
         Assert.False(_emulatorCore.HasBreakpoint(address));
+    }
+
+    [Fact]
+    public void RemoveBreakpoint_ExistingBreakpoint_BreakpointsEmpty()
+    {
+        ushort address = 0x8000;
+        _emulatorCore.AddBreakpoint(address);
+
+        _emulatorCore.RemoveBreakpoint(address);
+
         Assert.Empty(_emulatorCore.Breakpoints);
     }
 
@@ -154,16 +264,23 @@ public class EmulatorCoreTests
     }
 
     [Fact]
-    public void Stop_ChangesToStoppedState()
+    public void Stop_SetsStateToStopped()
     {
         _emulatorCore.Stop();
 
         Assert.Equal(ExecutionState.Stopped, _emulatorCore.State);
+    }
+
+    [Fact]
+    public void Stop_SetsIsRunningToFalse()
+    {
+        _emulatorCore.Stop();
+
         Assert.False(_emulatorCore.IsRunning);
     }
 
     [Fact]
-    public void Halt_ChangesToHaltedState()
+    public void Halt_TransitionsToHaltedState()
     {
         // First transition to a state that can be halted (e.g., SingleStep)
         // Set PC to valid address to avoid memory access issues
@@ -171,29 +288,77 @@ public class EmulatorCoreTests
 
         // This will transition to SingleStep state, then fail due to invalid instruction
         // when the decoder tries to decode the 0x0000 instruction word
-        Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Step());
+        try
+        {
+            _emulatorCore.Step();
+        }
+        catch (InvalidInstructionException)
+        {
+            // Expected exception
+        }
 
         // Now halt from SingleStep state
         _emulatorCore.Halt();
 
         Assert.Equal(ExecutionState.Halted, _emulatorCore.State);
+    }
+
+    [Fact]
+    public void Halt_SetsIsHaltedToTrue()
+    {
+        // First transition to a state that can be halted (e.g., SingleStep)
+        // Set PC to valid address to avoid memory access issues
+        _registerFile.SetProgramCounter(0x8000);
+
+        // This will transition to SingleStep state, then fail due to invalid instruction
+        // when the decoder tries to decode the 0x0000 instruction word
+        try
+        {
+            _emulatorCore.Step();
+        }
+        catch (InvalidInstructionException)
+        {
+            // Expected exception
+        }
+
+        // Now halt from SingleStep state
+        _emulatorCore.Halt();
+
         Assert.True(_emulatorCore.IsHalted);
     }
 
     [Fact]
-    public void Run_WithInstructionCount_StartsExecution()
+    public void Run_WithInstructionCount_ThrowsInvalidInstructionException()
     {
         // Set PC to a valid executable address 
         _registerFile.SetProgramCounter(0x8000);
 
         // This will fail due to invalid instructions, but we can test that it attempts to run
         Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Run(5));
+    }
+
+    [Fact]
+    public void Run_WithInstructionCount_TransitionsToErrorState()
+    {
+        // Set PC to a valid executable address 
+        _registerFile.SetProgramCounter(0x8000);
+
+        // This will fail due to invalid instructions, but we can test that it attempts to run
+        try
+        {
+            _emulatorCore.Run(5);
+        }
+        catch (InvalidInstructionException)
+        {
+            // Expected exception
+        }
+
         // State should transition to Error due to invalid instruction
         Assert.Equal(ExecutionState.Error, _emulatorCore.State);
     }
 
     [Fact]
-    public void Run_WithDuration_StartsExecution()
+    public void Run_WithDuration_ThrowsInvalidInstructionException()
     {
         // Set PC to a valid executable address 
         _registerFile.SetProgramCounter(0x8000);
@@ -201,6 +366,25 @@ public class EmulatorCoreTests
 
         // This will fail due to invalid instructions, but we can test that it attempts to run
         Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Run(duration));
+    }
+
+    [Fact]
+    public void Run_WithDuration_TransitionsToErrorState()
+    {
+        // Set PC to a valid executable address 
+        _registerFile.SetProgramCounter(0x8000);
+        var duration = TimeSpan.FromMilliseconds(10);
+
+        // This will fail due to invalid instructions, but we can test that it attempts to run
+        try
+        {
+            _emulatorCore.Run(duration);
+        }
+        catch (InvalidInstructionException)
+        {
+            // Expected exception
+        }
+
         // State should transition to Error due to invalid instruction
         Assert.Equal(ExecutionState.Error, _emulatorCore.State);
     }
@@ -226,14 +410,19 @@ public class EmulatorCoreTests
     }
 
     [Fact]
-    public void Statistics_InitiallyZero()
+    public void Statistics_InstructionsExecutedInitiallyZero()
     {
         Assert.Equal(0UL, _emulatorCore.Statistics.InstructionsExecuted);
+    }
+
+    [Fact]
+    public void Statistics_TotalCyclesInitiallyZero()
+    {
         Assert.Equal(0UL, _emulatorCore.Statistics.TotalCycles);
     }
 
     [Fact]
-    public void StateChanged_Event_RaisedOnStateTransitions()
+    public void StateChanged_Event_RaisedCorrectNumberOfTimes()
     {
         var stateChanges = new List<ExecutionStateChangedEventArgs>();
         _emulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
@@ -242,7 +431,29 @@ public class EmulatorCoreTests
         _emulatorCore.Reset();
 
         Assert.Equal(2, stateChanges.Count);
+    }
+
+    [Fact]
+    public void StateChanged_Event_FirstTransitionToStopped()
+    {
+        var stateChanges = new List<ExecutionStateChangedEventArgs>();
+        _emulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
+
+        _emulatorCore.Stop();
+        _emulatorCore.Reset();
+
         Assert.Equal(ExecutionState.Stopped, stateChanges[0].NewState);
+    }
+
+    [Fact]
+    public void StateChanged_Event_SecondTransitionToReset()
+    {
+        var stateChanges = new List<ExecutionStateChangedEventArgs>();
+        _emulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
+
+        _emulatorCore.Stop();
+        _emulatorCore.Reset();
+
         Assert.Equal(ExecutionState.Reset, stateChanges[1].NewState);
     }
 

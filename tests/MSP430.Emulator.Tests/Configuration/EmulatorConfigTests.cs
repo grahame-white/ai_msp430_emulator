@@ -57,13 +57,12 @@ public class EmulatorConfigTests : IDisposable
         Assert.NotNull(config.Cpu);
     }
 
-    [Theory]
-    [InlineData(LogLevel.Info)]
-    public void DefaultLoggingConfig_SetsMinimumLevel(LogLevel expectedLevel)
+    [Fact]
+    public void DefaultLoggingConfig_SetsMinimumLevel()
     {
         var config = EmulatorConfig.CreateDefault();
 
-        Assert.Equal(expectedLevel, config.Logging.MinimumLevel);
+        Assert.Equal(LogLevel.Info, config.Logging.MinimumLevel);
     }
 
     [Fact]

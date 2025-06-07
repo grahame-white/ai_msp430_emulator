@@ -93,9 +93,8 @@ public class BicInstructionTests
         Assert.False(instruction.IsByteOperation);
     }
 
-    [Theory]
-    [InlineData(RegisterName.R1)]
-    public void Constructor_ValidParameters_SetsSourceRegister(RegisterName expectedRegister)
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceRegister()
     {
         // Arrange & Act
         var instruction = new BicInstruction(
@@ -107,12 +106,11 @@ public class BicInstructionTests
             false);
 
         // Assert
-        Assert.Equal(expectedRegister, instruction.SourceRegister);
+        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
     }
 
-    [Theory]
-    [InlineData(RegisterName.R2)]
-    public void Constructor_ValidParameters_SetsDestinationRegister(RegisterName expectedRegister)
+    [Fact]
+    public void Constructor_ValidParameters_SetsDestinationRegister()
     {
         // Arrange & Act
         var instruction = new BicInstruction(
@@ -124,7 +122,7 @@ public class BicInstructionTests
             false);
 
         // Assert
-        Assert.Equal(expectedRegister, instruction.DestinationRegister);
+        Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
     }
 
     [Theory]

@@ -44,26 +44,8 @@ public class MovInstructionTests
         Assert.Equal(0x4, instruction.Opcode);
     }
 
-    [Theory]
-    [InlineData(0x4123)]
-    public void Constructor_ValidParameters_SetsInstructionWord(ushort expectedWord)
-    {
-        // Arrange & Act
-        var instruction = new MovInstruction(
-            expectedWord,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(expectedWord, instruction.InstructionWord);
-    }
-
-    [Theory]
-    [InlineData("MOV")]
-    public void Constructor_ValidParameters_SetsMnemonic(string expectedMnemonic)
+    [Fact]
+    public void Constructor_ValidParameters_SetsInstructionWord()
     {
         // Arrange & Act
         var instruction = new MovInstruction(
@@ -75,7 +57,23 @@ public class MovInstructionTests
             false);
 
         // Assert
-        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
+        Assert.Equal(0x4123, instruction.InstructionWord);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsMnemonic()
+    {
+        // Arrange & Act
+        var instruction = new MovInstruction(
+            0x4123,
+            RegisterName.R1,
+            RegisterName.R4,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
+        Assert.Equal("MOV", instruction.Mnemonic);
     }
 
     [Theory]

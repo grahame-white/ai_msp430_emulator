@@ -189,7 +189,7 @@ public class PopInstructionTests
         memory[0x0FFF] = 0x12; // High byte
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x1000, registerFile.GetStackPointer());

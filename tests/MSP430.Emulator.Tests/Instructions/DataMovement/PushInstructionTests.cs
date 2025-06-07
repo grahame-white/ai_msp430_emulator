@@ -187,7 +187,7 @@ public class PushInstructionTests
         registerFile.SetStackPointer(0x1000);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x0FFE, registerFile.GetStackPointer());
@@ -207,7 +207,7 @@ public class PushInstructionTests
         registerFile.SetStackPointer(0x1000);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x0FFE, registerFile.GetStackPointer());

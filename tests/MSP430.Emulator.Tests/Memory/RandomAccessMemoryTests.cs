@@ -350,7 +350,7 @@ public class RandomAccessMemoryTests
     public void Operations_LogInitialization()
     {
         _logger.MinimumLevel = LogLevel.Debug;
-        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+        _ = new RandomAccessMemory(0x2000, 1024, _logger);
 
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("RandomAccessMemory initialized"));

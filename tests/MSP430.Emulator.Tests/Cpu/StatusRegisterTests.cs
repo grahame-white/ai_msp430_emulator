@@ -642,7 +642,7 @@ public class StatusRegisterTests
     }
 
     [Theory]
-    [InlineData(0x0001, true)]   // Only Carry - Zero flag should be false
+    [InlineData(0x0001, false)]  // Only Carry - Zero flag should be false
     [InlineData(0x0007, true)]   // C, Z, N - Zero flag should be true
     [InlineData(0x00FF, true)]   // All low byte flags - Zero flag should be true
     [InlineData(0xFFFF, true)]   // All flags - Zero flag should be true

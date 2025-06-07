@@ -498,7 +498,7 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void StoreCalibrationData_SegmentAUnprotected_Succeeds()
+    public void StoreCalibrationData_SegmentAUnprotected_ReturnsTrue()
     {
         var infoMemory = new InformationMemory(_logger);
 
@@ -510,11 +510,41 @@ public class InformationMemoryTests
         bool result = infoMemory.StoreCalibrationData(calibrationData);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void StoreCalibrationData_SegmentAUnprotected_StoresCorrectBytesRead()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        // Unprotect Segment A for this test
+        infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentA, false);
+
+        byte[] calibrationData = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+
+        infoMemory.StoreCalibrationData(calibrationData);
 
         // Verify data was stored
         byte[] buffer = new byte[calibrationData.Length];
         int bytesRead = infoMemory.ReadCalibrationData(buffer);
         Assert.Equal(calibrationData.Length, bytesRead);
+    }
+
+    [Fact]
+    public void StoreCalibrationData_SegmentAUnprotected_StoresCorrectData()
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        // Unprotect Segment A for this test
+        infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentA, false);
+
+        byte[] calibrationData = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+
+        infoMemory.StoreCalibrationData(calibrationData);
+
+        // Verify data was stored
+        byte[] buffer = new byte[calibrationData.Length];
+        infoMemory.ReadCalibrationData(buffer);
         Assert.Equal(calibrationData, buffer);
     }
 
@@ -547,7 +577,7 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void ReadCalibrationData_ReturnsStoredData()
+    public void ReadCalibrationData_ReturnsCorrectByteCount()
     {
         var infoMemory = new InformationMemory(_logger);
 
@@ -560,11 +590,27 @@ public class InformationMemoryTests
         int bytesRead = infoMemory.ReadCalibrationData(buffer);
 
         Assert.Equal(10, bytesRead); // Should read min(buffer.Length, segmentSize)
-        Assert.Equal(0x01, buffer[0]);
-        Assert.Equal(0x02, buffer[1]);
-        Assert.Equal(0x03, buffer[2]);
-        Assert.Equal(0x04, buffer[3]);
-        Assert.Equal(0xFF, buffer[4]); // Rest should be erased state
+    }
+
+    [Theory]
+    [InlineData(0, 0x01)]
+    [InlineData(1, 0x02)]
+    [InlineData(2, 0x03)]
+    [InlineData(3, 0x04)]
+    [InlineData(4, 0xFF)]
+    public void ReadCalibrationData_ReturnsCorrectDataAtIndex(int index, byte expectedValue)
+    {
+        var infoMemory = new InformationMemory(_logger);
+
+        // Unprotect Segment A and store some data
+        infoMemory.SetSegmentWriteProtection(InformationSegment.SegmentA, false);
+        byte[] originalData = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+        infoMemory.StoreCalibrationData(originalData);
+
+        byte[] buffer = new byte[10]; // Larger buffer
+        infoMemory.ReadCalibrationData(buffer);
+
+        Assert.Equal(expectedValue, buffer[index]);
     }
 
     [Fact]

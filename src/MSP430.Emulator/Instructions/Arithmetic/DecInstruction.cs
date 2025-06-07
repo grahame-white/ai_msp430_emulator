@@ -13,9 +13,9 @@ namespace MSP430.Emulator.Instructions.Arithmetic;
 /// Flags affected: N, Z, C, V
 /// 
 /// References:
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131, January 2023), Section 5.3.2: "DEC - Decrement" - Instruction format and operation
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - October 2004–Revised June 2021, Section 4: "Assembler Description" - Instruction format and operation
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5.1.1: "MSP430 Double-Operand (Format I) Instructions" - Instruction encoding
-/// - MSP430FR2355 Datasheet (SLAS847G, December 2019), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: "Detailed Description" - Instruction Set
 /// </summary>
 public class DecInstruction : Instruction, IExecutableInstruction
 {

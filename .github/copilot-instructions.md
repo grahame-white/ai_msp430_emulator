@@ -112,7 +112,11 @@ Git hooks are automatically configured during setup to catch issues before commi
 - Use GitHub-native Mermaid diagrams and markdown formatting validated by markdownlint
 - Avoid unnecessary duplication of information across documents
 - Include inline comments explaining TI specification compliance
-- All MSP430FR2355 implementation details must reference official TI documentation
+- All MSP430FR235x implementation details must reference official TI documentation
+- Use table of contents documents for section validation:
+  - SLAU445I: `docs/references/MSP430FR2xx_FR4xx_Family_Users_Guide_(SLAU445I).md`
+  - SLAU131Y: `docs/references/MSP430_Assembly_Language_Tools_v21.6.0.LTS_User_Guide_(SLAU131Y).md`
+  - SLASEC4D: `docs/references/MSP430FR235x_MSP430FR215x_Mixed-Signal_Microcontrollers_(SLASEC4D).md`
 
 ### JavaScript/Node.js Standards (Automation Scripts)
 - Follow ESLint configuration in `.github/scripts/.eslintrc.json`

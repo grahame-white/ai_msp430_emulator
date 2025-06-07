@@ -15,9 +15,9 @@ namespace MSP430.Emulator.Instructions.DataMovement;
 /// Flags: Not affected
 /// 
 /// References:
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131), Section 5.3: "POP" - Instruction format and operation
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - October 2004–Revised June 2021, Section 4: "Assembler Description" - Instruction format and operation
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.6.2.34: "POP" - Instruction specification
-/// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and stack behavior
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: "Detailed Description" - Instruction Set
 /// </summary>
 public class PopInstruction : Instruction, IExecutableInstruction
 {

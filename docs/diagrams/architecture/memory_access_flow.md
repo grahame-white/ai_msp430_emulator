@@ -253,7 +253,7 @@ This documentation is based on official Texas Instruments documentation:
   - Section 2.2.1: "Memory Protection and Access Permissions" - Access control mechanisms
   - Section 6.3: "FRAM Access and Write Protection" - Memory access validation procedures
   - Section 1.4.1: "Memory Protection Unit (MPU)" - Hardware-level access control
-- **MSP430FR2355 Mixed-Signal Microcontroller Datasheet** (SLAS847G, October 2016 - Revised December 2019)
+- **MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers** (SLASEC4D, May 2018–Revised December 2019)
   - Section 6: "Memory Organization" - Access permission specifications
 
 **Access Permission Implementation:**

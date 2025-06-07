@@ -16,18 +16,22 @@ All technical documentation for the MSP430 emulator must adhere to the following
 **Example Reference Format:**
 
 ```text
-MSP430FR2355 Mixed-Signal Microcontroller Datasheet (SLAS847G, October 2016 - Revised December 2019)
-- Section 6: "Specifications" - Memory organization (Table 6-4, p. 20)
-- Section 7.3: "Memory Map" - Address space layout (Figure 7-1)
+MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D, May 2018–Revised December 2019)
+- Section 6: "Detailed Description" - Memory organization and specifications
+- Section 4.3: "Signal Descriptions" - Pin functionality
 ```
 
 **Required Primary Documents:**
 
-- **MSP430FR2355 Datasheet** (SLAS847G): Hardware specifications and electrical characteristics
+- **MSP430FR235x/FR215x Mixed-Signal Microcontrollers** (SLASEC4D): Hardware specifications and electrical characteristics
+  - Use `docs/references/MSP430FR235x_MSP430FR215x_Mixed-Signal_Microcontrollers_(SLASEC4D).md` for section number validation
+  - Document version: "MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - May 2018–Revised December 2019"
 - **MSP430FR2xx/FR4xx Family User's Guide** (SLAU445I): Programming model and architecture details
   - Use `docs/references/MSP430FR2xx_FR4xx_Family_Users_Guide_(SLAU445I).md` for section number validation
   - Document version: "MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019"
-- **MSP430 Assembly Language Tools User's Guide** (SLAU131): Instruction set and assembly syntax
+- **MSP430 Assembly Language Tools User's Guide** (SLAU131Y): Instruction set and assembly syntax
+  - Use `docs/references/MSP430_Assembly_Language_Tools_v21.6.0.LTS_User_Guide_(SLAU131Y).md` for section number validation
+  - Document version: "MSP430 Assembly Language Tools v21.6.0.LTS (SLAU131Y) - October 2004–Revised June 2021"
 
 **Secondary Source Usage:**
 

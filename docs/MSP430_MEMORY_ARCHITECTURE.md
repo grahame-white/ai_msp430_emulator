@@ -63,7 +63,7 @@ var customMemoryMap = new MemoryMap(customRegions);
 
 This implementation is based on official Texas Instruments documentation:
 
-- **MSP430FR2355 Mixed-Signal Microcontroller Datasheet** (SLAS847G, October 2016 - Revised December 2019)
+- **MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers** (SLASEC4D, May 2018–Revised December 2019)
 - **MSP430FR2xx FR4xx Family User's Guide** (SLAU445I) - October 2014–Revised March 2019
 
 For detailed section and table references used in the implementation, see the

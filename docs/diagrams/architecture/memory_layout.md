@@ -148,9 +148,9 @@ This documentation is based on official Texas Instruments documentation:
 
 **Primary References:**
 
-- **MSP430FR2355 Mixed-Signal Microcontroller Datasheet** (SLAS847G, October 2016 - Revised December 2019)
-  - Section 6: "Specifications" - Memory organization and address mapping (Table 6-4, p. 20)
-  - Section 7: "Device and Documentation Support" - Memory layout overview
+- **MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers** (SLASEC4D, May 2018–Revised December 2019)
+  - Section 6: "Detailed Description" - Memory organization and address mapping
+  - Section 3: "Device Comparison" - Memory layout overview
 - **MSP430FR2xx FR4xx Family User's Guide** (SLAU445I) - October 2014–Revised March 2019  
   - Section 1.4: "Memory Organization" - Detailed memory architecture (Figure 1-1, p. 27)
   - Section 2: "System Control Module (SYS)" - Memory controller and access permissions
@@ -158,7 +158,8 @@ This documentation is based on official Texas Instruments documentation:
 
 **Memory Map Verification:**
 
-- Datasheet SLAS847G, Table 6-4 "Memory Organization" confirms address ranges
+- MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: "Detailed Description" -
+  Memory organization confirms address ranges
 - User's Guide SLAU445I, Section 1.9.1: "Memory Map" provides visual layout
 - Bootstrap Loader specification from SLAU445I Section 1.9.4: "Bootloader (BSL)" (0x1000-0x17FF)
 

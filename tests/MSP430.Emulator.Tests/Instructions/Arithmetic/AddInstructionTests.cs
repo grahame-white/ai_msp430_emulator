@@ -171,7 +171,7 @@ public class AddInstructionTests
     [InlineData(RegisterName.R15, RegisterName.R4)]
     [InlineData(RegisterName.R3, RegisterName.R4)]
     [InlineData(RegisterName.R5, RegisterName.R6)]
-    public void Properties_VariousRegisters_ReturnCorrectValues(RegisterName source, RegisterName dest)
+    public void Properties_VariousRegisters_SourceRegisterCorrect(RegisterName source, RegisterName dest)
     {
         // Arrange
         var instruction = new AddInstruction(
@@ -184,6 +184,25 @@ public class AddInstructionTests
 
         // Act & Assert
         Assert.Equal(source, instruction.SourceRegister);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R0, RegisterName.R1)]
+    [InlineData(RegisterName.R15, RegisterName.R4)]
+    [InlineData(RegisterName.R3, RegisterName.R4)]
+    [InlineData(RegisterName.R5, RegisterName.R6)]
+    public void Properties_VariousRegisters_DestinationRegisterCorrect(RegisterName source, RegisterName dest)
+    {
+        // Arrange
+        var instruction = new AddInstruction(
+            0x5000,
+            source,
+            dest,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act & Assert
         Assert.Equal(dest, instruction.DestinationRegister);
     }
 
@@ -195,7 +214,7 @@ public class AddInstructionTests
     [InlineData(AddressingMode.Immediate)]
     [InlineData(AddressingMode.Absolute)]
     [InlineData(AddressingMode.Symbolic)]
-    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode mode)
+    public void AddressingModes_AllSupportedModes_SourceAddressingModeCorrect(AddressingMode mode)
     {
         // Arrange
         var instruction = new AddInstruction(
@@ -208,6 +227,28 @@ public class AddInstructionTests
 
         // Act & Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void AddressingModes_AllSupportedModes_DestinationAddressingModeCorrect(AddressingMode mode)
+    {
+        // Arrange
+        var instruction = new AddInstruction(
+            0x5000,
+            RegisterName.R1,
+            RegisterName.R4,
+            mode,
+            AddressingMode.Register,
+            false);
+
+        // Act & Assert
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
     }
 

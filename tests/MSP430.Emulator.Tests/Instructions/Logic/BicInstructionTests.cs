@@ -236,7 +236,7 @@ public class BicInstructionTests
     [InlineData(AddressingMode.Immediate)]
     [InlineData(AddressingMode.Absolute)]
     [InlineData(AddressingMode.Symbolic)]
-    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode mode)
+    public void AddressingModes_AllSupportedModes_SourceAddressingModeSet(AddressingMode mode)
     {
         // Arrange & Act
         var instruction = new BicInstruction(
@@ -249,6 +249,28 @@ public class BicInstructionTests
 
         // Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void AddressingModes_AllSupportedModes_DestinationAddressingModeSet(AddressingMode mode)
+    {
+        // Arrange & Act
+        var instruction = new BicInstruction(
+            0xC000,
+            RegisterName.R1,
+            RegisterName.R2,
+            mode,
+            mode,
+            false);
+
+        // Assert
         Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
 

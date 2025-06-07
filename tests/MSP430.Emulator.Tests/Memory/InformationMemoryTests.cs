@@ -223,7 +223,7 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void WriteByte_ToProtectedSegment_Fails()
+    public void WriteByte_ToProtectedSegment_ReturnsFalse()
     {
         var infoMemory = new InformationMemory(_logger);
         const ushort address = 0x1980; // Segment A (protected by default)
@@ -232,6 +232,17 @@ public class InformationMemoryTests
         bool result = infoMemory.WriteByte(address, testValue);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void WriteByte_ToProtectedSegment_DoesNotModifyMemory()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        const ushort address = 0x1980; // Segment A (protected by default)
+        const byte testValue = 0x42;
+
+        infoMemory.WriteByte(address, testValue);
+
         Assert.Equal(0xFF, infoMemory.ReadByte(address)); // Should remain erased
     }
 
@@ -246,7 +257,7 @@ public class InformationMemoryTests
     }
 
     [Fact]
-    public void WriteWord_ToUnprotectedSegment_Succeeds()
+    public void WriteWord_ToUnprotectedSegment_ReturnsTrue()
     {
         var infoMemory = new InformationMemory(_logger);
         const ushort address = 0x1800; // Segment D (unprotected)
@@ -255,6 +266,17 @@ public class InformationMemoryTests
         bool result = infoMemory.WriteWord(address, testValue);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void WriteWord_ToUnprotectedSegment_StoresValue()
+    {
+        var infoMemory = new InformationMemory(_logger);
+        const ushort address = 0x1800; // Segment D (unprotected)
+        const ushort testValue = 0x1234;
+
+        infoMemory.WriteWord(address, testValue);
+
         Assert.Equal(testValue, infoMemory.ReadWord(address));
     }
 

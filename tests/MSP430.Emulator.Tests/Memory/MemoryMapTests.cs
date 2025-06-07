@@ -293,20 +293,36 @@ public class MemoryMapTests
     }
 
     [Theory]
-    [InlineData(MemoryRegion.SpecialFunctionRegisters, 0x0000, 0x00FF)]
-    [InlineData(MemoryRegion.Peripherals8Bit, 0x0100, 0x01FF)]
-    [InlineData(MemoryRegion.Peripherals16Bit, 0x0200, 0x027F)]
-    [InlineData(MemoryRegion.BootstrapLoader, 0x1000, 0x17FF)]
-    [InlineData(MemoryRegion.InformationMemory, 0x1800, 0x19FF)]
-    [InlineData(MemoryRegion.Ram, 0x2000, 0x2FFF)]
-    [InlineData(MemoryRegion.Flash, 0x4000, 0xBFFF)]
-    [InlineData(MemoryRegion.InterruptVectorTable, 0xFFE0, 0xFFFF)]
-    public void DefaultMemoryLayout_RegionBoundaries_AreCorrect(MemoryRegion region, ushort expectedStart, ushort expectedEnd)
+    [InlineData(MemoryRegion.SpecialFunctionRegisters, 0x0000)]
+    [InlineData(MemoryRegion.Peripherals8Bit, 0x0100)]
+    [InlineData(MemoryRegion.Peripherals16Bit, 0x0200)]
+    [InlineData(MemoryRegion.BootstrapLoader, 0x1000)]
+    [InlineData(MemoryRegion.InformationMemory, 0x1800)]
+    [InlineData(MemoryRegion.Ram, 0x2000)]
+    [InlineData(MemoryRegion.Flash, 0x4000)]
+    [InlineData(MemoryRegion.InterruptVectorTable, 0xFFE0)]
+    public void DefaultMemoryLayout_RegionBoundaries_StartAddressCorrect(MemoryRegion region, ushort expectedStart)
     {
         var memoryMap = new MemoryMap();
 
         MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(region);
         Assert.Equal(expectedStart, regionInfo.StartAddress);
+    }
+
+    [Theory]
+    [InlineData(MemoryRegion.SpecialFunctionRegisters, 0x00FF)]
+    [InlineData(MemoryRegion.Peripherals8Bit, 0x01FF)]
+    [InlineData(MemoryRegion.Peripherals16Bit, 0x027F)]
+    [InlineData(MemoryRegion.BootstrapLoader, 0x17FF)]
+    [InlineData(MemoryRegion.InformationMemory, 0x19FF)]
+    [InlineData(MemoryRegion.Ram, 0x2FFF)]
+    [InlineData(MemoryRegion.Flash, 0xBFFF)]
+    [InlineData(MemoryRegion.InterruptVectorTable, 0xFFFF)]
+    public void DefaultMemoryLayout_RegionBoundaries_EndAddressCorrect(MemoryRegion region, ushort expectedEnd)
+    {
+        var memoryMap = new MemoryMap();
+
+        MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(region);
         Assert.Equal(expectedEnd, regionInfo.EndAddress);
     }
 

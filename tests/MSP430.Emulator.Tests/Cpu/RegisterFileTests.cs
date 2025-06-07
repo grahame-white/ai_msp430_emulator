@@ -282,6 +282,13 @@ public class RegisterFileTests
     [Fact]
     public void ReadRegister_InvalidRegister_ThrowsArgumentException()
     {
+        Assert.Throws<ArgumentException>(() =>
+            _registerFile.ReadRegister((RegisterName)16));
+    }
+
+    [Fact]
+    public void ReadRegister_InvalidRegister_ExceptionContainsCorrectMessage()
+    {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.ReadRegister((RegisterName)16));
 
@@ -299,6 +306,13 @@ public class RegisterFileTests
 
     [Fact]
     public void WriteRegister_InvalidRegister_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            _registerFile.WriteRegister((RegisterName)16, 0x1234));
+    }
+
+    [Fact]
+    public void WriteRegister_InvalidRegister_ExceptionContainsCorrectMessage()
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _registerFile.WriteRegister((RegisterName)16, 0x1234));

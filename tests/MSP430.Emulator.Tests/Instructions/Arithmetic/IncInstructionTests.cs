@@ -13,20 +13,76 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 public class IncInstructionTests
 {
     [Theory]
-    [InlineData(0xA123, RegisterName.R2, AddressingMode.Register, false)]
-    [InlineData(0xA456, RegisterName.R3, AddressingMode.Indexed, false)]
-    [InlineData(0xA789, RegisterName.R5, AddressingMode.Absolute, false)]
-    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName destReg, AddressingMode destMode, bool isByteOp)
+    [InlineData(InstructionFormat.FormatI)]
+    public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
     {
-        var instruction = new IncInstruction(instructionWord, destReg, destMode, isByteOp);
+        var instruction = new IncInstruction(0xA123, RegisterName.R4, AddressingMode.Register, false);
 
-        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-        Assert.Equal((byte)0xA, instruction.Opcode);
-        Assert.Equal(instructionWord, instruction.InstructionWord);
-        Assert.Equal(destReg, instruction.DestinationRegister);
-        Assert.Equal(destMode, instruction.DestinationAddressingMode);
-        Assert.Equal(isByteOp, instruction.IsByteOperation);
+        Assert.Equal(expectedFormat, instruction.Format);
+    }
+
+    [Theory]
+    [InlineData(0xA)]
+    public void Constructor_ValidParameters_SetsOpcode(byte expectedOpcode)
+    {
+        var instruction = new IncInstruction(0xA123, RegisterName.R4, AddressingMode.Register, false);
+
+        Assert.Equal(expectedOpcode, instruction.Opcode);
+    }
+
+    [Theory]
+    [InlineData(0xA123, 0xA123)]
+    [InlineData(0xA456, 0xA456)]
+    public void Constructor_ValidParameters_SetsInstructionWord(ushort instructionWord, ushort expected)
+    {
+        var instruction = new IncInstruction(instructionWord, RegisterName.R4, AddressingMode.Register, false);
+
+        Assert.Equal(expected, instruction.InstructionWord);
+    }
+
+    [Theory]
+    [InlineData(RegisterName.R2, RegisterName.R2)]
+    [InlineData(RegisterName.R3, RegisterName.R3)]
+    public void Constructor_ValidParameters_SetsDestinationRegister(RegisterName destReg, RegisterName expected)
+    {
+        var instruction = new IncInstruction(0xA123, destReg, AddressingMode.Register, false);
+
+        Assert.Equal(expected, instruction.DestinationRegister);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register, AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Indexed)]
+    public void Constructor_ValidParameters_SetsDestinationAddressingMode(AddressingMode destMode, AddressingMode expected)
+    {
+        var instruction = new IncInstruction(0xA123, RegisterName.R4, destMode, false);
+
+        Assert.Equal(expected, instruction.DestinationAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void Constructor_ValidParameters_SetsIsByteOperation(bool isByteOp, bool expected)
+    {
+        var instruction = new IncInstruction(0xA123, RegisterName.R4, AddressingMode.Register, isByteOp);
+
+        Assert.Equal(expected, instruction.IsByteOperation);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceRegisterToNull()
+    {
+        var instruction = new IncInstruction(0xA123, RegisterName.R4, AddressingMode.Register, false);
+
         Assert.Null(instruction.SourceRegister);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceAddressingModeToNull()
+    {
+        var instruction = new IncInstruction(0xA123, RegisterName.R4, AddressingMode.Register, false);
+
         Assert.Null(instruction.SourceAddressingMode);
     }
 
@@ -412,8 +468,63 @@ public class IncInstructionTests
         // Act - instruction should execute without throwing exceptions
         uint cycles = instruction.Execute(registerFile, memory, extensionWords.ToArray());
 
-        // Assert - verify instruction executed and returned valid cycle count
+        // Assert - verify instruction executed and returned positive cycle count
         Assert.True(cycles > 0, $"Expected positive cycle count for {destMode}");
+    }
+
+    /// <summary>
+    /// Tests that cycle count for all INC instruction addressing modes is reasonable.
+    /// Based on MSP430FR2xx/FR4xx Family User's Guide (SLAU445I) - Section 3.4: "Instruction Set"
+    /// </summary>
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void Execute_AllAddressingModes_ReasonableCycleCount(AddressingMode destMode)
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.SetProgramCounter(0x8000);
+
+        // Set up memory for addressing modes that access memory
+        memory[0x1000] = 0x34; // For indirect modes
+        memory[0x1001] = 0x12;
+        memory[0x1010] = 0xBC; // For indexed modes
+        memory[0x1011] = 0x9A;
+        memory[0x3000] = 0xEF; // For absolute modes
+        memory[0x3001] = 0xCD;
+
+        var instruction = new IncInstruction(
+            0xA000,
+            RegisterName.R1,
+            destMode,
+            false);
+
+        // Set up extension words based on addressing mode
+        List<ushort> extensionWords = [];
+        if (destMode == AddressingMode.Indexed)
+        {
+            extensionWords.Add(0x0010);
+        }
+
+        if (destMode == AddressingMode.Absolute)
+        {
+            extensionWords.Add(0x3000);
+        }
+
+        if (destMode == AddressingMode.Symbolic)
+        {
+            extensionWords.Add(0x1000);
+        }
+
+        // Act - instruction should execute without throwing exceptions
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords.ToArray());
+
+        // Assert - verify cycle count is reasonable (not too high)
         Assert.True(cycles <= 7, $"Cycle count {cycles} seems too high for {destMode}");
     }
 

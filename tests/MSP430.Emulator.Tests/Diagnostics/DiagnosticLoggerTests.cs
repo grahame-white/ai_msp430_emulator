@@ -97,7 +97,7 @@ public class DiagnosticLoggerTests
     }
 
     [Fact]
-    public void Log_WithContext_ShouldStoreContextInBuffer()
+    public void Log_WithContext_ShouldStoreEntryInBuffer()
     {
         // Arrange
         ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
@@ -110,7 +110,37 @@ public class DiagnosticLoggerTests
         // Assert
         LogEntry[] entries = diagnosticLogger.GetRecentEntries();
         Assert.Single(entries);
+    }
+
+    [Fact]
+    public void Log_WithContext_ShouldStoreCorrectMessage()
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
+        var context = new { Key = "Value", Number = 42 };
+
+        // Act
+        diagnosticLogger.Info("Test message", context);
+
+        // Assert
+        LogEntry[] entries = diagnosticLogger.GetRecentEntries();
         Assert.Equal("Test message", entries[0].Message);
+    }
+
+    [Fact]
+    public void Log_WithContext_ShouldStoreCorrectContext()
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
+        var context = new { Key = "Value", Number = 42 };
+
+        // Act
+        diagnosticLogger.Info("Test message", context);
+
+        // Assert
+        LogEntry[] entries = diagnosticLogger.GetRecentEntries();
         Assert.Equal(context, entries[0].Context);
     }
 
@@ -131,15 +161,32 @@ public class DiagnosticLoggerTests
         // Assert
         LogEntry[] entries = diagnosticLogger.GetRecentEntries();
         Assert.Equal(3, entries.Length);
+    }
 
-        // Should contain the most recent entries
-        Assert.Equal("Message 3", entries[0].Message);
-        Assert.Equal("Message 4", entries[1].Message);
-        Assert.Equal("Message 5", entries[2].Message);
+    [Theory]
+    [InlineData(0, "Message 3")]
+    [InlineData(1, "Message 4")]
+    [InlineData(2, "Message 5")]
+    public void Log_BeyondMaxEntries_ShouldContainMostRecentEntries(int index, string expectedMessage)
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 3);
+
+        // Act
+        diagnosticLogger.Info("Message 1");
+        diagnosticLogger.Info("Message 2");
+        diagnosticLogger.Info("Message 3");
+        diagnosticLogger.Info("Message 4");
+        diagnosticLogger.Info("Message 5");
+
+        // Assert
+        LogEntry[] entries = diagnosticLogger.GetRecentEntries();
+        Assert.Equal(expectedMessage, entries[index].Message);
     }
 
     [Fact]
-    public void GetRecentEntries_WithMaxEntries_ShouldLimitResults()
+    public void GetRecentEntries_WithMaxEntries_ShouldLimitResultsToCorrectCount()
     {
         // Arrange
         ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
@@ -155,13 +202,32 @@ public class DiagnosticLoggerTests
 
         // Assert
         Assert.Equal(3, entries.Length);
-        Assert.Equal("Message 3", entries[0].Message);
-        Assert.Equal("Message 4", entries[1].Message);
-        Assert.Equal("Message 5", entries[2].Message);
+    }
+
+    [Theory]
+    [InlineData(0, "Message 3")]
+    [InlineData(1, "Message 4")]
+    [InlineData(2, "Message 5")]
+    public void GetRecentEntries_WithMaxEntries_ShouldReturnMostRecentEntries(int index, string expectedMessage)
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
+
+        for (int i = 1; i <= 5; i++)
+        {
+            diagnosticLogger.Info($"Message {i}");
+        }
+
+        // Act
+        LogEntry[] entries = diagnosticLogger.GetRecentEntries(3);
+
+        // Assert
+        Assert.Equal(expectedMessage, entries[index].Message);
     }
 
     [Fact]
-    public void FormatRecentEntries_ShouldReturnFormattedString()
+    public void FormatRecentEntries_ShouldContainRecentLogEntriesHeader()
     {
         // Arrange
         ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
@@ -176,12 +242,48 @@ public class DiagnosticLoggerTests
 
         // Assert
         Assert.Contains("Recent Log Entries", formatted);
-        Assert.Contains("Test message 1", formatted);
-        Assert.Contains("Sample warning log", formatted);
-        Assert.Contains("Sample error log", formatted);
-        Assert.Contains("[INFO]", formatted);
-        Assert.Contains("[WARNING]", formatted);
-        Assert.Contains("[ERROR]", formatted);
+    }
+
+    [Theory]
+    [InlineData("Test message 1")]
+    [InlineData("Sample warning log")]
+    [InlineData("Sample error log")]
+    public void FormatRecentEntries_ShouldContainLoggedMessage(string expectedMessage)
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
+
+        diagnosticLogger.Info("Test message 1");
+        diagnosticLogger.Warning("Sample warning log");
+        diagnosticLogger.Error("Sample error log");
+
+        // Act
+        string formatted = diagnosticLogger.FormatRecentEntries();
+
+        // Assert
+        Assert.Contains(expectedMessage, formatted);
+    }
+
+    [Theory]
+    [InlineData("[INFO]")]
+    [InlineData("[WARNING]")]
+    [InlineData("[ERROR]")]
+    public void FormatRecentEntries_ShouldContainLogLevelPrefix(string expectedPrefix)
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
+
+        diagnosticLogger.Info("Test message 1");
+        diagnosticLogger.Warning("Sample warning log");
+        diagnosticLogger.Error("Sample error log");
+
+        // Act
+        string formatted = diagnosticLogger.FormatRecentEntries();
+
+        // Assert
+        Assert.Contains(expectedPrefix, formatted);
     }
 
     [Fact]
@@ -199,7 +301,7 @@ public class DiagnosticLoggerTests
     }
 
     [Fact]
-    public void AllLogMethods_ShouldCreateCorrectEntries()
+    public void AllLogMethods_ShouldCreateCorrectNumberOfEntries()
     {
         // Arrange
         ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
@@ -215,16 +317,34 @@ public class DiagnosticLoggerTests
         // Assert
         LogEntry[] entries = diagnosticLogger.GetRecentEntries();
         Assert.Equal(5, entries.Length);
+    }
 
-        Assert.Equal(LogLevel.Debug, entries[0].Level);
-        Assert.Equal(LogLevel.Info, entries[1].Level);
-        Assert.Equal(LogLevel.Warning, entries[2].Level);
-        Assert.Equal(LogLevel.Error, entries[3].Level);
-        Assert.Equal(LogLevel.Fatal, entries[4].Level);
+    [Theory]
+    [InlineData(0, LogLevel.Debug)]
+    [InlineData(1, LogLevel.Info)]
+    [InlineData(2, LogLevel.Warning)]
+    [InlineData(3, LogLevel.Error)]
+    [InlineData(4, LogLevel.Fatal)]
+    public void AllLogMethods_ShouldCreateCorrectLogLevel(int entryIndex, LogLevel expectedLevel)
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger();
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger, 10);
+
+        // Act
+        diagnosticLogger.Debug("Debug message");
+        diagnosticLogger.Info("Info message");
+        diagnosticLogger.Warning("Sample warning");
+        diagnosticLogger.Error("Sample error");
+        diagnosticLogger.Fatal("Fatal message");
+
+        // Assert
+        LogEntry[] entries = diagnosticLogger.GetRecentEntries();
+        Assert.Equal(expectedLevel, entries[entryIndex].Level);
     }
 
     [Fact]
-    public void MinimumLevel_ShouldReflectInnerLogger()
+    public void MinimumLevel_ShouldReflectInnerLoggerLevel()
     {
         // Arrange
         ConsoleLogger innerLogger = CreateSuppressedConsoleLogger(LogLevel.Warning);
@@ -232,24 +352,36 @@ public class DiagnosticLoggerTests
 
         // Act & Assert
         Assert.Equal(LogLevel.Warning, diagnosticLogger.MinimumLevel);
-
-        diagnosticLogger.MinimumLevel = LogLevel.Error;
-        Assert.Equal(LogLevel.Error, innerLogger.MinimumLevel);
     }
 
     [Fact]
-    public void IsEnabled_ShouldReflectInnerLogger()
+    public void MinimumLevel_WhenSet_ShouldUpdateInnerLogger()
+    {
+        // Arrange
+        ConsoleLogger innerLogger = CreateSuppressedConsoleLogger(LogLevel.Warning);
+        using var diagnosticLogger = new DiagnosticLogger(innerLogger);
+
+        // Act
+        diagnosticLogger.MinimumLevel = LogLevel.Error;
+
+        // Assert
+        Assert.Equal(LogLevel.Error, innerLogger.MinimumLevel);
+    }
+
+    [Theory]
+    [InlineData(LogLevel.Debug, false)]
+    [InlineData(LogLevel.Info, false)]
+    [InlineData(LogLevel.Warning, true)]
+    [InlineData(LogLevel.Error, true)]
+    [InlineData(LogLevel.Fatal, true)]
+    public void IsEnabled_ShouldReflectInnerLoggerSettings(LogLevel level, bool expectedEnabled)
     {
         // Arrange
         ConsoleLogger innerLogger = CreateSuppressedConsoleLogger(LogLevel.Warning);
         using var diagnosticLogger = new DiagnosticLogger(innerLogger);
 
         // Act & Assert
-        Assert.False(diagnosticLogger.IsEnabled(LogLevel.Debug));
-        Assert.False(diagnosticLogger.IsEnabled(LogLevel.Info));
-        Assert.True(diagnosticLogger.IsEnabled(LogLevel.Warning));
-        Assert.True(diagnosticLogger.IsEnabled(LogLevel.Error));
-        Assert.True(diagnosticLogger.IsEnabled(LogLevel.Fatal));
+        Assert.Equal(expectedEnabled, diagnosticLogger.IsEnabled(level));
     }
 
     [Fact]

@@ -12,8 +12,9 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 public class BitInstructionTests
 {
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsFormat()
+    [Theory]
+    [InlineData(InstructionFormat.FormatI)]
+    public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
     {
         // Arrange & Act
         var instruction = new BitInstruction(
@@ -25,11 +26,12 @@ public class BitInstructionTests
             false);
 
         // Assert
-        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        Assert.Equal(expectedFormat, instruction.Format);
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsOpcode()
+    [Theory]
+    [InlineData(0xB)]
+    public void Constructor_ValidParameters_SetsOpcode(byte expectedOpcode)
     {
         // Arrange & Act
         var instruction = new BitInstruction(
@@ -41,7 +43,7 @@ public class BitInstructionTests
             false);
 
         // Assert
-        Assert.Equal(0xB, instruction.Opcode);
+        Assert.Equal(expectedOpcode, instruction.Opcode);
     }
 
     [Fact]

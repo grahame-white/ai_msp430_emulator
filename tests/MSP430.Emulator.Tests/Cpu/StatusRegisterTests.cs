@@ -32,20 +32,14 @@ public class StatusRegisterTests
         Assert.Equal(expectedCarry, sr.Carry);
     }
 
-    [Fact]
-    public void Carry_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0001)]   // Set Carry to true
+    [InlineData(false, 0x0000)]  // Set Carry to false
+    public void Carry_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.Carry = true;
-        Assert.Equal((ushort)0x0001, sr.Value);
-    }
-
-    [Fact]
-    public void Carry_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.Carry = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.Carry = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Theory]
@@ -58,20 +52,14 @@ public class StatusRegisterTests
         Assert.Equal(expectedZero, sr.Zero);
     }
 
-    [Fact]
-    public void Zero_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0002)]   // Set Zero to true
+    [InlineData(false, 0x0000)]  // Set Zero to false
+    public void Zero_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.Zero = true;
-        Assert.Equal((ushort)0x0002, sr.Value);
-    }
-
-    [Fact]
-    public void Zero_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.Zero = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.Zero = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Theory]
@@ -84,20 +72,14 @@ public class StatusRegisterTests
         Assert.Equal(expectedNegative, sr.Negative);
     }
 
-    [Fact]
-    public void Negative_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0004)]   // Set Negative to true
+    [InlineData(false, 0x0000)]  // Set Negative to false
+    public void Negative_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.Negative = true;
-        Assert.Equal((ushort)0x0004, sr.Value);
-    }
-
-    [Fact]
-    public void Negative_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.Negative = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.Negative = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Theory]
@@ -110,20 +92,14 @@ public class StatusRegisterTests
         Assert.Equal(expected, sr.GeneralInterruptEnable);
     }
 
-    [Fact]
-    public void GeneralInterruptEnable_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0008)]   // Set GeneralInterruptEnable to true
+    [InlineData(false, 0x0000)]  // Set GeneralInterruptEnable to false
+    public void GeneralInterruptEnable_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.GeneralInterruptEnable = true;
-        Assert.Equal((ushort)0x0008, sr.Value);
-    }
-
-    [Fact]
-    public void GeneralInterruptEnable_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.GeneralInterruptEnable = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.GeneralInterruptEnable = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Theory]
@@ -136,20 +112,14 @@ public class StatusRegisterTests
         Assert.Equal(expected, sr.CpuOff);
     }
 
-    [Fact]
-    public void CpuOff_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0010)]   // Set CpuOff to true
+    [InlineData(false, 0x0000)]  // Set CpuOff to false
+    public void CpuOff_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.CpuOff = true;
-        Assert.Equal((ushort)0x0010, sr.Value);
-    }
-
-    [Fact]
-    public void CpuOff_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.CpuOff = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.CpuOff = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Theory]
@@ -162,20 +132,14 @@ public class StatusRegisterTests
         Assert.Equal(expected, sr.OscillatorOff);
     }
 
-    [Fact]
-    public void OscillatorOff_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0020)]   // Set OscillatorOff to true
+    [InlineData(false, 0x0000)]  // Set OscillatorOff to false
+    public void OscillatorOff_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.OscillatorOff = true;
-        Assert.Equal((ushort)0x0020, sr.Value);
-    }
-
-    [Fact]
-    public void OscillatorOff_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.OscillatorOff = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.OscillatorOff = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Theory]
@@ -188,20 +152,14 @@ public class StatusRegisterTests
         Assert.Equal(expected, sr.SystemClockGenerator0);
     }
 
-    [Fact]
-    public void SystemClockGenerator0_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0040)]   // Set SystemClockGenerator0 to true
+    [InlineData(false, 0x0000)]  // Set SystemClockGenerator0 to false
+    public void SystemClockGenerator0_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.SystemClockGenerator0 = true;
-        Assert.Equal((ushort)0x0040, sr.Value);
-    }
-
-    [Fact]
-    public void SystemClockGenerator0_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.SystemClockGenerator0 = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.SystemClockGenerator0 = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Theory]
@@ -214,20 +172,14 @@ public class StatusRegisterTests
         Assert.Equal(expected, sr.SystemClockGenerator1);
     }
 
-    [Fact]
-    public void SystemClockGenerator1_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0080)]   // Set SystemClockGenerator1 to true
+    [InlineData(false, 0x0000)]  // Set SystemClockGenerator1 to false
+    public void SystemClockGenerator1_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.SystemClockGenerator1 = true;
-        Assert.Equal((ushort)0x0080, sr.Value);
-    }
-
-    [Fact]
-    public void SystemClockGenerator1_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.SystemClockGenerator1 = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.SystemClockGenerator1 = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Theory]
@@ -240,20 +192,14 @@ public class StatusRegisterTests
         Assert.Equal(expected, sr.Overflow);
     }
 
-    [Fact]
-    public void Overflow_SetFlagToTrue_UpdatesValue()
+    [Theory]
+    [InlineData(true, 0x0100)]   // Set Overflow to true
+    [InlineData(false, 0x0000)]  // Set Overflow to false
+    public void Overflow_SetFlag_UpdatesValue(bool flagValue, ushort expectedValue)
     {
         var sr = new StatusRegister();
-        sr.Overflow = true;
-        Assert.Equal((ushort)0x0100, sr.Value);
-    }
-
-    [Fact]
-    public void Overflow_SetFlagToFalse_UpdatesValue()
-    {
-        var sr = new StatusRegister();
-        sr.Overflow = false;
-        Assert.Equal((ushort)0x0000, sr.Value);
+        sr.Overflow = flagValue;
+        Assert.Equal(expectedValue, sr.Value);
     }
 
     [Fact]

@@ -873,7 +873,7 @@ public class FlashControllerTests
     public void StateTransitions_LogsInitializationMessage()
     {
         _logger.MinimumLevel = LogLevel.Debug;
-        _ = new FlashController(_logger);
+        var controller = new FlashController(_logger);
 
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("FlashController initialized"));

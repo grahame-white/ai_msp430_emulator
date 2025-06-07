@@ -919,7 +919,7 @@ public class AndInstructionTests
     }
 
     [Fact]
-    public void Execute_IndexedDestination_UsesExtensionWord()
+    public void Execute_IndexedDestination_UsesExtensionWord_LowByte()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -946,11 +946,100 @@ public class AndInstructionTests
 
         // Assert - memory at indexed location should be modified: 0x00FF & 0x0FF0 = 0x00F0
         Assert.Equal(0xF0, memory[0x0210]); // Low byte of 0x00F0
+    }
+
+    [Fact]
+    public void Execute_IndexedDestination_UsesExtensionWord_HighByte()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x00FF);
+        registerFile.WriteRegister(RegisterName.R6, 0x0200); // Base address
+
+        // Set up initial value at indexed destination
+        memory[0x0210] = 0xF0; // Low byte at indexed address 0x200 + 0x10 = 0x210
+        memory[0x0211] = 0x0F; // High byte of 0x0FF0
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R4,
+            RegisterName.R6,
+            AddressingMode.Register,
+            AddressingMode.Indexed,
+            false);
+
+        ushort[] extensionWords = [0x0010]; // Index offset
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
         Assert.Equal(0x00, memory[0x0211]); // High byte of 0x00F0
     }
 
     [Fact]
-    public void Execute_BothSourceAndDestinationRequireExtensionWords()
+    public void Execute_BothSourceAndDestinationRequireExtensionWords_LowByte()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+
+        // Set up memory values
+        memory[0x0100] = 0xAA; // Source value at absolute address 0x100
+        memory[0x0101] = 0x55; // High byte: 0x55AA
+        memory[0x0200] = 0xFF; // Destination value at absolute address 0x200
+        memory[0x0201] = 0x00; // High byte: 0x00FF
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R0, // Absolute source
+            RegisterName.R1, // Absolute destination
+            AddressingMode.Absolute,
+            AddressingMode.Absolute,
+            false);
+
+        ushort[] extensionWords = [0x0100, 0x0200]; // Source address, destination address
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert - memory at destination should be modified: 0x55AA & 0x00FF = 0x00AA
+        Assert.Equal(0xAA, memory[0x0200]); // Low byte of 0x00AA
+    }
+
+    [Fact]
+    public void Execute_BothSourceAndDestinationRequireExtensionWords_HighByte()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+
+        // Set up memory values
+        memory[0x0100] = 0xAA; // Source value at absolute address 0x100
+        memory[0x0101] = 0x55; // High byte: 0x55AA
+        memory[0x0200] = 0xFF; // Destination value at absolute address 0x200
+        memory[0x0201] = 0x00; // High byte: 0x00FF
+
+        var instruction = new AndInstruction(
+            0xF000,
+            RegisterName.R0, // Absolute source
+            RegisterName.R1, // Absolute destination
+            AddressingMode.Absolute,
+            AddressingMode.Absolute,
+            false);
+
+        ushort[] extensionWords = [0x0100, 0x0200]; // Source address, destination address
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x00, memory[0x0201]); // High byte of 0x00AA
+    }
+
+    [Fact]
+    public void Execute_BothSourceAndDestinationRequireExtensionWords_Cycles()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -975,9 +1064,7 @@ public class AndInstructionTests
         // Act
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
-        // Assert - memory at destination should be modified: 0x55AA & 0x00FF = 0x00AA
-        Assert.Equal(0xAA, memory[0x0200]); // Low byte of 0x00AA
-        Assert.Equal(0x00, memory[0x0201]); // High byte of 0x00AA
+        // Assert
         Assert.Equal(7u, cycles); // 1 base + 3 for absolute source + 3 for absolute destination
     }
 

@@ -143,7 +143,6 @@ public class PushInstruction : Instruction, IExecutableInstruction
     /// <returns>The sign-extended 16-bit value.</returns>
     private static ushort SignExtendByte(ushort byteValue)
     {
-        byte b = (byte)(byteValue & 0xFF);
-        return (ushort)((sbyte)b);
+        return (ushort)((sbyte)(byte)(byteValue & 0xFF));
     }
 }

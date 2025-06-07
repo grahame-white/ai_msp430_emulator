@@ -618,4 +618,133 @@ public class MovInstructionTests
         Assert.False(registerFile.StatusRegister.Overflow); // Overflow flag cleared by MOV
         // Carry flag is preserved (not modified by MOV)
     }
+
+    [Fact]
+    public void Execute_R2WithAbsoluteMode_UpdatesFlags()
+    {
+        // This test verifies that when R2 is used as the destination register with Absolute mode,
+        // flags are updated normally because we're not writing directly to the Status Register
+
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        ushort memoryAddress = 0x1000;
+        ushort valueToMove = 0x8000; // Negative value to test flag updates
+
+        // Set up R3 with the value to move
+        registerFile.WriteRegister(RegisterName.R3, valueToMove);
+
+        // Clear flags to test they get updated
+        registerFile.StatusRegister.Negative = false;
+        registerFile.StatusRegister.Zero = false;
+        registerFile.StatusRegister.Overflow = true;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R3, // Source register
+            RegisterName.R2, // Destination register is R2, but mode is Absolute
+            AddressingMode.Register,
+            AddressingMode.Absolute, // This means write to memory at absolute address, not directly to R2
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, new ushort[] { memoryAddress });
+
+        // Assert
+        // Check that value was written to memory at the absolute address (not to R2 register)
+        ushort writtenValue = (ushort)(memory[memoryAddress] | (memory[memoryAddress + 1] << 8));
+        Assert.Equal(valueToMove, writtenValue);
+
+        // Flags SHOULD be updated because we're using Absolute mode (not Register mode)
+        Assert.True(registerFile.StatusRegister.Negative); // Negative flag set (bit 15 set)
+        Assert.False(registerFile.StatusRegister.Zero); // Zero flag clear (value is not zero)
+        Assert.False(registerFile.StatusRegister.Overflow); // Overflow flag cleared by MOV
+    }
+
+    [Fact]
+    public void Execute_R2WithSymbolicMode_UpdatesFlags()
+    {
+        // This test verifies that when R2 is used as the destination register with Symbolic mode,
+        // flags are updated normally because we're not writing directly to the Status Register
+
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        ushort offset = 0x0010;
+        ushort pcValue = 0x1000;
+        ushort valueToMove = 0x0000; // Zero value to test Zero flag
+
+        // Set up PC and source value
+        registerFile.WriteRegister(RegisterName.PC, pcValue);
+        registerFile.WriteRegister(RegisterName.R4, valueToMove);
+
+        // Clear flags to test they get updated
+        registerFile.StatusRegister.Negative = true;
+        registerFile.StatusRegister.Zero = false;
+        registerFile.StatusRegister.Overflow = true;
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R4, // Source register
+            RegisterName.R2, // Destination register is R2, but mode is Symbolic
+            AddressingMode.Register,
+            AddressingMode.Symbolic, // This means write to memory at PC + offset, not directly to R2
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, new ushort[] { offset });
+
+        // Assert
+        // Check that value was written to memory at PC + offset (not to R2 register)
+        ushort targetAddress = (ushort)(pcValue + offset);
+        ushort writtenValue = (ushort)(memory[targetAddress] | (memory[targetAddress + 1] << 8));
+        Assert.Equal(valueToMove, writtenValue);
+
+        // Flags SHOULD be updated because we're using Symbolic mode (not Register mode)
+        Assert.False(registerFile.StatusRegister.Negative); // Negative flag clear (bit 15 not set)
+        Assert.True(registerFile.StatusRegister.Zero); // Zero flag set (value is zero)
+        Assert.False(registerFile.StatusRegister.Overflow); // Overflow flag cleared by MOV
+    }
+
+    [Fact]
+    public void ToString_WithExtensionWords_ShowsActualValues()
+    {
+        // Arrange
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Immediate,
+            AddressingMode.Absolute,
+            false);
+
+        ushort[] extensionWords = { 0x1234, 0x5678 }; // Immediate value and absolute address
+
+        // Act
+        string result = instruction.ToString(extensionWords);
+
+        // Assert
+        Assert.Equal("MOV #0x1234, &0x5678", result);
+    }
+
+    [Fact]
+    public void ToString_WithExtensionWords_ByteOperation_ShowsActualValues()
+    {
+        // Arrange
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R5,
+            RegisterName.R6,
+            AddressingMode.Indexed,
+            AddressingMode.Symbolic,
+            true);
+
+        ushort[] extensionWords = { 0x10, 0x20 }; // Indexed offset and symbolic offset
+
+        // Act
+        string result = instruction.ToString(extensionWords);
+
+        // Assert
+        Assert.Equal("MOV.B 0x10(R5), 0x20", result);
+    }
 }

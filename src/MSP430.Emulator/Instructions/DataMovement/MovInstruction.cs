@@ -131,9 +131,10 @@ public class MovInstruction : Instruction, IExecutableInstruction
             destinationExtensionWord);
 
         // Update flags: MOV sets N and Z based on the value moved, clears V, preserves C
-        // Special case: When destination is R2 (Status Register), flags are not updated
+        // Special case: When destination is R2 (Status Register) in register mode, flags are not updated
         // to avoid modifying the value being written to the Status Register
-        if (_destinationRegister != RegisterName.R2)
+        // For non-register modes (Absolute, Symbolic, etc.), flags are updated normally
+        if (_destinationRegister != RegisterName.R2 || _destinationAddressingMode != AddressingMode.Register)
         {
             UpdateFlags(sourceValue, registerFile.StatusRegister);
         }
@@ -153,12 +154,42 @@ public class MovInstruction : Instruction, IExecutableInstruction
     }
 
     /// <summary>
+    /// Returns a detailed string representation of the instruction with actual values.
+    /// </summary>
+    /// <param name="extensionWords">Extension words containing immediate values, addresses, or offsets.</param>
+    /// <returns>A string describing the instruction with actual values shown.</returns>
+    public string ToString(ushort[] extensionWords)
+    {
+        string suffix = IsByteOperation ? ".B" : "";
+
+        // Determine extension words for source and destination
+        ushort sourceExtensionWord = 0;
+        ushort destinationExtensionWord = 0;
+
+        if (AddressingModeDecoder.RequiresExtensionWord(_sourceAddressingMode))
+        {
+            sourceExtensionWord = extensionWords.Length > 0 ? extensionWords[0] : (ushort)0;
+            if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
+            {
+                destinationExtensionWord = extensionWords.Length > 1 ? extensionWords[1] : (ushort)0;
+            }
+        }
+        else if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
+        {
+            destinationExtensionWord = extensionWords.Length > 0 ? extensionWords[0] : (ushort)0;
+        }
+
+        return $"{Mnemonic}{suffix} {FormatOperandWithValue(_sourceRegister, _sourceAddressingMode, sourceExtensionWord)}, {FormatOperandWithValue(_destinationRegister, _destinationAddressingMode, destinationExtensionWord)}";
+    }
+
+    /// <summary>
     /// Updates CPU flags based on the moved value.
     /// MOV instruction sets N and Z flags based on the value, clears V flag, and preserves C flag.
     /// 
-    /// Special case: When destination is R2 (Status Register), flags are not updated
+    /// Special case: When destination is R2 (Status Register) in register mode, flags are not updated
     /// to avoid modifying the value being written to the Status Register.
-    /// This follows MSP430 specification behavior where writing to SR doesn't trigger flag updates.
+    /// For non-register modes (Absolute, Symbolic, etc.), flags are updated normally even when R2 is the target register.
+    /// This follows MSP430 specification behavior where writing to SR in register mode doesn't trigger flag updates.
     /// 
     /// References:
     /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.2.1: "Status Register" - Special handling when SR is destination
@@ -188,8 +219,21 @@ public class MovInstruction : Instruction, IExecutableInstruction
         // Base cycle count for Format I instructions
         uint baseCycles = 1;
 
-        // Add cycles for source addressing mode
-        uint sourceCycles = _sourceAddressingMode switch
+        // Add cycles for source and destination addressing modes
+        uint sourceCycles = GetAddressingModeCycles(_sourceAddressingMode);
+        uint destinationCycles = GetAddressingModeCycles(_destinationAddressingMode);
+
+        return baseCycles + sourceCycles + destinationCycles;
+    }
+
+    /// <summary>
+    /// Gets the number of additional CPU cycles required for a specific addressing mode.
+    /// </summary>
+    /// <param name="addressingMode">The addressing mode to get cycles for.</param>
+    /// <returns>The number of additional CPU cycles.</returns>
+    private static uint GetAddressingModeCycles(AddressingMode addressingMode)
+    {
+        return addressingMode switch
         {
             AddressingMode.Register => 0,
             AddressingMode.Indexed => 3,
@@ -200,20 +244,6 @@ public class MovInstruction : Instruction, IExecutableInstruction
             AddressingMode.Symbolic => 3,
             _ => 0
         };
-
-        // Add cycles for destination addressing mode
-        uint destinationCycles = _destinationAddressingMode switch
-        {
-            AddressingMode.Register => 0,
-            AddressingMode.Indexed => 3,
-            AddressingMode.Indirect => 2,
-            AddressingMode.IndirectAutoIncrement => 2,
-            AddressingMode.Absolute => 3,
-            AddressingMode.Symbolic => 3,
-            _ => 0
-        };
-
-        return baseCycles + sourceCycles + destinationCycles;
     }
 
     /// <summary>
@@ -233,6 +263,28 @@ public class MovInstruction : Instruction, IExecutableInstruction
             AddressingMode.Immediate => "#N",
             AddressingMode.Absolute => "&ADDR",
             AddressingMode.Symbolic => "ADDR",
+            _ => "?"
+        };
+    }
+
+    /// <summary>
+    /// Formats an operand with actual values for display in assembly format.
+    /// </summary>
+    /// <param name="register">The register used by the operand.</param>
+    /// <param name="addressingMode">The addressing mode of the operand.</param>
+    /// <param name="extensionWord">The extension word containing the immediate value, address, or offset.</param>
+    /// <returns>A formatted string representing the operand with actual values.</returns>
+    private static string FormatOperandWithValue(RegisterName register, AddressingMode addressingMode, ushort extensionWord)
+    {
+        return addressingMode switch
+        {
+            AddressingMode.Register => register.ToString(),
+            AddressingMode.Indexed => $"0x{extensionWord:X}({register})",
+            AddressingMode.Indirect => $"@{register}",
+            AddressingMode.IndirectAutoIncrement => $"@{register}+",
+            AddressingMode.Immediate => $"#0x{extensionWord:X}",
+            AddressingMode.Absolute => $"&0x{extensionWord:X}",
+            AddressingMode.Symbolic => $"0x{extensionWord:X}",
             _ => "?"
         };
     }

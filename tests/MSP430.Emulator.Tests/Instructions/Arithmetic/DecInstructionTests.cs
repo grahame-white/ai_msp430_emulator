@@ -10,158 +10,31 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 /// </summary>
 public class DecInstructionTests
 {
-    [Fact]
-    public void Constructor_ValidParameters_SetsFormat()
+    [Theory]
+    [InlineData(0xB123, RegisterName.R2, AddressingMode.Register, false)]
+    [InlineData(0xB456, RegisterName.R3, AddressingMode.Indexed, false)]
+    [InlineData(0xB789, RegisterName.R5, AddressingMode.Absolute, false)]
+    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName destReg, AddressingMode destMode, bool isByteOp)
     {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
+        var instruction = new DecInstruction(instructionWord, destReg, destMode, isByteOp);
 
-        // Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsOpcode()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(0xB, instruction.Opcode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsInstructionWord()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(0xB123, instruction.InstructionWord);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsMnemonic()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal("DEC", instruction.Mnemonic);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsIsByteOperationFalse()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.False(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationRegister()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceRegisterNull()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
-
-        // Assert
+        Assert.Equal((byte)0xB, instruction.Opcode);
+        Assert.Equal(instructionWord, instruction.InstructionWord);
+        Assert.Equal(destReg, instruction.DestinationRegister);
+        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+        Assert.Equal(isByteOp, instruction.IsByteOperation);
         Assert.Null(instruction.SourceRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceAddressingModeNull()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB123,
-            RegisterName.R2,
-            AddressingMode.Register,
-            false);
-
-        // Assert
         Assert.Null(instruction.SourceAddressingMode);
     }
 
-    [Fact]
-    public void Constructor_ByteOperation_SetsByteFlag()
+    [Theory]
+    [InlineData(false, "DEC")]
+    [InlineData(true, "DEC.B")]
+    public void Constructor_ByteOperationFlag_SetsMnemonic(bool isByteOperation, string expectedMnemonic)
     {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB563,
-            RegisterName.R5,
-            AddressingMode.Register,
-            true);
-
-        // Assert
-        Assert.True(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsMnemonicWithB()
-    {
-        // Arrange & Act
-        var instruction = new DecInstruction(
-            0xB563,
-            RegisterName.R5,
-            AddressingMode.Register,
-            true);
-
-        // Assert
-        Assert.Equal("DEC.B", instruction.Mnemonic);
+        var instruction = new DecInstruction(0xB563, RegisterName.R5, AddressingMode.Register, isByteOperation);
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Theory]

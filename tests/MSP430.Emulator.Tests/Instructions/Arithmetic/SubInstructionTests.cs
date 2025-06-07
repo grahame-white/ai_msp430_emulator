@@ -13,158 +13,31 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 public class SubInstructionTests
 {
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsFormat()
+    [Theory]
+    [InlineData(0x8123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false)]
+    [InlineData(0x8456, RegisterName.R2, RegisterName.R3, AddressingMode.Immediate, AddressingMode.Indexed, false)]
+    [InlineData(0x8789, RegisterName.R5, RegisterName.R6, AddressingMode.Absolute, AddressingMode.Symbolic, false)]
+    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName sourceReg, RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOp)
     {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
+        var instruction = new SubInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, isByteOp);
 
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        Assert.Equal((byte)0x8, instruction.Opcode);
+        Assert.Equal(instructionWord, instruction.InstructionWord);
+        Assert.Equal(sourceReg, instruction.SourceRegister);
+        Assert.Equal(destReg, instruction.DestinationRegister);
+        Assert.Equal(sourceMode, instruction.SourceAddressingMode);
+        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+        Assert.Equal(isByteOp, instruction.IsByteOperation);
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsOpcode()
+    [Theory]
+    [InlineData(false, "SUB")]
+    [InlineData(true, "SUB.B")]
+    public void Constructor_ByteOperationFlag_SetsMnemonic(bool isByteOperation, string expectedMnemonic)
     {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        Assert.Equal(0x8, instruction.Opcode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsInstructionWord()
-    {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        Assert.Equal(0x8123, instruction.InstructionWord);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsMnemonic()
-    {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        Assert.Equal("SUB", instruction.Mnemonic);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsByteOperationFlag()
-    {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        Assert.False(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceRegister()
-    {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationRegister()
-    {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        Assert.Equal(RegisterName.R4, instruction.DestinationRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceAddressingMode()
-    {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
-    {
-        var instruction = new SubInstruction(
-            0x8123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsByteFlag()
-    {
-        var instruction = new SubInstruction(
-            0x8563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        Assert.True(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsByteOperationMnemonic()
-    {
-        var instruction = new SubInstruction(
-            0x8563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        Assert.Equal("SUB.B", instruction.Mnemonic);
+        var instruction = new SubInstruction(0x8563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, isByteOperation);
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Theory]

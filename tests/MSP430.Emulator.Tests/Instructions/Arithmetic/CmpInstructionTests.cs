@@ -13,87 +13,30 @@ public class CmpInstructionTests
 {
 
     [Theory]
-    [InlineData(InstructionFormat.FormatI)]
-    public void Constructor_ValidParameters_SetsFormat(InstructionFormat expectedFormat)
+    [InlineData(0x9123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false)]
+    [InlineData(0x9456, RegisterName.R2, RegisterName.R3, AddressingMode.Immediate, AddressingMode.Indexed, false)]
+    [InlineData(0x9789, RegisterName.R5, RegisterName.R6, AddressingMode.Absolute, AddressingMode.Symbolic, false)]
+    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName sourceReg, RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOp)
     {
-        // Arrange & Act
-        var instruction = new CmpInstruction(
-            0x9123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
+        var instruction = new CmpInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, isByteOp);
 
-        // Assert
-        Assert.Equal(expectedFormat, instruction.Format);
+        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        Assert.Equal((byte)0x9, instruction.Opcode);
+        Assert.Equal(instructionWord, instruction.InstructionWord);
+        Assert.Equal(sourceReg, instruction.SourceRegister);
+        Assert.Equal(destReg, instruction.DestinationRegister);
+        Assert.Equal(sourceMode, instruction.SourceAddressingMode);
+        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+        Assert.Equal(isByteOp, instruction.IsByteOperation);
     }
 
     [Theory]
-    [InlineData(0x9)]
-    public void Constructor_ValidParameters_SetsOpcode(byte expectedOpcode)
+    [InlineData(false, "CMP")]
+    [InlineData(true, "CMP.B")]
+    public void Constructor_ByteOperationFlag_SetsMnemonic(bool isByteOperation, string expectedMnemonic)
     {
-        // Arrange & Act
-        var instruction = new CmpInstruction(
-            0x9123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(expectedOpcode, instruction.Opcode);
-    }
-
-    [Theory]
-    [InlineData(0x9123)]
-    public void Constructor_ValidParameters_SetsInstructionWord(ushort expectedWord)
-    {
-        // Arrange & Act
-        var instruction = new CmpInstruction(
-            0x9123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(expectedWord, instruction.InstructionWord);
-    }
-
-    [Theory]
-    [InlineData("CMP")]
-    public void Constructor_ValidParameters_SetsMnemonic(string expectedMnemonic)
-    {
-        // Arrange & Act
-        var instruction = new CmpInstruction(
-            0x9123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
+        var instruction = new CmpInstruction(0x9563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, isByteOperation);
         Assert.Equal(expectedMnemonic, instruction.Mnemonic);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsIsByteOperationToFalse()
-    {
-        // Arrange & Act
-        var instruction = new CmpInstruction(
-            0x9123,
-            RegisterName.R1,
-            RegisterName.R4,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.False(instruction.IsByteOperation);
     }
 
     [Theory]

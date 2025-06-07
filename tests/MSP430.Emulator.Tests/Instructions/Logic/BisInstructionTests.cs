@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
@@ -15,93 +14,30 @@ public class BisInstructionTests
 {
 
     [Theory]
-    [InlineData("Format", InstructionFormat.FormatI)]
-    [InlineData("Mnemonic", "BIS")]
-    [InlineData("IsByteOperation", false)]
-    [InlineData("SourceRegister", RegisterName.R1)]
-    [InlineData("DestinationRegister", RegisterName.R2)]
-    [InlineData("SourceAddressingMode", AddressingMode.Register)]
-    [InlineData("DestinationAddressingMode", AddressingMode.Register)]
-    public void Constructor_ValidParameters_SetsProperty(string propertyName, object expectedValue)
+    [InlineData(0xD123, RegisterName.R1, RegisterName.R2, AddressingMode.Register, AddressingMode.Register, false)]
+    [InlineData(0xD456, RegisterName.R3, RegisterName.R4, AddressingMode.Immediate, AddressingMode.Indexed, false)]
+    [InlineData(0xD789, RegisterName.R5, RegisterName.R6, AddressingMode.Absolute, AddressingMode.Symbolic, false)]
+    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName sourceReg, RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOp)
     {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
+        var instruction = new BisInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, isByteOp);
 
-        // Assert
-        object? propertyValue = typeof(BisInstruction).GetProperty(propertyName)?.GetValue(instruction);
-        Assert.Equal(expectedValue, propertyValue);
+        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        Assert.Equal((byte)0xD, instruction.Opcode);
+        Assert.Equal(instructionWord, instruction.InstructionWord);
+        Assert.Equal(sourceReg, instruction.SourceRegister);
+        Assert.Equal(destReg, instruction.DestinationRegister);
+        Assert.Equal(sourceMode, instruction.SourceAddressingMode);
+        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+        Assert.Equal(isByteOp, instruction.IsByteOperation);
     }
 
     [Theory]
-    [InlineData(0xD)]
-    public void Constructor_ValidParameters_SetsOpcode(int expectedOpcode)
+    [InlineData(false, "BIS")]
+    [InlineData(true, "BIS.B")]
+    public void Constructor_ByteOperationFlag_SetsMnemonic(bool isByteOperation, string expectedMnemonic)
     {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(expectedOpcode, instruction.Opcode);
-    }
-
-    [Theory]
-    [InlineData(0xD123)]
-    public void Constructor_ValidParameters_SetsInstructionWord(ushort expectedWord)
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(expectedWord, instruction.InstructionWord);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsByteFlag()
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        // Assert
-        Assert.True(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsMnemonic()
-    {
-        // Arrange & Act
-        var instruction = new BisInstruction(
-            0xD563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        // Assert
-        Assert.Equal("BIS.B", instruction.Mnemonic);
+        var instruction = new BisInstruction(0xD563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, isByteOperation);
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Theory]

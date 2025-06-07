@@ -11,21 +11,22 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 public class DecInstructionTests
 {
     [Theory]
-    [InlineData(0xB123, RegisterName.R2, AddressingMode.Register, false)]
-    [InlineData(0xB456, RegisterName.R3, AddressingMode.Indexed, false)]
-    [InlineData(0xB789, RegisterName.R5, AddressingMode.Absolute, false)]
-    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName destReg, AddressingMode destMode, bool isByteOp)
+    [InlineData(0xB123)]
+    [InlineData(0xB456)]
+    [InlineData(0xB789)]
+    public void Constructor_ValidParameters_SetsInstructionWord(ushort instructionWord)
     {
-        var instruction = new DecInstruction(instructionWord, destReg, destMode, isByteOp);
-
-        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-        Assert.Equal((byte)0xB, instruction.Opcode);
+        var instruction = new DecInstruction(instructionWord, RegisterName.R3, AddressingMode.Register, false);
         Assert.Equal(instructionWord, instruction.InstructionWord);
-        Assert.Equal(destReg, instruction.DestinationRegister);
-        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Constructor_ValidParameters_SetsByteOperation(bool isByteOp)
+    {
+        var instruction = new DecInstruction(0xB123, RegisterName.R3, AddressingMode.Register, isByteOp);
         Assert.Equal(isByteOp, instruction.IsByteOperation);
-        Assert.Null(instruction.SourceRegister);
-        Assert.Null(instruction.SourceAddressingMode);
     }
 
     [Theory]

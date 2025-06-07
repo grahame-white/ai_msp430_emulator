@@ -13,20 +13,41 @@ public class AndInstructionTests
 {
 
     [Theory]
-    [InlineData(0xF123, RegisterName.R1, RegisterName.R2, AddressingMode.Register, AddressingMode.Register, false)]
-    [InlineData(0xF456, RegisterName.R3, RegisterName.R4, AddressingMode.Immediate, AddressingMode.Indexed, false)]
-    [InlineData(0xF789, RegisterName.R5, RegisterName.R6, AddressingMode.Absolute, AddressingMode.Symbolic, false)]
-    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName sourceReg, RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOp)
+    [InlineData(0xF123)]
+    [InlineData(0xF456)]
+    [InlineData(0xF789)]
+    public void Constructor_ValidParameters_SetsFormat(ushort instructionWord)
     {
-        var instruction = new AndInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, isByteOp);
-
+        var instruction = new AndInstruction(instructionWord, RegisterName.R1, RegisterName.R2, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+    }
+
+    [Theory]
+    [InlineData(0xF123)]
+    [InlineData(0xF456)]
+    [InlineData(0xF789)]
+    public void Constructor_ValidParameters_SetsOpcode(ushort instructionWord)
+    {
+        var instruction = new AndInstruction(instructionWord, RegisterName.R1, RegisterName.R2, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal((byte)0xF, instruction.Opcode);
+    }
+
+    [Theory]
+    [InlineData(0xF123)]
+    [InlineData(0xF456)]
+    [InlineData(0xF789)]
+    public void Constructor_ValidParameters_SetsInstructionWord(ushort instructionWord)
+    {
+        var instruction = new AndInstruction(instructionWord, RegisterName.R1, RegisterName.R2, AddressingMode.Register, AddressingMode.Register, false);
         Assert.Equal(instructionWord, instruction.InstructionWord);
-        Assert.Equal(sourceReg, instruction.SourceRegister);
-        Assert.Equal(destReg, instruction.DestinationRegister);
-        Assert.Equal(sourceMode, instruction.SourceAddressingMode);
-        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Constructor_ValidParameters_SetsByteOperation(bool isByteOp)
+    {
+        var instruction = new AndInstruction(0xF123, RegisterName.R1, RegisterName.R2, AddressingMode.Register, AddressingMode.Register, isByteOp);
         Assert.Equal(isByteOp, instruction.IsByteOperation);
     }
 

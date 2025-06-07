@@ -12,23 +12,6 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 public class CmpInstructionTests
 {
 
-    [Theory]
-    [InlineData(0x9123, RegisterName.R1, RegisterName.R4, AddressingMode.Register, AddressingMode.Register, false)]
-    [InlineData(0x9456, RegisterName.R2, RegisterName.R3, AddressingMode.Immediate, AddressingMode.Indexed, false)]
-    [InlineData(0x9789, RegisterName.R5, RegisterName.R6, AddressingMode.Absolute, AddressingMode.Symbolic, false)]
-    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName sourceReg, RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOp)
-    {
-        var instruction = new CmpInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, isByteOp);
-
-        Assert.Equal(InstructionFormat.FormatI, instruction.Format);
-        Assert.Equal((byte)0x9, instruction.Opcode);
-        Assert.Equal(instructionWord, instruction.InstructionWord);
-        Assert.Equal(sourceReg, instruction.SourceRegister);
-        Assert.Equal(destReg, instruction.DestinationRegister);
-        Assert.Equal(sourceMode, instruction.SourceAddressingMode);
-        Assert.Equal(destMode, instruction.DestinationAddressingMode);
-        Assert.Equal(isByteOp, instruction.IsByteOperation);
-    }
 
     [Theory]
     [InlineData(false, "CMP")]

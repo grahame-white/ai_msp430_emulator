@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 
 namespace MSP430.Emulator.Instructions.DataMovement;
@@ -95,21 +96,7 @@ public class MovInstruction : Instruction, IExecutableInstruction
     public uint Execute(IRegisterFile registerFile, byte[] memory, ushort[] extensionWords)
     {
         // Determine extension words for source and destination
-        ushort sourceExtensionWord = 0;
-        ushort destinationExtensionWord = 0;
-
-        if (AddressingModeDecoder.RequiresExtensionWord(_sourceAddressingMode))
-        {
-            sourceExtensionWord = extensionWords[0];
-            if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
-            {
-                destinationExtensionWord = extensionWords[1];
-            }
-        }
-        else if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
-        {
-            destinationExtensionWord = extensionWords[0];
-        }
+        ExtractExtensionWords(extensionWords, out ushort sourceExtensionWord, out ushort destinationExtensionWord);
 
         // Read source operand
         ushort sourceValue = InstructionHelpers.ReadOperand(
@@ -163,23 +150,9 @@ public class MovInstruction : Instruction, IExecutableInstruction
         string suffix = IsByteOperation ? ".B" : "";
 
         // Determine extension words for source and destination
-        ushort sourceExtensionWord = 0;
-        ushort destinationExtensionWord = 0;
+        ExtractExtensionWords(extensionWords, out ushort sourceExtensionWord, out ushort destinationExtensionWord);
 
-        if (AddressingModeDecoder.RequiresExtensionWord(_sourceAddressingMode))
-        {
-            sourceExtensionWord = extensionWords.Length > 0 ? extensionWords[0] : (ushort)0;
-            if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
-            {
-                destinationExtensionWord = extensionWords.Length > 1 ? extensionWords[1] : (ushort)0;
-            }
-        }
-        else if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
-        {
-            destinationExtensionWord = extensionWords.Length > 0 ? extensionWords[0] : (ushort)0;
-        }
-
-        return $"{Mnemonic}{suffix} {FormatOperandWithValue(_sourceRegister, _sourceAddressingMode, sourceExtensionWord)}, {FormatOperandWithValue(_destinationRegister, _destinationAddressingMode, destinationExtensionWord)}";
+        return $"{Mnemonic}{suffix} {FormatOperand(_sourceRegister, _sourceAddressingMode, sourceExtensionWord)}, {FormatOperand(_destinationRegister, _destinationAddressingMode, destinationExtensionWord)}";
     }
 
     /// <summary>
@@ -231,6 +204,7 @@ public class MovInstruction : Instruction, IExecutableInstruction
     /// </summary>
     /// <param name="addressingMode">The addressing mode to get cycles for.</param>
     /// <returns>The number of additional CPU cycles.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when an unrecognized addressing mode is provided.</exception>
     private static uint GetAddressingModeCycles(AddressingMode addressingMode)
     {
         return addressingMode switch
@@ -242,8 +216,33 @@ public class MovInstruction : Instruction, IExecutableInstruction
             AddressingMode.Immediate => 0,
             AddressingMode.Absolute => 3,
             AddressingMode.Symbolic => 3,
-            _ => 0
+            _ => throw new ArgumentOutOfRangeException(nameof(addressingMode), addressingMode, "Unrecognized addressing mode")
         };
+    }
+
+    /// <summary>
+    /// Extracts extension words for source and destination operands based on their addressing modes.
+    /// </summary>
+    /// <param name="extensionWords">Array of extension words from the instruction.</param>
+    /// <param name="sourceExtensionWord">Output parameter for the source extension word.</param>
+    /// <param name="destinationExtensionWord">Output parameter for the destination extension word.</param>
+    private void ExtractExtensionWords(ushort[] extensionWords, out ushort sourceExtensionWord, out ushort destinationExtensionWord)
+    {
+        sourceExtensionWord = 0;
+        destinationExtensionWord = 0;
+
+        if (AddressingModeDecoder.RequiresExtensionWord(_sourceAddressingMode))
+        {
+            sourceExtensionWord = extensionWords.Length > 0 ? extensionWords[0] : (ushort)0;
+            if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
+            {
+                destinationExtensionWord = extensionWords.Length > 1 ? extensionWords[1] : (ushort)0;
+            }
+        }
+        else if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
+        {
+            destinationExtensionWord = extensionWords.Length > 0 ? extensionWords[0] : (ushort)0;
+        }
     }
 
     /// <summary>
@@ -251,40 +250,19 @@ public class MovInstruction : Instruction, IExecutableInstruction
     /// </summary>
     /// <param name="register">The register used by the operand.</param>
     /// <param name="addressingMode">The addressing mode of the operand.</param>
+    /// <param name="extensionWord">Optional extension word containing immediate values, addresses, or offsets. If null, generic placeholders are used.</param>
     /// <returns>A formatted string representing the operand.</returns>
-    private static string FormatOperand(RegisterName register, AddressingMode addressingMode)
+    private static string FormatOperand(RegisterName register, AddressingMode addressingMode, ushort? extensionWord = null)
     {
         return addressingMode switch
         {
             AddressingMode.Register => register.ToString(),
-            AddressingMode.Indexed => $"X({register})",
+            AddressingMode.Indexed => extensionWord.HasValue ? $"0x{extensionWord.Value:X}({register})" : $"X({register})",
             AddressingMode.Indirect => $"@{register}",
             AddressingMode.IndirectAutoIncrement => $"@{register}+",
-            AddressingMode.Immediate => "#N",
-            AddressingMode.Absolute => "&ADDR",
-            AddressingMode.Symbolic => "ADDR",
-            _ => "?"
-        };
-    }
-
-    /// <summary>
-    /// Formats an operand with actual values for display in assembly format.
-    /// </summary>
-    /// <param name="register">The register used by the operand.</param>
-    /// <param name="addressingMode">The addressing mode of the operand.</param>
-    /// <param name="extensionWord">The extension word containing the immediate value, address, or offset.</param>
-    /// <returns>A formatted string representing the operand with actual values.</returns>
-    private static string FormatOperandWithValue(RegisterName register, AddressingMode addressingMode, ushort extensionWord)
-    {
-        return addressingMode switch
-        {
-            AddressingMode.Register => register.ToString(),
-            AddressingMode.Indexed => $"0x{extensionWord:X}({register})",
-            AddressingMode.Indirect => $"@{register}",
-            AddressingMode.IndirectAutoIncrement => $"@{register}+",
-            AddressingMode.Immediate => $"#0x{extensionWord:X}",
-            AddressingMode.Absolute => $"&0x{extensionWord:X}",
-            AddressingMode.Symbolic => $"0x{extensionWord:X}",
+            AddressingMode.Immediate => extensionWord.HasValue ? $"#0x{extensionWord.Value:X}" : "#",
+            AddressingMode.Absolute => extensionWord.HasValue ? $"&0x{extensionWord.Value:X}" : "&ADDR",
+            AddressingMode.Symbolic => extensionWord.HasValue ? $"0x{extensionWord.Value:X}" : "ADDR",
             _ => "?"
         };
     }

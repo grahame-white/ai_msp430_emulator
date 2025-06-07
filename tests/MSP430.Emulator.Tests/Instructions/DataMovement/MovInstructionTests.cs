@@ -537,7 +537,7 @@ public class MovInstructionTests
         // Test various addressing mode combinations
         (AddressingMode, AddressingMode, string)[] testCases = new[]
         {
-            (AddressingMode.Immediate, AddressingMode.Register, "MOV #N, R2"),
+            (AddressingMode.Immediate, AddressingMode.Register, "MOV #, R2"),
             (AddressingMode.Indirect, AddressingMode.Indexed, "MOV @R1, X(R2)"),
             (AddressingMode.IndirectAutoIncrement, AddressingMode.Absolute, "MOV @R1+, &ADDR"),
             (AddressingMode.Symbolic, AddressingMode.Indirect, "MOV ADDR, @R2")

@@ -522,13 +522,14 @@ public class CmpInstructionTests
         Assert.Equal(0x2000, registerFile.ReadRegister(RegisterName.R4)); // Destination completely unchanged
     }
 
-    [Fact]
-    public void Execute_DestinationNotModified_ZeroFlag()
+    [Theory]
+    [InlineData(0x1000, 0x2000, false)]
+    public void Execute_DestinationNotModified_ZeroFlagState(ushort sourceValue, ushort destValue, bool expectedZero)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R1, 0x1000);
-        registerFile.WriteRegister(RegisterName.R4, 0x2000);
+        registerFile.WriteRegister(RegisterName.R1, sourceValue);
+        registerFile.WriteRegister(RegisterName.R4, destValue);
 
         var instruction = new CmpInstruction(
             0x9014,
@@ -542,16 +543,17 @@ public class CmpInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.False(registerFile.StatusRegister.Zero);
+        Assert.Equal(expectedZero, registerFile.StatusRegister.Zero);
     }
 
-    [Fact]
-    public void Execute_DestinationNotModified_NegativeFlag()
+    [Theory]
+    [InlineData(0x1000, 0x2000, false)]
+    public void Execute_DestinationNotModified_NegativeFlagState(ushort sourceValue, ushort destValue, bool expectedNegative)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R1, 0x1000);
-        registerFile.WriteRegister(RegisterName.R4, 0x2000);
+        registerFile.WriteRegister(RegisterName.R1, sourceValue);
+        registerFile.WriteRegister(RegisterName.R4, destValue);
 
         var instruction = new CmpInstruction(
             0x9014,
@@ -565,16 +567,17 @@ public class CmpInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.False(registerFile.StatusRegister.Negative);
+        Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
     }
 
-    [Fact]
-    public void Execute_DestinationNotModified_CarryFlag()
+    [Theory]
+    [InlineData(0x1000, 0x2000, false)]
+    public void Execute_DestinationNotModified_CarryFlagState(ushort sourceValue, ushort destValue, bool expectedCarry)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R1, 0x1000);
-        registerFile.WriteRegister(RegisterName.R4, 0x2000);
+        registerFile.WriteRegister(RegisterName.R1, sourceValue);
+        registerFile.WriteRegister(RegisterName.R4, destValue);
 
         var instruction = new CmpInstruction(
             0x9014,
@@ -588,7 +591,7 @@ public class CmpInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.False(registerFile.StatusRegister.Carry);
+        Assert.Equal(expectedCarry, registerFile.StatusRegister.Carry);
     }
 
     [Fact]

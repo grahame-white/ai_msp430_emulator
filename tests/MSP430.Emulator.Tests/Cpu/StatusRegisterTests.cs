@@ -215,55 +215,51 @@ public class StatusRegisterTests
         Assert.Equal((ushort)0x000F, sr.Value); // Bits 0-3 set
     }
 
-    [Fact]
-    public void MultipleFlags_SetSimultaneously_CarryFlagSet()
+    [Theory]
+    [InlineData(true, true, true, true)]
+    public void MultipleFlags_SetSimultaneously_CarryFlagSet(bool carrySet, bool zeroSet, bool negativeSet, bool gieSet)
     {
         var sr = new StatusRegister();
-
-        sr.Carry = true;
-        sr.Zero = true;
-        sr.Negative = true;
-        sr.GeneralInterruptEnable = true;
-
+        sr.Carry = carrySet;
+        sr.Zero = zeroSet;
+        sr.Negative = negativeSet;
+        sr.GeneralInterruptEnable = gieSet;
         Assert.True(sr.Carry);
     }
 
-    [Fact]
-    public void MultipleFlags_SetSimultaneously_ZeroFlagSet()
+    [Theory]
+    [InlineData(true, true, true, true)]
+    public void MultipleFlags_SetSimultaneously_ZeroFlagSet(bool carrySet, bool zeroSet, bool negativeSet, bool gieSet)
     {
         var sr = new StatusRegister();
-
-        sr.Carry = true;
-        sr.Zero = true;
-        sr.Negative = true;
-        sr.GeneralInterruptEnable = true;
-
+        sr.Carry = carrySet;
+        sr.Zero = zeroSet;
+        sr.Negative = negativeSet;
+        sr.GeneralInterruptEnable = gieSet;
         Assert.True(sr.Zero);
     }
 
-    [Fact]
-    public void MultipleFlags_SetSimultaneously_NegativeFlagSet()
+    [Theory]
+    [InlineData(true, true, true, true)]
+    public void MultipleFlags_SetSimultaneously_NegativeFlagSet(bool carrySet, bool zeroSet, bool negativeSet, bool gieSet)
     {
         var sr = new StatusRegister();
-
-        sr.Carry = true;
-        sr.Zero = true;
-        sr.Negative = true;
-        sr.GeneralInterruptEnable = true;
-
+        sr.Carry = carrySet;
+        sr.Zero = zeroSet;
+        sr.Negative = negativeSet;
+        sr.GeneralInterruptEnable = gieSet;
         Assert.True(sr.Negative);
     }
 
-    [Fact]
-    public void MultipleFlags_SetSimultaneously_GeneralInterruptEnableFlagSet()
+    [Theory]
+    [InlineData(true, true, true, true)]
+    public void MultipleFlags_SetSimultaneously_GeneralInterruptEnableFlagSet(bool carrySet, bool zeroSet, bool negativeSet, bool gieSet)
     {
         var sr = new StatusRegister();
-
-        sr.Carry = true;
-        sr.Zero = true;
-        sr.Negative = true;
-        sr.GeneralInterruptEnable = true;
-
+        sr.Carry = carrySet;
+        sr.Zero = zeroSet;
+        sr.Negative = negativeSet;
+        sr.GeneralInterruptEnable = gieSet;
         Assert.True(sr.GeneralInterruptEnable);
     }
 

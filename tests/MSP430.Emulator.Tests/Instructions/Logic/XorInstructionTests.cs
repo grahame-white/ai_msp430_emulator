@@ -13,180 +13,31 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 public class XorInstructionTests
 {
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsFormat()
+    [Theory]
+    [InlineData(0xE123, RegisterName.R1, RegisterName.R2, AddressingMode.Register, AddressingMode.Register, false)]
+    [InlineData(0xE456, RegisterName.R3, RegisterName.R4, AddressingMode.Immediate, AddressingMode.Indexed, false)]
+    [InlineData(0xE789, RegisterName.R5, RegisterName.R6, AddressingMode.Absolute, AddressingMode.Symbolic, false)]
+    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName sourceReg, RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOp)
     {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
+        var instruction = new XorInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, isByteOp);
 
-        // Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        Assert.Equal((byte)0xE, instruction.Opcode);
+        Assert.Equal(instructionWord, instruction.InstructionWord);
+        Assert.Equal(sourceReg, instruction.SourceRegister);
+        Assert.Equal(destReg, instruction.DestinationRegister);
+        Assert.Equal(sourceMode, instruction.SourceAddressingMode);
+        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+        Assert.Equal(isByteOp, instruction.IsByteOperation);
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsOpcode()
+    [Theory]
+    [InlineData(false, "XOR")]
+    [InlineData(true, "XOR.B")]
+    public void Constructor_ByteOperationFlag_SetsMnemonic(bool isByteOperation, string expectedMnemonic)
     {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(0xE, instruction.Opcode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsInstructionWord()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(0xE123, instruction.InstructionWord);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsMnemonic()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal("XOR", instruction.Mnemonic);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsIsByteOperation()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.False(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceRegister()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationRegister()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceAddressingMode()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsByteFlag()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        // Assert
-        Assert.True(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsMnemonic()
-    {
-        // Arrange & Act
-        var instruction = new XorInstruction(
-            0xE563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        // Assert
-        Assert.Equal("XOR.B", instruction.Mnemonic);
+        var instruction = new XorInstruction(0xE563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, isByteOperation);
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Theory]

@@ -12,180 +12,31 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 public class AndInstructionTests
 {
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsFormat()
+    [Theory]
+    [InlineData(0xF123, RegisterName.R1, RegisterName.R2, AddressingMode.Register, AddressingMode.Register, false)]
+    [InlineData(0xF456, RegisterName.R3, RegisterName.R4, AddressingMode.Immediate, AddressingMode.Indexed, false)]
+    [InlineData(0xF789, RegisterName.R5, RegisterName.R6, AddressingMode.Absolute, AddressingMode.Symbolic, false)]
+    public void Constructor_ValidParameters_SetsBasicProperties(ushort instructionWord, RegisterName sourceReg, RegisterName destReg, AddressingMode sourceMode, AddressingMode destMode, bool isByteOp)
     {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
+        var instruction = new AndInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, isByteOp);
 
-        // Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+        Assert.Equal((byte)0xF, instruction.Opcode);
+        Assert.Equal(instructionWord, instruction.InstructionWord);
+        Assert.Equal(sourceReg, instruction.SourceRegister);
+        Assert.Equal(destReg, instruction.DestinationRegister);
+        Assert.Equal(sourceMode, instruction.SourceAddressingMode);
+        Assert.Equal(destMode, instruction.DestinationAddressingMode);
+        Assert.Equal(isByteOp, instruction.IsByteOperation);
     }
 
-    [Fact]
-    public void Constructor_ValidParameters_SetsOpcode()
+    [Theory]
+    [InlineData(false, "AND")]
+    [InlineData(true, "AND.B")]
+    public void Constructor_ByteOperationFlag_SetsMnemonic(bool isByteOperation, string expectedMnemonic)
     {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(0xF, instruction.Opcode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsInstructionWord()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(0xF123, instruction.InstructionWord);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsMnemonic()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal("AND", instruction.Mnemonic);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsIsByteOperation()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.False(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceRegister()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(RegisterName.R1, instruction.SourceRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationRegister()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsSourceAddressingMode()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF123,
-            RegisterName.R1,
-            RegisterName.R2,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Assert
-        Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsByteFlag()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        // Assert
-        Assert.True(instruction.IsByteOperation);
-    }
-
-    [Fact]
-    public void Constructor_ByteOperation_SetsMnemonic()
-    {
-        // Arrange & Act
-        var instruction = new AndInstruction(
-            0xF563,
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            true);
-
-        // Assert
-        Assert.Equal("AND.B", instruction.Mnemonic);
+        var instruction = new AndInstruction(0xF563, RegisterName.R5, RegisterName.R6, AddressingMode.Register, AddressingMode.Register, isByteOperation);
+        Assert.Equal(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Theory]

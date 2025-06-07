@@ -28,15 +28,46 @@ public class MemoryControllerTests
     }
 
     [Fact]
-    public void Constructor_ValidParameters_InitializesCorrectly()
+    public void Constructor_ValidParameters_InitializesMemoryMap()
     {
         // Act & Assert
         Assert.NotNull(_controller.MemoryMap);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_InitializesRam()
+    {
+        // Act & Assert
         Assert.NotNull(_controller.Ram);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_InitializesFlash()
+    {
+        // Act & Assert
         Assert.NotNull(_controller.Flash);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_InitializesInformationMemory()
+    {
+        // Act & Assert
         Assert.NotNull(_controller.InformationMemory);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_InitializesStatistics()
+    {
+        // Act & Assert
         Assert.NotNull(_controller.Statistics);
-        Assert.Equal(0ul, _controller.Statistics.TotalOperations);
+    }
+
+    [Theory]
+    [InlineData(0ul)]
+    public void Constructor_ValidParameters_InitializesStatisticsWithZeroOperations(ulong expectedOperations)
+    {
+        // Act & Assert
+        Assert.Equal(expectedOperations, _controller.Statistics.TotalOperations);
     }
 
     [Fact]

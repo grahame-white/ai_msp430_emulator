@@ -334,8 +334,24 @@ public class InstructionDecoderTests
     [InlineData(0x1400)] // Invalid Format II opcode
     public void Decode_InvalidInstruction_ThrowsInvalidInstructionException(ushort instructionWord)
     {
+        Assert.Throws<InvalidInstructionException>(() => _decoder.Decode(instructionWord));
+    }
+
+    [Theory]
+    [InlineData(0x0000)] // Reserved opcode space
+    [InlineData(0x1400)] // Invalid Format II opcode
+    public void Decode_InvalidInstruction_ExceptionContainsCorrectInstructionWord(ushort instructionWord)
+    {
         InvalidInstructionException exception = Assert.Throws<InvalidInstructionException>(() => _decoder.Decode(instructionWord));
         Assert.Equal(instructionWord, exception.InstructionWord);
+    }
+
+    [Theory]
+    [InlineData(0x0000)] // Reserved opcode space
+    [InlineData(0x1400)] // Invalid Format II opcode
+    public void Decode_InvalidInstruction_ExceptionContainsInvalidMessage(ushort instructionWord)
+    {
+        InvalidInstructionException exception = Assert.Throws<InvalidInstructionException>(() => _decoder.Decode(instructionWord));
         Assert.Contains("Invalid", exception.Message);
     }
 

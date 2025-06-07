@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using MSP430.Emulator.Logging;
 using MSP430.Emulator.Memory;
@@ -17,16 +16,39 @@ public class FlashControllerTests
     }
 
     [Theory]
-    [InlineData("State", FlashControllerState.Locked)]
-    [InlineData("ProtectionLevel", FlashProtectionLevel.None)]
-    [InlineData("CurrentOperation", FlashOperation.None)]
-    [InlineData("IsOperationInProgress", false)]
-    public void Constructor_SetsProperty(string propertyName, object expectedValue)
+    [InlineData(FlashControllerState.Locked)]
+    public void Constructor_SetsState(FlashControllerState expectedState)
     {
         var controller = new FlashController(_logger);
 
-        object? propertyValue = typeof(FlashController).GetProperty(propertyName)?.GetValue(controller);
-        Assert.Equal(expectedValue, propertyValue);
+        Assert.Equal(expectedState, controller.State);
+    }
+
+    [Theory]
+    [InlineData(FlashProtectionLevel.None)]
+    public void Constructor_SetsProtectionLevel(FlashProtectionLevel expectedLevel)
+    {
+        var controller = new FlashController(_logger);
+
+        Assert.Equal(expectedLevel, controller.ProtectionLevel);
+    }
+
+    [Theory]
+    [InlineData(FlashOperation.None)]
+    public void Constructor_SetsCurrentOperation(FlashOperation expectedOperation)
+    {
+        var controller = new FlashController(_logger);
+
+        Assert.Equal(expectedOperation, controller.CurrentOperation);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    public void Constructor_SetsIsOperationInProgress(bool expectedInProgress)
+    {
+        var controller = new FlashController(_logger);
+
+        Assert.Equal(expectedInProgress, controller.IsOperationInProgress);
     }
 
     [Theory]
@@ -387,11 +409,8 @@ public class FlashControllerTests
     }
 
     [Theory]
-    [InlineData("State", FlashControllerState.Unlocked)]
-    [InlineData("CurrentOperation", FlashOperation.None)]
-    [InlineData("OperationCyclesRemaining", 0u)]
-    [InlineData("IsOperationInProgress", false)]
-    public void Update_CompletesOperationWhenCyclesElapse_SetsProperty(string propertyName, object expectedValue)
+    [InlineData(FlashControllerState.Unlocked)]
+    public void Update_CompletesOperationWhenCyclesElapse_SetsState(FlashControllerState expectedState)
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
@@ -400,14 +419,54 @@ public class FlashControllerTests
 
         controller.Update(initialCycles);
 
-        object? propertyValue = typeof(FlashController).GetProperty(propertyName)?.GetValue(controller);
-        Assert.Equal(expectedValue, propertyValue);
+        Assert.Equal(expectedState, controller.State);
     }
 
     [Theory]
-    [InlineData("State", FlashControllerState.Programming)]
-    [InlineData("IsOperationInProgress", true)]
-    public void Update_PartialCycles_KeepsProperty(string propertyName, object expectedValue)
+    [InlineData(FlashOperation.None)]
+    public void Update_CompletesOperationWhenCyclesElapse_SetsCurrentOperation(FlashOperation expectedOperation)
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        uint initialCycles = controller.OperationCyclesRemaining;
+
+        controller.Update(initialCycles);
+
+        Assert.Equal(expectedOperation, controller.CurrentOperation);
+    }
+
+    [Theory]
+    [InlineData(0u)]
+    public void Update_CompletesOperationWhenCyclesElapse_SetsOperationCyclesRemaining(uint expectedCycles)
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        uint initialCycles = controller.OperationCyclesRemaining;
+
+        controller.Update(initialCycles);
+
+        Assert.Equal(expectedCycles, controller.OperationCyclesRemaining);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    public void Update_CompletesOperationWhenCyclesElapse_SetsIsOperationInProgress(bool expectedInProgress)
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+        uint initialCycles = controller.OperationCyclesRemaining;
+
+        controller.Update(initialCycles);
+
+        Assert.Equal(expectedInProgress, controller.IsOperationInProgress);
+    }
+
+    [Theory]
+    [InlineData(FlashControllerState.Programming)]
+    public void Update_PartialCycles_KeepsState(FlashControllerState expectedState)
     {
         var controller = new FlashController(_logger);
         controller.TryUnlock(0xA555);
@@ -415,8 +474,20 @@ public class FlashControllerTests
 
         controller.Update(10);
 
-        object? propertyValue = typeof(FlashController).GetProperty(propertyName)?.GetValue(controller);
-        Assert.Equal(expectedValue, propertyValue);
+        Assert.Equal(expectedState, controller.State);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    public void Update_PartialCycles_KeepsIsOperationInProgress(bool expectedInProgress)
+    {
+        var controller = new FlashController(_logger);
+        controller.TryUnlock(0xA555);
+        controller.StartProgramming(false);
+
+        controller.Update(10);
+
+        Assert.Equal(expectedInProgress, controller.IsOperationInProgress);
     }
 
     [Fact]

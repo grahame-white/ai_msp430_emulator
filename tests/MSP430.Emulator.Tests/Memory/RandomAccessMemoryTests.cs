@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using MSP430.Emulator.Logging;
 using MSP430.Emulator.Memory;
@@ -17,27 +16,57 @@ public class RandomAccessMemoryTests
     }
 
     [Theory]
-    [InlineData("Size", 1024)]
-    [InlineData("BaseAddress", (ushort)0x2000)]
-    [InlineData("EndAddress", (ushort)0x23FF)]
-    public void Constructor_ValidParameters_SetsProperty(string propertyName, object expectedValue)
+    [InlineData(1024)]
+    public void Constructor_ValidParameters_SetsSize(int expectedSize)
     {
-        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+        var memory = new RandomAccessMemory(0x2000, expectedSize, _logger);
 
-        object? propertyValue = typeof(RandomAccessMemory).GetProperty(propertyName)?.GetValue(memory);
-        Assert.Equal(expectedValue, propertyValue);
+        Assert.Equal(expectedSize, memory.Size);
     }
 
     [Theory]
-    [InlineData("Size", 1024)]
-    [InlineData("BaseAddress", (ushort)0x2000)]
-    [InlineData("EndAddress", (ushort)0x23FF)]
-    public void Constructor_NullLogger_SetsProperty(string propertyName, object expectedValue)
+    [InlineData((ushort)0x2000)]
+    public void Constructor_ValidParameters_SetsBaseAddress(ushort expectedBaseAddress)
+    {
+        var memory = new RandomAccessMemory(expectedBaseAddress, 1024, _logger);
+
+        Assert.Equal(expectedBaseAddress, memory.BaseAddress);
+    }
+
+    [Theory]
+    [InlineData((ushort)0x23FF)]
+    public void Constructor_ValidParameters_SetsEndAddress(ushort expectedEndAddress)
+    {
+        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
+
+        Assert.Equal(expectedEndAddress, memory.EndAddress);
+    }
+
+    [Theory]
+    [InlineData(1024)]
+    public void Constructor_NullLogger_SetsSize(int expectedSize)
+    {
+        var memory = new RandomAccessMemory(0x2000, expectedSize);
+
+        Assert.Equal(expectedSize, memory.Size);
+    }
+
+    [Theory]
+    [InlineData((ushort)0x2000)]
+    public void Constructor_NullLogger_SetsBaseAddress(ushort expectedBaseAddress)
+    {
+        var memory = new RandomAccessMemory(expectedBaseAddress, 1024);
+
+        Assert.Equal(expectedBaseAddress, memory.BaseAddress);
+    }
+
+    [Theory]
+    [InlineData((ushort)0x23FF)]
+    public void Constructor_NullLogger_SetsEndAddress(ushort expectedEndAddress)
     {
         var memory = new RandomAccessMemory(0x2000, 1024);
 
-        object? propertyValue = typeof(RandomAccessMemory).GetProperty(propertyName)?.GetValue(memory);
-        Assert.Equal(expectedValue, propertyValue);
+        Assert.Equal(expectedEndAddress, memory.EndAddress);
     }
 
     [Theory]

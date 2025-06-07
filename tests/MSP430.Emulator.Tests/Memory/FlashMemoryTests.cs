@@ -429,10 +429,17 @@ public class FlashMemoryTests
     }
 
     [Theory]
-    [InlineData(0x8000, 0x8000)]
-    [InlineData(0x81FF, 0x8000)]
-    [InlineData(0x8200, 0x8200)]
-    [InlineData(0x8FFF, 0x8E00)]
+    [InlineData(0x8000, 0x8000)] // First sector start
+    [InlineData(0x81FF, 0x8000)] // First sector end
+    [InlineData(0x8200, 0x8200)] // Second sector start
+    [InlineData(0x83FF, 0x8200)] // Second sector end
+    [InlineData(0x8400, 0x8400)] // Third sector start
+    [InlineData(0x8600, 0x8600)] // Fourth sector start
+    [InlineData(0x8800, 0x8800)] // Fifth sector start
+    [InlineData(0x8A00, 0x8A00)] // Sixth sector start
+    [InlineData(0x8C00, 0x8C00)] // Seventh sector start
+    [InlineData(0x8E00, 0x8E00)] // Eighth sector start
+    [InlineData(0x8FFF, 0x8E00)] // Last sector end
     public void GetSectorBaseAddress_ValidAddress_ReturnsCorrectBase(ushort address, ushort expectedBase)
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);

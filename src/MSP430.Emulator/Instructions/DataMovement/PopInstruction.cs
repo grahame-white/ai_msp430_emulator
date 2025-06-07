@@ -91,8 +91,9 @@ public class PopInstruction : Instruction, IExecutableInstruction
             throw new InvalidOperationException($"Stack underflow detected: Stack pointer 0x{currentSP:X4} accesses memory beyond bounds");
         }
 
-        // Read value from current stack location (always as word)
-        ushort stackValue = ReadFromMemory(currentSP, false, memory);
+        // Read value from current stack location
+        // For byte operations, read as byte and sign-extend; for word operations, read as word
+        ushort stackValue = ReadFromMemory(currentSP, _isByteOperation, memory);
 
         // Post-increment stack pointer by 2 (stack grows downward, always operates on words)
         ushort newSP = (ushort)(currentSP + 2);
@@ -100,14 +101,15 @@ public class PopInstruction : Instruction, IExecutableInstruction
         // Check for potential stack pointer overflow
         if (newSP < currentSP) // Overflow detection
         {
-            throw new InvalidOperationException($"Stack underflow detected: Stack pointer 0x{currentSP:X4} would overflow on POP operation");
+            throw new InvalidOperationException($"Stack pointer overflow detected: Stack pointer 0x{currentSP:X4} would overflow on POP operation");
         }
 
         // Update stack pointer (RegisterFile handles word-alignment automatically)
         registerFile.SetStackPointer(newSP);
 
         // Prepare value for destination based on operation type
-        ushort destinationValue = _isByteOperation ? (ushort)(stackValue & 0xFF) : stackValue;
+        // For byte operations, apply sign extension for consistency with PUSH.B
+        ushort destinationValue = _isByteOperation ? SignExtendByte(stackValue) : stackValue;
 
         // Write value to destination operand
         InstructionHelpers.WriteOperand(
@@ -162,5 +164,16 @@ public class PopInstruction : Instruction, IExecutableInstruction
             // MSP430 is little-endian
             return (ushort)(memory[address] | (memory[address + 1] << 8));
         }
+    }
+
+    /// <summary>
+    /// Sign-extends an 8-bit value to 16 bits for byte POP operations.
+    /// This ensures consistency with PUSH.B behavior.
+    /// </summary>
+    /// <param name="byteValue">The 8-bit value to sign-extend.</param>
+    /// <returns>The sign-extended 16-bit value.</returns>
+    private static ushort SignExtendByte(ushort byteValue)
+    {
+        return (ushort)((sbyte)(byte)(byteValue & 0xFF));
     }
 }

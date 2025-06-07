@@ -257,7 +257,7 @@ public class PopInstructionTests
         // Act & Assert
         InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
             instruction.Execute(registerFile, memory, Array.Empty<ushort>()));
-        Assert.Contains("Stack underflow", exception.Message);
+        Assert.Contains("Stack pointer overflow", exception.Message);
     }
 
     [Fact]

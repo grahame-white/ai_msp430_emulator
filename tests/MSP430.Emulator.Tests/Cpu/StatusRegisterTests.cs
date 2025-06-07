@@ -216,150 +216,69 @@ public class StatusRegisterTests
     }
 
     [Theory]
-    [InlineData(true, true, true, true)]
-    public void MultipleFlags_SetSimultaneously_CarryFlagSet(bool carrySet, bool zeroSet, bool negativeSet, bool gieSet)
+    [InlineData("Carry")]
+    [InlineData("Zero")]
+    [InlineData("Negative")]
+    [InlineData("GeneralInterruptEnable")]
+    public void MultipleFlags_SetSimultaneously_IndividualFlagsSet(string flagName)
     {
         var sr = new StatusRegister();
-        sr.Carry = carrySet;
-        sr.Zero = zeroSet;
-        sr.Negative = negativeSet;
-        sr.GeneralInterruptEnable = gieSet;
-        Assert.True(sr.Carry);
+        sr.Carry = true;
+        sr.Zero = true;
+        sr.Negative = true;
+        sr.GeneralInterruptEnable = true;
+
+        bool actualValue = flagName switch
+        {
+            "Carry" => sr.Carry,
+            "Zero" => sr.Zero,
+            "Negative" => sr.Negative,
+            "GeneralInterruptEnable" => sr.GeneralInterruptEnable,
+            _ => throw new ArgumentException($"Unknown flag: {flagName}")
+        };
+
+        Assert.True(actualValue);
     }
 
     [Theory]
-    [InlineData(true, true, true, true)]
-    public void MultipleFlags_SetSimultaneously_ZeroFlagSet(bool carrySet, bool zeroSet, bool negativeSet, bool gieSet)
-    {
-        var sr = new StatusRegister();
-        sr.Carry = carrySet;
-        sr.Zero = zeroSet;
-        sr.Negative = negativeSet;
-        sr.GeneralInterruptEnable = gieSet;
-        Assert.True(sr.Zero);
-    }
-
-    [Theory]
-    [InlineData(true, true, true, true)]
-    public void MultipleFlags_SetSimultaneously_NegativeFlagSet(bool carrySet, bool zeroSet, bool negativeSet, bool gieSet)
-    {
-        var sr = new StatusRegister();
-        sr.Carry = carrySet;
-        sr.Zero = zeroSet;
-        sr.Negative = negativeSet;
-        sr.GeneralInterruptEnable = gieSet;
-        Assert.True(sr.Negative);
-    }
-
-    [Theory]
-    [InlineData(true, true, true, true)]
-    public void MultipleFlags_SetSimultaneously_GeneralInterruptEnableFlagSet(bool carrySet, bool zeroSet, bool negativeSet, bool gieSet)
-    {
-        var sr = new StatusRegister();
-        sr.Carry = carrySet;
-        sr.Zero = zeroSet;
-        sr.Negative = negativeSet;
-        sr.GeneralInterruptEnable = gieSet;
-        Assert.True(sr.GeneralInterruptEnable);
-    }
-
-    [Theory]
-    [InlineData(0x01FF, true)]  // Carry bit set
-    [InlineData(0x01FE, false)] // Carry bit clear
-    public void Value_SetDirectly_UpdatesCarryFlag(ushort value, bool expectedCarry)
+    [InlineData(0x01FF, "Carry", true)]      // Carry bit set
+    [InlineData(0x01FE, "Carry", false)]     // Carry bit clear
+    [InlineData(0x01FF, "Zero", true)]       // Zero bit set
+    [InlineData(0x01FD, "Zero", false)]      // Zero bit clear
+    [InlineData(0x01FF, "Negative", true)]   // Negative bit set
+    [InlineData(0x01FB, "Negative", false)]  // Negative bit clear
+    [InlineData(0x01FF, "GeneralInterruptEnable", true)]   // GIE bit set
+    [InlineData(0x01F7, "GeneralInterruptEnable", false)]  // GIE bit clear
+    [InlineData(0x01FF, "CpuOff", true)]     // CpuOff bit set
+    [InlineData(0x01EF, "CpuOff", false)]    // CpuOff bit clear
+    [InlineData(0x01FF, "OscillatorOff", true)]   // OscillatorOff bit set
+    [InlineData(0x01DF, "OscillatorOff", false)]  // OscillatorOff bit clear
+    [InlineData(0x01FF, "SystemClockGenerator0", true)]   // SCG0 bit set
+    [InlineData(0x01BF, "SystemClockGenerator0", false)]  // SCG0 bit clear
+    [InlineData(0x01FF, "SystemClockGenerator1", true)]   // SCG1 bit set
+    [InlineData(0x017F, "SystemClockGenerator1", false)]  // SCG1 bit clear
+    [InlineData(0x01FF, "Overflow", true)]   // Overflow bit set
+    [InlineData(0x00FF, "Overflow", false)]  // Overflow bit clear
+    public void Value_SetDirectly_UpdatesFlags(ushort value, string flagName, bool expectedValue)
     {
         var sr = new StatusRegister();
         sr.Value = value;
 
-        Assert.Equal(expectedCarry, sr.Carry);
-    }
+        bool actualValue = flagName switch
+        {
+            "Carry" => sr.Carry,
+            "Zero" => sr.Zero,
+            "Negative" => sr.Negative,
+            "GeneralInterruptEnable" => sr.GeneralInterruptEnable,
+            "CpuOff" => sr.CpuOff,
+            "OscillatorOff" => sr.OscillatorOff,
+            "SystemClockGenerator0" => sr.SystemClockGenerator0,
+            "SystemClockGenerator1" => sr.SystemClockGenerator1,
+            "Overflow" => sr.Overflow,
+            _ => throw new ArgumentException($"Unknown flag: {flagName}")
+        };
 
-    [Theory]
-    [InlineData(0x01FF, true)]  // Zero bit set
-    [InlineData(0x01FD, false)] // Zero bit clear
-    public void Value_SetDirectly_UpdatesZeroFlag(ushort value, bool expectedZero)
-    {
-        var sr = new StatusRegister();
-        sr.Value = value;
-
-        Assert.Equal(expectedZero, sr.Zero);
-    }
-
-    [Theory]
-    [InlineData(0x01FF, true)]  // Negative bit set
-    [InlineData(0x01FB, false)] // Negative bit clear
-    public void Value_SetDirectly_UpdatesNegativeFlag(ushort value, bool expectedNegative)
-    {
-        var sr = new StatusRegister();
-        sr.Value = value;
-
-        Assert.Equal(expectedNegative, sr.Negative);
-    }
-
-    [Theory]
-    [InlineData(0x01FF, true)]  // GIE bit set
-    [InlineData(0x01F7, false)] // GIE bit clear
-    public void Value_SetDirectly_UpdatesGeneralInterruptEnableFlag(ushort value, bool expectedGie)
-    {
-        var sr = new StatusRegister();
-        sr.Value = value;
-
-        Assert.Equal(expectedGie, sr.GeneralInterruptEnable);
-    }
-
-    [Theory]
-    [InlineData(0x01FF, true)]  // CpuOff bit set
-    [InlineData(0x01EF, false)] // CpuOff bit clear
-    public void Value_SetDirectly_UpdatesCpuOffFlag(ushort value, bool expectedCpuOff)
-    {
-        var sr = new StatusRegister();
-        sr.Value = value;
-
-        Assert.Equal(expectedCpuOff, sr.CpuOff);
-    }
-
-    [Theory]
-    [InlineData(0x01FF, true)]  // OscillatorOff bit set
-    [InlineData(0x01DF, false)] // OscillatorOff bit clear
-    public void Value_SetDirectly_UpdatesOscillatorOffFlag(ushort value, bool expectedOscOff)
-    {
-        var sr = new StatusRegister();
-        sr.Value = value;
-
-        Assert.Equal(expectedOscOff, sr.OscillatorOff);
-    }
-
-    [Theory]
-    [InlineData(0x01FF, true)]  // SCG0 bit set
-    [InlineData(0x01BF, false)] // SCG0 bit clear
-    public void Value_SetDirectly_UpdatesSystemClockGenerator0Flag(ushort value, bool expectedScg0)
-    {
-        var sr = new StatusRegister();
-        sr.Value = value;
-
-        Assert.Equal(expectedScg0, sr.SystemClockGenerator0);
-    }
-
-    [Theory]
-    [InlineData(0x01FF, true)]  // SCG1 bit set
-    [InlineData(0x017F, false)] // SCG1 bit clear
-    public void Value_SetDirectly_UpdatesSystemClockGenerator1Flag(ushort value, bool expectedScg1)
-    {
-        var sr = new StatusRegister();
-        sr.Value = value;
-
-        Assert.Equal(expectedScg1, sr.SystemClockGenerator1);
-    }
-
-    [Theory]
-    [InlineData(0x01FF, true)]  // Overflow bit set
-    [InlineData(0x00FF, false)] // Overflow bit clear
-    public void Value_SetDirectly_UpdatesOverflowFlag(ushort value, bool expectedOverflow)
-    {
-        var sr = new StatusRegister();
-        sr.Value = value;
-
-        Assert.Equal(expectedOverflow, sr.Overflow);
+        Assert.Equal(expectedValue, actualValue);
     }
 
     [Fact]

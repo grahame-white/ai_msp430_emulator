@@ -101,17 +101,13 @@ public class FlashMemoryTests
         Assert.Throws<ArgumentOutOfRangeException>(() => new FlashMemory(0x8000, invalidSize, 512, _logger));
     }
 
-    [Fact]
-    public void Constructor_InvalidSectorSize_ThrowsArgumentException()
+    [Theory]
+    [InlineData(500)] // Size not divisible by sector size
+    [InlineData(0)]   // Zero sector size
+    [InlineData(-1)]  // Negative sector size
+    public void Constructor_InvalidSectorSize_ThrowsArgumentException(int invalidSectorSize)
     {
-        // Size not divisible by sector size
-        Assert.Throws<ArgumentException>(() => new FlashMemory(0x8000, 4096, 500, _logger));
-
-        // Zero sector size
-        Assert.Throws<ArgumentException>(() => new FlashMemory(0x8000, 4096, 0, _logger));
-
-        // Negative sector size
-        Assert.Throws<ArgumentException>(() => new FlashMemory(0x8000, 4096, -1, _logger));
+        Assert.Throws<ArgumentException>(() => new FlashMemory(0x8000, 4096, invalidSectorSize, _logger));
     }
 
     [Fact]
@@ -169,6 +165,15 @@ public class FlashMemoryTests
         bool result = flash.ProgramByte(0x8000, 0xAB);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void ProgramByte_WhenLocked_DoesNotChangeMemory()
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+
+        flash.ProgramByte(0x8000, 0xAB);
+
         Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8000));
     }
 
@@ -181,6 +186,16 @@ public class FlashMemoryTests
         bool result = flash.ProgramByte(0x8000, 0xAB);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void ProgramByte_WhenUnlocked_WritesValue()
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+        flash.Unlock(0xA555);
+
+        flash.ProgramByte(0x8000, 0xAB);
+
         Assert.Equal(0xAB, flash.ReadByte(0x8000));
     }
 
@@ -197,6 +212,20 @@ public class FlashMemoryTests
         bool result = flash.ProgramByte(0x8000, 0xFF);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public void ProgramByte_RequiringErase_DoesNotChangeMemory()
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+        flash.Unlock(0xA555);
+
+        // First program sets some bits to 0
+        flash.ProgramByte(0x8000, 0xAB);
+
+        // Try to program a value that would require setting 0 bits to 1
+        flash.ProgramByte(0x8000, 0xFF);
+
         Assert.Equal(0xAB, flash.ReadByte(0x8000));
     }
 
@@ -209,6 +238,16 @@ public class FlashMemoryTests
         bool result = flash.ProgramWord(0x8000, 0x1234);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public void ProgramWord_WhenUnlocked_WritesValue()
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+        flash.Unlock(0xA555);
+
+        flash.ProgramWord(0x8000, 0x1234);
+
         Assert.Equal((ushort)0x1234, flash.ReadWord(0x8000));
     }
 
@@ -220,14 +259,28 @@ public class FlashMemoryTests
 
         // Program some data first
         flash.ProgramByte(0x8000, 0xAB);
-        flash.ProgramByte(0x8001, 0xCD);
 
         bool result = flash.EraseSector(0x8000);
 
         Assert.True(result);
-        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8000));
-        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x8001));
-        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(0x81FF)); // End of sector
+    }
+
+    [Theory]
+    [InlineData(0x8000)] // Start of sector
+    [InlineData(0x8001)] // Middle of sector
+    [InlineData(0x81FF)] // End of sector
+    public void EraseSector_WhenUnlocked_ErasesMemoryLocations(ushort address)
+    {
+        var flash = new FlashMemory(0x8000, 4096, 512, _logger);
+        flash.Unlock(0xA555);
+
+        // Program some data first
+        flash.ProgramByte(0x8000, 0xAB);
+        flash.ProgramByte(0x8001, 0xCD);
+
+        flash.EraseSector(0x8000);
+
+        Assert.Equal(FlashMemory.ErasedPattern, flash.ReadByte(address));
     }
 
     [Fact]

@@ -298,7 +298,7 @@ public class AddInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_DoesNotSetZeroFlag()
+    public void Execute_RegisterToRegister_ClearsZeroFlag()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -315,7 +315,7 @@ public class AddInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_DoesNotSetNegativeFlag()
+    public void Execute_RegisterToRegister_ClearsNegativeFlag()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -332,7 +332,7 @@ public class AddInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_DoesNotSetCarryFlag()
+    public void Execute_RegisterToRegister_ClearsCarryFlag()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -349,7 +349,7 @@ public class AddInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_DoesNotSetOverflowFlag()
+    public void Execute_RegisterToRegister_ClearsOverflowFlag()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();

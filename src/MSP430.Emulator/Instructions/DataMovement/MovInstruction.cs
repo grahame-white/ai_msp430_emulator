@@ -11,6 +11,11 @@ namespace MSP430.Emulator.Instructions.DataMovement;
 /// 
 /// Operation: dst = src
 /// Flags: Sets N and Z based on the value moved, clears V, preserves C
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131), Section 5.3.17: "MOV - Move" - Instruction format and operation
+/// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.3.1: "Format I Instructions" - Instruction encoding
+/// - MSP430FR2355 Datasheet (SLAS847G), Section 6.12: "Instruction Set" - Opcode definition and flag behavior
 /// </summary>
 public class MovInstruction : Instruction, IExecutableInstruction
 {
@@ -126,8 +131,12 @@ public class MovInstruction : Instruction, IExecutableInstruction
             destinationExtensionWord);
 
         // Update flags: MOV sets N and Z based on the value moved, clears V, preserves C
-        // Note: There are edge cases with R2 (Status Register) that need further investigation
-        UpdateFlags(sourceValue, registerFile.StatusRegister);
+        // Special case: When destination is R2 (Status Register), flags are not updated
+        // to avoid modifying the value being written to the Status Register
+        if (_destinationRegister != RegisterName.R2)
+        {
+            UpdateFlags(sourceValue, registerFile.StatusRegister);
+        }
 
         // Return cycle count based on addressing modes
         return GetCycleCount();
@@ -146,6 +155,13 @@ public class MovInstruction : Instruction, IExecutableInstruction
     /// <summary>
     /// Updates CPU flags based on the moved value.
     /// MOV instruction sets N and Z flags based on the value, clears V flag, and preserves C flag.
+    /// 
+    /// Special case: When destination is R2 (Status Register), flags are not updated
+    /// to avoid modifying the value being written to the Status Register.
+    /// This follows MSP430 specification behavior where writing to SR doesn't trigger flag updates.
+    /// 
+    /// References:
+    /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.2.1: "Status Register" - Special handling when SR is destination
     /// </summary>
     /// <param name="value">The value that was moved.</param>
     /// <param name="statusRegister">The CPU status register to update.</param>

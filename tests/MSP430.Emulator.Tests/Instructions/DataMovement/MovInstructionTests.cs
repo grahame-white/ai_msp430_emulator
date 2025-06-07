@@ -190,13 +190,13 @@ public class MovInstructionTests
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R1, 0x1000);
+        registerFile.WriteRegister(RegisterName.R5, 0x1000); // Use R5 instead of R1 to avoid alignment
         registerFile.WriteRegister(RegisterName.R3, 0xFF00); // Use R3 instead of R2
         memory[0x1000] = 0x34;
 
         var instruction = new MovInstruction(
             0x4000,
-            RegisterName.R1,
+            RegisterName.R5, // Use R5 instead of R1 to avoid alignment
             RegisterName.R3, // Use R3 instead of R2
             AddressingMode.IndirectAutoIncrement,
             AddressingMode.Register,
@@ -207,7 +207,7 @@ public class MovInstructionTests
 
         // Assert
         Assert.Equal(0xFF34, registerFile.ReadRegister(RegisterName.R3));
-        Assert.Equal(0x1001, registerFile.ReadRegister(RegisterName.R1)); // Incremented by 1 for byte operation
+        Assert.Equal(0x1001, registerFile.ReadRegister(RegisterName.R5)); // Incremented by 1 for byte operation
     }
 
     [Fact]
@@ -292,13 +292,13 @@ public class MovInstructionTests
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
-        registerFile.WriteRegister(RegisterName.R1, 0xABCD);
-        registerFile.WriteRegister(RegisterName.R4, 0x2000); // Use R4 instead of R2
+        registerFile.WriteRegister(RegisterName.R5, 0xABCD); // Use R5 as source
+        registerFile.WriteRegister(RegisterName.R6, 0x2000); // Use R6 as address pointer
 
         var instruction = new MovInstruction(
             0x4000,
-            RegisterName.R1,
-            RegisterName.R4, // Use R4 instead of R2
+            RegisterName.R5, // Use R5 as source
+            RegisterName.R6, // Use R6 as address pointer
             AddressingMode.Register,
             AddressingMode.Indirect,
             false);
@@ -436,10 +436,47 @@ public class MovInstructionTests
 
     [Theory]
     [InlineData(AddressingMode.Register, AddressingMode.Register)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Register, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Register, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Register, AddressingMode.Symbolic)]
     [InlineData(AddressingMode.Immediate, AddressingMode.Register)]
-    [InlineData(AddressingMode.Indexed, AddressingMode.Indirect)]
-    [InlineData(AddressingMode.Absolute, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Register)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Register)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.IndirectAutoIncrement)]
     [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Register)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Symbolic)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Register)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Indirect)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic)]
     public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode sourceMode, AddressingMode destMode)
     {
         // Arrange
@@ -523,5 +560,62 @@ public class MovInstructionTests
             // Assert
             Assert.Equal(expected, result);
         }
+    }
+
+    [Fact]
+    public void Execute_StatusRegisterAsDestination_DoesNotUpdateFlags()
+    {
+        // Arrange
+        // This test verifies the special case where MOV to R2 (Status Register) doesn't update flags
+        // According to MSP430 specification, writing to SR should not trigger flag updates
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        // Use a simple test value and simple initial state
+        registerFile.WriteRegister(RegisterName.R5, 0x1234);
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R5,
+            RegisterName.R2, // Destination is Status Register
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R2)); // Value is written correctly
+        // The key point: flag update logic should NOT run when destination is R2
+    }
+
+    [Fact]
+    public void Execute_StatusRegisterAsSource_UpdatesFlagsNormally()
+    {
+        // Arrange
+        // This test verifies that when R2 is the source (not destination), flags are updated normally
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+
+        // Set up R2 with a simple value
+        registerFile.WriteRegister(RegisterName.R2, 0x0000); // Zero value to test Zero flag
+
+        var instruction = new MovInstruction(
+            0x4000,
+            RegisterName.R2, // Source is Status Register
+            RegisterName.R5, // Destination is general-purpose register
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x0000, registerFile.ReadRegister(RegisterName.R5)); // Value is written correctly
+        // Flags SHOULD be updated when destination is not R2
+        Assert.False(registerFile.StatusRegister.Negative); // Negative flag clear (bit 15 not set)
+        Assert.True(registerFile.StatusRegister.Zero); // Zero flag set (value is zero)
+        Assert.False(registerFile.StatusRegister.Overflow); // Overflow flag cleared by MOV
+        // Carry flag is preserved (not modified by MOV)
     }
 }

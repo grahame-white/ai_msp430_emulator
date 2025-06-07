@@ -121,7 +121,7 @@ public class MovInstruction : Instruction, IExecutableInstruction
         // Special case: When destination is R2 (Status Register) in register mode, flags are not updated
         // to avoid modifying the value being written to the Status Register
         // For non-register modes (Absolute, Symbolic, etc.), flags are updated normally
-        if (_destinationRegister != RegisterName.R2 || _destinationAddressingMode != AddressingMode.Register)
+        if (ShouldUpdateFlags())
         {
             UpdateFlags(sourceValue, registerFile.StatusRegister);
         }
@@ -181,6 +181,23 @@ public class MovInstruction : Instruction, IExecutableInstruction
         statusRegister.Overflow = false;
 
         // Carry flag: Preserved (not modified by MOV)
+    }
+
+    /// <summary>
+    /// Determines whether flags should be updated for this MOV instruction.
+    /// 
+    /// Flags are not updated when the destination is R2 (Status Register) in register mode
+    /// to avoid modifying the value being written to the Status Register.
+    /// For non-register modes (Absolute, Symbolic, etc.), flags are updated normally 
+    /// even when R2 is the target register.
+    /// 
+    /// References:
+    /// - MSP430FR2xx/FR4xx Family User's Guide (SLAU445I), Section 4.2.1: "Status Register" - Special handling when SR is destination
+    /// </summary>
+    /// <returns>True if flags should be updated, false otherwise.</returns>
+    private bool ShouldUpdateFlags()
+    {
+        return _destinationRegister != RegisterName.R2 || _destinationAddressingMode != AddressingMode.Register;
     }
 
     /// <summary>
@@ -274,7 +291,7 @@ public class MovInstruction : Instruction, IExecutableInstruction
             AddressingMode.Immediate => extensionWord.HasValue ? $"#0x{extensionWord.Value:X}" : "#",
             AddressingMode.Absolute => extensionWord.HasValue ? $"&0x{extensionWord.Value:X}" : "&ADDR",
             AddressingMode.Symbolic => extensionWord.HasValue ? $"0x{extensionWord.Value:X}" : "ADDR",
-            _ => "?"
+            _ => throw new ArgumentOutOfRangeException(nameof(addressingMode), addressingMode, "Unrecognized addressing mode")
         };
     }
 }

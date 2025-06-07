@@ -13,7 +13,7 @@ public class XorInstructionTests
 {
 
     [Fact]
-    public void Constructor_ValidParameters_CreatesInstruction()
+    public void Constructor_ValidParameters_SetsFormat()
     {
         // Arrange & Act
         var instruction = new XorInstruction(
@@ -26,13 +26,133 @@ public class XorInstructionTests
 
         // Assert
         Assert.Equal(InstructionFormat.FormatI, instruction.Format);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsOpcode()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(0xE, instruction.Opcode);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsInstructionWord()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(0xE123, instruction.InstructionWord);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsMnemonic()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal("XOR", instruction.Mnemonic);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsIsByteOperation()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.False(instruction.IsByteOperation);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceRegister()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(RegisterName.R1, instruction.SourceRegister);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsDestinationRegister()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(RegisterName.R2, instruction.DestinationRegister);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsSourceAddressingMode()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(AddressingMode.Register, instruction.SourceAddressingMode);
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_SetsDestinationAddressingMode()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE123,
+            RegisterName.R1,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Assert
         Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode);
     }
 
@@ -50,6 +170,21 @@ public class XorInstructionTests
 
         // Assert
         Assert.True(instruction.IsByteOperation);
+    }
+
+    [Fact]
+    public void Constructor_ByteOperation_SetsMnemonic()
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE563,
+            RegisterName.R5,
+            RegisterName.R6,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true);
+
+        // Assert
         Assert.Equal("XOR.B", instruction.Mnemonic);
     }
 
@@ -183,7 +318,7 @@ public class XorInstructionTests
     [InlineData(AddressingMode.Immediate)]
     [InlineData(AddressingMode.Absolute)]
     [InlineData(AddressingMode.Symbolic)]
-    public void AddressingModes_AllSupportedModes_ReturnCorrectValues(AddressingMode mode)
+    public void AddressingModes_AllSupportedModes_SetsSourceAddressingMode(AddressingMode mode)
     {
         // Arrange & Act
         var instruction = new XorInstruction(
@@ -196,6 +331,28 @@ public class XorInstructionTests
 
         // Assert
         Assert.Equal(mode, instruction.SourceAddressingMode);
+    }
+
+    [Theory]
+    [InlineData(AddressingMode.Register)]
+    [InlineData(AddressingMode.Indexed)]
+    [InlineData(AddressingMode.Indirect)]
+    [InlineData(AddressingMode.IndirectAutoIncrement)]
+    [InlineData(AddressingMode.Immediate)]
+    [InlineData(AddressingMode.Absolute)]
+    [InlineData(AddressingMode.Symbolic)]
+    public void AddressingModes_AllSupportedModes_SetsDestinationAddressingMode(AddressingMode mode)
+    {
+        // Arrange & Act
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R1,
+            RegisterName.R2,
+            mode,
+            mode,
+            false);
+
+        // Assert
         Assert.Equal(mode, instruction.DestinationAddressingMode);
     }
 
@@ -219,14 +376,129 @@ public class XorInstructionTests
             false);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert - XOR operation: 0xF0F0 ^ 0x0FF0 = 0xFF00
         Assert.Equal(0xFF00, registerFile.ReadRegister(RegisterName.R5));
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_SetsZeroFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_SetsNegativeFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Negative); // 0xFF00 has bit 15 set (negative)
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_SetsCarryFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Carry);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_SetsOverflowFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Overflow);
+    }
+
+    [Fact]
+    public void Execute_RegisterToRegister_ReturnsCycles()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
+        registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(1u, cycles);
     }
 
@@ -252,7 +524,53 @@ public class XorInstructionTests
 
         // Assert - only low byte should be affected: (0xAA ^ 0x55) | 0x3400 = 0x34FF
         Assert.Equal((ushort)((0xAA ^ 0x55) | 0x3400), registerFile.ReadRegister(RegisterName.R5));
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_SetsZeroFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x12AA);
+        registerFile.WriteRegister(RegisterName.R5, 0x3455);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true); // Byte operation
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.False(registerFile.StatusRegister.Zero);
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_SetsNegativeFlag()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[1024];
+        registerFile.WriteRegister(RegisterName.R4, 0x12AA);
+        registerFile.WriteRegister(RegisterName.R5, 0x3455);
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            true); // Byte operation
+
+        // Act
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.True(registerFile.StatusRegister.Negative); // 0xFF has bit 7 set (negative for byte)
     }
 
@@ -486,6 +804,34 @@ public class XorInstructionTests
 
         // Assert
         Assert.Equal(3u, cycles); // 1 base + 2 source (indirect auto-increment) + 0 dest (register)
+    }
+
+    [Fact]
+    public void Execute_IndirectAutoIncrementToRegister_IncrementsSourceRegister()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
+        registerFile.WriteRegister(RegisterName.R4, 0x0100); // Points to memory address
+        registerFile.WriteRegister(RegisterName.R5, 0x0000);
+
+        // Set up memory at indirect location
+        memory[0x0100] = 0x00;
+        memory[0x0101] = 0xFF;
+
+        var instruction = new XorInstruction(
+            0xE000,
+            RegisterName.R4,
+            RegisterName.R5,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = Array.Empty<ushort>();
+
+        // Act
+        instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
         Assert.Equal(0x0102, registerFile.ReadRegister(RegisterName.R4)); // Should be incremented by 2 for word operation
     }
 

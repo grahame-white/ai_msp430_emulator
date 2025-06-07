@@ -226,22 +226,33 @@ public class MovInstruction : Instruction, IExecutableInstruction
     /// <param name="extensionWords">Array of extension words from the instruction.</param>
     /// <param name="sourceExtensionWord">Output parameter for the source extension word.</param>
     /// <param name="destinationExtensionWord">Output parameter for the destination extension word.</param>
+    /// <exception cref="ArgumentException">Thrown when required extension words are missing.</exception>
     private void ExtractExtensionWords(ushort[] extensionWords, out ushort sourceExtensionWord, out ushort destinationExtensionWord)
     {
         sourceExtensionWord = 0;
         destinationExtensionWord = 0;
 
-        if (AddressingModeDecoder.RequiresExtensionWord(_sourceAddressingMode))
+        int index = 0;
+        bool sourceRequiresExtension = AddressingModeDecoder.RequiresExtensionWord(_sourceAddressingMode);
+        bool destinationRequiresExtension = AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode);
+
+        // Validate that we have enough extension words
+        int requiredWords = (sourceRequiresExtension ? 1 : 0) + (destinationRequiresExtension ? 1 : 0);
+        if (extensionWords.Length < requiredWords)
         {
-            sourceExtensionWord = extensionWords.Length > 0 ? extensionWords[0] : (ushort)0;
-            if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
-            {
-                destinationExtensionWord = extensionWords.Length > 1 ? extensionWords[1] : (ushort)0;
-            }
+            throw new ArgumentException($"Instruction requires {requiredWords} extension words but only {extensionWords.Length} provided", nameof(extensionWords));
         }
-        else if (AddressingModeDecoder.RequiresExtensionWord(_destinationAddressingMode))
+
+        // Extract source extension word if needed
+        if (sourceRequiresExtension)
         {
-            destinationExtensionWord = extensionWords.Length > 0 ? extensionWords[0] : (ushort)0;
+            sourceExtensionWord = extensionWords[index++];
+        }
+
+        // Extract destination extension word if needed
+        if (destinationRequiresExtension)
+        {
+            destinationExtensionWord = extensionWords[index];
         }
     }
 
@@ -252,7 +263,7 @@ public class MovInstruction : Instruction, IExecutableInstruction
     /// <param name="addressingMode">The addressing mode of the operand.</param>
     /// <param name="extensionWord">Optional extension word containing immediate values, addresses, or offsets. If null, generic placeholders are used.</param>
     /// <returns>A formatted string representing the operand.</returns>
-    private static string FormatOperand(RegisterName register, AddressingMode addressingMode, ushort? extensionWord = null)
+    private string FormatOperand(RegisterName register, AddressingMode addressingMode, ushort? extensionWord = null)
     {
         return addressingMode switch
         {

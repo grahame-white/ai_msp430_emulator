@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
@@ -333,11 +335,12 @@ public class PeripheralMemoryRegionTests
             };
 
             // Act & Assert
-            foreach (MemoryRegion regionType in peripheralRegions)
-            {
-                MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(regionType);
-                ushort testAddress = (ushort)((regionInfo.StartAddress + regionInfo.EndAddress) / 2);
+            IEnumerable<ushort> testAddresses = peripheralRegions
+                .Select(regionType => memoryMap.GetRegionInfo(regionType))
+                .Select(regionInfo => (ushort)((regionInfo.StartAddress + regionInfo.EndAddress) / 2));
 
+            foreach (ushort testAddress in testAddresses)
+            {
                 Assert.True(memoryMap.IsAccessAllowed(testAddress, MemoryAccessPermissions.Read));
                 Assert.True(memoryMap.IsAccessAllowed(testAddress, MemoryAccessPermissions.Write));
                 Assert.False(memoryMap.IsAccessAllowed(testAddress, MemoryAccessPermissions.Execute));

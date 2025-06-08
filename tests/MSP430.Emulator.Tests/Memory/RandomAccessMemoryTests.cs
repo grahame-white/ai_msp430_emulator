@@ -350,9 +350,7 @@ public class RandomAccessMemoryTests
     public void Operations_LogInitialization()
     {
         _logger.MinimumLevel = LogLevel.Debug;
-#pragma warning disable S1481 // Unused local variables should be removed
-        var memory = new RandomAccessMemory(0x2000, 1024, _logger);
-#pragma warning restore S1481
+        _ = new RandomAccessMemory(0x2000, 1024, _logger);
 
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("RandomAccessMemory initialized"));

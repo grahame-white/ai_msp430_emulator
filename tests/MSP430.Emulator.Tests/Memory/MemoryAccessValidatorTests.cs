@@ -6,6 +6,20 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
 
+/// <summary>
+/// Unit tests for the MemoryAccessValidator class.
+/// 
+/// Tests validate memory access validation according to:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 2: Memory Organization
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) Section 6: Detailed Description
+/// 
+/// Memory access validation includes:
+/// - Address range boundary checking
+/// - Read/Write/Execute permission validation
+/// - Memory alignment requirements (word vs byte access)
+/// - Memory protection and access rights
+/// - Invalid address space detection
+/// </summary>
 public class MemoryAccessValidatorTests
 {
     private readonly IMemoryMap _memoryMap;

@@ -6,6 +6,19 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
 
+/// <summary>
+/// Unit tests for the FlashController class.
+/// 
+/// Tests validate FRAM controller behavior according to:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 6: FRAM
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) Section 6: Memory
+/// 
+/// Note: MSP430FR2355 uses FRAM, not Flash. This controller manages FRAM behavior:
+/// - FRAM wait state control (SLAU445I Section 6.5)
+/// - FRAM Error Correction Code (ECC) (SLAU445I Section 6.6)
+/// - FRAM power control modes (SLAU445I Section 6.8)
+/// - Byte-level write operations without erase cycles
+/// </summary>
 public class FlashControllerTests
 {
     private readonly TestLogger _logger;

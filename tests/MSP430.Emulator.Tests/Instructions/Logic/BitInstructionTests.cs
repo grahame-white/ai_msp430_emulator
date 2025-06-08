@@ -8,6 +8,16 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 
 /// <summary>
 /// Unit tests for the BitInstruction class.
+/// 
+/// Tests validate BIT instruction behavior according to:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) Section 4.3.4: BIT instruction
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 4.4: Logic instructions
+/// 
+/// BIT instruction performs bit test operation (AND without storing result):
+/// - Two-operand instruction with source and destination operands
+/// - Sets Zero, Negative, and Carry status flags based on result
+/// - Clears Overflow flag
+/// - Available in both word (BIT) and byte (BIT.B) variants
 /// </summary>
 public class BitInstructionTests
 {

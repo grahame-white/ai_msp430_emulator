@@ -6,6 +6,20 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
 
+/// <summary>
+/// Unit tests for the InformationMemory class.
+/// 
+/// Tests validate information memory behavior according to:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 2.3: Information Memory
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) Section 6.2: Information Memory
+/// 
+/// Information memory includes:
+/// - Device calibration data and factory settings
+/// - TLV (Tag-Length-Value) structure for device parameters
+/// - Bootstrap loader (BSL) area
+/// - Device-specific configuration data
+/// - Address range typically 0x1800-0x19FF for MSP430FR2355
+/// </summary>
 public class InformationMemoryTests
 {
     private readonly TestLogger _logger;

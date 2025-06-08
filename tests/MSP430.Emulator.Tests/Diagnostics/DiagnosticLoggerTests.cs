@@ -7,6 +7,17 @@ using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Tests.Diagnostics;
 
+/// <summary>
+/// Unit tests for the DiagnosticLogger class.
+/// 
+/// Tests validate diagnostic logging functionality for MSP430 emulator debugging.
+/// Diagnostic logging supports emulator development and troubleshooting by providing:
+/// - Instruction execution tracing
+/// - Memory access logging
+/// - Register state monitoring
+/// - Performance metrics collection
+/// - Error and exception reporting
+/// </summary>
 public class DiagnosticLoggerTests
 {
     /// <summary>

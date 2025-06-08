@@ -6,6 +6,19 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
 
+/// <summary>
+/// Unit tests for the FlashMemory class.
+/// 
+/// Tests validate FRAM memory behavior according to:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 6: FRAM
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) Section 6.1: Memory Organization
+/// 
+/// Note: MSP430FR2355 uses FRAM, not Flash. This class manages FRAM memory:
+/// - FRAM address range 0x4000-0xBFFF (SLASEC4D Table 6-1)
+/// - Non-volatile data retention without power
+/// - Byte-level write operations
+/// - No erase cycles required (unlike traditional Flash)
+/// </summary>
 public class FlashMemoryTests
 {
     private readonly TestLogger _logger;

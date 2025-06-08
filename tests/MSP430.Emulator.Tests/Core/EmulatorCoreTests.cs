@@ -9,6 +9,20 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Core;
 
+/// <summary>
+/// Unit tests for the EmulatorCore class.
+/// 
+/// Tests validate core emulator behavior according to:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 1: Introduction
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) Section 1: Device Overview
+/// 
+/// Core emulator functionality includes:
+/// - CPU instruction execution cycle
+/// - Memory subsystem integration
+/// - Interrupt handling coordination
+/// - Execution state management
+/// - Reset and initialization behavior
+/// </summary>
 public class EmulatorCoreTests
 {
     private readonly RegisterFile _registerFile;

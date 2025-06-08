@@ -7,6 +7,17 @@ using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Tests.Logging;
 
+/// <summary>
+/// Unit tests for the FileLogger class.
+/// 
+/// Tests validate file-based logging functionality for MSP430 emulator persistence.
+/// File logging provides persistent emulator information including:
+/// - Detailed execution traces and instruction logs
+/// - Error logs and exception stack traces
+/// - Performance metrics and timing analysis
+/// - Debug session recordings for analysis
+/// - Long-term emulator behavior monitoring
+/// </summary>
 public class FileLoggerTests : IDisposable
 {
     private readonly string _testLogPath;

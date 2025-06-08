@@ -13,7 +13,7 @@ namespace MSP430.Emulator.Cpu;
 /// - R3 (CG2): Constant Generator #2
 /// - R4-R15: General Purpose Registers
 /// 
-/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
+/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014-Revised March 2019,
 /// Section 4.3: "CPU Registers", Section 4.3.1: "Program Counter (PC)", and Section 4.3.2: "Stack Pointer (SP)".
 /// See docs/references/SLAU445/4.3_cpu_registers.md, docs/references/SLAU445/4.3.1_program_counter_(pc).md,
 /// and docs/references/SLAU445/4.3.2_stack_pointer_(sp).md for detailed specifications.

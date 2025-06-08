@@ -8,10 +8,6 @@ namespace MSP430.Emulator.Tests.Memory;
 /// <summary>
 /// Unit tests for the MemoryMap class.
 /// 
-/// Tests validate memory mapping functionality according to:
-/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) Section 6: Detailed Description
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 2: Memory Organization
-/// 
 /// MSP430FR2355 Memory Map Layout:
 /// - Special Function Registers (SFR): 0x0000-0x00FF (256 bytes)
 /// - 8-bit Peripherals: 0x0100-0x01FF (256 bytes)
@@ -28,7 +24,7 @@ namespace MSP430.Emulator.Tests.Memory;
 /// - ReadWriteExecute: FRAM (full access when unlocked)
 /// 
 /// References:
-/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: Detailed Description
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 2: Memory Organization
 /// </summary>
 public class MemoryMapTests

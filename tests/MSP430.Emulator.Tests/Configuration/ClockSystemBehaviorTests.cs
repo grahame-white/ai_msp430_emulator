@@ -7,11 +7,6 @@ namespace MSP430.Emulator.Tests.Configuration;
 /// <summary>
 /// Tests for clock system behavior validation based on MSP430FR2355 specifications.
 /// 
-/// Tests validate clock system configuration and status register interactions according to:
-/// - SLASEC4D Section 5.12 (Timing and Switching Characteristics)
-/// - SLASEC4D Section 5.13 (Clock Specifications) 
-/// - SLAU445I Section 5.2 (PMM Operation)
-/// 
 /// MSP430FR2355 Clock System Features:
 /// - DCO (Digitally Controlled Oscillator): Default clock source
 /// - LFXT (Low-Frequency Crystal): 32.768 kHz crystal oscillator
@@ -20,8 +15,9 @@ namespace MSP430.Emulator.Tests.Configuration;
 /// - Oscillator fault detection
 /// 
 /// References:
-/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D)
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I)
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 5.12: Timing and Switching Characteristics
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 5.13: Clock Specifications
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 5.2: PMM Operation
 /// </summary>
 public class ClockSystemBehaviorTests
 {

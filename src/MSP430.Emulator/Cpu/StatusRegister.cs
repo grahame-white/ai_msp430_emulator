@@ -10,6 +10,7 @@ namespace MSP430.Emulator.Cpu;
 /// 
 /// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
 /// Section 4.3.3: "Status Register (SR)" - Figure 4-9 and Table 4-1.
+/// See docs/references/SLAU445/4.3.3_status_register_(sr).md for detailed specifications.
 /// </summary>
 public class StatusRegister
 {

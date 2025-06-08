@@ -6,12 +6,13 @@ namespace MSP430.Emulator.Cpu;
 /// The MSP430 has 16 16-bit registers, with some having special functions:
 /// - R0 (PC): Program Counter
 /// - R1 (SP): Stack Pointer  
-/// - R2 (SR): Status Register
-/// - R3 (CG1): Constant Generator #1
+/// - R2 (SR/CG1): Status Register / Constant Generator #1
+/// - R3 (CG2): Constant Generator #2
 /// - R4-R15: General Purpose Registers
 /// 
 /// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
 /// Section 4.3: "CPU Registers".
+/// See docs/references/SLAU445/4.3_cpu_registers.md for detailed specifications.
 /// </summary>
 public enum RegisterName : byte
 {
@@ -28,13 +29,14 @@ public enum RegisterName : byte
     R1 = 1,
 
     /// <summary>
-    /// R2 - Status Register (SR).
-    /// Contains processor status flags and control bits.
+    /// R2 - Status Register (SR) / Constant Generator #1 (CG1).
+    /// Contains processor status flags and control bits when used as SR.
+    /// Generates constants +4 and +8 when used as CG1 in certain addressing modes.
     /// </summary>
     R2 = 2,
 
     /// <summary>
-    /// R3 - Constant Generator #1 (CG1).
+    /// R3 - Constant Generator #2 (CG2).
     /// Used by the CPU to generate common constants efficiently.
     /// </summary>
     R3 = 3,
@@ -116,7 +118,12 @@ public enum RegisterName : byte
     SR = R2,
 
     /// <summary>
-    /// CG1 - Constant Generator #1 (alias for R3).
+    /// CG1 - Constant Generator #1 (alias for R2).
     /// </summary>
-    CG1 = R3
+    CG1 = R2,
+
+    /// <summary>
+    /// CG2 - Constant Generator #2 (alias for R3).
+    /// </summary>
+    CG2 = R3
 }

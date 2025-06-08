@@ -11,6 +11,8 @@ namespace MSP430.Emulator.Instructions;
 /// 
 /// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
 /// Section 4.4: "Addressing Modes" and Section 4.3.4: "Constant Generator Registers (CG1 and CG2)" - Table 4-2.
+/// See docs/references/SLAU445/4.4_addressing_modes.md and 
+/// docs/references/SLAU445/4.3.4_constant_generator_registers_(cg1_and_cg2).md for detailed specifications.
 /// </summary>
 public static class AddressingModeDecoder
 {

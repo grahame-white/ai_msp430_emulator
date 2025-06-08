@@ -176,6 +176,19 @@ public class RegisterFileTests
         _registerFile.WriteRegisterLowByte(RegisterName.R4, 0xAB);
 
         ushort newValue = _registerFile.ReadRegister(RegisterName.R4);
+        // Per SLAU455 4.3.5: "Any byte-write to a CPU register clears bits 19:8"
+        // For general purpose registers, byte write clears upper bits
+        Assert.Equal((ushort)0x00AB, newValue);
+    }
+
+    [Fact]
+    public void WriteRegisterLowByte_StatusRegister_PreservesHighByte()
+    {
+        _registerFile.WriteRegister(RegisterName.R2, 0x1234);
+        _registerFile.WriteRegisterLowByte(RegisterName.R2, 0xAB);
+
+        ushort newValue = _registerFile.ReadRegister(RegisterName.R2);
+        // Status Register is special - it preserves high byte on low byte write
         Assert.Equal((ushort)0x12AB, newValue);
     }
 
@@ -186,6 +199,8 @@ public class RegisterFileTests
         _registerFile.WriteRegisterHighByte(RegisterName.R4, 0xAB);
 
         ushort newValue = _registerFile.ReadRegister(RegisterName.R4);
+        // Per SLAU455 4.3.5: High byte write creates 16-bit value, clears bits 19:16
+        // For general purpose registers, this effectively clears the upper 4 bits
         Assert.Equal((ushort)0xAB34, newValue);
     }
 

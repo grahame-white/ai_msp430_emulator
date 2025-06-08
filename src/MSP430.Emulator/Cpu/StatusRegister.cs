@@ -3,10 +3,12 @@ using System.Collections.Generic;
 namespace MSP430.Emulator.Cpu;
 
 /// <summary>
-/// Represents the MSP430 Status Register (SR/R2) with individual flag management.
+/// Represents the MSP430X CPUX Status Register (SR/R2) with individual flag management.
 /// 
+/// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU455) - Section 4.3.3: Status Register (SR).
 /// The Status Register contains various flags that indicate the processor state
-/// and control certain operations.
+/// and control certain operations. Per SLAU455: "Do not write 20-bit values to the SR. 
+/// Unpredictable operation can result."
 /// </summary>
 public class StatusRegister
 {

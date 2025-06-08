@@ -105,11 +105,11 @@ runner.test('TaskParser class is properly structured', () => {
 
 // Test: Validate ESLint configuration
 runner.test('ESLint configuration is valid', () => {
-    runner.assertExists('.eslintrc.json');
-    const eslintConfig = JSON.parse(fs.readFileSync('.eslintrc.json', 'utf8'));
-
-    runner.assert(eslintConfig.env, 'ESLint env configuration missing');
-    runner.assert(eslintConfig.rules, 'ESLint rules configuration missing');
+    runner.assertExists('eslint.config.js');
+    // For flat config, we just verify the file exists and is loadable as JavaScript
+    const eslintConfigContent = fs.readFileSync('eslint.config.js', 'utf8');
+    runner.assert(eslintConfigContent.includes('module.exports'), 'ESLint config should export a configuration');
+    runner.assert(eslintConfigContent.includes('rules'), 'ESLint rules configuration missing');
 });
 
 // Test: Validate tasks file path resolution

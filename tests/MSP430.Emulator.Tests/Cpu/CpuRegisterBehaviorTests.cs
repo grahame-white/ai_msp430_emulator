@@ -7,14 +7,6 @@ namespace MSP430.Emulator.Tests.Cpu;
 /// <summary>
 /// Comprehensive tests for MSP430 CPU register behaviors based on MSP430FR2355 specifications.
 /// 
-/// These tests validate CPU register functionality according to:
-/// - SLAU445I Section 4.3: CPU Registers (general register behavior)
-/// - SLAU445I Section 4.3.1: Program Counter (PC) (word alignment and special behaviors)
-/// - SLAU445I Section 4.3.2: Stack Pointer (SP) (word alignment requirements)
-/// - SLAU445I Section 4.3.3: Status Register (SR) (flag behaviors and interactions)
-/// - SLAU445I Section 4.3.4: Constant Generator Registers (CG1 and CG2) (constant generation)
-/// - SLAU445I Section 4.3.5: General-Purpose Registers (R4 to R15) (general-purpose usage)
-/// 
 /// MSP430FR2355 CPU Register Specifications:
 /// - 16 registers total: R0-R15, each 16-bit
 /// - R0 (PC): Program Counter - automatically word-aligned (even addresses only)
@@ -24,7 +16,12 @@ namespace MSP430.Emulator.Tests.Cpu;
 /// - R4-R15: General-purpose registers
 /// 
 /// References:
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3: CPU Registers
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.1: Program Counter (PC)
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.2: Stack Pointer (SP)
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.3: Status Register (SR)
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.4: Constant Generator Registers
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.5: General-Purpose Registers
 /// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6.1
 /// </summary>
 public class CpuRegisterBehaviorTests

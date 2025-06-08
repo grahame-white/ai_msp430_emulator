@@ -5,6 +5,25 @@ using MSP430.Emulator.Cpu;
 
 namespace MSP430.Emulator.Tests.Cpu;
 
+/// <summary>
+/// Unit tests for the StatusRegister class.
+/// 
+/// Status Register (SR) is a 16-bit register that contains:
+/// - Bit 0: Carry flag (C) - Set when arithmetic operation generates carry/borrow
+/// - Bit 1: Zero flag (Z) - Set when operation result is zero
+/// - Bit 2: Negative flag (N) - Set when operation result is negative (MSB = 1)
+/// - Bit 3: Global Interrupt Enable (GIE) - Enables/disables maskable interrupts
+/// - Bit 4: CPU Off (CPUOFF) - Turns off CPU (LPM0+ entry)
+/// - Bit 5: Oscillator Off (OSCOFF) - Turns off LFXT oscillator (LPM4 entry)
+/// - Bit 6: System Clock Generator 0 (SCG0) - Turns off DCO oscillator (LPM1+ entry)
+/// - Bit 7: System Clock Generator 1 (SCG1) - Turns off SMCLK (LPM2+ entry)
+/// - Bit 8: Overflow flag (V) - Set when arithmetic overflow occurs
+/// - Bits 9-15: Reserved (reads as 0, writes ignored)
+/// 
+/// References:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.3: Status Register (SR/R2)
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 3.4: Status Bits
+/// </summary>
 public class StatusRegisterTests
 {
     [Fact]

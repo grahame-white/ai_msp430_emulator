@@ -8,21 +8,18 @@ namespace MSP430.Emulator.Tests.Memory;
 /// <summary>
 /// Tests for peripheral memory region access and behavior validation based on MSP430FR2355 specifications.
 /// 
-/// Tests validate peripheral memory regions and access patterns according to:
-/// - SLASEC4D Section 6 (Peripheral Modules)
-/// - SLASEC4D Section 6.1 (Timer_A)
-/// - SLASEC4D Section 6.2 (Timer_B) 
-/// - SLASEC4D Section 6.5 (ADC)
-/// - SLASEC4D Section 6.6 (eUSCI_A/B for UART/SPI/I2C)
-/// - SLASEC4D Section 6.7 (DMA Controller)
-/// 
 /// MSP430FR2355 Peripheral Address Space:
 /// - 8-bit Peripherals: 0x0100-0x01FF (256 bytes)
 /// - 16-bit Peripherals: 0x0200-0x027F (128 bytes)
 /// - Special Function Registers: 0x0000-0x00FF (256 bytes)
 /// 
 /// References:
-/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D)
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: Peripheral Modules
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6.1: Timer_A
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6.2: Timer_B
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6.5: ADC
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6.6: eUSCI_A/B
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6.7: DMA Controller
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I)
 /// </summary>
 public class PeripheralMemoryRegionTests

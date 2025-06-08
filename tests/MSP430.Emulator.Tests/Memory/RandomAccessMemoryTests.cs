@@ -6,6 +6,20 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
 
+/// <summary>
+/// Unit tests for the RandomAccessMemory class.
+/// 
+/// Random Access Memory (RAM) characteristics:
+/// - Volatile memory for temporary data storage
+/// - Fast read/write access with no wait states
+/// - Address range typically 0x2000-0x3FFF for MSP430FR2355
+/// - Byte and word access support
+/// - Data lost on power-down (unlike FRAM)
+/// 
+/// References:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 2.2: RAM
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6.1: Memory Organization
+/// </summary>
 public class RandomAccessMemoryTests
 {
     private readonly TestLogger _logger;

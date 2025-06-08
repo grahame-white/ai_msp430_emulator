@@ -7,6 +7,17 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 
 /// <summary>
 /// Unit tests for the DecInstruction class.
+/// 
+/// DEC instruction performs decrement operation (subtract 1 from destination):
+/// - Single-operand instruction operating on destination only
+/// - Sets status flags (Zero, Negative, Carry, Overflow) based on result
+/// - Supports all addressing modes except immediate for destination
+/// - Available in both word (DEC) and byte (DEC.B) variants
+/// - Opcode: 0xB (Format I)
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4.3.17: DEC instruction
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.4: Single-operand instructions
 /// </summary>
 public class DecInstructionTests
 {

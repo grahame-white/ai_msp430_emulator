@@ -12,6 +12,9 @@ namespace MSP430.Emulator.Cpu;
 /// - R2 (SR): Status Register with flag management
 /// - R3 (CG1): Constant Generator #1
 /// - R4-R15: General Purpose Registers
+/// 
+/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
+/// Section 4.3: "CPU Registers", Section 4.3.1: "Program Counter (PC)", and Section 4.3.2: "Stack Pointer (SP)".
 /// </summary>
 public class RegisterFile : IRegisterFile
 {

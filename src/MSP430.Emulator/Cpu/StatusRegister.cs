@@ -7,6 +7,9 @@ namespace MSP430.Emulator.Cpu;
 /// 
 /// The Status Register contains various flags that indicate the processor state
 /// and control certain operations.
+/// 
+/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
+/// Section 4.3.3: "Status Register (SR)" - Figure 4-9 and Table 4-1.
 /// </summary>
 public class StatusRegister
 {

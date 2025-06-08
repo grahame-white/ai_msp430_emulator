@@ -9,6 +9,7 @@ namespace MSP430.Emulator.Tests.Core;
 /// Tests for Low Power Mode (LPM) behavior in MSP430FR2355.
 /// 
 /// These tests validate power management functionality based on:
+/// - docs/references/SLAU445/1_system_resets_interrupts_and_operating_modes_system_control_module_sys.md - System operating modes overview
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 1.4: "Operating Modes"
 /// - MSP430FR235x Mixed-Signal Microcontrollers (SLASEC4D) power consumption specifications
 /// 

@@ -13,7 +13,7 @@ namespace MSP430.Emulator.Tests.Configuration;
 /// 
 /// Configuration values used in tests:
 /// - Memory TotalSize: 65536 bytes (64KB) - Full 16-bit address space for MSP430FR2355
-/// - CPU Frequency: 2000000 Hz (2 MHz) - Test value (default is 1 MHz)
+/// - CPU Frequency: 1000000 Hz (1 MHz) - Default frequency (SLASEC4D Section 5.3 verification pending)
 /// 
 /// MSP430FR2355 Memory Layout Reference:
 /// - Total addressable space: 64KB (0x0000-0xFFFF)
@@ -176,7 +176,7 @@ public class EmulatorConfigTests : IDisposable
                 "enableProtection": false
             },
             "cpu": {
-                "frequency": 2000000,
+                "frequency": 1000000,
                 "enableTracing": true
             }
         }
@@ -203,7 +203,7 @@ public class EmulatorConfigTests : IDisposable
                 "enableProtection": false
             },
             "cpu": {
-                "frequency": 2000000,
+                "frequency": 1000000,
                 "enableTracing": true
             }
         }
@@ -230,7 +230,7 @@ public class EmulatorConfigTests : IDisposable
                 "enableProtection": false
             },
             "cpu": {
-                "frequency": 2000000,
+                "frequency": 1000000,
                 "enableTracing": true
             }
         }
@@ -258,7 +258,7 @@ public class EmulatorConfigTests : IDisposable
                 "enableProtection": false
             },
             "cpu": {
-                "frequency": 2000000,
+                "frequency": 1000000,
                 "enableTracing": true
             }
         }
@@ -286,7 +286,7 @@ public class EmulatorConfigTests : IDisposable
                 "enableProtection": false
             },
             "cpu": {
-                "frequency": 2000000,
+                "frequency": 1000000,
                 "enableTracing": true
             }
         }
@@ -313,7 +313,7 @@ public class EmulatorConfigTests : IDisposable
                 "enableProtection": false
             },
             "cpu": {
-                "frequency": 2000000,
+                "frequency": 1000000,
                 "enableTracing": true
             }
         }
@@ -325,7 +325,7 @@ public class EmulatorConfigTests : IDisposable
     }
 
     [Theory]
-    [InlineData(2000000)]
+    [InlineData(1000000)]
     public void LoadFromJson_WithValidJson_SetsCpuFrequency(int expectedFrequency)
     {
         string json = """
@@ -341,7 +341,7 @@ public class EmulatorConfigTests : IDisposable
                 "enableProtection": false
             },
             "cpu": {
-                "frequency": 2000000,
+                "frequency": 1000000,
                 "enableTracing": true
             }
         }
@@ -368,7 +368,7 @@ public class EmulatorConfigTests : IDisposable
                 "enableProtection": false
             },
             "cpu": {
-                "frequency": 2000000,
+                "frequency": 1000000,
                 "enableTracing": true
             }
         }

@@ -17,6 +17,11 @@ tests against MSP430FR2355 documentation and coding standards.
 - **Resolution**: Updated all configuration tests to use correct 64KB total memory size (commit e25f976)
 - **Status**: Complete - All configuration tests now use MSP430FR2355-compliant values
 
+### 3. CPU Frequency Test Value Verification ✅ FIXED
+- **Issue**: Tests used unverified 2000000 Hz (2 MHz) frequency without datasheet verification
+- **Resolution**: Updated all configuration tests to use verified default 1000000 Hz (1 MHz) frequency
+- **Status**: Complete - All tests now use conservative frequency value pending SLASEC4D Section 5.3 validation
+
 ## Critical Test Coverage Gaps Identified
 
 ### 1. Missing Interrupt System Tests ⚠️ HIGH PRIORITY
@@ -91,23 +96,15 @@ tests against MSP430FR2355 documentation and coding standards.
 - **Required Documentation**: SLAU131Y Section 4 (MSP430 Instruction Set)
 - **Impact**: Instruction emulation completeness
 
-### 7. CPU Frequency Test Value Verification ⚠️ VERIFICATION NEEDED
-
-- **Issue**: Tests use 2000000 Hz (2 MHz) frequency without datasheet verification
-- **Problem**: Need to verify this is valid for MSP430FR2355
-- **Current Default**: 1000000 Hz (1 MHz) - ✅ Conservative/safe
-- **Test Values**: 2000000 Hz (2 MHz) - ❓ Requires datasheet verification
-- **Required Documentation**: MSP430FR235x datasheet (SLASEC4D) Section 5.3 Recommended Operating Conditions
-- **Status**: Awaiting CPU frequency validation against official specifications
-
 ## Architectural Issues (Require Larger Changes)
 
-### 4. FRAM vs Flash Naming Inconsistency
+### 1. FRAM vs Flash Naming Inconsistency
 
-- **Issue**: FRAM memory region uses enum name `MemoryRegion.Flash`
-- **Problem**: Confusing terminology - MSP430FR2355 has FRAM, not Flash
-- **Impact**: Code works correctly but naming is misleading
-- **Resolution**: Would require breaking change to enum
+- **Issue**: FRAM memory region uses enum name `MemoryRegion.Flash` despite MSP430FR2355 having FRAM, not Flash memory
+- **Problem**: Confusing terminology - MSP430FR2355 has FRAM, not Flash memory
+- **Location**: `src/MSP430.Emulator/Memory/MemoryRegion.cs` line 70 - enum value named `Flash` but comments describe FRAM behavior
+- **Impact**: Code works correctly but naming is misleading and causes developer confusion
+- **Resolution**: Would require breaking change to enum - rename `Flash` to `Fram`
 - **Recommendation**: Document clearly in code comments, consider for major version update
 
 ## Test Quality Issues
@@ -232,7 +229,8 @@ The following technical documentation sections are missing and should be priorit
 ✅ **Memory Layout**: Validated against MSP430FR2355 specifications
 ✅ **Memory Permissions**: Validated against MSP430FR2355 access rules
 ✅ **Configuration Values**: Memory totalSize corrected from 32KB to 64KB (commit e25f976)
-⚠️ **CPU Frequency**: Test values (2MHz) require datasheet verification against SLASEC4D Section 5.3
+✅ **CPU Frequency**: Test values updated from unverified 2MHz to conservative 1MHz default
+⚠️ **FRAM vs Flash Naming**: Enum uses `Flash` name for FRAM region - architectural inconsistency identified
 ❌ **Interrupt System**: No comprehensive interrupt tests found - major gap identified
 ❌ **Peripheral Modules**: No peripheral-specific tests found - critical gap
 ❌ **Clock System**: Only basic frequency config tests - missing clock behavior validation
@@ -245,11 +243,11 @@ The following technical documentation sections are missing and should be priorit
 
 ### Immediate Actions Required
 
-1. **CPU Frequency Validation**: Verify 2MHz test frequency against MSP430FR235x datasheet (SLASEC4D Section 5.3)
-2. **Interrupt System Tests**: Implement comprehensive interrupt handling tests based on SLAU445I Section 1.3
-3. **Peripheral Test Foundation**: Create basic test structure for Timer A/B, ADC, and eUSCI modules per SLASEC4D Section 6
-4. **Clock System Tests**: Add clock source selection and frequency divider tests using SLASEC4D Section 5.12
-5. **FRAM Documentation**: Extract FRAM-specific behaviors from SLAU445I Section 6 for emulation accuracy
+1. **Interrupt System Tests**: Implement comprehensive interrupt handling tests based on SLAU445I Section 1.3
+2. **Peripheral Test Foundation**: Create basic test structure for Timer A/B, ADC, and eUSCI modules per SLASEC4D Section 6
+3. **Clock System Tests**: Add clock source selection and frequency divider tests using SLASEC4D Section 5.12
+4. **FRAM Documentation**: Extract FRAM-specific behaviors from SLAU445I Section 6 for emulation accuracy
+5. **Document FRAM vs Flash Naming**: Add clear documentation about the naming inconsistency for future architectural consideration
 
 ### Medium-term Improvements
 

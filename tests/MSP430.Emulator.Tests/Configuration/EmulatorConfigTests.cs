@@ -8,6 +8,23 @@ using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Tests.Configuration;
 
+/// <summary>
+/// Tests for EmulatorConfig class with MSP430FR2355-specific configuration values.
+/// 
+/// Configuration values used in tests:
+/// - Memory TotalSize: 65536 bytes (64KB) - Full 16-bit address space for MSP430FR2355
+/// - CPU Frequency: 2000000 Hz (2 MHz) - Test value (default is 1 MHz)
+/// 
+/// MSP430FR2355 Memory Layout Reference:
+/// - Total addressable space: 64KB (0x0000-0xFFFF)
+/// - FRAM: 32KB (0x4000-0xBFFF) 
+/// - SRAM: 4KB (0x2000-0x2FFF)
+/// - Peripherals and other regions: remaining space
+/// 
+/// References:
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D)
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I)
+/// </summary>
 public class EmulatorConfigTests : IDisposable
 {
     private readonly string _testConfigPath;
@@ -155,7 +172,7 @@ public class EmulatorConfigTests : IDisposable
                 "filePath": "custom.log"
             },
             "memory": {
-                "totalSize": 32768,
+                "totalSize": 65536,
                 "enableProtection": false
             },
             "cpu": {
@@ -182,7 +199,7 @@ public class EmulatorConfigTests : IDisposable
                 "filePath": "custom.log"
             },
             "memory": {
-                "totalSize": 32768,
+                "totalSize": 65536,
                 "enableProtection": false
             },
             "cpu": {
@@ -209,7 +226,7 @@ public class EmulatorConfigTests : IDisposable
                 "filePath": "custom.log"
             },
             "memory": {
-                "totalSize": 32768,
+                "totalSize": 65536,
                 "enableProtection": false
             },
             "cpu": {
@@ -237,7 +254,7 @@ public class EmulatorConfigTests : IDisposable
                 "filePath": "custom.log"
             },
             "memory": {
-                "totalSize": 32768,
+                "totalSize": 65536,
                 "enableProtection": false
             },
             "cpu": {
@@ -253,7 +270,7 @@ public class EmulatorConfigTests : IDisposable
     }
 
     [Theory]
-    [InlineData(32768)]
+    [InlineData(65536)]
     public void LoadFromJson_WithValidJson_SetsMemoryTotalSize(int expectedSize)
     {
         string json = """
@@ -265,7 +282,7 @@ public class EmulatorConfigTests : IDisposable
                 "filePath": "custom.log"
             },
             "memory": {
-                "totalSize": 32768,
+                "totalSize": 65536,
                 "enableProtection": false
             },
             "cpu": {
@@ -292,7 +309,7 @@ public class EmulatorConfigTests : IDisposable
                 "filePath": "custom.log"
             },
             "memory": {
-                "totalSize": 32768,
+                "totalSize": 65536,
                 "enableProtection": false
             },
             "cpu": {
@@ -320,7 +337,7 @@ public class EmulatorConfigTests : IDisposable
                 "filePath": "custom.log"
             },
             "memory": {
-                "totalSize": 32768,
+                "totalSize": 65536,
                 "enableProtection": false
             },
             "cpu": {
@@ -347,7 +364,7 @@ public class EmulatorConfigTests : IDisposable
                 "filePath": "custom.log"
             },
             "memory": {
-                "totalSize": 32768,
+                "totalSize": 65536,
                 "enableProtection": false
             },
             "cpu": {
@@ -417,7 +434,7 @@ public class EmulatorConfigTests : IDisposable
     {
         var originalConfig = EmulatorConfig.CreateDefault();
         originalConfig.Logging.MinimumLevel = LogLevel.Debug;
-        originalConfig.Memory.TotalSize = 32768;
+        originalConfig.Memory.TotalSize = 65536;
         originalConfig.SaveToFile(_testConfigPath);
 
         var loadedConfig = EmulatorConfig.LoadFromFile(_testConfigPath);
@@ -430,12 +447,12 @@ public class EmulatorConfigTests : IDisposable
     {
         var originalConfig = EmulatorConfig.CreateDefault();
         originalConfig.Logging.MinimumLevel = LogLevel.Debug;
-        originalConfig.Memory.TotalSize = 32768;
+        originalConfig.Memory.TotalSize = 65536;
         originalConfig.SaveToFile(_testConfigPath);
 
         var loadedConfig = EmulatorConfig.LoadFromFile(_testConfigPath);
 
-        Assert.Equal(32768, loadedConfig.Memory.TotalSize);
+        Assert.Equal(65536, loadedConfig.Memory.TotalSize);
     }
 
     [Fact]

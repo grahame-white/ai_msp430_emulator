@@ -172,7 +172,7 @@ public class PopInstructionTests
         memory[0x0FFF] = 0x12; // High byte
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x1000, registerFile.GetStackPointer()); // SP incremented by 2
@@ -193,7 +193,7 @@ public class PopInstructionTests
         memory[0x0FFF] = 0x12; // High byte
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R4)); // Value popped to register
@@ -262,7 +262,7 @@ public class PopInstructionTests
         ushort[] extensionWords = new ushort[] { 0x0010 }; // Offset
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        _ = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
         Assert.Equal(0x1000, registerFile.GetStackPointer());
@@ -286,7 +286,7 @@ public class PopInstructionTests
         ushort[] extensionWords = new ushort[] { 0x0010 }; // Offset
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        _ = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
         // Value should be written to base + offset = 0x2000 + 0x0010 = 0x2010
@@ -311,7 +311,7 @@ public class PopInstructionTests
         ushort[] extensionWords = new ushort[] { 0x0010 }; // Offset
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        _ = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
         // Value should be written to base + offset = 0x2000 + 0x0010 = 0x2010

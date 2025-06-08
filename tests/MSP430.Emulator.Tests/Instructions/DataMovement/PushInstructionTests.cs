@@ -166,7 +166,7 @@ public class PushInstructionTests
         registerFile.SetStackPointer(0x1000);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x0FFE, registerFile.GetStackPointer()); // SP decremented by 2
@@ -184,7 +184,7 @@ public class PushInstructionTests
         registerFile.SetStackPointer(0x1000);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x34, memory[0x0FFE]); // Low byte of value stored (little-endian)
@@ -202,7 +202,7 @@ public class PushInstructionTests
         registerFile.SetStackPointer(0x1000);
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x12, memory[0x0FFF]); // High byte of value stored
@@ -346,7 +346,7 @@ public class PushInstructionTests
         ushort[] extensionWords = new ushort[] { 0x5678 };
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        _ = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
         Assert.Equal(0x0FFE, registerFile.GetStackPointer());
@@ -364,7 +364,7 @@ public class PushInstructionTests
         ushort[] extensionWords = new ushort[] { 0x5678 };
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        _ = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
         Assert.Equal(0x78, memory[0x0FFE]); // Low byte of immediate value
@@ -382,7 +382,7 @@ public class PushInstructionTests
         ushort[] extensionWords = new ushort[] { 0x5678 };
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+        _ = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
         Assert.Equal(0x56, memory[0x0FFF]); // High byte of immediate value

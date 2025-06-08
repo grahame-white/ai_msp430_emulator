@@ -13,6 +13,38 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 /// </summary>
 public class PushInstructionTests
 {
+    /// <summary>
+    /// Creates a standard test environment with register file and memory.
+    /// </summary>
+    /// <param name="stackPointer">Initial stack pointer value (default: 0x1000)</param>
+    /// <param name="r4Value">Initial value for R4 register (default: 0x1234)</param>
+    /// <returns>Tuple containing register file and memory array</returns>
+    private static (RegisterFile RegisterFile, byte[] Memory) CreateTestEnvironment(ushort stackPointer = 0x1000, ushort r4Value = 0x1234)
+    {
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        registerFile.SetStackPointer(stackPointer);
+        registerFile.WriteRegister(RegisterName.R4, r4Value);
+
+        return (registerFile, memory);
+    }
+
+    /// <summary>
+    /// Creates a standard PushInstruction for testing.
+    /// </summary>
+    /// <param name="sourceRegister">Source register (default: R4)</param>
+    /// <param name="addressingMode">Addressing mode (default: Register)</param>
+    /// <param name="isByteOperation">Whether this is a byte operation (default: false)</param>
+    /// <returns>Configured PushInstruction</returns>
+    private static PushInstruction CreateTestInstruction(
+        RegisterName sourceRegister = RegisterName.R4,
+        AddressingMode addressingMode = AddressingMode.Register,
+        bool isByteOperation = false)
+    {
+        ushort instructionWord = isByteOperation ? (ushort)0x1244 : (ushort)0x1204;
+        return new PushInstruction(instructionWord, sourceRegister, addressingMode, isByteOperation);
+    }
     [Fact]
     public void Constructor_ValidParameters_SetsFormat()
     {
@@ -158,12 +190,8 @@ public class PushInstructionTests
     public void Execute_RegisterMode_DecrementsStackPointer()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x1234);
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        PushInstruction instruction = CreateTestInstruction();
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -176,12 +204,8 @@ public class PushInstructionTests
     public void Execute_RegisterMode_WritesLowByteToMemory()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x1234);
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        PushInstruction instruction = CreateTestInstruction();
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -194,12 +218,8 @@ public class PushInstructionTests
     public void Execute_RegisterMode_WritesHighByteToMemory()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x1234);
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        PushInstruction instruction = CreateTestInstruction();
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -212,12 +232,8 @@ public class PushInstructionTests
     public void Execute_RegisterMode_ReturnsCorrectCycleCount()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x1234);
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        PushInstruction instruction = CreateTestInstruction();
 
         // Act
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -227,15 +243,11 @@ public class PushInstructionTests
     }
 
     [Fact]
-    public void Execute_ByteOperation_UpdatesStackPointer()
+    public void Execute_ByteOperation_DecrementsStackPointer()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1244, RegisterName.R4, AddressingMode.Register, true);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x12FF); // Negative byte value
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(r4Value: 0x12FF); // Negative byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -248,12 +260,8 @@ public class PushInstructionTests
     public void Execute_ByteOperation_WritesSignExtendedLowByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1244, RegisterName.R4, AddressingMode.Register, true);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x12FF); // Negative byte value
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(r4Value: 0x12FF); // Negative byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -266,12 +274,8 @@ public class PushInstructionTests
     public void Execute_ByteOperation_WritesSignExtendedHighByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1244, RegisterName.R4, AddressingMode.Register, true);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x12FF); // Negative byte value
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(r4Value: 0x12FF); // Negative byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -281,15 +285,11 @@ public class PushInstructionTests
     }
 
     [Fact]
-    public void Execute_ByteOperationPositive_UpdatesStackPointer()
+    public void Execute_ByteOperationPositive_DecrementsStackPointer()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1244, RegisterName.R4, AddressingMode.Register, true);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x1234); // Positive byte value
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(); // Default 0x1234 is positive byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -302,12 +302,8 @@ public class PushInstructionTests
     public void Execute_ByteOperationPositive_WritesLowByteToMemory()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1244, RegisterName.R4, AddressingMode.Register, true);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x1234); // Positive byte value
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(); // Default 0x1234 is positive byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -335,7 +331,7 @@ public class PushInstructionTests
     }
 
     [Fact]
-    public void Execute_ImmediateMode_UpdatesStackPointer()
+    public void Execute_ImmediateMode_DecrementsStackPointer()
     {
         // Arrange
         var registerFile = new RegisterFile();

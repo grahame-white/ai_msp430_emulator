@@ -193,6 +193,82 @@ public class RegisterFileTests
     }
 
     [Fact]
+    public void ReadRegister20Bit_GeneralPurposeRegister_ReturnsFullValue()
+    {
+        // Test that 20-bit register access works
+        _registerFile.WriteRegister20Bit(RegisterName.R4, 0x12345);
+
+        uint value20Bit = _registerFile.ReadRegister20Bit(RegisterName.R4);
+        ushort value16Bit = _registerFile.ReadRegister(RegisterName.R4);
+
+        Assert.Equal(0x12345u, value20Bit);
+        Assert.Equal((ushort)0x2345, value16Bit); // Lower 16 bits
+    }
+
+    [Fact]
+    public void WriteRegister20Bit_StatusRegister_ThrowsException()
+    {
+        // Per SLAU455 4.3.3: "Do not write 20-bit values to the SR. Unpredictable operation can result."
+        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            _registerFile.WriteRegister20Bit(RegisterName.R2, 0x12345));
+
+        Assert.Contains("Cannot write 20-bit values to Status Register", exception.Message);
+        Assert.Equal("value", exception.ParamName);
+    }
+
+    [Fact]
+    public void GetProgramCounter20Bit_Returns20BitValue()
+    {
+        _registerFile.WriteRegister20Bit(RegisterName.R0, 0xABCDE);
+
+        uint pc20Bit = _registerFile.GetProgramCounter20Bit();
+        ushort pc16Bit = _registerFile.GetProgramCounter();
+
+        // PC is word-aligned, so bit 0 is cleared
+        Assert.Equal(0xABCDEu & 0xFFFFE, pc20Bit); // Word aligned: 0xABCDE
+        Assert.Equal((ushort)(0xBCDE), pc16Bit); // Lower 16 bits of 0xABCDE, word aligned
+    }
+
+    [Fact]
+    public void WriteRegister16Bit_ClearsUpperBits()
+    {
+        // Set 20-bit value first
+        _registerFile.WriteRegister20Bit(RegisterName.R4, 0xFFFFF);
+        Assert.Equal(0xFFFFFu, _registerFile.ReadRegister20Bit(RegisterName.R4));
+
+        // Write 16-bit value should clear upper 4 bits per SLAU455 4.3.5
+        _registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        uint value20Bit = _registerFile.ReadRegister20Bit(RegisterName.R4);
+        ushort value16Bit = _registerFile.ReadRegister(RegisterName.R4);
+
+        Assert.Equal(0x01234u, value20Bit); // Upper 4 bits cleared
+        Assert.Equal((ushort)0x1234, value16Bit);
+    }
+
+    [Fact]
+    public void GetAllRegisters20Bit_ReturnsCorrectValues()
+    {
+        _registerFile.WriteRegister20Bit(RegisterName.R4, 0x12345);
+        _registerFile.WriteRegister20Bit(RegisterName.R5, 0x67890);
+        _registerFile.WriteRegister(RegisterName.R2, 0xABCD); // Status register stays 16-bit
+
+        uint[] all20Bit = _registerFile.GetAllRegisters20Bit();
+        ushort[] all16Bit = _registerFile.GetAllRegisters();
+
+        Assert.Equal(16, all20Bit.Length);
+        Assert.Equal(16, all16Bit.Length);
+
+        Assert.Equal(0x12345u, all20Bit[4]);
+        Assert.Equal(0x67890u, all20Bit[5]);
+        Assert.Equal(0xABCDu, all20Bit[2]); // SR is still 16-bit
+
+        Assert.Equal((ushort)0x2345, all16Bit[4]); // Lower 16 bits
+        Assert.Equal((ushort)0x7890, all16Bit[5]); // Lower 16 bits  
+        Assert.Equal((ushort)0xABCD, all16Bit[2]); // SR unchanged
+    }
+
+    [Fact]
     public void WriteRegisterHighByte_ValidRegister_UpdatesHighByteOnly()
     {
         _registerFile.WriteRegister(RegisterName.R4, 0x1234);

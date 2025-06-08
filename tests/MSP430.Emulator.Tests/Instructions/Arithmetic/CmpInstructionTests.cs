@@ -8,6 +8,20 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 
 /// <summary>
 /// Unit tests for the CmpInstruction class.
+/// 
+/// Tests validate CMP instruction behavior according to:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) Section 4.3: MSP430 Instruction Set
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 4.4: CPUX Instructions
+/// 
+/// CMP instruction performs comparison (subtraction without storing result):
+/// - Two-operand instruction with source and destination operands
+/// - Sets status flags (Zero, Negative, Carry, Overflow) based on comparison result
+/// - Supports all addressing modes for both source and destination
+/// - Available in both word (CMP) and byte (CMP.B) variants
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4.3.15: CMP instruction
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.4: CPUX instruction extensions
 /// </summary>
 public class CmpInstructionTests
 {

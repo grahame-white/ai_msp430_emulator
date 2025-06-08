@@ -8,6 +8,23 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 
 /// <summary>
 /// Unit tests for the MovInstruction class.
+/// 
+/// Tests validate MOV instruction behavior according to:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) Section 4.3: MSP430 Instruction Set
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 4.4: CPUX Instructions
+/// 
+/// MOV instruction performs data movement from source to destination:
+/// - Two-operand instruction with source and destination operands
+/// - Does not affect status flags (except for special register operations)
+/// - Supports all addressing mode combinations
+/// - Available in both word (MOV) and byte (MOV.B) variants
+/// - Opcode: 0x4 (Format I)
+/// - Most commonly used instruction for data transfer operations
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4.3.21: MOV instruction
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.4: Data movement instructions
+/// 
 /// Tests all addressing mode combinations, byte/word operations, and flag behavior.
 /// </summary>
 public class MovInstructionTests

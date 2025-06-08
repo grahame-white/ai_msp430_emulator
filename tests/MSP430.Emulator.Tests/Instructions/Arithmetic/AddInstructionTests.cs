@@ -9,6 +9,15 @@ namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 
 /// <summary>
 /// Unit tests for the AddInstruction class.
+/// 
+/// Tests ADD instruction functionality per MSP430FR2355 specifications.
+/// ADD[.W] - Add source word to destination word
+/// ADD.B - Add source byte to destination byte
+/// Operation: src + dst → dst
+/// 
+/// References:
+/// - docs/references/SLAU445/4.6.2.2_add.md - ADD instruction specification
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.6.2.2: ADD instruction
 /// </summary>
 public class AddInstructionTests
 {

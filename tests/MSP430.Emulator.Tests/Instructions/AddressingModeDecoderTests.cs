@@ -19,6 +19,9 @@ namespace MSP430.Emulator.Tests.Instructions;
 /// - Symbolic Mode (ADDR)
 /// 
 /// References:
+/// - docs/references/SLAU445/4.4_addressing_modes.md - Addressing modes overview
+/// - docs/references/SLAU445/4.4.1_register_mode.md - Register mode specification
+/// - docs/references/SLAU445/4.4.2_indexed_mode.md - Indexed mode specification
 /// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 3.3: Addressing Modes
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.2: Addressing Modes
 /// </summary>

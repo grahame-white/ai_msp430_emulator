@@ -108,7 +108,10 @@ runner.test('ESLint configuration is valid', () => {
     runner.assertExists('eslint.config.js');
     // For flat config, we just verify the file exists and is loadable as JavaScript
     const eslintConfigContent = fs.readFileSync('eslint.config.js', 'utf8');
-    runner.assert(eslintConfigContent.includes('module.exports'), 'ESLint config should export a configuration');
+    runner.assert(
+        eslintConfigContent.includes('module.exports'),
+        'ESLint config should export a configuration'
+    );
     runner.assert(eslintConfigContent.includes('rules'), 'ESLint rules configuration missing');
 });
 

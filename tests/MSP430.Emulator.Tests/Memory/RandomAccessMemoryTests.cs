@@ -12,7 +12,7 @@ namespace MSP430.Emulator.Tests.Memory;
 /// Random Access Memory (RAM) characteristics:
 /// - Volatile memory for temporary data storage
 /// - Fast read/write access with no wait states
-/// - Address range typically 0x2000-0x3FFF for MSP430FR2355
+/// - Address range 0x2000-0x2FFF (4KB) for MSP430FR2355
 /// - Byte and word access support
 /// - Data lost on power-down (unlike FRAM)
 /// 

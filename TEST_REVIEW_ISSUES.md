@@ -105,7 +105,20 @@ tests against MSP430FR2355 documentation and coding standards.
 
 ## Critical Test Coverage Gaps Identified
 
-### 1. Limited Instruction Set Test Coverage ⚠️ LOW PRIORITY
+### 1. Missing MSP430 Documentation References ⚠️ HIGH PRIORITY
+
+- **Issue**: 25 out of 41 test files (61%) lack proper MSP430 documentation references
+- **Current State**: Recently added tests have excellent documentation, but many existing tests lack TI specification references
+- **Missing Documentation References**:
+  - 9 instruction test files missing TI document references
+  - Core emulator component tests (EmulatorCoreTests, ExecutionStateTests)
+  - CPU component tests (RegisterFileTests, StatusRegisterTests)
+  - Memory component tests (8 files including MemoryMapTests, FlashMemoryTests)
+  - Diagnostics and logging tests (4 files)
+- **Required Documentation**: SLAU445I, SLAU131Y, SLASEC4D section references per docs/DOCUMENTATION_STANDARDS.md
+- **Impact**: Reduces traceability to MSP430FR2355 specifications and hampers compliance verification
+
+### 2. Limited Instruction Set Test Coverage ⚠️ LOW PRIORITY
 
 - **Issue**: Only partial instruction set testing (arithmetic, logic, data movement)
 - **Current State**: Basic instruction categories tested
@@ -132,17 +145,47 @@ tests against MSP430FR2355 documentation and coding standards.
 
 ## Test Quality Issues
 
-### 5. Test Documentation
+### 1. Missing MSP430 Documentation References ⚠️ HIGH PRIORITY
 
-- **Issue**: Some tests lack references to specific MSP430 documentation sections
-- **Status**: Partially addressed in integration tests
-- **Recommendation**: Add documentation comments explaining which MSP430 specs are validated
+- **Issue**: 25 out of 41 test files (61%) lack proper MSP430 specification references
+- **Affected Files**:
+  - **Instruction Tests** (9 files): CmpInstructionTests, DecInstructionTests, MovInstructionTests,
+    AndInstructionTests, BicInstructionTests, BitInstructionTests, StatusBitInstructionTests,
+    AddressingModeDecoderTests, InstructionDecoderTests
+  - **Core Tests** (2 files): EmulatorCoreTests, ExecutionStateTests
+  - **CPU Tests** (2 files): RegisterFileTests, StatusRegisterTests
+  - **Memory Tests** (8 files): FlashControllerTests, FlashMemoryTests, InformationMemoryTests,
+    MemoryAccessValidatorTests, MemoryControllerTests, MemoryMapTests, MemorySystemIntegrationTests,
+    RandomAccessMemoryTests
+  - **Other Tests** (4 files): DiagnosticLoggerTests, DiagnosticReportGeneratorTests,
+    ConsoleLoggerTests, FileLoggerTests
+- **Required Action**: Add TI document references (SLAU445I, SLAU131Y, SLASEC4D) with specific
+  section numbers per docs/DOCUMENTATION_STANDARDS.md
+- **Impact**: Reduces specification traceability and compliance verification capability
+
+### 2. Test Documentation Quality Inconsistency
+
+- **Issue**: Newer tests have excellent documentation while older tests lack references to specific
+  MSP430 documentation sections
+- **Status**: Recently added tests (196 new tests) demonstrate proper documentation standards
+- **Recommendation**: Update existing tests to match documentation quality of newer tests
 
 ## Priority Technical Documentation Gaps
 
 The following technical documentation sections are missing and should be prioritized for implementation accuracy:
 
-### 1. FRAM Controller Behavior (HIGH PRIORITY)
+### 1. Test Documentation Standardization (HIGH PRIORITY)
+
+- **Document IDs**: All TI documents (SLAU445I, SLAU131Y, SLASEC4D)
+- **Sections of Interest**: All relevant sections for existing tests
+- **Impact**: 25 test files (61%) lack proper TI specification references, reducing compliance
+  traceability
+- **Current Gap**: Newer tests demonstrate excellent documentation standards, but existing tests
+  lack proper references
+- **Recommended Action**: Update existing test files to include TI document references with
+  specific section numbers per docs/DOCUMENTATION_STANDARDS.md
+
+### 2. FRAM Controller Behavior (HIGH PRIORITY)
 
 - **Document ID**: SLAU445I (MSP430FR2xx FR4xx Family User's Guide)
 - **Sections of Interest**:
@@ -154,7 +197,7 @@ The following technical documentation sections are missing and should be priorit
 - **Current Gap**: Tests validate memory regions but not FRAM-specific behaviors (wait states, ECC, power control)
 - **Recommended Action**: Document and test FRAM-specific behaviors that differ from traditional Flash
 
-### 2. Power Management Module Specifications (MEDIUM PRIORITY)
+### 3. Power Management Module Specifications (MEDIUM PRIORITY)
 
 - **Document ID**: SLAU445I (MSP430FR2xx FR4xx Family User's Guide)
 - **Sections of Interest**:
@@ -165,7 +208,7 @@ The following technical documentation sections are missing and should be priorit
 - **Current Gap**: No power management or LPM test files exist
 - **Recommended Action**: Implement power mode transition and wake-up event tests
 
-### 3. Complete Instruction Set Specifications (LOW PRIORITY)
+### 4. Complete Instruction Set Specifications (LOW PRIORITY)
 
 - **Document ID**: SLAU131Y (MSP430 Assembly Language Tools User's Guide)
 - **Sections of Interest**:
@@ -231,6 +274,7 @@ The following technical documentation sections are missing and should be priorit
 ⚠️ **FRAM vs Flash Naming**: Enum uses `Flash` name for FRAM region - architectural inconsistency identified
 ⚠️ **Instruction Set**: Partial coverage (arithmetic, logic, data movement) - missing MSP430X
    instructions
+⚠️ **Test Documentation**: 25 out of 41 test files lack proper TI specification references (61% gap)
 📝 **Technical Documentation**: Remaining gaps identified for TI specification references
 
 ## Next Steps
@@ -247,6 +291,8 @@ The following technical documentation sections are missing and should be priorit
 5. ✅ **Power Management Tests**: LPM mode transition tests implemented based on SLAU445I Section 1.4
 6. ✅ **Document FRAM vs Flash Naming**: Clear documentation added about the naming
    inconsistency for future architectural consideration
+7. ⚠️ **Add Missing Documentation References**: Update 25 test files to include proper TI
+   specification references (HIGH PRIORITY)
 
 ### Medium-term Improvements
 
@@ -255,7 +301,8 @@ The following technical documentation sections are missing and should be priorit
 2. ✅ **Power Management Testing**: LPM mode transition tests implemented based on SLAU445I Section 1.4
 3. **Advanced Peripheral Testing**: Full functional test coverage for Timer A/B, ADC, UART/SPI/I2C, and DMA modules
 4. **Memory Protection Testing**: Implement comprehensive protection mechanism tests referencing SLAU445I Section 1.9.3
-5. **Cross-reference Documentation**: Ensure all tests include appropriate TI document and section references
+5. **Test Documentation Standardization**: Ensure all tests include appropriate TI document and
+   section references per docs/DOCUMENTATION_STANDARDS.md
 
 ### Critical Test Coverage Expansion
 
@@ -265,6 +312,8 @@ The following technical documentation sections are missing and should be priorit
 4. ✅ **FRAM Controller**: Wait state control, ECC behavior, power control modes
 5. ✅ **Power Management**: LPM0-LPM4.5 transitions, wake-up events, Status Register manipulation
 6. **Complete Instruction Set**: MSP430X instruction set, addressing mode edge cases, timing validation
+7. **Test Documentation**: Add TI specification references to 25 test files lacking proper
+   documentation
 
 ### Architectural Considerations
 

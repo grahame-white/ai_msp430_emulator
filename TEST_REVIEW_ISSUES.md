@@ -6,8 +6,8 @@ This document tracks issues found during the systematic review of unit and integ
 tests against MSP430FR2355 documentation and coding standards.
 
 **Current Test Status:**
-- **Total Tests**: 2987 (2975 unit + 12 integration)
-- **Recent Additions**: 150 new tests (22 interrupt + 55 CPU register + 36 clock system + 37 peripheral memory)
+- **Total Tests**: 3033 (3021 unit + 12 integration)  
+- **Recent Additions**: 196 new tests (22 interrupt + 55 CPU register + 36 clock system + 37 peripheral memory + 25 FRAM behavior + 21 power management)
 - **Compliance**: All tests aligned with MSP430FR2355 specifications
 - **Coverage**: High coverage maintained (87.8% line, 74.8% branch)
 
@@ -70,33 +70,31 @@ tests against MSP430FR2355 documentation and coding standards.
   - Peripheral permission validation (ReadWrite, no Execute)
 - **Status**: Complete - All 37 peripheral memory tests passing with MSP430FR2355 compliance
 
+### 8. Missing FRAM Behavior Tests ✅ FIXED
+- **Issue**: Tests validated FRAM memory regions but not FRAM-specific behaviors vs Flash
+- **Resolution**: Added 25 comprehensive FRAM behavior tests covering:
+  - FRAM vs Flash behavioral differences (byte-level writes, no erase cycles) - SLAU445I Section 6.4
+  - FRAM wait state control behavior (CPU frequency dependency) - SLAU445I Section 6.5
+  - FRAM Error Correction Code (ECC) behavior documentation - SLAU445I Section 6.6
+  - FRAM power control modes and non-volatile data retention - SLAU445I Section 6.8
+  - FRAM cache behavior and write-through policies - SLAU445I Section 6.9
+  - MSP430FR2355 FRAM address range validation (0x4000-0xBFFF) - SLASEC4D
+- **Status**: Complete - All 25 FRAM behavior tests passing with MSP430FR2355 compliance
+
+### 9. Missing Power Management Tests ✅ FIXED
+- **Issue**: No power management or Low Power Mode (LPM) tests
+- **Resolution**: Added 21 comprehensive power management tests covering:
+  - LPM0-LPM4 mode transitions using Status Register bits - SLAU445I Section 1.4.2
+  - LPM3.5 and LPM4.5 ultra-low power modes - SLAU445I Section 1.4.3
+  - Wake-up event handling and CPU execution restoration - SLAU445I Section 1.4.3.2
+  - Clock control in low power modes (MCLK, SMCLK, ACLK) - SLAU445I Section 1.4.1
+  - Status Register bit manipulation for LPM entry and exit
+  - GIE bit preservation during interrupt wake-up events
+- **Status**: Complete - All 21 power management tests passing with MSP430FR2355 compliance
+
 ## Critical Test Coverage Gaps Identified
 
-### 1. Limited FRAM-Specific Behavior Tests ⚠️ MEDIUM PRIORITY
-
-- **Issue**: Tests validate FRAM memory regions but not FRAM-specific behaviors
-- **Current State**: Memory region tests exist but lack FRAM controller specifics
-- **Missing Coverage**:
-  - FRAM wait state control
-  - FRAM ECC (Error Correction Code) behavior
-  - FRAM power control modes
-  - FRAM vs Flash behavioral differences
-- **Required Documentation**: SLAU445I Section 6 (FRAM Controller)
-- **Impact**: FRAM controller emulation accuracy
-
-### 2. Missing Power Management Tests ⚠️ MEDIUM PRIORITY
-
-- **Issue**: No power management or Low Power Mode (LPM) tests
-- **Current State**: No power management test files found
-- **Missing Coverage**:
-  - LPM0-LPM4.5 mode transitions
-  - Wake-up event handling
-  - Power consumption validation
-  - Clock behavior in low power modes
-- **Required Documentation**: SLAU445I Section 5 (PMM - Power Management Module)
-- **Impact**: Power management emulation completeness
-
-### 3. Limited Instruction Set Test Coverage ⚠️ LOW PRIORITY
+### 1. Limited Instruction Set Test Coverage ⚠️ LOW PRIORITY
 
 - **Issue**: Only partial instruction set testing (arithmetic, logic, data movement)
 - **Current State**: Basic instruction categories tested
@@ -202,9 +200,9 @@ The following technical documentation sections are missing and should be priorit
 ✅ **CPU Register Behavior**: 55 comprehensive register behavior tests added, all passing with SLAU445I Section 4.3 compliance
 ✅ **Clock System Behavior**: 36 comprehensive clock system tests added, all passing with SLASEC4D Section 5.12 compliance
 ✅ **Peripheral Memory Regions**: 37 comprehensive peripheral memory tests added, all passing with MSP430FR2355 compliance
+✅ **FRAM Behavior**: 25 comprehensive FRAM behavior tests added, all passing with SLAU445I Section 6 compliance
+✅ **Power Management**: 21 comprehensive power management tests added, all passing with SLAU445I Section 1.4 compliance
 ⚠️ **FRAM vs Flash Naming**: Enum uses `Flash` name for FRAM region - architectural inconsistency identified
-⚠️ **FRAM Behavior**: Memory region tests exist but lack FRAM-specific behavior validation
-❌ **Power Management**: No power management or LPM tests found
 ⚠️ **Instruction Set**: Partial coverage (arithmetic, logic, data movement) - missing MSP430X instructions
 📝 **Technical Documentation**: Remaining gaps identified for TI specification references
 
@@ -215,13 +213,14 @@ The following technical documentation sections are missing and should be priorit
 1. ✅ **Interrupt System Tests**: Comprehensive interrupt handling tests implemented based on SLAU445I Section 1.3
 2. ✅ **Peripheral Test Foundation**: Peripheral memory region tests created covering SFR, 8-bit, and 16-bit peripheral regions
 3. ✅ **Clock System Tests**: Clock system behavior tests implemented using SLASEC4D Section 5.12
-4. **FRAM Behavior Tests**: Extract FRAM-specific behaviors from SLAU445I Section 6 for emulation accuracy
-5. ✅ **Document FRAM vs Flash Naming**: Clear documentation added about the naming inconsistency for future architectural consideration
+4. ✅ **FRAM Behavior Tests**: FRAM-specific behaviors extracted from SLAU445I Section 6 and implemented
+5. ✅ **Power Management Tests**: LPM mode transition tests implemented based on SLAU445I Section 1.4
+6. ✅ **Document FRAM vs Flash Naming**: Clear documentation added about the naming inconsistency for future architectural consideration
 
 ### Medium-term Improvements
 
-1. **FRAM Controller Testing**: Implement wait state, ECC, and power control behavior tests based on SLAU445I Section 6
-2. **Power Management Testing**: Implement LPM mode transition tests based on SLAU445I Section 5
+1. ✅ **FRAM Controller Testing**: FRAM wait state, ECC, and power control behavior tests implemented based on SLAU445I Section 6
+2. ✅ **Power Management Testing**: LPM mode transition tests implemented based on SLAU445I Section 1.4
 3. **Advanced Peripheral Testing**: Full functional test coverage for Timer A/B, ADC, UART/SPI/I2C, and DMA modules
 4. **Memory Protection Testing**: Implement comprehensive protection mechanism tests referencing SLAU445I Section 1.9.3
 5. **Cross-reference Documentation**: Ensure all tests include appropriate TI document and section references
@@ -231,8 +230,8 @@ The following technical documentation sections are missing and should be priorit
 1. ✅ **Interrupt System**: Vector table validation, nested interrupts, system interrupt generators
 2. ✅ **Peripheral Memory Regions**: SFR, 8-bit, and 16-bit peripheral address space validation
 3. ✅ **Clock System**: System Clock Generator control, oscillator control, frequency validation
-4. **FRAM Controller**: Wait state control, ECC behavior, power control modes
-5. **Power Management**: LPM0-LPM4.5 transitions, wake-up events, power consumption validation
+4. ✅ **FRAM Controller**: Wait state control, ECC behavior, power control modes
+5. ✅ **Power Management**: LPM0-LPM4.5 transitions, wake-up events, Status Register manipulation
 6. **Complete Instruction Set**: MSP430X instruction set, addressing mode edge cases, timing validation
 
 ### Architectural Considerations

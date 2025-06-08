@@ -9,12 +9,14 @@ namespace MSP430.Emulator.Cpu;
 /// Provides access to all CPU registers including:
 /// - R0 (PC): Program Counter with automatic alignment
 /// - R1 (SP): Stack Pointer with word alignment
-/// - R2 (SR): Status Register with flag management
-/// - R3 (CG1): Constant Generator #1
+/// - R2 (SR/CG1): Status Register with flag management / Constant Generator #1
+/// - R3 (CG2): Constant Generator #2
 /// - R4-R15: General Purpose Registers
 /// 
-/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
+/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014-Revised March 2019,
 /// Section 4.3: "CPU Registers", Section 4.3.1: "Program Counter (PC)", and Section 4.3.2: "Stack Pointer (SP)".
+/// See docs/references/SLAU445/4.3_cpu_registers.md, docs/references/SLAU445/4.3.1_program_counter_(pc).md,
+/// and docs/references/SLAU445/4.3.2_stack_pointer_(sp).md for detailed specifications.
 /// </summary>
 public class RegisterFile : IRegisterFile
 {
@@ -60,8 +62,8 @@ public class RegisterFile : IRegisterFile
             case RegisterName.R2: // Status Register
                 value = _statusRegister.Value;
                 break;
-            case RegisterName.R3: // Constant Generator #1
-                // CG1 typically generates constants based on addressing mode
+            case RegisterName.R3: // Constant Generator #2
+                // CG2 typically generates constants based on addressing mode
                 // For basic register access, return stored value
                 value = _registers[index];
                 break;
@@ -101,8 +103,8 @@ public class RegisterFile : IRegisterFile
                 _statusRegister.Value = value;
                 _registers[index] = value;
                 break;
-            case RegisterName.R3: // Constant Generator #1
-                // CG1 is typically read-only in normal operation
+            case RegisterName.R3: // Constant Generator #2
+                // CG2 is typically read-only in normal operation
                 // But allow writes for completeness and testing
                 _registers[index] = value;
                 break;

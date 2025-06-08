@@ -143,7 +143,6 @@ public class BisInstructionTests
     [InlineData(RegisterName.R0)]
     [InlineData(RegisterName.R1)]
     [InlineData(RegisterName.R2)]
-    [InlineData(RegisterName.CG1)]
     [InlineData(RegisterName.R4)]
     [InlineData(RegisterName.R15)]
     public void SourceRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)
@@ -165,7 +164,6 @@ public class BisInstructionTests
     [InlineData(RegisterName.R0)]
     [InlineData(RegisterName.R1)]
     [InlineData(RegisterName.R2)]
-    [InlineData(RegisterName.CG1)]
     [InlineData(RegisterName.R4)]
     [InlineData(RegisterName.R15)]
     public void DestinationRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)

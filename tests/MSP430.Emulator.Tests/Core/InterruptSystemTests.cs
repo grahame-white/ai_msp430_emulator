@@ -8,12 +8,6 @@ namespace MSP430.Emulator.Tests.Core;
 /// <summary>
 /// Tests for interrupt system functionality based on MSP430FR2355 specifications.
 /// 
-/// These tests validate interrupt handling behavior according to:
-/// - SLAU445I Section 1.3: Interrupts (interrupt processing, vectors, nesting)
-/// - SLAU445I Section 1.3.4: Interrupt Processing (acceptance and return)
-/// - SLAU445I Section 1.3.6: Interrupt Vectors (vector table layout)
-/// - SLAU445I Section 1.3.7: SYS Interrupt Vector Generators
-/// 
 /// MSP430FR2355 Interrupt Vector Table Layout (0xFFE0-0xFFFF):
 /// - Each vector is 2 bytes (16-bit address)
 /// - Highest priority at highest address (0xFFFE-0xFFFF)
@@ -22,7 +16,10 @@ namespace MSP430.Emulator.Tests.Core;
 /// - Various peripheral interrupt vectors at lower addresses
 /// 
 /// References:
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.3
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.3: Interrupts
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.3.4: Interrupt Processing
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.3.6: Interrupt Vectors
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.3.7: SYS Interrupt Vector Generators
 /// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6.3
 /// </summary>
 public class InterruptSystemTests

@@ -10,16 +10,16 @@ namespace MSP430.Emulator.Tests.Memory;
 /// <summary>
 /// Integration tests for the memory system components working together.
 /// 
-/// Tests validate integrated memory system behavior according to:
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 2: Memory Organization
-/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) Section 6: Detailed Description
-/// 
 /// Integration testing covers:
 /// - Memory subsystem coordination (Controller, Map, Regions)
 /// - Cross-memory-region access patterns
 /// - Memory system initialization and reset behavior
 /// - Performance characteristics across memory types
 /// - Error handling and boundary condition integration
+/// 
+/// References:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 2: Memory Organization
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: Detailed Description
 /// </summary>
 public class MemorySystemIntegrationTests
 {

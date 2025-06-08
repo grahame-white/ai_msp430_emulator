@@ -8,10 +8,6 @@ namespace MSP430.Emulator.Tests.Cpu;
 /// <summary>
 /// Unit tests for the StatusRegister class.
 /// 
-/// Tests validate status register behavior according to:
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 4.3.3: Status Register (SR/R2)
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) Section 3.4: Status Bits
-/// 
 /// Status Register (SR) is a 16-bit register that contains:
 /// - Bit 0: Carry flag (C) - Set when arithmetic operation generates carry/borrow
 /// - Bit 1: Zero flag (Z) - Set when operation result is zero
@@ -25,7 +21,7 @@ namespace MSP430.Emulator.Tests.Cpu;
 /// - Bits 9-15: Reserved (reads as 0, writes ignored)
 /// 
 /// References:
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.3: Status Register
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.3: Status Register (SR/R2)
 /// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 3.4: Status Bits
 /// </summary>
 public class StatusRegisterTests

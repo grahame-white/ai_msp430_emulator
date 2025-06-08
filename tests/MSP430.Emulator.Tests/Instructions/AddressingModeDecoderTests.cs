@@ -124,6 +124,25 @@ public class AddressingModeDecoderTests
     }
 
     [Theory]
+    [InlineData(2, 4)]
+    [InlineData(3, 8)]
+    public void GetR2ConstantGeneratorValue_ValidAsBits_ReturnsCorrectConstant(byte asBits, ushort expected)
+    {
+        ushort? result = AddressingModeDecoder.GetR2ConstantGeneratorValue(asBits);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(4)]
+    public void GetR2ConstantGeneratorValue_InvalidAsBits_ReturnsNull(byte asBits)
+    {
+        ushort? result = AddressingModeDecoder.GetR2ConstantGeneratorValue(asBits);
+        Assert.Null(result);
+    }
+
+    [Theory]
     [InlineData(0, true)]
     [InlineData(15, true)]
     [InlineData(16, false)]

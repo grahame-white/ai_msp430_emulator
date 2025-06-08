@@ -5,6 +5,9 @@ namespace MSP430.Emulator.Cpu;
 /// 
 /// The register file provides access to the 16 16-bit registers (R0-R15)
 /// with special behavior for certain registers (PC, SP, SR, CG1).
+/// 
+/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
+/// Section 4.3: "CPU Registers".
 /// </summary>
 public interface IRegisterFile
 {

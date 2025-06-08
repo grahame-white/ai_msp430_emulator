@@ -178,7 +178,7 @@ The following technical documentation sections are missing and should be priorit
 
 - **Document IDs**: All TI documents (SLAU445I, SLAU131Y, SLASEC4D)
 - **Sections of Interest**: All relevant sections for existing tests
-- **Impact**: Major improvement - only 18 test files (44%) now lack proper TI specification references, 
+- **Impact**: Major improvement - only 18 test files (44%) now lack proper TI specification references,
   improved from 61% gap
 - **Current Gap**: Excellent progress made with comprehensive documentation added to major test categories
 - **Recommended Action**: Verify remaining 18 files to determine if they require MSP430-specific references
@@ -274,7 +274,8 @@ The following technical documentation sections are missing and should be priorit
 ⚠️ **FRAM vs Flash Naming**: Enum uses `Flash` name for FRAM region - architectural inconsistency identified
 ⚠️ **Instruction Set**: Partial coverage (arithmetic, logic, data movement) - missing MSP430X
    instructions
-⚠️ **Test Documentation**: 18 out of 41 test files lack proper TI specification references (44% gap) - major improvement from 61%
+⚠️ **Test Documentation**: 18 out of 41 test files lack proper TI specification references (44% gap) -
+   major improvement from 61%
 📝 **Technical Documentation**: Remaining gaps identified for TI specification references
 
 ## Next Steps

@@ -10,6 +10,13 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 /// Unit tests for the PopInstruction class.
 /// Tests all addressing modes, byte/word operations, and stack management behavior.
 /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4: "CPUX"
+/// 
+/// CONFIRMED ISSUES NOT YET ADDRESSED:
+/// - Execute_ByteOperationWord_StoresOnlyLowByte (2 assertions)
+/// - Execute_StackUnderflow_MemoryOutOfBounds_ThrowsException (2 assertions)
+/// - Execute_StackPointerOverflow_ThrowsException (2 assertions)
+/// - Execute_ValidStackOperation_MultipleOperations (3 assertions)
+/// - ToString_IndexedMode_ReturnsCorrectFormat (3 assertions)
 /// </summary>
 public class PopInstructionTests
 {
@@ -151,7 +158,49 @@ public class PopInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterMode_PopsValueAndIncrementsStackPointer()
+    public void Execute_RegisterMode_IncrementsStackPointer()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+        var instruction = new PopInstruction(0x1304, RegisterName.R4, AddressingMode.Register, false);
+
+        registerFile.SetStackPointer(0x0FFE);
+
+        // Setup stack memory
+        memory[0x0FFE] = 0x34; // Low byte
+        memory[0x0FFF] = 0x12; // High byte
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x1000, registerFile.GetStackPointer()); // SP incremented by 2
+    }
+
+    [Fact]
+    public void Execute_RegisterMode_PopsValueToRegister()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+        var instruction = new PopInstruction(0x1304, RegisterName.R4, AddressingMode.Register, false);
+
+        registerFile.SetStackPointer(0x0FFE);
+
+        // Setup stack memory
+        memory[0x0FFE] = 0x34; // Low byte
+        memory[0x0FFF] = 0x12; // High byte
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R4)); // Value popped to register
+    }
+
+    [Fact]
+    public void Execute_RegisterMode_ReturnsCorrectCycleCount()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -168,8 +217,6 @@ public class PopInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(0x1000, registerFile.GetStackPointer()); // SP incremented by 2
-        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R4)); // Value popped to register
         Assert.Equal(1u, cycles); // Register mode cycle count
     }
 
@@ -198,7 +245,81 @@ public class PopInstructionTests
     }
 
     [Fact]
-    public void Execute_IndexedMode_PopsToIndexedLocation()
+    public void Execute_IndexedMode_IncrementsStackPointer()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+        var instruction = new PopInstruction(0x1314, RegisterName.R4, AddressingMode.Indexed, false);
+
+        registerFile.WriteRegister(RegisterName.R4, 0x2000); // Base address
+        registerFile.SetStackPointer(0x0FFE);
+
+        // Setup stack memory
+        memory[0x0FFE] = 0xAB; // Low byte
+        memory[0x0FFF] = 0xCD; // High byte
+
+        ushort[] extensionWords = new ushort[] { 0x0010 }; // Offset
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x1000, registerFile.GetStackPointer());
+    }
+
+    [Fact]
+    public void Execute_IndexedMode_WritesLowByteToIndexedLocation()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+        var instruction = new PopInstruction(0x1314, RegisterName.R4, AddressingMode.Indexed, false);
+
+        registerFile.WriteRegister(RegisterName.R4, 0x2000); // Base address
+        registerFile.SetStackPointer(0x0FFE);
+
+        // Setup stack memory
+        memory[0x0FFE] = 0xAB; // Low byte
+        memory[0x0FFF] = 0xCD; // High byte
+
+        ushort[] extensionWords = new ushort[] { 0x0010 }; // Offset
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        // Value should be written to base + offset = 0x2000 + 0x0010 = 0x2010
+        Assert.Equal(0xAB, memory[0x2010]); // Low byte at indexed location
+    }
+
+    [Fact]
+    public void Execute_IndexedMode_WritesHighByteToIndexedLocation()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+        var instruction = new PopInstruction(0x1314, RegisterName.R4, AddressingMode.Indexed, false);
+
+        registerFile.WriteRegister(RegisterName.R4, 0x2000); // Base address
+        registerFile.SetStackPointer(0x0FFE);
+
+        // Setup stack memory
+        memory[0x0FFE] = 0xAB; // Low byte
+        memory[0x0FFF] = 0xCD; // High byte
+
+        ushort[] extensionWords = new ushort[] { 0x0010 }; // Offset
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        // Value should be written to base + offset = 0x2000 + 0x0010 = 0x2010
+        Assert.Equal(0xCD, memory[0x2011]); // High byte at indexed location
+    }
+
+    [Fact]
+    public void Execute_IndexedMode_ReturnsCorrectCycleCount()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -218,10 +339,6 @@ public class PopInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(0x1000, registerFile.GetStackPointer());
-        // Value should be written to base + offset = 0x2000 + 0x0010 = 0x2010
-        Assert.Equal(0xAB, memory[0x2010]); // Low byte at indexed location
-        Assert.Equal(0xCD, memory[0x2011]); // High byte at indexed location
         Assert.Equal(4u, cycles); // Indexed mode cycle count
     }
 

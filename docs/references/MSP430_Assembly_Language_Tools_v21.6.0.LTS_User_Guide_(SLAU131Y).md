@@ -57,10 +57,10 @@
   - 4.5 Naming Alternate Directories for Assembler Input
     - 4.5.1 Using the --include_path Assembler Option
     - 4.5.2 Using the MSP430_A_DIR Environment Variable
-  - 4.6 Source Statement Format
+  - 4.6 Source Statement Format → [Instruction Format Layouts](../diagrams/instructions/format_layouts.md)
     - 4.6.1 Label Field
-    - 4.6.2 Mnemonic Field
-    - 4.6.3 Operand Field
+    - 4.6.2 Mnemonic Field → [Instruction Decoding Flow](../diagrams/instructions/decoding_flow.md)
+    - 4.6.3 Operand Field → [Addressing Modes Diagram](../diagrams/instructions/addressing_modes.md)
     - 4.6.4 Comment Field
   - 4.7 Literal Constants
     - 4.7.1 Integer Literals

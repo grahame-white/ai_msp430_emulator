@@ -33,15 +33,15 @@
   - 5.11 Thermal Resistance Characteristics
   - 5.12 Timing and Switching Characteristics
 - 6 Detailed Description
-  - 6.1 CPU
+  - 6.1 CPU → [**Emulator CPU Registers**](../MSP430_CPU_REGISTERS.md)
   - 6.2 Operating Modes
   - 6.3 Interrupt Vector Addresses
-  - 6.4 Memory Organization
+  - 6.4 Memory Organization → [**Emulator Memory Architecture**](../MSP430_MEMORY_ARCHITECTURE.md)
   - 6.5 Bootloader (BSL)
   - 6.6 JTAG Standard Interface
   - 6.7 Spy-Bi-Wire Interface (SBW)
-  - 6.8 FRAM
-  - 6.9 Memory Protection
+  - 6.8 FRAM → [Memory Layout Diagram](../diagrams/architecture/memory_layout.md)
+  - 6.9 Memory Protection → [**Emulator Memory Architecture**](../MSP430_MEMORY_ARCHITECTURE.md)
   - 6.10 Peripherals
   - 6.11 Input/Output Diagrams
   - 6.12 Device Descriptors (TLV)

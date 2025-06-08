@@ -9,16 +9,16 @@ namespace MSP430.Emulator.Tests.Cpu;
 /// <summary>
 /// Unit tests for the RegisterFile class.
 /// 
-/// Tests validate CPU register file behavior according to:
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 4.3: CPU Registers
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) Section 3.2: Registers
-/// 
 /// Register file includes:
 /// - R0 (PC): Program Counter with word alignment
 /// - R1 (SP): Stack Pointer with word alignment
 /// - R2 (SR): Status Register with flag bits
 /// - R3: Constant generator
 /// - R4-R15: General-purpose registers
+/// 
+/// References:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3: CPU Registers
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 3.2: Registers
 /// </summary>
 public class RegisterFileTests
 {

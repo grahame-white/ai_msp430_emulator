@@ -9,10 +9,6 @@ namespace MSP430.Emulator.Tests.Instructions;
 /// <summary>
 /// Unit tests for the AddressingModeDecoder class.
 /// 
-/// Tests validate addressing mode decoding according to:
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) Section 3.3: Addressing Modes
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 4.2: Addressing Modes
-/// 
 /// Addressing modes include:
 /// - Register Mode (Rn)
 /// - Indexed Mode (X(Rn))
@@ -21,6 +17,10 @@ namespace MSP430.Emulator.Tests.Instructions;
 /// - Immediate Mode (#N)
 /// - Absolute Mode (&ADDR)
 /// - Symbolic Mode (ADDR)
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 3.3: Addressing Modes
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.2: Addressing Modes
 /// </summary>
 public class AddressingModeDecoderTests
 {

@@ -35,7 +35,7 @@ public class SxtInstructionTests
             AddressingMode.Register);
 
         // Assert
-        Assert.Equal(0x118, instruction.Opcode);
+        Assert.Equal(0x11, instruction.Opcode);
     }
 
     [Fact]

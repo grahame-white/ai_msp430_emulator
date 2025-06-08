@@ -35,7 +35,7 @@ public class SwpbInstructionTests
             AddressingMode.Register);
 
         // Assert
-        Assert.Equal(0x108, instruction.Opcode);
+        Assert.Equal(0x10, instruction.Opcode);
     }
 
     [Fact]

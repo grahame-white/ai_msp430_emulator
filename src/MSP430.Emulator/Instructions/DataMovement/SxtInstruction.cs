@@ -12,7 +12,7 @@ namespace MSP430.Emulator.Instructions.DataMovement;
 /// 
 /// Operation: dst[15:8] = dst[7] ? 0xFF : 0x00; dst[7:0] unchanged
 /// Format: SXT dst
-/// Opcode: 0x118 (Format II, bits 15:8 = 0x11, bits 7:4 = 0x08)
+/// Opcode: 0x11 (Format II)
 /// Flags: Sets N and Z based on result, clears V, preserves C
 /// 
 /// References:
@@ -35,7 +35,7 @@ public class SxtInstruction : Instruction, IExecutableInstruction
         ushort instructionWord,
         RegisterName destinationRegister,
         AddressingMode destinationAddressingMode)
-        : base(InstructionFormat.FormatII, 0x118, instructionWord)
+        : base(InstructionFormat.FormatII, 0x11, instructionWord)
     {
         _destinationRegister = destinationRegister;
         _destinationAddressingMode = destinationAddressingMode;

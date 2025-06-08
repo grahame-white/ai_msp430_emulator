@@ -11,7 +11,7 @@ namespace MSP430.Emulator.Instructions.DataMovement;
 /// 
 /// Operation: dst[15:8] = src[7:0]; dst[7:0] = src[15:8]
 /// Format: SWPB dst
-/// Opcode: 0x108 (Format II, bits 15:8 = 0x10, bits 7:4 = 0x08)
+/// Opcode: 0x10 (Format II, sub-opcode determined by bits 7:6)
 /// Flags: Sets N and Z based on result, clears V, preserves C
 /// 
 /// References:
@@ -34,7 +34,7 @@ public class SwpbInstruction : Instruction, IExecutableInstruction
         ushort instructionWord,
         RegisterName destinationRegister,
         AddressingMode destinationAddressingMode)
-        : base(InstructionFormat.FormatII, 0x108, instructionWord)
+        : base(InstructionFormat.FormatII, 0x10, instructionWord)
     {
         _destinationRegister = destinationRegister;
         _destinationAddressingMode = destinationAddressingMode;

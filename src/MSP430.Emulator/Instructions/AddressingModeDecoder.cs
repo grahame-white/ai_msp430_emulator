@@ -8,6 +8,9 @@ namespace MSP430.Emulator.Instructions;
 /// The MSP430 uses a combination of register number and As/Ad bits to determine
 /// the addressing mode. Special combinations of register and As/Ad bits create
 /// additional addressing modes beyond the basic four.
+/// 
+/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
+/// Section 4.4: "Addressing Modes" and Section 4.3.4: "Constant Generator Registers (CG1 and CG2)" - Table 4-2.
 /// </summary>
 public static class AddressingModeDecoder
 {
@@ -123,6 +126,22 @@ public static class AddressingModeDecoder
             2 => 2,      // R3 indirect mode gives constant +2
             3 => 0xFFFF, // R3 indirect auto-increment gives constant -1
             _ => null
+        };
+    }
+
+    /// <summary>
+    /// Gets the constant value for R2 constant generator modes.
+    /// Per SLAU445I Table 4-2, R2 can generate constants +4 and +8.
+    /// </summary>
+    /// <param name="asBits">The As bits for R2.</param>
+    /// <returns>The constant value, or null if not a constant generator mode.</returns>
+    public static ushort? GetR2ConstantGeneratorValue(byte asBits)
+    {
+        return asBits switch
+        {
+            2 => 4,      // R2 indirect mode gives constant +4
+            3 => 8,      // R2 indirect auto-increment gives constant +8
+            _ => null    // As=00 is register mode, As=01 is absolute address mode
         };
     }
 

@@ -178,7 +178,7 @@ public class AddInstructionAddressingModeTests
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrementToRegister_PerformsCorrectAddition()
+    public void Execute_IndirectAutoIncrementToRegister_WorksCorrectly()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -271,67 +271,7 @@ public class AddInstructionAddressingModeTests
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrementByteOperation_PerformsCorrectAddition()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-
-        // Set R5 to point to address 0x2000
-        registerFile.WriteRegister(RegisterName.R5, 0x2000);
-
-        // Set up byte value at address 0x2000
-        memory[0x2000] = 0x78;
-
-        registerFile.WriteRegister(RegisterName.R6, 0x34);
-
-        var instruction = new AddInstruction(
-            0x5560, // ADD.B @R5+, R6
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.IndirectAutoIncrement,
-            AddressingMode.Register,
-            true); // Byte operation
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.Equal(0xAC, registerFile.ReadRegister(RegisterName.R6) & 0xFF); // 0x34 + 0x78 = 0xAC
-    }
-
-    [Fact]
     public void Execute_IndirectAutoIncrementByteOperation_IncrementsBy1()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-
-        // Set R5 to point to address 0x2000
-        registerFile.WriteRegister(RegisterName.R5, 0x2000);
-
-        // Set up byte value at address 0x2000
-        memory[0x2000] = 0x78;
-
-        registerFile.WriteRegister(RegisterName.R6, 0x34);
-
-        var instruction = new AddInstruction(
-            0x5560, // ADD.B @R5+, R6
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.IndirectAutoIncrement,
-            AddressingMode.Register,
-            true); // Byte operation
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.Equal(0x2001, registerFile.ReadRegister(RegisterName.R5)); // R5 should be incremented by 1 for byte operation
-    }
-
-    [Fact]
-    public void Execute_IndirectAutoIncrementByteOperation_ReturnsCorrectCycles()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -357,44 +297,13 @@ public class AddInstructionAddressingModeTests
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
+        Assert.Equal(0xAC, registerFile.ReadRegister(RegisterName.R6) & 0xFF); // 0x34 + 0x78 = 0xAC
+        Assert.Equal(0x2001, registerFile.ReadRegister(RegisterName.R5)); // R5 should be incremented by 1 for byte operation
         Assert.Equal(3u, cycles);
     }
 
     [Fact]
-    public void Execute_IndexedToRegister_PerformsCorrectAddition()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-
-        // Set R5 to base address 0x2000
-        registerFile.WriteRegister(RegisterName.R5, 0x2000);
-
-        // Set up value at address 0x2000 + 0x0010 = 0x2010
-        memory[0x2010] = 0x78; // Low byte
-        memory[0x2011] = 0x56; // High byte (0x5678 in little-endian)
-
-        registerFile.WriteRegister(RegisterName.R6, 0x1234);
-
-        var instruction = new AddInstruction(
-            0x5560, // ADD 0x10(R5), R6
-            RegisterName.R5,
-            RegisterName.R6,
-            AddressingMode.Indexed,
-            AddressingMode.Register,
-            false);
-
-        ushort[] extensionWords = { 0x0010 }; // Index offset
-
-        // Act
-        instruction.Execute(registerFile, memory, extensionWords);
-
-        // Assert
-        Assert.Equal(0x68AC, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0x5678 = 0x68AC
-    }
-
-    [Fact]
-    public void Execute_IndexedToRegister_ReturnsCorrectCycles()
+    public void Execute_IndexedToRegister_WorksCorrectly()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -423,6 +332,7 @@ public class AddInstructionAddressingModeTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
+        Assert.Equal(0x68AC, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0x5678 = 0x68AC
         Assert.Equal(4u, cycles); // Indexed to register should be 4 cycles (1 + 3 for indexed)
     }
 
@@ -450,346 +360,238 @@ public class AddInstructionAddressingModeTests
             AddressingMode.Indexed,
             false);
 
-        public void Execute_RegisterToIndexed_WritesToMemoryCorrectly()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            // Set R6 to base address 0x2000
-            registerFile.WriteRegister(RegisterName.R6, 0x2000);
-
-            // Set up initial value at address 0x2000 + 0x0010 = 0x2010
-            memory[0x2010] = 0x00; // Low byte
-            memory[0x2011] = 0x10; // High byte (0x1000 in little-endian)
-
-            registerFile.WriteRegister(RegisterName.R5, 0x0234);
-
-            var instruction = new AddInstruction(
-                0x5560, // ADD R5, 0x10(R6)
-                RegisterName.R5,
-                RegisterName.R6,
-                AddressingMode.Register,
-                AddressingMode.Indexed,
-                false);
-
-            ushort[] extensionWords = { 0x0010 }; // Index offset
-
-            // Act
-            instruction.Execute(registerFile, memory, extensionWords);
-
-            // Assert - memory at 0x2010 should contain 0x1000 + 0x0234 = 0x1234
-            Assert.Equal(0x34, memory[0x2010]); // Low byte
-        }
-
-        public void Execute_RegisterToIndexed_WritesToMemoryHighByteCorrectly()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            // Set R6 to base address 0x2000
-            registerFile.WriteRegister(RegisterName.R6, 0x2000);
-
-            // Set up initial value at address 0x2000 + 0x0010 = 0x2010
-            memory[0x2010] = 0x00; // Low byte
-            memory[0x2011] = 0x10; // High byte (0x1000 in little-endian)
-
-            registerFile.WriteRegister(RegisterName.R5, 0x0234);
-
-            var instruction = new AddInstruction(
-                0x5560, // ADD R5, 0x10(R6)
-                RegisterName.R5,
-                RegisterName.R6,
-                AddressingMode.Register,
-                AddressingMode.Indexed,
-                false);
-
-            ushort[] extensionWords = { 0x0010 }; // Index offset
-
-            // Act
-            instruction.Execute(registerFile, memory, extensionWords);
-
-            // Assert - memory at 0x2010 should contain 0x1000 + 0x0234 = 0x1234
-            Assert.Equal(0x12, memory[0x2011]); // High byte
-        }
-
-        public void Execute_RegisterToIndexed_ReturnsCorrectCycles()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            // Set R6 to base address 0x2000
-            registerFile.WriteRegister(RegisterName.R6, 0x2000);
-
-            // Set up initial value at address 0x2000 + 0x0010 = 0x2010
-            memory[0x2010] = 0x00; // Low byte
-            memory[0x2011] = 0x10; // High byte (0x1000 in little-endian)
-
-            registerFile.WriteRegister(RegisterName.R5, 0x0234);
-
-            var instruction = new AddInstruction(
-                0x5560, // ADD R5, 0x10(R6)
-                RegisterName.R5,
-                RegisterName.R6,
-                AddressingMode.Register,
-                AddressingMode.Indexed,
-                false);
-
-            ushort[] extensionWords = { 0x0010 }; // Index offset
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, extensionWords);
-
-            // Assert
-            Assert.Equal(4u, cycles); // Register to indexed should be 4 cycles (1 + 3 for indexed)
-        }
-
-        public void Execute_SymbolicToRegister_WorksCorrectly()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            // Set PC to 0x1000 for symbolic addressing calculation
-            registerFile.SetProgramCounter(0x1000);
-
-            // Set up value at address PC + offset = 0x1000 + 0x1000 = 0x2000
-            memory[0x2000] = 0x78; // Low byte
-            memory[0x2001] = 0x56; // High byte (0x5678 in little-endian)
-
-            registerFile.WriteRegister(RegisterName.R6, 0x1234);
-
-            var instruction = new AddInstruction(
-                0x5060, // ADD SYMB, R6 (where SYMB is PC-relative)
-                RegisterName.R0,
-                RegisterName.R6,
-                AddressingMode.Symbolic,
-                AddressingMode.Register,
-                false);
-
-            ushort[] extensionWords = { 0x1000 }; // PC-relative offset
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, extensionWords);
-
-            // Assert
-            Assert.Equal(0x68AC, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0x5678 = 0x68AC
-        }
-
-        public void Execute_SymbolicToRegister_ReturnsCorrectCycles()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            // Set PC to 0x1000 for symbolic addressing calculation
-            registerFile.SetProgramCounter(0x1000);
-
-            // Set up value at address PC + offset = 0x1000 + 0x1000 = 0x2000
-            memory[0x2000] = 0x78; // Low byte
-            memory[0x2001] = 0x56; // High byte (0x5678 in little-endian)
-
-            registerFile.WriteRegister(RegisterName.R6, 0x1234);
-
-            var instruction = new AddInstruction(
-                0x5060, // ADD SYMB, R6 (where SYMB is PC-relative)
-                RegisterName.R0,
-                RegisterName.R6,
-                AddressingMode.Symbolic,
-                AddressingMode.Register,
-                false);
-
-            ushort[] extensionWords = { 0x1000 }; // PC-relative offset
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, extensionWords);
-
-            // Assert
-            Assert.Equal(4u, cycles); // Symbolic to register should be 4 cycles (1 + 3 for symbolic)
-        }
-
-        public void Execute_RegisterToSymbolic_WorksCorrectly()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            // Set PC to 0x1000 for symbolic addressing calculation
-            registerFile.SetProgramCounter(0x1000);
-
-            // Set up initial value at address PC + offset = 0x1000 + 0x1000 = 0x2000
-            memory[0x2000] = 0x00; // Low byte
-            memory[0x2001] = 0x10; // High byte (0x1000 in little-endian)
-
-            registerFile.WriteRegister(RegisterName.R5, 0x0234);
-
-            var instruction = new AddInstruction(
-                0x5500, // ADD R5, SYMB (where SYMB is PC-relative)
-                RegisterName.R5,
-                RegisterName.R0,
-                AddressingMode.Register,
-                AddressingMode.Symbolic,
-                false);
-
-            ushort[] extensionWords = { 0x1000 }; // PC-relative offset
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, extensionWords);
-
-            // Assert - memory at 0x2000 should contain 0x1000 + 0x0234 = 0x1234
-            Assert.Equal(0x34, memory[0x2000]); // Low byte
-            Assert.Equal(0x12, memory[0x2001]); // High byte
-            Assert.Equal(4u, cycles); // Register to symbolic should be 4 cycles (1 + 3 for symbolic)
-        }
-
-        public void Execute_ConstantGeneratorR2Plus4_WorksCorrectly()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            registerFile.WriteRegister(RegisterName.R6, 0x1000);
-
-            var instruction = new AddInstruction(
-                0x5260, // ADD @R2, R6 (R2 indirect generates constant +4)
-                RegisterName.R2,
-                RegisterName.R6,
-                AddressingMode.Indirect,
-                AddressingMode.Register,
-                false);
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-            // Assert
-            Assert.Equal(0x1004, registerFile.ReadRegister(RegisterName.R6)); // 0x1000 + 4 = 0x1004
-            Assert.Equal(1u, cycles); // Constant generator should be 1 cycle
-        }
-
-        public void Execute_ConstantGeneratorR2Plus8_WorksCorrectly()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            registerFile.WriteRegister(RegisterName.R6, 0x1000);
-
-            var instruction = new AddInstruction(
-                0x5360, // ADD @R2+, R6 (R2 indirect autoincrement generates constant +8)
-                RegisterName.R2,
-                RegisterName.R6,
-                AddressingMode.IndirectAutoIncrement,
-                AddressingMode.Register,
-                false);
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-            // Assert
-            Assert.Equal(0x1008, registerFile.ReadRegister(RegisterName.R6)); // 0x1000 + 8 = 0x1008
-            Assert.Equal(1u, cycles); // Constant generator should be 1 cycle
-        }
-
-        public void Execute_ConstantGeneratorR3Zero_WorksCorrectly()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            registerFile.WriteRegister(RegisterName.R6, 0x1234);
-
-            var instruction = new AddInstruction(
-                0x5360, // ADD R3, R6 (R3 register mode generates constant 0)
-                RegisterName.R3,
-                RegisterName.R6,
-                AddressingMode.Register,
-                AddressingMode.Register,
-                false);
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-            // Assert
-            Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0 = 0x1234
-            Assert.Equal(1u, cycles); // Constant generator should be 1 cycle
-        }
-
-        public void Execute_ConstantGeneratorR3Plus1_WorksCorrectly()
-        {
-            // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            registerFile.WriteRegister(RegisterName.R6, 0x1234);
-
-            var instruction = new AddInstruction(
-                0x5160, // ADD #1, R6 (R3 immediate mode generates constant +1)
-                RegisterName.R3,
-                RegisterName.R6,
-                AddressingMode.Immediate,
-                AddressingMode.Register,
-                false);
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-            // Assert
-            Assert.Equal(0x1235, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 1 = 0x1235
-            Assert.Equal(1u, cycles); // Constant generator should be 1 cycle
-        }
-
-        public void Execute_DestinationNeverUsesConstantGenerator_VerifyR2AsDestination()
-        {
-            // Arrange - This test verifies that R2 as destination doesn't use constant generator rules
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            // Set initial value in status register (R2)
-            registerFile.StatusRegister.Value = 0x0100;
-
-            registerFile.WriteRegister(RegisterName.R5, 0x0234);
-
-            var instruction = new AddInstruction(
-                0x5520, // ADD R5, R2 (destination R2 should NOT use constant generator)
-                RegisterName.R5,
-                RegisterName.R2,
-                AddressingMode.Register,
-                AddressingMode.Register,
-                false);
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-            // Assert - R2 should be treated as a normal register destination
-            Assert.Equal(0x0334, registerFile.StatusRegister.Value); // 0x0100 + 0x0234 = 0x0334
-            Assert.Equal(1u, cycles);
-        }
-
-        public void Execute_DestinationNeverUsesConstantGenerator_VerifyR3AsDestination()
-        {
-            // Arrange - This test verifies that R3 as destination doesn't use constant generator rules
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-
-            // Set initial value in R3
-            registerFile.WriteRegister(RegisterName.R3, 0x1000);
-            registerFile.WriteRegister(RegisterName.R5, 0x0234);
-
-            var instruction = new AddInstruction(
-                0x5530, // ADD R5, R3 (destination R3 should NOT use constant generator)
-                RegisterName.R5,
-                RegisterName.R3,
-                AddressingMode.Register,
-                AddressingMode.Register,
-                false);
-
-            // Act
-            uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-            // Assert - R3 should be treated as a normal register destination
-            Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R3)); // 0x1000 + 0x0234 = 0x1234
-            Assert.Equal(1u, cycles);
-        }
+        ushort[] extensionWords = { 0x0010 }; // Index offset
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert - memory at 0x2010 should contain 0x1000 + 0x0234 = 0x1234
+        Assert.Equal(0x34, memory[0x2010]); // Low byte
+        Assert.Equal(0x12, memory[0x2011]); // High byte
+        Assert.Equal(4u, cycles); // Register to indexed should be 4 cycles (1 + 3 for indexed)
     }
+
+    [Fact]
+    public void Execute_SymbolicToRegister_WorksCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set PC to 0x1000 for symbolic addressing calculation
+        registerFile.SetProgramCounter(0x1000);
+
+        // Set up value at address PC + offset = 0x1000 + 0x1000 = 0x2000
+        memory[0x2000] = 0x78; // Low byte
+        memory[0x2001] = 0x56; // High byte (0x5678 in little-endian)
+
+        registerFile.WriteRegister(RegisterName.R6, 0x1234);
+
+        var instruction = new AddInstruction(
+            0x5060, // ADD SYMB, R6 (where SYMB is PC-relative)
+            RegisterName.R0,
+            RegisterName.R6,
+            AddressingMode.Symbolic,
+            AddressingMode.Register,
+            false);
+
+        ushort[] extensionWords = { 0x1000 }; // PC-relative offset
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x68AC, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0x5678 = 0x68AC
+        Assert.Equal(4u, cycles); // Symbolic to register should be 4 cycles (1 + 3 for symbolic)
+    }
+
+    [Fact]
+    public void Execute_RegisterToSymbolic_WorksCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set PC to 0x1000 for symbolic addressing calculation
+        registerFile.SetProgramCounter(0x1000);
+
+        // Set up initial value at address PC + offset = 0x1000 + 0x1000 = 0x2000
+        memory[0x2000] = 0x00; // Low byte
+        memory[0x2001] = 0x10; // High byte (0x1000 in little-endian)
+
+        registerFile.WriteRegister(RegisterName.R5, 0x0234);
+
+        var instruction = new AddInstruction(
+            0x5500, // ADD R5, SYMB (where SYMB is PC-relative)
+            RegisterName.R5,
+            RegisterName.R0,
+            AddressingMode.Register,
+            AddressingMode.Symbolic,
+            false);
+
+        ushort[] extensionWords = { 0x1000 }; // PC-relative offset
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert - memory at 0x2000 should contain 0x1000 + 0x0234 = 0x1234
+        Assert.Equal(0x34, memory[0x2000]); // Low byte
+        Assert.Equal(0x12, memory[0x2001]); // High byte
+        Assert.Equal(4u, cycles); // Register to symbolic should be 4 cycles (1 + 3 for symbolic)
+    }
+
+    [Fact]
+    public void Execute_ConstantGeneratorR2Plus4_WorksCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        registerFile.WriteRegister(RegisterName.R6, 0x1000);
+
+        var instruction = new AddInstruction(
+            0x5260, // ADD @R2, R6 (R2 indirect generates constant +4)
+            RegisterName.R2,
+            RegisterName.R6,
+            AddressingMode.Indirect,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x1004, registerFile.ReadRegister(RegisterName.R6)); // 0x1000 + 4 = 0x1004
+        Assert.Equal(1u, cycles); // Constant generator should be 1 cycle
+    }
+
+    [Fact]
+    public void Execute_ConstantGeneratorR2Plus8_WorksCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        registerFile.WriteRegister(RegisterName.R6, 0x1000);
+
+        var instruction = new AddInstruction(
+            0x5360, // ADD @R2+, R6 (R2 indirect autoincrement generates constant +8)
+            RegisterName.R2,
+            RegisterName.R6,
+            AddressingMode.IndirectAutoIncrement,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x1008, registerFile.ReadRegister(RegisterName.R6)); // 0x1000 + 8 = 0x1008
+        Assert.Equal(1u, cycles); // Constant generator should be 1 cycle
+    }
+
+    [Fact]
+    public void Execute_ConstantGeneratorR3Zero_WorksCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        registerFile.WriteRegister(RegisterName.R6, 0x1234);
+
+        var instruction = new AddInstruction(
+            0x5360, // ADD R3, R6 (R3 register mode generates constant 0)
+            RegisterName.R3,
+            RegisterName.R6,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0 = 0x1234
+        Assert.Equal(1u, cycles); // Constant generator should be 1 cycle
+    }
+
+    [Fact]
+    public void Execute_ConstantGeneratorR3Plus1_WorksCorrectly()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        registerFile.WriteRegister(RegisterName.R6, 0x1234);
+
+        var instruction = new AddInstruction(
+            0x5160, // ADD #1, R6 (R3 immediate mode generates constant +1)
+            RegisterName.R3,
+            RegisterName.R6,
+            AddressingMode.Immediate,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x1235, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 1 = 0x1235
+        Assert.Equal(1u, cycles); // Constant generator should be 1 cycle
+    }
+
+    [Fact]
+    public void Execute_DestinationNeverUsesConstantGenerator_VerifyR2AsDestination()
+    {
+        // Arrange - This test verifies that R2 as destination doesn't use constant generator rules
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set initial value in status register (R2)
+        registerFile.StatusRegister.Value = 0x0100;
+
+        registerFile.WriteRegister(RegisterName.R5, 0x0234);
+
+        var instruction = new AddInstruction(
+            0x5520, // ADD R5, R2 (destination R2 should NOT use constant generator)
+            RegisterName.R5,
+            RegisterName.R2,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert - R2 should be treated as a normal register destination
+        Assert.Equal(0x0334, registerFile.StatusRegister.Value); // 0x0100 + 0x0234 = 0x0334
+        Assert.Equal(1u, cycles);
+    }
+
+    [Fact]
+    public void Execute_DestinationNeverUsesConstantGenerator_VerifyR3AsDestination()
+    {
+        // Arrange - This test verifies that R3 as destination doesn't use constant generator rules
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set initial value in R3
+        registerFile.WriteRegister(RegisterName.R3, 0x1000);
+        registerFile.WriteRegister(RegisterName.R5, 0x0234);
+
+        var instruction = new AddInstruction(
+            0x5530, // ADD R5, R3 (destination R3 should NOT use constant generator)
+            RegisterName.R5,
+            RegisterName.R3,
+            AddressingMode.Register,
+            AddressingMode.Register,
+            false);
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert - R3 should be treated as a normal register destination
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.R3)); // 0x1000 + 0x0234 = 0x1234
+        Assert.Equal(1u, cycles);
+    }
+}

@@ -414,7 +414,7 @@ public class ClockSystemBehaviorTests
         public void ClockFrequency_ValidDcoFrequencies_AboveMinimum(int frequency)
         {
             // Arrange & Act
-            var config = new CpuConfig { Frequency = frequency };
+            _ = new CpuConfig { Frequency = frequency };
 
             // Assert - Frequency should be above minimum practical frequency
             Assert.True(frequency >= 1000000);
@@ -428,7 +428,7 @@ public class ClockSystemBehaviorTests
         public void ClockFrequency_ValidDcoFrequencies_BelowMaximum(int frequency)
         {
             // Arrange & Act
-            var config = new CpuConfig { Frequency = frequency };
+            _ = new CpuConfig { Frequency = frequency };
 
             // Assert - Frequency should be below maximum extended frequency
             Assert.True(frequency <= 16000000);

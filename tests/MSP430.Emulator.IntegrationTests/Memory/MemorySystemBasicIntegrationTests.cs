@@ -213,7 +213,7 @@ public class MemorySystemBasicIntegrationTests
     }
 
     [Fact]
-    public void MemorySystem_FramRegion_HasFullAccessPermissions()
+    public void MemorySystem_FramRegion_SupportsAllAccessTypes()
     {
         // Arrange
         var memoryMap = new MemoryMap();

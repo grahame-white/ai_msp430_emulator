@@ -316,13 +316,18 @@ public class PowerManagementTests
     #region Test Infrastructure and Documentation
 
     [Fact]
-    public void PowerManagementTests_VerifyTestInfrastructure()
+    public void PowerManagementTests_TestInfrastructure_RegisterFileInstantiable()
     {
         // Verify test infrastructure supports power management testing
         var registerFile = new RegisterFile();
         Assert.NotNull(registerFile);
+    }
 
+    [Fact]
+    public void PowerManagementTests_StatusRegister_CanBeManipulatedForLPMTesting()
+    {
         // Verify SR register can be manipulated for LPM testing
+        var registerFile = new RegisterFile();
         registerFile.WriteRegister(RegisterName.SR, 0x1234);
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.SR));
 

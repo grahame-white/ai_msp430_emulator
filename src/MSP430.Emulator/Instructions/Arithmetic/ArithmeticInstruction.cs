@@ -202,26 +202,19 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         uint baseCycles = 1;
 
         // Add cycles for source addressing mode (account for constant generators)
-        uint sourceCycles;
-        if (IsConstantGenerator(_sourceRegister, _sourceAddressingMode))
-        {
-            // Constant generators take 0 additional cycles
-            sourceCycles = 0;
-        }
-        else
-        {
-            sourceCycles = _sourceAddressingMode switch
+        uint sourceCycles = IsConstantGenerator(_sourceRegister, _sourceAddressingMode)
+            ? 0u  // Constant generators take 0 additional cycles
+            : _sourceAddressingMode switch
             {
-                AddressingMode.Register => 0,
-                AddressingMode.Indexed => 3,
-                AddressingMode.Indirect => 2,
-                AddressingMode.IndirectAutoIncrement => 2,
-                AddressingMode.Immediate => 0,
-                AddressingMode.Absolute => 3,
-                AddressingMode.Symbolic => 3,
-                _ => 0
+                AddressingMode.Register => 0u,
+                AddressingMode.Indexed => 3u,
+                AddressingMode.Indirect => 2u,
+                AddressingMode.IndirectAutoIncrement => 2u,
+                AddressingMode.Immediate => 0u,
+                AddressingMode.Absolute => 3u,
+                AddressingMode.Symbolic => 3u,
+                _ => 0u
             };
-        }
 
         // Add cycles for destination addressing mode (never constant generators)
         uint destinationCycles = _destinationAddressingMode switch

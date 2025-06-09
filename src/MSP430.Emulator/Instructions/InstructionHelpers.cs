@@ -122,6 +122,63 @@ public static class InstructionHelpers
     }
 
     /// <summary>
+    /// Reads a destination operand value based on the addressing mode.
+    /// 
+    /// This method is specifically for reading destination operands and does NOT apply
+    /// constant generator rules, since constant generators only apply to source operands
+    /// according to MSP430 specifications.
+    /// </summary>
+    /// <param name="register">The register used by the addressing mode.</param>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <param name="registerFile">The CPU register file.</param>
+    /// <param name="memory">The system memory.</param>
+    /// <param name="extensionWord">Extension word for indexed, absolute, or symbolic modes.</param>
+    /// <returns>The operand value.</returns>
+    public static ushort ReadDestinationOperand(
+        RegisterName register,
+        AddressingMode addressingMode,
+        bool isByteOperation,
+        IRegisterFile registerFile,
+        byte[] memory,
+        ushort extensionWord)
+    {
+        // Destination operands never use constant generators - they always reference actual registers/memory
+        switch (addressingMode)
+        {
+            case AddressingMode.Register:
+                return isByteOperation
+                    ? (ushort)(registerFile.ReadRegister(register) & 0xFF)
+                    : registerFile.ReadRegister(register);
+
+            case AddressingMode.Indirect:
+                return ReadFromMemory(registerFile.ReadRegister(register), isByteOperation, memory);
+
+            case AddressingMode.IndirectAutoIncrement:
+                ushort address = registerFile.ReadRegister(register);
+                ushort value = ReadFromMemory(address, isByteOperation, memory);
+                // Post-increment by 1 for byte operations, 2 for word operations
+                registerFile.WriteRegister(register, (ushort)(address + (isByteOperation ? 1 : 2)));
+                return value;
+
+            case AddressingMode.Indexed:
+                return ReadFromMemory((ushort)(registerFile.ReadRegister(register) + extensionWord), isByteOperation, memory);
+
+            case AddressingMode.Absolute:
+                return ReadFromMemory(extensionWord, isByteOperation, memory);
+
+            case AddressingMode.Symbolic:
+                return ReadFromMemory((ushort)(registerFile.GetProgramCounter() + extensionWord), isByteOperation, memory);
+
+            case AddressingMode.Immediate:
+                throw new ArgumentException("Immediate addressing mode is not valid for destination operands");
+
+            default:
+                throw new ArgumentException($"Unsupported addressing mode: {addressingMode}");
+        }
+    }
+
+    /// <summary>
     /// Writes an operand value based on the addressing mode.
     /// </summary>
     /// <param name="register">The register used by the addressing mode.</param>

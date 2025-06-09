@@ -34,6 +34,6 @@
   <!-- Global analyzer packages for enhanced static analysis -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" PrivateAssets="all" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" PrivateAssets="all" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.11.0.117924" PrivateAssets="all" />
   </ItemGroup>
 </Project>

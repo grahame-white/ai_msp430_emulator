@@ -18,8 +18,8 @@ The MSP430 CPU contains 16 registers organized as follows:
 |----------|------|-------|----------|
 | R0 | PC | Program Counter | Points to next instruction |
 | R1 | SP | Stack Pointer | Points to top of stack |
-| R2 | SR | Status Register | CPU flags and control bits |
-| R3 | CG1 | Constant Generator | Hardware constant generation |
+| R2 | SR/CG1 | Status Register | CPU flags and control bits / Constant Generator #1 |
+| R3 | CG2 | Constant Generator #2 | Hardware constant generation |
 
 #### General Purpose Registers (R4-R15)
 

@@ -366,10 +366,11 @@ public class EmulatorCore : IEmulatorCore
         _memoryValidator.ValidateExecute(pc);
         ushort instructionWord = ReadMemoryWord(pc);
 
-        // Decode instruction (validate it's decodable)
+        // Decode instruction
+        Instruction instruction;
         try
         {
-            _instructionDecoder.Decode(instructionWord);
+            instruction = _instructionDecoder.Decode(instructionWord);
         }
         catch (InvalidInstructionException ex)
         {
@@ -377,12 +378,33 @@ public class EmulatorCore : IEmulatorCore
             throw;
         }
 
-        // For now, we'll just increment PC and record execution
-        // Real instruction execution would be implemented here
+        // Increment PC to point past the instruction word
         _registerFile.IncrementProgramCounter();
 
-        // Simulate instruction execution cycles (typically 1-5 cycles for MSP430)
-        uint cycles = 1; // Basic cycle count - would be determined by instruction type
+        // Fetch extension words if needed
+        ushort[] extensionWords = new ushort[instruction.ExtensionWordCount];
+        for (int i = 0; i < instruction.ExtensionWordCount; i++)
+        {
+            ushort extWordAddress = (ushort)(_registerFile.GetProgramCounter() + (i * 2));
+            _memoryValidator.ValidateRead(extWordAddress);
+            extensionWords[i] = ReadMemoryWord(extWordAddress);
+        }
+
+        // Increment PC past extension words
+        _registerFile.SetProgramCounter((ushort)(_registerFile.GetProgramCounter() + (instruction.ExtensionWordCount * 2)));
+
+        // Execute the instruction if it's executable
+        uint cycles;
+        if (instruction is IExecutableInstruction executableInstruction)
+        {
+            cycles = executableInstruction.Execute(_registerFile, _memory, extensionWords);
+        }
+        else
+        {
+            // For non-executable instructions (future use), just use a default cycle count
+            cycles = 1;
+            _logger?.Warning($"Instruction 0x{instructionWord:X4} at PC 0x{pc:X4} is not executable - skipping execution");
+        }
 
         // Record statistics
         _statistics.RecordInstruction(cycles);

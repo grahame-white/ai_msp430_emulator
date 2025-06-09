@@ -21,6 +21,7 @@ namespace MSP430.Emulator.Tests.Cpu;
 /// - Bits 9-15: Reserved (reads as 0, writes ignored)
 /// 
 /// References:
+/// - docs/references/SLAU445/4.3.3_status_register_(sr).md - Status Register (SR) specification
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.3: Status Register (SR/R2)
 /// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 3.4: Status Bits
 /// </summary>

@@ -16,6 +16,8 @@ namespace MSP430.Emulator.Tests.Instructions;
 /// - Extended instruction formats for MSP430X
 /// 
 /// References:
+/// - docs/references/SLAU445/4_cpux.md - CPU overview and instruction processing
+/// - docs/references/SLAU445/4.1_msp430x_cpu_(cpux)_introduction.md - CPU introduction
 /// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4: MSP430 Instruction Set
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.1: Instruction Formats
 /// </summary>

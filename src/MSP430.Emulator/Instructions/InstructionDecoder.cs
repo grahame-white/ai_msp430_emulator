@@ -1,4 +1,7 @@
 using MSP430.Emulator.Cpu;
+using MSP430.Emulator.Instructions.Arithmetic;
+using MSP430.Emulator.Instructions.DataMovement;
+using MSP430.Emulator.Instructions.Logic;
 
 namespace MSP430.Emulator.Instructions;
 
@@ -99,7 +102,7 @@ public class InstructionDecoder : IInstructionDecoder
     /// <summary>
     /// Decodes a Format I (two-operand) instruction.
     /// </summary>
-    private FormatIInstruction DecodeFormatI(ushort instructionWord, ushort opcode)
+    private Instruction DecodeFormatI(ushort instructionWord, ushort opcode)
     {
         // Extract fields from Format I instruction
         var sourceReg = (RegisterName)((instructionWord & 0x0F00) >> 8);    // Bits 11:8
@@ -124,12 +127,21 @@ public class InstructionDecoder : IInstructionDecoder
             throw new InvalidInstructionException(instructionWord, "Invalid addressing mode in Format I instruction");
         }
 
-        // Calculate extension word count to avoid virtual calls during construction
-        int extensionWordCount = (AddressingModeDecoder.RequiresExtensionWord(sourceMode) ? 1 : 0) +
-                               (AddressingModeDecoder.RequiresExtensionWord(destMode) ? 1 : 0);
-
-        return new FormatIInstruction(opcode, instructionWord, sourceReg, destReg,
-            sourceMode, destMode, byteWord, extensionWordCount);
+        // Create specific instruction type based on opcode
+        return opcode switch
+        {
+            0x4 => new MovInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0x5 => new AddInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0x8 => new SubInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0x9 => new CmpInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0xB => new BitInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0xC => new BicInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0xD => new BisInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0xE => new XorInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0xF => new AndInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            _ => throw new InvalidInstructionException(instructionWord,
+                $"Unsupported Format I instruction opcode: 0x{opcode:X}")
+        };
     }
 
     /// <summary>

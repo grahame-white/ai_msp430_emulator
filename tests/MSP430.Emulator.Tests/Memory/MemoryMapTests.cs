@@ -12,10 +12,10 @@ namespace MSP430.Emulator.Tests.Memory;
 /// - Special Function Registers (SFR): 0x0000-0x00FF (256 bytes)
 /// - 8-bit Peripherals: 0x0100-0x01FF (256 bytes)
 /// - 16-bit Peripherals: 0x0200-0x027F (128 bytes)
-/// - RAM: 0x2000-0x3FFF (8KB)
+/// - Bootstrap Loader: 0x1000-0x17FF (2KB)
+/// - Information Memory: 0x1800-0x19FF (512 bytes)
+/// - RAM: 0x2000-0x2FFF (4KB)
 /// - FRAM (Code/Data): 0x4000-0xBFFF (32KB)
-/// - Information Memory: 0x1000-0x19FF (2.5KB)
-/// - Boot Memory: 0x1A00-0x1BFF (512 bytes)
 /// - Interrupt Vector Table: 0xFFE0-0xFFFF (32 bytes)
 /// 
 /// Memory regions have different access permissions:

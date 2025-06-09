@@ -202,7 +202,7 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         uint baseCycles = 1;
 
         // Add cycles for source addressing mode (account for constant generators)
-        uint sourceCycles = IsConstantGenerator(_sourceRegister, _sourceAddressingMode)
+        uint sourceCycles = InstructionHelpers.IsConstantGenerator(_sourceRegister, _sourceAddressingMode)
             ? 0u  // Constant generators take 0 additional cycles
             : _sourceAddressingMode switch
             {
@@ -241,7 +241,7 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
     private static bool NeedsExtensionWord(RegisterName register, AddressingMode addressingMode)
     {
         // Constant generators don't need extension words
-        if (IsConstantGenerator(register, addressingMode))
+        if (InstructionHelpers.IsConstantGenerator(register, addressingMode))
         {
             return false;
         }
@@ -253,23 +253,4 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
                addressingMode == AddressingMode.Indexed;
     }
 
-    /// <summary>
-    /// Determines if a register and addressing mode combination represents a constant generator.
-    /// </summary>
-    /// <param name="register">The register.</param>
-    /// <param name="addressingMode">The addressing mode.</param>
-    /// <returns>True if this is a constant generator, false otherwise.</returns>
-    private static bool IsConstantGenerator(RegisterName register, AddressingMode addressingMode)
-    {
-        return register switch
-        {
-            // R2 constant generators: As=10 (Indirect) → +4, As=11 (IndirectAutoIncrement) → +8
-            // R2 As=01 (Absolute) is NOT a constant generator - it's legitimate absolute addressing
-            RegisterName.R2 => addressingMode == AddressingMode.Indirect || addressingMode == AddressingMode.IndirectAutoIncrement,
-
-            // R3 constant generators: As=00 (Register) → 0, As=01/10/11 (Immediate) → 1/2/-1
-            RegisterName.R3 => addressingMode == AddressingMode.Register || addressingMode == AddressingMode.Immediate,
-            _ => false
-        };
-    }
 }

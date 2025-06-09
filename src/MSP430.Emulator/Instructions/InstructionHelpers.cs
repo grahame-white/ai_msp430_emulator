@@ -341,7 +341,7 @@ public static class InstructionHelpers
     /// <param name="register">The register.</param>
     /// <param name="addressingMode">The addressing mode.</param>
     /// <returns>True if this is a constant generator, false otherwise.</returns>
-    private static bool IsConstantGenerator(RegisterName register, AddressingMode addressingMode)
+    public static bool IsConstantGenerator(RegisterName register, AddressingMode addressingMode)
     {
         return register switch
         {

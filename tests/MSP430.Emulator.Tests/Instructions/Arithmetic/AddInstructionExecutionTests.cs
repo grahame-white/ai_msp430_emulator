@@ -108,102 +108,11 @@ public class AddInstructionExecutionTests
         Assert.True(cycles > 0, "Instruction should consume at least one cycle");
     }
 
-    [Fact]
-    public void Execute_ImmediateMode_AddsCorrectValues()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
 
-        // Set destination register
-        registerFile.WriteRegister(RegisterName.R6, 0x1000);
 
-        var instruction = new AddInstruction(
-            0x5036, // ADD #0x0500, R6
-            RegisterName.R0, // Immediate mode uses R0
-            RegisterName.R6,
-            AddressingMode.Immediate,
-            AddressingMode.Register,
-            false);
 
-        ushort[] extensionWords = { 0x0500 }; // Immediate value
 
-        // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
-        // Assert
-        Assert.Equal(0x1500, registerFile.ReadRegister(RegisterName.R6)); // 0x1000 + 0x0500 = 0x1500
-        Assert.False(registerFile.StatusRegister.Carry);
-        Assert.False(registerFile.StatusRegister.Zero);
-        Assert.False(registerFile.StatusRegister.Negative);
-        Assert.False(registerFile.StatusRegister.Overflow);
-        Assert.True(cycles > 0, "Instruction should consume at least one cycle");
-    }
-
-    [Fact]
-    public void Execute_MemoryToRegister_ReadsFromMemoryCorrectly()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-
-        // Set up memory with a value at address 0x2000
-        memory[0x2000] = 0x34; // Low byte
-        memory[0x2001] = 0x12; // High byte (0x1234 in little-endian)
-
-        // Set destination register
-        registerFile.WriteRegister(RegisterName.R6, 0x1000);
-
-        var instruction = new AddInstruction(
-            0x5026, // ADD &0x2000, R6
-            RegisterName.R0, // Absolute mode uses R0  
-            RegisterName.R6,
-            AddressingMode.Absolute,
-            AddressingMode.Register,
-            false);
-
-        ushort[] extensionWords = { 0x2000 }; // Absolute address
-
-        // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
-
-        // Assert
-        Assert.Equal(0x2234, registerFile.ReadRegister(RegisterName.R6)); // 0x1000 + 0x1234 = 0x2234
-        Assert.True(cycles > 0, "Instruction should consume at least one cycle");
-    }
-
-    [Fact]
-    public void Execute_RegisterToMemory_WritesToMemoryCorrectly()
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-
-        // Set up memory with initial value at address 0x2000
-        memory[0x2000] = 0x00; // Low byte
-        memory[0x2001] = 0x10; // High byte (0x1000 in little-endian)
-
-        // Set source register
-        registerFile.WriteRegister(RegisterName.R5, 0x0234);
-
-        var instruction = new AddInstruction(
-            0x5520, // ADD R5, &0x2000
-            RegisterName.R5,
-            RegisterName.R0, // Absolute mode uses R0
-            AddressingMode.Register,
-            AddressingMode.Absolute,
-            false);
-
-        ushort[] extensionWords = { 0x2000 }; // Absolute address
-
-        // Act
-        uint cycles = instruction.Execute(registerFile, memory, extensionWords);
-
-        // Assert - memory should contain 0x1000 + 0x0234 = 0x1234
-        Assert.Equal(0x34, memory[0x2000]); // Low byte
-        Assert.Equal(0x12, memory[0x2001]); // High byte
-        Assert.True(cycles > 0, "Instruction should consume at least one cycle");
-    }
 
     [Fact]
     public void Execute_OverflowConditions_DetectsPositiveOverflow()

@@ -352,7 +352,7 @@ public class PeripheralMemoryRegionTests
     public class SpecialFunctionRegisterTests
     {
         [Fact]
-        public void MemoryMap_SpecialFunctionRegisters_CorrectAddressRange()
+        public void MemoryMap_SpecialFunctionRegisters_HasCorrectStartAddress()
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -362,8 +362,41 @@ public class PeripheralMemoryRegionTests
 
             // Assert - SFRs should be at 0x0000-0x00FF per MSP430FR2355
             Assert.Equal(0x0000, regionInfo.StartAddress);
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_HasCorrectEndAddress()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.SpecialFunctionRegisters);
+
             Assert.Equal(0x00FF, regionInfo.EndAddress);
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_HasCorrectRegionType()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.SpecialFunctionRegisters);
+
             Assert.Equal(MemoryRegion.SpecialFunctionRegisters, regionInfo.Region);
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_HasCorrectDescription()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.SpecialFunctionRegisters);
+
             Assert.Equal("Special Function Registers", regionInfo.Description);
         }
 
@@ -371,22 +404,54 @@ public class PeripheralMemoryRegionTests
         [InlineData(0x0000)]  // Start of SFR range
         [InlineData(0x0050)]  // Middle of SFR range
         [InlineData(0x00FF)]  // End of SFR range
-        public void MemoryMap_SpecialFunctionRegisterAddresses_ValidAccess(ushort address)
+        public void MemoryMap_SpecialFunctionRegisterAddresses_IsValidAddress(ushort address)
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            bool isValid = memoryMap.IsValidAddress(address);
+
+            // Assert
+            Assert.True(isValid);
+        }
+
+        [Theory]
+        [InlineData(0x0000)]  // Start of SFR range
+        [InlineData(0x0050)]  // Middle of SFR range
+        [InlineData(0x00FF)]  // End of SFR range
+        public void MemoryMap_SpecialFunctionRegisterAddresses_InCorrectRegion(ushort address)
         {
             // Arrange
             var memoryMap = new MemoryMap();
 
             // Act
             MemoryRegionInfo region = memoryMap.GetRegion(address);
-            bool isValid = memoryMap.IsValidAddress(address);
 
-            // Assert
-            Assert.True(isValid);
             Assert.Equal(MemoryRegion.SpecialFunctionRegisters, region.Region);
         }
 
         [Fact]
-        public void MemoryMap_SpecialFunctionRegisters_ReadWritePermissions()
+        public void MemoryMap_SpecialFunctionRegisters_AllowsReadAccess()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Assert - SFRs should allow read/write access
+            Assert.True(memoryMap.IsAccessAllowed(0x0050, MemoryAccessPermissions.Read));
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_AllowsWriteAccess()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            Assert.True(memoryMap.IsAccessAllowed(0x0050, MemoryAccessPermissions.Write));
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_HasReadWritePermissions()
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -394,9 +459,6 @@ public class PeripheralMemoryRegionTests
             // Act
             MemoryAccessPermissions permissions = memoryMap.GetPermissions(0x0050); // Middle of SFR range
 
-            // Assert - SFRs should allow read/write access
-            Assert.True(memoryMap.IsAccessAllowed(0x0050, MemoryAccessPermissions.Read));
-            Assert.True(memoryMap.IsAccessAllowed(0x0050, MemoryAccessPermissions.Write));
             Assert.Equal(MemoryAccessPermissions.ReadWrite, permissions);
         }
 

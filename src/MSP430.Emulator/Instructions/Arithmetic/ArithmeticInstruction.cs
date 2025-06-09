@@ -138,8 +138,8 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
             memory,
             sourceExtensionWord);
 
-        // Read destination operand
-        ushort destinationValue = InstructionHelpers.ReadOperand(
+        // Read destination operand (note: destination operands never use constant generators)
+        ushort destinationValue = InstructionHelpers.ReadDestinationOperand(
             _destinationRegister,
             _destinationAddressingMode,
             _isByteOperation,
@@ -201,20 +201,29 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         // Base cycle count for Format I instructions
         uint baseCycles = 1;
 
-        // Add cycles for source addressing mode
-        uint sourceCycles = _sourceAddressingMode switch
+        // Add cycles for source addressing mode (account for constant generators)
+        uint sourceCycles;
+        if (IsConstantGenerator(_sourceRegister, _sourceAddressingMode))
         {
-            AddressingMode.Register => 0,
-            AddressingMode.Indexed => 3,
-            AddressingMode.Indirect => 2,
-            AddressingMode.IndirectAutoIncrement => 2,
-            AddressingMode.Immediate => 0,
-            AddressingMode.Absolute => 3,
-            AddressingMode.Symbolic => 3,
-            _ => 0
-        };
+            // Constant generators take 0 additional cycles
+            sourceCycles = 0;
+        }
+        else
+        {
+            sourceCycles = _sourceAddressingMode switch
+            {
+                AddressingMode.Register => 0,
+                AddressingMode.Indexed => 3,
+                AddressingMode.Indirect => 2,
+                AddressingMode.IndirectAutoIncrement => 2,
+                AddressingMode.Immediate => 0,
+                AddressingMode.Absolute => 3,
+                AddressingMode.Symbolic => 3,
+                _ => 0
+            };
+        }
 
-        // Add cycles for destination addressing mode
+        // Add cycles for destination addressing mode (never constant generators)
         uint destinationCycles = _destinationAddressingMode switch
         {
             AddressingMode.Register => 0,

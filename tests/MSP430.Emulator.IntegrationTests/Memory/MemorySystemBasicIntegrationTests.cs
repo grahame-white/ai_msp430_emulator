@@ -24,29 +24,55 @@ public class MemorySystemBasicIntegrationTests
         Assert.Equal(8, memoryMap.Regions.Count);
     }
 
-    [Fact]
-    public void MemorySystem_AccessValidation_WorksAcrossAllRegions()
+    [Theory]
+    [InlineData(0x0080, MemoryAccessPermissions.Read, true)]
+    [InlineData(0x0080, MemoryAccessPermissions.Write, true)]
+    [InlineData(0x0080, MemoryAccessPermissions.Execute, false)]
+    public void MemorySystem_SfrRegion_HasCorrectAccessPermissions(ushort address, MemoryAccessPermissions permission, bool expectedValid)
     {
         // Arrange
         var memoryMap = new MemoryMap();
         var validator = new MemoryAccessValidator(memoryMap);
 
-        // Act & Assert - Test key addresses from each region according to MSP430FR2355 layout
+        // Act
+        bool result = validator.IsAccessValid(address, permission);
 
-        // Special Function Registers (0x0000-0x00FF) - Read/Write access
-        Assert.True(validator.IsAccessValid(0x0080, MemoryAccessPermissions.Read));
-        Assert.True(validator.IsAccessValid(0x0080, MemoryAccessPermissions.Write));
-        Assert.False(validator.IsAccessValid(0x0080, MemoryAccessPermissions.Execute));
+        // Assert
+        Assert.Equal(expectedValid, result);
+    }
 
-        // SRAM (0x2000-0x2FFF) - Full Read/Write/Execute access
-        Assert.True(validator.IsAccessValid(0x2500, MemoryAccessPermissions.Read));
-        Assert.True(validator.IsAccessValid(0x2500, MemoryAccessPermissions.Write));
-        Assert.True(validator.IsAccessValid(0x2500, MemoryAccessPermissions.Execute));
+    [Theory]
+    [InlineData(0x2500, MemoryAccessPermissions.Read, true)]
+    [InlineData(0x2500, MemoryAccessPermissions.Write, true)]
+    [InlineData(0x2500, MemoryAccessPermissions.Execute, true)]
+    public void MemorySystem_SramRegion_HasFullAccessPermissions(ushort address, MemoryAccessPermissions permission, bool expectedValid)
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+        var validator = new MemoryAccessValidator(memoryMap);
 
-        // FRAM (0x4000-0xBFFF) - Full Read/Write/Execute access
-        Assert.True(validator.IsAccessValid(0x8000, MemoryAccessPermissions.Read));
-        Assert.True(validator.IsAccessValid(0x8000, MemoryAccessPermissions.Write));
-        Assert.True(validator.IsAccessValid(0x8000, MemoryAccessPermissions.Execute));
+        // Act
+        bool result = validator.IsAccessValid(address, permission);
+
+        // Assert
+        Assert.Equal(expectedValid, result);
+    }
+
+    [Theory]
+    [InlineData(0x8000, MemoryAccessPermissions.Read, true)]
+    [InlineData(0x8000, MemoryAccessPermissions.Write, true)]
+    [InlineData(0x8000, MemoryAccessPermissions.Execute, true)]
+    public void MemorySystem_FramRegion_HasFullAccessPermissions(ushort address, MemoryAccessPermissions permission, bool expectedValid)
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+        var validator = new MemoryAccessValidator(memoryMap);
+
+        // Act
+        bool result = validator.IsAccessValid(address, permission);
+
+        // Assert
+        Assert.Equal(expectedValid, result);
     }
 
     [Theory]
@@ -67,31 +93,106 @@ public class MemorySystemBasicIntegrationTests
     }
 
     [Fact]
-    public void MemorySystem_RegionBoundaries_AreExactlyAsMSP430FR2355Specification()
+    public void MemorySystem_SfrRegionBoundaries_MatchMSP430FR2355Specification()
     {
         // Arrange
         var memoryMap = new MemoryMap();
 
-        // Act & Assert - Verify exact boundaries match MSP430FR2355 datasheet
-
-        // Special Function Registers: 0x0000-0x00FF
+        // Act
         MemoryRegionInfo sfrRegion = memoryMap.GetRegionInfo(MemoryRegion.SpecialFunctionRegisters);
+
+        // Assert - Special Function Registers: 0x0000-0x00FF
         Assert.Equal((ushort)0x0000, sfrRegion.StartAddress);
+    }
+
+    [Fact]
+    public void MemorySystem_SfrRegionEndAddress_MatchesMSP430FR2355Specification()
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+
+        // Act
+        MemoryRegionInfo sfrRegion = memoryMap.GetRegionInfo(MemoryRegion.SpecialFunctionRegisters);
+
+        // Assert - Special Function Registers: 0x0000-0x00FF
         Assert.Equal((ushort)0x00FF, sfrRegion.EndAddress);
+    }
 
-        // SRAM: 0x2000-0x2FFF (4KB)
+    [Fact]
+    public void MemorySystem_RamRegionStartAddress_MatchesMSP430FR2355Specification()
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+
+        // Act
         MemoryRegionInfo ramRegion = memoryMap.GetRegionInfo(MemoryRegion.Ram);
+
+        // Assert - SRAM: 0x2000-0x2FFF (4KB)
         Assert.Equal((ushort)0x2000, ramRegion.StartAddress);
+    }
+
+    [Fact]
+    public void MemorySystem_RamRegionEndAddress_MatchesMSP430FR2355Specification()
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+
+        // Act
+        MemoryRegionInfo ramRegion = memoryMap.GetRegionInfo(MemoryRegion.Ram);
+
+        // Assert - SRAM: 0x2000-0x2FFF (4KB)
         Assert.Equal((ushort)0x2FFF, ramRegion.EndAddress);
+    }
 
-        // FRAM: 0x4000-0xBFFF (32KB)
+    [Fact]
+    public void MemorySystem_FramRegionStartAddress_MatchesMSP430FR2355Specification()
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+
+        // Act
         MemoryRegionInfo framRegion = memoryMap.GetRegionInfo(MemoryRegion.Flash);
-        Assert.Equal((ushort)0x4000, framRegion.StartAddress);
-        Assert.Equal((ushort)0xBFFF, framRegion.EndAddress);
 
-        // Interrupt Vector Table: 0xFFE0-0xFFFF
+        // Assert - FRAM: 0x4000-0xBFFF (32KB)
+        Assert.Equal((ushort)0x4000, framRegion.StartAddress);
+    }
+
+    [Fact]
+    public void MemorySystem_FramRegionEndAddress_MatchesMSP430FR2355Specification()
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+
+        // Act
+        MemoryRegionInfo framRegion = memoryMap.GetRegionInfo(MemoryRegion.Flash);
+
+        // Assert - FRAM: 0x4000-0xBFFF (32KB)
+        Assert.Equal((ushort)0xBFFF, framRegion.EndAddress);
+    }
+
+    [Fact]
+    public void MemorySystem_InterruptVectorTableStartAddress_MatchesMSP430FR2355Specification()
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+
+        // Act
         MemoryRegionInfo ivtRegion = memoryMap.GetRegionInfo(MemoryRegion.InterruptVectorTable);
+
+        // Assert - Interrupt Vector Table: 0xFFE0-0xFFFF
         Assert.Equal((ushort)0xFFE0, ivtRegion.StartAddress);
+    }
+
+    [Fact]
+    public void MemorySystem_InterruptVectorTableEndAddress_MatchesMSP430FR2355Specification()
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+
+        // Act
+        MemoryRegionInfo ivtRegion = memoryMap.GetRegionInfo(MemoryRegion.InterruptVectorTable);
+
+        // Assert - Interrupt Vector Table: 0xFFE0-0xFFFF
         Assert.Equal((ushort)0xFFFF, ivtRegion.EndAddress);
     }
 
@@ -102,13 +203,26 @@ public class MemorySystemBasicIntegrationTests
         var memoryMap = new MemoryMap();
         var validator = new MemoryAccessValidator(memoryMap);
 
-        // Act & Assert - FRAM allows byte-level write access unlike traditional Flash
-        // This is a key characteristic of MSP430FR2355 FRAM technology
+        // Act
         ushort framAddress = 0x8000; // Middle of FRAM region
+        bool result = validator.IsAccessValid(framAddress, MemoryAccessPermissions.Write);
 
-        Assert.True(validator.IsAccessValid(framAddress, MemoryAccessPermissions.Write));
+        // Assert - FRAM allows byte-level write access unlike traditional Flash
+        // This is a key characteristic of MSP430FR2355 FRAM technology
+        Assert.True(result);
+    }
 
+    [Fact]
+    public void MemorySystem_FramRegion_HasFullAccessPermissions()
+    {
+        // Arrange
+        var memoryMap = new MemoryMap();
+
+        // Act
+        ushort framAddress = 0x8000; // Middle of FRAM region
         MemoryRegionInfo framRegion = memoryMap.GetRegion(framAddress);
+
+        // Assert - FRAM region allows all access types
         Assert.Equal(MemoryAccessPermissions.All, framRegion.Permissions);
     }
 }

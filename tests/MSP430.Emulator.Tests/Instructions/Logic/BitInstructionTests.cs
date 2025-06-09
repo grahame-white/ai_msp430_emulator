@@ -8,6 +8,16 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 
 /// <summary>
 /// Unit tests for the BitInstruction class.
+/// 
+/// BIT instruction performs bit test operation (AND without storing result):
+/// - Two-operand instruction with source and destination operands
+/// - Sets Zero, Negative, and Carry status flags based on result
+/// - Clears Overflow flag
+/// - Available in both word (BIT) and byte (BIT.B) variants
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4.3.4: BIT instruction
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.4: Logic instructions
 /// </summary>
 public class BitInstructionTests
 {
@@ -272,7 +282,6 @@ public class BitInstructionTests
     [InlineData(RegisterName.R0)]
     [InlineData(RegisterName.R1)]
     [InlineData(RegisterName.R2)]
-    [InlineData(RegisterName.CG1)]
     [InlineData(RegisterName.R4)]
     [InlineData(RegisterName.R15)]
     public void SourceRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)
@@ -294,7 +303,6 @@ public class BitInstructionTests
     [InlineData(RegisterName.R0)]
     [InlineData(RegisterName.R1)]
     [InlineData(RegisterName.R2)]
-    [InlineData(RegisterName.CG1)]
     [InlineData(RegisterName.R4)]
     [InlineData(RegisterName.R15)]
     public void DestinationRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)

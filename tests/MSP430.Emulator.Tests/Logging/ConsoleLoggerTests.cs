@@ -5,6 +5,17 @@ using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Tests.Logging;
 
+/// <summary>
+/// Unit tests for the ConsoleLogger class.
+/// 
+/// Tests validate console logging functionality for MSP430 emulator output.
+/// Console logging provides real-time emulator information including:
+/// - Instruction execution messages
+/// - Error and warning notifications  
+/// - Debug information and state changes
+/// - Performance and timing information
+/// - User interaction feedback
+/// </summary>
 public class ConsoleLoggerTests
 {
     [Fact]

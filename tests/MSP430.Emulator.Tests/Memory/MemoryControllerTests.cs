@@ -7,6 +7,17 @@ namespace MSP430.Emulator.Tests.Memory;
 
 /// <summary>
 /// Unit tests for the MemoryController class.
+/// 
+/// Memory controller manages:
+/// - Unified memory space addressing (16-bit address space)
+/// - Memory region routing (RAM, FRAM, Peripherals, Special Function Registers)
+/// - Memory access coordination and arbitration
+/// - Wait state management for FRAM access
+/// - Memory-mapped I/O coordination
+/// 
+/// References:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 2: Memory Organization
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: Detailed Description
 /// </summary>
 public class MemoryControllerTests
 {

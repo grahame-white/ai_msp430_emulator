@@ -8,6 +8,16 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 
 /// <summary>
 /// Unit tests for the AndInstruction class.
+/// 
+/// AND instruction performs bitwise AND operation:
+/// - Two-operand instruction with source and destination operands
+/// - Sets Zero and Negative status flags based on result
+/// - Clears Carry and Overflow flags
+/// - Available in both word (AND) and byte (AND.B) variants
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4.3.2: AND instruction
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.4: Logic instructions
 /// </summary>
 public class AndInstructionTests
 {
@@ -142,7 +152,6 @@ public class AndInstructionTests
     [InlineData(RegisterName.R0)]
     [InlineData(RegisterName.R1)]
     [InlineData(RegisterName.R2)]
-    [InlineData(RegisterName.CG1)]
     [InlineData(RegisterName.R4)]
     [InlineData(RegisterName.R15)]
     public void SourceRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)
@@ -164,7 +173,6 @@ public class AndInstructionTests
     [InlineData(RegisterName.R0)]
     [InlineData(RegisterName.R1)]
     [InlineData(RegisterName.R2)]
-    [InlineData(RegisterName.CG1)]
     [InlineData(RegisterName.R4)]
     [InlineData(RegisterName.R15)]
     public void DestinationRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)

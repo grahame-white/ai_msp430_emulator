@@ -5,6 +5,21 @@ using MSP430.Emulator.Core;
 
 namespace MSP430.Emulator.Tests.Core;
 
+/// <summary>
+/// Unit tests for the ExecutionState and ExecutionStateManager classes.
+/// 
+/// Execution states include:
+/// - Reset: Initial state after power-on or reset
+/// - Running: Normal instruction execution
+/// - Halted: Execution stopped (breakpoint, error)
+/// - Low Power Modes: LPM0-LPM4.5 for power management
+/// 
+/// References:
+/// - docs/references/SLAU445/1_system_resets_interrupts_and_operating_modes_system_control_module_sys.md - System operating modes overview
+/// - docs/references/SLAU445/1.2_system_reset_and_initialization.md - System reset behavior
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.4: Operating Modes
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 3: CPU
+/// </summary>
 public class ExecutionStateTests
 {
     [Fact]

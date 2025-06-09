@@ -6,6 +6,22 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
 
+/// <summary>
+/// Unit tests for the FlashController class.
+/// 
+/// Note: MSP430FR2355 uses FRAM, not Flash. This controller manages FRAM behavior:
+/// - FRAM wait state control
+/// - FRAM Error Correction Code (ECC)
+/// - FRAM power control modes
+/// - Byte-level write operations without erase cycles
+/// 
+/// References:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 6: FRAM
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 6.5: FRAM wait state control
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 6.6: FRAM Error Correction Code (ECC)
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 6.8: FRAM power control modes
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: Memory
+/// </summary>
 public class FlashControllerTests
 {
     private readonly TestLogger _logger;
@@ -873,9 +889,7 @@ public class FlashControllerTests
     public void StateTransitions_LogsInitializationMessage()
     {
         _logger.MinimumLevel = LogLevel.Debug;
-#pragma warning disable S1481 // Unused local variables should be removed
-        var controller = new FlashController(_logger);
-#pragma warning restore S1481
+        _ = new FlashController(_logger);
 
         Assert.Contains(_logger.LogEntries, entry =>
             entry.Level == LogLevel.Debug && entry.Message.Contains("FlashController initialized"));

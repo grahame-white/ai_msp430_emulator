@@ -66,6 +66,16 @@ public enum MemoryRegion
     /// FRAM Memory (MSP430FR2355: 0x4000-0xBFFF).
     /// Non-volatile ferroelectric memory for unified code and data storage.
     /// Supports byte-level write operations unlike traditional Flash.
+    /// 
+    /// NOTE: This enum value is named "Flash" for historical reasons but represents
+    /// FRAM memory in MSP430FR2355. FRAM has different characteristics than Flash:
+    /// - Byte-level write capability (vs page/block writes in Flash)
+    /// - No erase cycles required
+    /// - Faster write operations
+    /// - Different wait state behavior
+    /// 
+    /// This naming inconsistency should be addressed in a future major version.
+    /// See TEST_REVIEW_ISSUES.md for details.
     /// </summary>
     Flash,
 

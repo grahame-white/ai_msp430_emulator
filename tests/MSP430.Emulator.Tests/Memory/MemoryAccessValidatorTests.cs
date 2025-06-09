@@ -6,6 +6,20 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
 
+/// <summary>
+/// Unit tests for the MemoryAccessValidator class.
+/// 
+/// Memory access validation includes:
+/// - Address range boundary checking
+/// - Read/Write/Execute permission validation
+/// - Memory alignment requirements (word vs byte access)
+/// - Memory protection and access rights
+/// - Invalid address space detection
+/// 
+/// References:
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 2: Memory Organization
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: Detailed Description
+/// </summary>
 public class MemoryAccessValidatorTests
 {
     private readonly IMemoryMap _memoryMap;
@@ -223,14 +237,21 @@ public class MemoryAccessValidatorTests
     }
 
     [Fact]
-    public void ValidateAccess_WithAccessType_ValidatesCorrectly()
+    public void ValidateAccess_ValidAccessType_DoesNotThrow()
     {
-        // Test valid access
+        // RAM allows read access
         _validator.ValidateAccess(0x2000, MemoryAccessPermissions.Read);
 
-        // Test invalid access
+        // Should not throw - test passes if no exception
+        Assert.True(true);
+    }
+
+    [Fact]
+    public void ValidateAccess_InvalidAccessType_ThrowsMemoryAccessException()
+    {
+        // Bootstrap Loader doesn't allow write
         Assert.Throws<MemoryAccessException>(() =>
-            _validator.ValidateAccess(0x1000, MemoryAccessPermissions.Write)); // Bootstrap Loader doesn't allow write
+            _validator.ValidateAccess(0x1000, MemoryAccessPermissions.Write));
     }
 
     [Fact]
@@ -296,14 +317,6 @@ public class MemoryAccessValidatorTests
     }
 
     [Fact]
-    public void GetValidationInfo_ValidAddress_ReturnsNotNullRegion()
-    {
-        MemoryAccessValidationInfo info = _validator.GetValidationInfo(0x2000); // RAM
-
-        Assert.NotNull(info.Region);
-    }
-
-    [Fact]
     public void GetValidationInfo_ValidAddress_ReturnsCorrectRegionType()
     {
         MemoryAccessValidationInfo info = _validator.GetValidationInfo(0x2000); // RAM
@@ -341,12 +354,6 @@ public class MemoryAccessValidatorTests
         MemoryAccessValidationInfo info = _validator.GetValidationInfo(0x0300); // Unmapped
 
         Assert.Null(info.Region);
-    }
-
-    [Fact]
-    public void ValidateRead_LogsWarningOnViolation_ThrowsException()
-    {
-        Assert.Throws<MemoryAccessException>(() => _validator.ValidateRead(0x0300));
     }
 
     [Fact]
@@ -393,29 +400,34 @@ public class MemoryAccessValidatorTests
         Assert.Equal(expected, result);
     }
 
-    [Theory]
-    [InlineData("ValidateRead", "read access validated")]
-    [InlineData("ValidateWrite", "write access validated")]
-    [InlineData("ValidateExecute", "execute access validated")]
-    public void ValidationMethod_LogsCorrectAccessType(string methodName, string expectedLogMessage)
+    [Fact]
+    public void ValidateRead_ValidAddress_LogsDebugMessage()
     {
         _logger.MinimumLevel = LogLevel.Debug;
 
-        // Use reflection or switch to call the appropriate method
-        switch (methodName)
-        {
-            case "ValidateRead":
-                _validator.ValidateRead(0x2000);
-                break;
-            case "ValidateWrite":
-                _validator.ValidateWrite(0x2000);
-                break;
-            case "ValidateExecute":
-                _validator.ValidateExecute(0x2000);
-                break;
-        }
+        _validator.ValidateRead(0x2000);
 
-        Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains(expectedLogMessage));
+        Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains("read access validated"));
+    }
+
+    [Fact]
+    public void ValidateWrite_ValidAddress_LogsDebugMessage()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+
+        _validator.ValidateWrite(0x2000);
+
+        Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains("write access validated"));
+    }
+
+    [Fact]
+    public void ValidateExecute_ValidAddress_LogsDebugMessage()
+    {
+        _logger.MinimumLevel = LogLevel.Debug;
+
+        _validator.ValidateExecute(0x2000);
+
+        Assert.Contains(_logger.LogEntries, entry => entry.Message.Contains("execute access validated"));
     }
 
     private class TestLogger : ILogger

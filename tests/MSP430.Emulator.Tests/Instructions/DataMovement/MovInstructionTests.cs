@@ -8,7 +8,20 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 
 /// <summary>
 /// Unit tests for the MovInstruction class.
+/// 
+/// MOV instruction performs data movement from source to destination:
+/// - Two-operand instruction with source and destination operands
+/// - Does not affect status flags (except for special register operations)
+/// - Supports all addressing mode combinations
+/// - Available in both word (MOV) and byte (MOV.B) variants
+/// - Opcode: 0x4 (Format I)
+/// - Most commonly used instruction for data transfer operations
+/// 
 /// Tests all addressing mode combinations, byte/word operations, and flag behavior.
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4.3.21: MOV instruction
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.4: Data movement instructions
 /// </summary>
 public class MovInstructionTests
 {
@@ -1049,18 +1062,19 @@ public class MovInstructionTests
     }
 
     [Theory]
-    [InlineData(true)]
+    [InlineData(false)]
     public void Execute_R2WithAbsoluteMode_UpdatesNegativeFlag(bool expectedNegative)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
         ushort memoryAddress = 0x1000;
-        ushort valueToMove = 0x8000;
 
-        registerFile.WriteRegister(RegisterName.R3, valueToMove);
+        // NOTE: R3 with Register mode (As=00) is a constant generator that returns 0,
+        // so the value moved will be 0, not the value stored in R3
+        registerFile.WriteRegister(RegisterName.R3, 0x8000);
         // Set opposite initial values to ensure the test is checking the actual update
-        registerFile.StatusRegister.Negative = false;
+        registerFile.StatusRegister.Negative = true; // Will be cleared since moving 0
 
         var instruction = new MovInstruction(
             0x4000,
@@ -1078,18 +1092,19 @@ public class MovInstructionTests
     }
 
     [Theory]
-    [InlineData(false)]
+    [InlineData(true)]
     public void Execute_R2WithAbsoluteMode_UpdatesZeroFlag(bool expectedZero)
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
         ushort memoryAddress = 0x1000;
-        ushort valueToMove = 0x8000;
 
-        registerFile.WriteRegister(RegisterName.R3, valueToMove);
+        // NOTE: R3 with Register mode (As=00) is a constant generator that returns 0,
+        // so the Zero flag should be set since moving 0
+        registerFile.WriteRegister(RegisterName.R3, 0x8000);
         // Set opposite initial values to ensure the test is checking the actual update
-        registerFile.StatusRegister.Zero = true;
+        registerFile.StatusRegister.Zero = false; // Will be set since moving 0
 
         var instruction = new MovInstruction(
             0x4000,
@@ -1140,19 +1155,21 @@ public class MovInstructionTests
     {
         // This test verifies that when R2 is used as the destination register with Absolute mode,
         // the value is written to memory at the absolute address
+        //
+        // NOTE: R3 with Register mode (As=00) is a constant generator that returns 0,
+        // per MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 4.3.4
 
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
 
         ushort memoryAddress = 0x1000;
-        ushort valueToMove = 0x8000; // Negative value to test flag updates
 
-        // Set up R3 with the value to move
-        registerFile.WriteRegister(RegisterName.R3, valueToMove);
+        // Set up R3 with some value - this should be ignored since R3 Register mode is constant generator
+        registerFile.WriteRegister(RegisterName.R3, 0x8000);
 
         var instruction = new MovInstruction(
             0x4000,
-            RegisterName.R3, // Source register
+            RegisterName.R3, // Source register - R3 As=00 generates constant 0
             RegisterName.R2, // Destination register is R2, but mode is Absolute
             AddressingMode.Register,
             AddressingMode.Absolute, // This means write to memory at absolute address, not directly to R2
@@ -1162,9 +1179,9 @@ public class MovInstructionTests
         instruction.Execute(registerFile, memory, new ushort[] { memoryAddress });
 
         // Assert
-        // Check that value was written to memory at the absolute address (not to R2 register)
+        // Check that constant 0 was written to memory (R3 Register mode generates 0)
         ushort writtenValue = (ushort)(memory[memoryAddress] | (memory[memoryAddress + 1] << 8));
-        Assert.Equal(valueToMove, writtenValue);
+        Assert.Equal(0x0000, writtenValue);
     }
 
     [Theory]

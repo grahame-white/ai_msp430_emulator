@@ -7,6 +7,17 @@ using MSP430.Emulator.Logging;
 
 namespace MSP430.Emulator.Tests.Diagnostics;
 
+/// <summary>
+/// Unit tests for the DiagnosticReportGenerator class.
+/// 
+/// Tests validate diagnostic report generation for MSP430 emulator analysis.
+/// Diagnostic reports provide comprehensive emulator state information including:
+/// - CPU register states and execution statistics
+/// - Memory usage patterns and access history
+/// - Instruction execution frequency analysis
+/// - Performance metrics and timing information
+/// - Error summaries and exception details
+/// </summary>
 public class DiagnosticReportGeneratorTests
 {
     [Fact]

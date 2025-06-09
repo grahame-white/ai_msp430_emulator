@@ -8,6 +8,16 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 
 /// <summary>
 /// Unit tests for the status bit manipulation instruction classes.
+/// 
+/// Status bit manipulation instructions include:
+/// - SETC/CLRC: Set/Clear Carry flag
+/// - SETZ/CLRZ: Set/Clear Zero flag
+/// - SETN/CLRN: Set/Clear Negative flag
+/// - EINT/DINT: Enable/Disable Interrupts (GIE bit)
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4.3: MSP430 Instruction Set
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.3: Status Register (SR/R2)
 /// </summary>
 public class StatusBitInstructionTests
 {

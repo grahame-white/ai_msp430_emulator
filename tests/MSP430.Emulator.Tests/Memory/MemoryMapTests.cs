@@ -5,6 +5,28 @@ using MSP430.Emulator.Memory;
 
 namespace MSP430.Emulator.Tests.Memory;
 
+/// <summary>
+/// Unit tests for the MemoryMap class.
+/// 
+/// MSP430FR2355 Memory Map Layout:
+/// - Special Function Registers (SFR): 0x0000-0x00FF (256 bytes)
+/// - 8-bit Peripherals: 0x0100-0x01FF (256 bytes)
+/// - 16-bit Peripherals: 0x0200-0x027F (128 bytes)
+/// - Bootstrap Loader: 0x1000-0x17FF (2KB)
+/// - Information Memory: 0x1800-0x19FF (512 bytes)
+/// - RAM: 0x2000-0x2FFF (4KB)
+/// - FRAM (Code/Data): 0x4000-0xBFFF (32KB)
+/// - Interrupt Vector Table: 0xFFE0-0xFFFF (32 bytes)
+/// 
+/// Memory regions have different access permissions:
+/// - ReadWrite: RAM, FRAM (when unlocked)
+/// - ReadExecute: FRAM (code), Boot Memory, Interrupt Vectors
+/// - ReadWriteExecute: FRAM (full access when unlocked)
+/// 
+/// References:
+/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: Detailed Description
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 2: Memory Organization
+/// </summary>
 public class MemoryMapTests
 {
     [Fact]

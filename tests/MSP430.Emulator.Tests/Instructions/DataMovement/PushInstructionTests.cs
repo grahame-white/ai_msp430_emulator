@@ -13,6 +13,38 @@ namespace MSP430.Emulator.Tests.Instructions.DataMovement;
 /// </summary>
 public class PushInstructionTests
 {
+    /// <summary>
+    /// Creates a standard test environment with register file and memory.
+    /// </summary>
+    /// <param name="stackPointer">Initial stack pointer value (default: 0x1000)</param>
+    /// <param name="r4Value">Initial value for R4 register (default: 0x1234)</param>
+    /// <returns>Tuple containing register file and memory array</returns>
+    private static (RegisterFile RegisterFile, byte[] Memory) CreateTestEnvironment(ushort stackPointer = 0x1000, ushort r4Value = 0x1234)
+    {
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        registerFile.SetStackPointer(stackPointer);
+        registerFile.WriteRegister(RegisterName.R4, r4Value);
+
+        return (registerFile, memory);
+    }
+
+    /// <summary>
+    /// Creates a standard PushInstruction for testing.
+    /// </summary>
+    /// <param name="sourceRegister">Source register (default: R4)</param>
+    /// <param name="addressingMode">Addressing mode (default: Register)</param>
+    /// <param name="isByteOperation">Whether this is a byte operation (default: false)</param>
+    /// <returns>Configured PushInstruction</returns>
+    private static PushInstruction CreateTestInstruction(
+        RegisterName sourceRegister = RegisterName.R4,
+        AddressingMode addressingMode = AddressingMode.Register,
+        bool isByteOperation = false)
+    {
+        ushort instructionWord = isByteOperation ? (ushort)0x1244 : (ushort)0x1204;
+        return new PushInstruction(instructionWord, sourceRegister, addressingMode, isByteOperation);
+    }
     [Fact]
     public void Constructor_ValidParameters_SetsFormat()
     {
@@ -155,48 +187,133 @@ public class PushInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterMode_PushesValueAndDecrementsStackPointer()
+    public void Execute_RegisterMode_DecrementsStackPointer()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        PushInstruction instruction = CreateTestInstruction();
 
-        registerFile.WriteRegister(RegisterName.R4, 0x1234);
-        registerFile.SetStackPointer(0x1000);
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x0FFE, registerFile.GetStackPointer()); // SP decremented by 2
+    }
+
+    [Fact]
+    public void Execute_RegisterMode_WritesLowByteToMemory()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        PushInstruction instruction = CreateTestInstruction();
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x34, memory[0x0FFE]); // Low byte of value stored (little-endian)
+    }
+
+    [Fact]
+    public void Execute_RegisterMode_WritesHighByteToMemory()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        PushInstruction instruction = CreateTestInstruction();
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x12, memory[0x0FFF]); // High byte of value stored
+    }
+
+    [Fact]
+    public void Execute_RegisterMode_ReturnsCorrectCycleCount()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+        PushInstruction instruction = CreateTestInstruction();
 
         // Act
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(0x0FFE, registerFile.GetStackPointer()); // SP decremented by 2
-        Assert.Equal(0x34, memory[0x0FFE]); // Low byte of value stored (little-endian)
-        Assert.Equal(0x12, memory[0x0FFF]); // High byte of value stored
         Assert.Equal(1u, cycles); // Register mode cycle count
     }
 
     [Fact]
-    public void Execute_ByteOperation_SignExtendsValue()
+    public void Execute_ByteOperation_DecrementsStackPointer()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
-        var instruction = new PushInstruction(0x1244, RegisterName.R4, AddressingMode.Register, true);
-
-        registerFile.WriteRegister(RegisterName.R4, 0x12FF); // Negative byte value
-        registerFile.SetStackPointer(0x1000);
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(r4Value: 0x12FF); // Negative byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
 
         // Act
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         Assert.Equal(0x0FFE, registerFile.GetStackPointer());
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_WritesSignExtendedLowByte()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(r4Value: 0x12FF); // Negative byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(0xFF, memory[0x0FFE]); // Low byte
+    }
+
+    [Fact]
+    public void Execute_ByteOperation_WritesSignExtendedHighByte()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(r4Value: 0x12FF); // Negative byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(0xFF, memory[0x0FFF]); // High byte (sign-extended)
     }
 
     [Fact]
-    public void Execute_ByteOperationPositive_ZeroExtendsValue()
+    public void Execute_ByteOperationPositive_DecrementsStackPointer()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(); // Default 0x1234 is positive byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x0FFE, registerFile.GetStackPointer());
+    }
+
+    [Fact]
+    public void Execute_ByteOperationPositive_WritesLowByteToMemory()
+    {
+        // Arrange
+        (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(); // Default 0x1234 is positive byte value
+        PushInstruction instruction = CreateTestInstruction(isByteOperation: true);
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x34, memory[0x0FFE]); // Low byte
+    }
+
+    [Fact]
+    public void Execute_ByteOperationPositive_ZeroExtendsHighByte()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -210,13 +327,65 @@ public class PushInstructionTests
         _ = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(0x0FFE, registerFile.GetStackPointer());
-        Assert.Equal(0x34, memory[0x0FFE]); // Low byte
         Assert.Equal(0x00, memory[0x0FFF]); // High byte (positive, so no sign extension)
     }
 
     [Fact]
-    public void Execute_ImmediateMode_PushesImmediateValueAndUsesExtensionWord()
+    public void Execute_ImmediateMode_DecrementsStackPointer()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+        var instruction = new PushInstruction(0x1230, RegisterName.R0, AddressingMode.Immediate, false);
+
+        registerFile.SetStackPointer(0x1000);
+        ushort[] extensionWords = new ushort[] { 0x5678 };
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x0FFE, registerFile.GetStackPointer());
+    }
+
+    [Fact]
+    public void Execute_ImmediateMode_WritesLowByteToMemory()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+        var instruction = new PushInstruction(0x1230, RegisterName.R0, AddressingMode.Immediate, false);
+
+        registerFile.SetStackPointer(0x1000);
+        ushort[] extensionWords = new ushort[] { 0x5678 };
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x78, memory[0x0FFE]); // Low byte of immediate value
+    }
+
+    [Fact]
+    public void Execute_ImmediateMode_WritesHighByteToMemory()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+        var instruction = new PushInstruction(0x1230, RegisterName.R0, AddressingMode.Immediate, false);
+
+        registerFile.SetStackPointer(0x1000);
+        ushort[] extensionWords = new ushort[] { 0x5678 };
+
+        // Act
+        _ = instruction.Execute(registerFile, memory, extensionWords);
+
+        // Assert
+        Assert.Equal(0x56, memory[0x0FFF]); // High byte of immediate value
+    }
+
+    [Fact]
+    public void Execute_ImmediateMode_ReturnsCorrectCycleCount()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -230,9 +399,6 @@ public class PushInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(0x0FFE, registerFile.GetStackPointer());
-        Assert.Equal(0x78, memory[0x0FFE]); // Low byte of immediate value
-        Assert.Equal(0x56, memory[0x0FFF]); // High byte of immediate value
         Assert.Equal(1u, cycles); // Immediate mode cycle count
     }
 

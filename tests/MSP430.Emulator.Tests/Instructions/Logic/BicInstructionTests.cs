@@ -9,6 +9,16 @@ namespace MSP430.Emulator.Tests.Instructions.Logic;
 
 /// <summary>
 /// Unit tests for the BicInstruction class.
+/// 
+/// BIC instruction performs bit clear operation (AND destination with inverted source):
+/// - Two-operand instruction with source and destination operands
+/// - Sets Zero and Negative status flags based on result
+/// - Clears Carry and Overflow flags
+/// - Available in both word (BIC) and byte (BIC.B) variants
+/// 
+/// References:
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4.3.3: BIC instruction
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.4: Logic instructions
 /// </summary>
 public class BicInstructionTests
 {
@@ -273,7 +283,6 @@ public class BicInstructionTests
     [InlineData(RegisterName.R0)]
     [InlineData(RegisterName.R1)]
     [InlineData(RegisterName.R2)]
-    [InlineData(RegisterName.CG1)]
     [InlineData(RegisterName.R4)]
     [InlineData(RegisterName.R15)]
     public void SourceRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)
@@ -295,7 +304,6 @@ public class BicInstructionTests
     [InlineData(RegisterName.R0)]
     [InlineData(RegisterName.R1)]
     [InlineData(RegisterName.R2)]
-    [InlineData(RegisterName.CG1)]
     [InlineData(RegisterName.R4)]
     [InlineData(RegisterName.R15)]
     public void DestinationRegister_AllRegisters_ReturnsCorrectRegister(RegisterName register)

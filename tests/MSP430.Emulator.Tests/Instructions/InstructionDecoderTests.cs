@@ -6,6 +6,21 @@ using MSP430.Emulator.Instructions;
 
 namespace MSP430.Emulator.Tests.Instructions;
 
+/// <summary>
+/// Unit tests for the InstructionDecoder class.
+/// 
+/// Instruction formats include:
+/// - Format I: Two-operand instructions (MOV, ADD, SUB, etc.)
+/// - Format II: Single-operand instructions (RRC, SWPB, etc.)
+/// - Format III: Jump instructions (JEQ, JNE, etc.)
+/// - Extended instruction formats for MSP430X
+/// 
+/// References:
+/// - docs/references/SLAU445/4_cpux.md - CPU overview and instruction processing
+/// - docs/references/SLAU445/4.1_msp430x_cpu_(cpux)_introduction.md - CPU introduction
+/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - Section 4: MSP430 Instruction Set
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.1: Instruction Formats
+/// </summary>
 public class InstructionDecoderTests
 {
     private readonly InstructionDecoder _decoder = new();

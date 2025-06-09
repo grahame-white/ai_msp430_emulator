@@ -70,52 +70,94 @@ public class ClockSystemBehaviorTests
     public class SystemClockGeneratorTests
     {
         [Fact]
-        public void StatusRegister_SystemClockGenerator0And1_InitiallyFalse()
+        public void StatusRegister_SystemClockGenerator0_InitiallyFalse()
         {
             // Arrange & Act
             var sr = new StatusRegister();
 
-            // Assert - SCG0 and SCG1 should be clear on reset
+            // Assert - SCG0 should be clear on reset
             Assert.False(sr.SystemClockGenerator0);
+        }
+
+        [Fact]
+        public void StatusRegister_SystemClockGenerator1_InitiallyFalse()
+        {
+            // Arrange & Act
+            var sr = new StatusRegister();
+
+            // Assert - SCG1 should be clear on reset
             Assert.False(sr.SystemClockGenerator1);
         }
 
         [Theory]
-        [InlineData(true, true)]    // Both SCG bits set
-        [InlineData(true, false)]   // Only SCG0 set
-        [InlineData(false, true)]   // Only SCG1 set
-        [InlineData(false, false)]  // Both SCG bits clear
-        public void StatusRegister_SystemClockGeneratorCombinations_SetCorrectly(bool scg0, bool scg1)
+        [InlineData(true)]
+        [InlineData(false)]
+        public void StatusRegister_SystemClockGenerator0_SetCorrectly(bool scg0)
         {
             // Arrange
             var sr = new StatusRegister();
 
             // Act
             sr.SystemClockGenerator0 = scg0;
-            sr.SystemClockGenerator1 = scg1;
 
             // Assert
             Assert.Equal(scg0, sr.SystemClockGenerator0);
-            Assert.Equal(scg1, sr.SystemClockGenerator1);
         }
 
-        [Fact]
-        public void StatusRegister_SystemClockGeneratorFlags_IndependentOperation()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void StatusRegister_SystemClockGenerator1_SetCorrectly(bool scg1)
         {
             // Arrange
             var sr = new StatusRegister();
 
-            // Act & Assert - Test independence
+            // Act
+            sr.SystemClockGenerator1 = scg1;
+
+            // Assert
+            Assert.Equal(scg1, sr.SystemClockGenerator1);
+        }
+
+        [Fact]
+        public void StatusRegister_SystemClockGenerator0_OperatesIndependentlyFromSCG1()
+        {
+            // Arrange
+            var sr = new StatusRegister();
+
+            // Act 
             sr.SystemClockGenerator0 = true;
-            Assert.True(sr.SystemClockGenerator0);
-            Assert.False(sr.SystemClockGenerator1);
 
+            // Assert - SCG0 can be set without affecting SCG1
+            Assert.True(sr.SystemClockGenerator0);
+        }
+
+        [Fact]
+        public void StatusRegister_SystemClockGenerator1_DoesNotAffectSCG0WhenSet()
+        {
+            // Arrange
+            var sr = new StatusRegister();
+            sr.SystemClockGenerator0 = true;
+
+            // Act
             sr.SystemClockGenerator1 = true;
-            Assert.True(sr.SystemClockGenerator0);
-            Assert.True(sr.SystemClockGenerator1);
 
+            // Assert - SCG1 can be set without affecting SCG0
+            Assert.True(sr.SystemClockGenerator0);
+        }
+
+        [Fact]
+        public void StatusRegister_SystemClockGenerator0_CanBeClearedIndependently()
+        {
+            // Arrange
+            var sr = new StatusRegister();
+            sr.SystemClockGenerator0 = true;
+            sr.SystemClockGenerator1 = true;
+
+            // Act
             sr.SystemClockGenerator0 = false;
-            Assert.False(sr.SystemClockGenerator0);
+
+            // Assert - SCG0 can be cleared without affecting SCG1
             Assert.True(sr.SystemClockGenerator1);
         }
     }
@@ -151,24 +193,49 @@ public class ClockSystemBehaviorTests
         }
 
         [Fact]
-        public void StatusRegister_OscillatorOffAndClockGenerator_IndependentOperation()
+        public void StatusRegister_OscillatorOff_CanBeSetWithSCGBits()
         {
             // Arrange
             var sr = new StatusRegister();
 
-            // Act & Assert - Test that oscillator control is independent of SCG bits
+            // Act
             sr.OscillatorOff = true;
             sr.SystemClockGenerator0 = true;
             sr.SystemClockGenerator1 = true;
 
+            // Assert - Oscillator control is independent of SCG bits
             Assert.True(sr.OscillatorOff);
-            Assert.True(sr.SystemClockGenerator0);
-            Assert.True(sr.SystemClockGenerator1);
+        }
 
-            // Clear oscillator off, SCG bits should remain
+        [Fact]
+        public void StatusRegister_OscillatorOff_DoesNotAffectSCG0()
+        {
+            // Arrange
+            var sr = new StatusRegister();
+            sr.OscillatorOff = true;
+            sr.SystemClockGenerator0 = true;
+            sr.SystemClockGenerator1 = true;
+
+            // Act
             sr.OscillatorOff = false;
-            Assert.False(sr.OscillatorOff);
+
+            // Assert - Clearing oscillator off should not affect SCG0
             Assert.True(sr.SystemClockGenerator0);
+        }
+
+        [Fact]
+        public void StatusRegister_OscillatorOff_DoesNotAffectSCG1()
+        {
+            // Arrange
+            var sr = new StatusRegister();
+            sr.OscillatorOff = true;
+            sr.SystemClockGenerator0 = true;
+            sr.SystemClockGenerator1 = true;
+
+            // Act
+            sr.OscillatorOff = false;
+
+            // Assert - Clearing oscillator off should not affect SCG1
             Assert.True(sr.SystemClockGenerator1);
         }
     }
@@ -179,20 +246,44 @@ public class ClockSystemBehaviorTests
     public class ClockSystemResetTests
     {
         [Fact]
-        public void StatusRegister_Reset_ClearsAllClockControlBits()
+        public void StatusRegister_Reset_ClearsOscillatorOffBit()
         {
             // Arrange
             var sr = new StatusRegister();
             sr.OscillatorOff = true;
+
+            // Act
+            sr.Reset();
+
+            // Assert - Oscillator off bit should be cleared after reset
+            Assert.False(sr.OscillatorOff);
+        }
+
+        [Fact]
+        public void StatusRegister_Reset_ClearsSystemClockGenerator0Bit()
+        {
+            // Arrange
+            var sr = new StatusRegister();
             sr.SystemClockGenerator0 = true;
+
+            // Act
+            sr.Reset();
+
+            // Assert - SCG0 bit should be cleared after reset
+            Assert.False(sr.SystemClockGenerator0);
+        }
+
+        [Fact]
+        public void StatusRegister_Reset_ClearsSystemClockGenerator1Bit()
+        {
+            // Arrange
+            var sr = new StatusRegister();
             sr.SystemClockGenerator1 = true;
 
             // Act
             sr.Reset();
 
-            // Assert - All clock control bits should be cleared after reset
-            Assert.False(sr.OscillatorOff);
-            Assert.False(sr.SystemClockGenerator0);
+            // Assert - SCG1 bit should be cleared after reset
             Assert.False(sr.SystemClockGenerator1);
         }
 
@@ -201,7 +292,7 @@ public class ClockSystemBehaviorTests
         [InlineData(0x00E0)]  // Only clock bits set before reset
         [InlineData(0x0020)]  // Only oscillator off bit set
         [InlineData(0x00C0)]  // Only SCG bits set
-        public void StatusRegister_ResetFromVariousStates_ClearsClockBits(ushort initialValue)
+        public void StatusRegister_ResetFromVariousStates_ClearsOscillatorOffBit(ushort initialValue)
         {
             // Arrange
             var sr = new StatusRegister(initialValue);
@@ -209,9 +300,41 @@ public class ClockSystemBehaviorTests
             // Act
             sr.Reset();
 
-            // Assert - Clock control bits should be cleared regardless of initial state
+            // Assert - Oscillator off bit should be cleared regardless of initial state
             Assert.False(sr.OscillatorOff);
+        }
+
+        [Theory]
+        [InlineData(0xFFFF)]  // All bits set before reset
+        [InlineData(0x00E0)]  // Only clock bits set before reset
+        [InlineData(0x0020)]  // Only oscillator off bit set
+        [InlineData(0x00C0)]  // Only SCG bits set
+        public void StatusRegister_ResetFromVariousStates_ClearsSCG0Bit(ushort initialValue)
+        {
+            // Arrange
+            var sr = new StatusRegister(initialValue);
+
+            // Act
+            sr.Reset();
+
+            // Assert - SCG0 bit should be cleared regardless of initial state
             Assert.False(sr.SystemClockGenerator0);
+        }
+
+        [Theory]
+        [InlineData(0xFFFF)]  // All bits set before reset
+        [InlineData(0x00E0)]  // Only clock bits set before reset
+        [InlineData(0x0020)]  // Only oscillator off bit set
+        [InlineData(0x00C0)]  // Only SCG bits set
+        public void StatusRegister_ResetFromVariousStates_ClearsSCG1Bit(ushort initialValue)
+        {
+            // Arrange
+            var sr = new StatusRegister(initialValue);
+
+            // Act
+            sr.Reset();
+
+            // Assert - SCG1 bit should be cleared regardless of initial state
             Assert.False(sr.SystemClockGenerator1);
         }
     }
@@ -232,23 +355,38 @@ public class ClockSystemBehaviorTests
         }
 
         [Theory]
-        [InlineData(1000000, true)]   // 1 MHz - Valid default
-        [InlineData(8000000, true)]   // 8 MHz - Valid maximum
-        [InlineData(16000000, true)]  // 16 MHz - Valid extended
-        [InlineData(32768, true)]     // 32.768 kHz - Valid LFXT
-        public void EmulatorConfig_CpuFrequencyConfiguration_PersistsCorrectly(int frequency, bool enableTracing)
+        [InlineData(1000000)]     // 1 MHz - Valid default
+        [InlineData(8000000)]     // 8 MHz - Valid maximum
+        [InlineData(16000000)]    // 16 MHz - Valid extended
+        [InlineData(32768)]       // 32.768 kHz - Valid LFXT
+        public void EmulatorConfig_CpuFrequencyConfiguration_PersistsFrequency(int frequency)
         {
             // Arrange
             var config = EmulatorConfig.CreateDefault();
             config.Cpu.Frequency = frequency;
+
+            // Act - Serialize and deserialize
+            string json = config.ToJson();
+            var deserializedConfig = EmulatorConfig.LoadFromJson(json);
+
+            // Assert - Frequency should persist correctly
+            Assert.Equal(frequency, deserializedConfig.Cpu.Frequency);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void EmulatorConfig_CpuTracingConfiguration_PersistsTracing(bool enableTracing)
+        {
+            // Arrange
+            var config = EmulatorConfig.CreateDefault();
             config.Cpu.EnableTracing = enableTracing;
 
             // Act - Serialize and deserialize
             string json = config.ToJson();
             var deserializedConfig = EmulatorConfig.LoadFromJson(json);
 
-            // Assert - Configuration should persist correctly
-            Assert.Equal(frequency, deserializedConfig.Cpu.Frequency);
+            // Assert - Tracing setting should persist correctly
             Assert.Equal(enableTracing, deserializedConfig.Cpu.EnableTracing);
         }
 
@@ -273,16 +411,40 @@ public class ClockSystemBehaviorTests
         [InlineData(4000000)]    // 4 MHz DCO
         [InlineData(8000000)]    // 8 MHz DCO
         [InlineData(16000000)]   // 16 MHz DCO (extended)
-        public void ClockFrequency_ValidDcoFrequencies_WithinSpecification(int frequency)
+        public void ClockFrequency_ValidDcoFrequencies_AboveMinimum(int frequency)
         {
             // Arrange & Act
             var config = new CpuConfig { Frequency = frequency };
 
-            // Assert - These frequencies should be within MSP430FR2355 DCO range
-            // Note: This test validates configuration acceptance
-            // Future implementation should add proper validation logic
-            Assert.True(frequency >= 1000000); // Minimum practical frequency
-            Assert.True(frequency <= 16000000); // Maximum extended frequency
+            // Assert - Frequency should be above minimum practical frequency
+            Assert.True(frequency >= 1000000);
+        }
+
+        [Theory]
+        [InlineData(1000000)]    // 1 MHz DCO
+        [InlineData(4000000)]    // 4 MHz DCO
+        [InlineData(8000000)]    // 8 MHz DCO
+        [InlineData(16000000)]   // 16 MHz DCO (extended)
+        public void ClockFrequency_ValidDcoFrequencies_BelowMaximum(int frequency)
+        {
+            // Arrange & Act
+            var config = new CpuConfig { Frequency = frequency };
+
+            // Assert - Frequency should be below maximum extended frequency
+            Assert.True(frequency <= 16000000);
+        }
+
+        [Theory]
+        [InlineData(1000000)]    // 1 MHz DCO
+        [InlineData(4000000)]    // 4 MHz DCO
+        [InlineData(8000000)]    // 8 MHz DCO
+        [InlineData(16000000)]   // 16 MHz DCO (extended)
+        public void ClockFrequency_ValidDcoFrequencies_SetCorrectly(int frequency)
+        {
+            // Arrange & Act
+            var config = new CpuConfig { Frequency = frequency };
+
+            // Assert - Frequency should be set as configured
             Assert.Equal(frequency, config.Frequency);
         }
 

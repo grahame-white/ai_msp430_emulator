@@ -16,7 +16,7 @@ echo "==> Running pre-commit formatting check..."
 STAGED_ALL_FILES=$(git diff --cached --name-only --diff-filter=ACM || true)
 if [ -n "$STAGED_ALL_FILES" ]; then
     echo "==> Checking for ANSI escape sequences..."
-    if echo "$STAGED_ALL_FILES" | xargs git show --cached | grep -q $'\033\['; then
+    if git diff --cached | grep -q $'\033\['; then
         echo "❌ ANSI escape sequences detected in staged files!"
         echo "   This usually means terminal output was copied into source code."
         echo "   Please remove all ANSI color codes and escape sequences."

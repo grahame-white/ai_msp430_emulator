@@ -110,10 +110,7 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         int extensionIndex = 0;
 
         // Source operand extension word
-        if (_sourceAddressingMode == AddressingMode.Immediate ||
-            _sourceAddressingMode == AddressingMode.Absolute ||
-            _sourceAddressingMode == AddressingMode.Symbolic ||
-            _sourceAddressingMode == AddressingMode.Indexed)
+        if (NeedsExtensionWord(_sourceRegister, _sourceAddressingMode))
         {
             if (extensionIndex >= extensionWords.Length)
             {
@@ -123,9 +120,7 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         }
 
         // Destination operand extension word
-        if (_destinationAddressingMode == AddressingMode.Absolute ||
-            _destinationAddressingMode == AddressingMode.Symbolic ||
-            _destinationAddressingMode == AddressingMode.Indexed)
+        if (NeedsExtensionWord(_destinationRegister, _destinationAddressingMode))
         {
             if (extensionIndex >= extensionWords.Length)
             {
@@ -143,8 +138,8 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
             memory,
             sourceExtensionWord);
 
-        // Read destination operand
-        ushort destinationValue = InstructionHelpers.ReadOperand(
+        // Read destination operand (note: destination operands never use constant generators)
+        ushort destinationValue = InstructionHelpers.ReadDestinationOperand(
             _destinationRegister,
             _destinationAddressingMode,
             _isByteOperation,
@@ -206,20 +201,22 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         // Base cycle count for Format I instructions
         uint baseCycles = 1;
 
-        // Add cycles for source addressing mode
-        uint sourceCycles = _sourceAddressingMode switch
-        {
-            AddressingMode.Register => 0,
-            AddressingMode.Indexed => 3,
-            AddressingMode.Indirect => 2,
-            AddressingMode.IndirectAutoIncrement => 2,
-            AddressingMode.Immediate => 0,
-            AddressingMode.Absolute => 3,
-            AddressingMode.Symbolic => 3,
-            _ => 0
-        };
+        // Add cycles for source addressing mode (account for constant generators)
+        uint sourceCycles = InstructionHelpers.IsConstantGenerator(_sourceRegister, _sourceAddressingMode)
+            ? 0u  // Constant generators take 0 additional cycles
+            : _sourceAddressingMode switch
+            {
+                AddressingMode.Register => 0u,
+                AddressingMode.Indexed => 3u,
+                AddressingMode.Indirect => 2u,
+                AddressingMode.IndirectAutoIncrement => 2u,
+                AddressingMode.Immediate => 0u,
+                AddressingMode.Absolute => 3u,
+                AddressingMode.Symbolic => 3u,
+                _ => 0u
+            };
 
-        // Add cycles for destination addressing mode
+        // Add cycles for destination addressing mode (never constant generators)
         uint destinationCycles = _destinationAddressingMode switch
         {
             AddressingMode.Register => 0,
@@ -233,4 +230,27 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
 
         return baseCycles + sourceCycles + destinationCycles;
     }
+
+    /// <summary>
+    /// Determines if a register and addressing mode combination needs an extension word.
+    /// Constant generators don't need extension words even if they use Immediate mode.
+    /// </summary>
+    /// <param name="register">The register.</param>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <returns>True if an extension word is needed, false otherwise.</returns>
+    private static bool NeedsExtensionWord(RegisterName register, AddressingMode addressingMode)
+    {
+        // Constant generators don't need extension words
+        if (InstructionHelpers.IsConstantGenerator(register, addressingMode))
+        {
+            return false;
+        }
+
+        // Regular extension word requirements
+        return addressingMode == AddressingMode.Immediate ||
+               addressingMode == AddressingMode.Absolute ||
+               addressingMode == AddressingMode.Symbolic ||
+               addressingMode == AddressingMode.Indexed;
+    }
+
 }

@@ -104,7 +104,7 @@ public class IncInstruction : Instruction, IExecutableInstruction
         ushort extensionWord = ExtensionWordCount > 0 ? extensionWords[0] : (ushort)0;
 
         // Read current value from destination
-        ushort currentValue = InstructionHelpers.ReadOperand(
+        ushort currentValue = InstructionHelpers.ReadDestinationOperand(
             _destinationRegister,
             _destinationAddressingMode,
             _isByteOperation,

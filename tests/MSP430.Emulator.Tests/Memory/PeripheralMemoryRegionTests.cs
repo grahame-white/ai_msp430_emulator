@@ -30,7 +30,7 @@ public class PeripheralMemoryRegionTests
     public class EightBitPeripheralTests
     {
         [Fact]
-        public void MemoryMap_EightBitPeripherals_CorrectAddressRange()
+        public void MemoryMap_EightBitPeripherals_HasCorrectStartAddress()
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -40,8 +40,41 @@ public class PeripheralMemoryRegionTests
 
             // Assert - 8-bit peripherals should be at 0x0100-0x01FF per MSP430FR2355
             Assert.Equal(0x0100, regionInfo.StartAddress);
+        }
+
+        [Fact]
+        public void MemoryMap_EightBitPeripherals_HasCorrectEndAddress()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.Peripherals8Bit);
+
             Assert.Equal(0x01FF, regionInfo.EndAddress);
+        }
+
+        [Fact]
+        public void MemoryMap_EightBitPeripherals_HasCorrectRegionType()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.Peripherals8Bit);
+
             Assert.Equal(MemoryRegion.Peripherals8Bit, regionInfo.Region);
+        }
+
+        [Fact]
+        public void MemoryMap_EightBitPeripherals_HasCorrectDescription()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.Peripherals8Bit);
+
             Assert.Equal("8-bit Peripherals", regionInfo.Description);
         }
 
@@ -49,17 +82,30 @@ public class PeripheralMemoryRegionTests
         [InlineData(0x0100)]  // Start of 8-bit peripheral range
         [InlineData(0x0150)]  // Middle of 8-bit peripheral range
         [InlineData(0x01FF)]  // End of 8-bit peripheral range
-        public void MemoryMap_EightBitPeripheralAddresses_ValidAccess(ushort address)
+        public void MemoryMap_EightBitPeripheralAddresses_IsValidAddress(ushort address)
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            bool isValid = memoryMap.IsValidAddress(address);
+
+            // Assert
+            Assert.True(isValid);
+        }
+
+        [Theory]
+        [InlineData(0x0100)]  // Start of 8-bit peripheral range
+        [InlineData(0x0150)]  // Middle of 8-bit peripheral range
+        [InlineData(0x01FF)]  // End of 8-bit peripheral range
+        public void MemoryMap_EightBitPeripheralAddresses_InCorrectRegion(ushort address)
         {
             // Arrange
             var memoryMap = new MemoryMap();
 
             // Act
             MemoryRegionInfo region = memoryMap.GetRegion(address);
-            bool isValid = memoryMap.IsValidAddress(address);
 
-            // Assert
-            Assert.True(isValid);
             Assert.Equal(MemoryRegion.Peripherals8Bit, region.Region);
         }
 
@@ -79,7 +125,26 @@ public class PeripheralMemoryRegionTests
         }
 
         [Fact]
-        public void MemoryMap_EightBitPeripherals_ReadWritePermissions()
+        public void MemoryMap_EightBitPeripherals_AllowsReadAccess()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Assert - 8-bit peripherals should allow read/write access
+            Assert.True(memoryMap.IsAccessAllowed(0x0150, MemoryAccessPermissions.Read));
+        }
+
+        [Fact]
+        public void MemoryMap_EightBitPeripherals_AllowsWriteAccess()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            Assert.True(memoryMap.IsAccessAllowed(0x0150, MemoryAccessPermissions.Write));
+        }
+
+        [Fact]
+        public void MemoryMap_EightBitPeripherals_HasReadWritePermissions()
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -87,15 +152,12 @@ public class PeripheralMemoryRegionTests
             // Act
             MemoryAccessPermissions permissions = memoryMap.GetPermissions(0x0150); // Middle of 8-bit peripheral range
 
-            // Assert - 8-bit peripherals should allow read/write access
-            Assert.True(memoryMap.IsAccessAllowed(0x0150, MemoryAccessPermissions.Read));
-            Assert.True(memoryMap.IsAccessAllowed(0x0150, MemoryAccessPermissions.Write));
             Assert.Equal(MemoryAccessPermissions.ReadWrite, permissions);
         }
 
         [Theory]
-        [InlineData(0x0100, 256)]  // Total 8-bit peripheral region size
-        public void MemoryMap_EightBitPeripherals_SizeCalculation(ushort startAddress, int expectedSize)
+        [InlineData(256)]  // Total 8-bit peripheral region size
+        public void MemoryMap_EightBitPeripherals_CorrectSize(int expectedSize)
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -106,6 +168,16 @@ public class PeripheralMemoryRegionTests
 
             // Assert
             Assert.Equal(expectedSize, actualSize);
+        }
+
+        [Theory]
+        [InlineData(0x0100)]  // Total 8-bit peripheral region size
+        public void MemoryMap_EightBitPeripherals_CorrectStartAddress(ushort startAddress)
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.Peripherals8Bit);
+
             Assert.Equal(startAddress, regionInfo.StartAddress);
         }
     }
@@ -116,7 +188,7 @@ public class PeripheralMemoryRegionTests
     public class SixteenBitPeripheralTests
     {
         [Fact]
-        public void MemoryMap_SixteenBitPeripherals_CorrectAddressRange()
+        public void MemoryMap_SixteenBitPeripherals_HasCorrectStartAddress()
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -126,8 +198,41 @@ public class PeripheralMemoryRegionTests
 
             // Assert - 16-bit peripherals should be at 0x0200-0x027F per MSP430FR2355
             Assert.Equal(0x0200, regionInfo.StartAddress);
+        }
+
+        [Fact]
+        public void MemoryMap_SixteenBitPeripherals_HasCorrectEndAddress()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.Peripherals16Bit);
+
             Assert.Equal(0x027F, regionInfo.EndAddress);
+        }
+
+        [Fact]
+        public void MemoryMap_SixteenBitPeripherals_HasCorrectRegionType()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.Peripherals16Bit);
+
             Assert.Equal(MemoryRegion.Peripherals16Bit, regionInfo.Region);
+        }
+
+        [Fact]
+        public void MemoryMap_SixteenBitPeripherals_HasCorrectDescription()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.Peripherals16Bit);
+
             Assert.Equal("16-bit Peripherals", regionInfo.Description);
         }
 
@@ -135,17 +240,30 @@ public class PeripheralMemoryRegionTests
         [InlineData(0x0200)]  // Start of 16-bit peripheral range
         [InlineData(0x0240)]  // Middle of 16-bit peripheral range
         [InlineData(0x027F)]  // End of 16-bit peripheral range
-        public void MemoryMap_SixteenBitPeripheralAddresses_ValidAccess(ushort address)
+        public void MemoryMap_SixteenBitPeripheralAddresses_IsValidAddress(ushort address)
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            bool isValid = memoryMap.IsValidAddress(address);
+
+            // Assert
+            Assert.True(isValid);
+        }
+
+        [Theory]
+        [InlineData(0x0200)]  // Start of 16-bit peripheral range
+        [InlineData(0x0240)]  // Middle of 16-bit peripheral range
+        [InlineData(0x027F)]  // End of 16-bit peripheral range
+        public void MemoryMap_SixteenBitPeripheralAddresses_InCorrectRegion(ushort address)
         {
             // Arrange
             var memoryMap = new MemoryMap();
 
             // Act
             MemoryRegionInfo region = memoryMap.GetRegion(address);
-            bool isValid = memoryMap.IsValidAddress(address);
 
-            // Assert
-            Assert.True(isValid);
             Assert.Equal(MemoryRegion.Peripherals16Bit, region.Region);
         }
 
@@ -171,7 +289,26 @@ public class PeripheralMemoryRegionTests
         }
 
         [Fact]
-        public void MemoryMap_SixteenBitPeripherals_ReadWritePermissions()
+        public void MemoryMap_SixteenBitPeripherals_AllowsReadAccess()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Assert - 16-bit peripherals should allow read/write access
+            Assert.True(memoryMap.IsAccessAllowed(0x0240, MemoryAccessPermissions.Read));
+        }
+
+        [Fact]
+        public void MemoryMap_SixteenBitPeripherals_AllowsWriteAccess()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            Assert.True(memoryMap.IsAccessAllowed(0x0240, MemoryAccessPermissions.Write));
+        }
+
+        [Fact]
+        public void MemoryMap_SixteenBitPeripherals_HasReadWritePermissions()
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -179,15 +316,12 @@ public class PeripheralMemoryRegionTests
             // Act
             MemoryAccessPermissions permissions = memoryMap.GetPermissions(0x0240); // Middle of 16-bit peripheral range
 
-            // Assert - 16-bit peripherals should allow read/write access
-            Assert.True(memoryMap.IsAccessAllowed(0x0240, MemoryAccessPermissions.Read));
-            Assert.True(memoryMap.IsAccessAllowed(0x0240, MemoryAccessPermissions.Write));
             Assert.Equal(MemoryAccessPermissions.ReadWrite, permissions);
         }
 
         [Theory]
-        [InlineData(0x0200, 128)]  // Total 16-bit peripheral region size
-        public void MemoryMap_SixteenBitPeripherals_SizeCalculation(ushort startAddress, int expectedSize)
+        [InlineData(128)]  // Total 16-bit peripheral region size
+        public void MemoryMap_SixteenBitPeripherals_CorrectSize(int expectedSize)
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -198,6 +332,16 @@ public class PeripheralMemoryRegionTests
 
             // Assert
             Assert.Equal(expectedSize, actualSize);
+        }
+
+        [Theory]
+        [InlineData(0x0200)]  // Total 16-bit peripheral region size
+        public void MemoryMap_SixteenBitPeripherals_CorrectStartAddress(ushort startAddress)
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.Peripherals16Bit);
+
             Assert.Equal(startAddress, regionInfo.StartAddress);
         }
     }
@@ -208,7 +352,7 @@ public class PeripheralMemoryRegionTests
     public class SpecialFunctionRegisterTests
     {
         [Fact]
-        public void MemoryMap_SpecialFunctionRegisters_CorrectAddressRange()
+        public void MemoryMap_SpecialFunctionRegisters_HasCorrectStartAddress()
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -218,8 +362,41 @@ public class PeripheralMemoryRegionTests
 
             // Assert - SFRs should be at 0x0000-0x00FF per MSP430FR2355
             Assert.Equal(0x0000, regionInfo.StartAddress);
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_HasCorrectEndAddress()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.SpecialFunctionRegisters);
+
             Assert.Equal(0x00FF, regionInfo.EndAddress);
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_HasCorrectRegionType()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.SpecialFunctionRegisters);
+
             Assert.Equal(MemoryRegion.SpecialFunctionRegisters, regionInfo.Region);
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_HasCorrectDescription()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            MemoryRegionInfo regionInfo = memoryMap.GetRegionInfo(MemoryRegion.SpecialFunctionRegisters);
+
             Assert.Equal("Special Function Registers", regionInfo.Description);
         }
 
@@ -227,22 +404,54 @@ public class PeripheralMemoryRegionTests
         [InlineData(0x0000)]  // Start of SFR range
         [InlineData(0x0050)]  // Middle of SFR range
         [InlineData(0x00FF)]  // End of SFR range
-        public void MemoryMap_SpecialFunctionRegisterAddresses_ValidAccess(ushort address)
+        public void MemoryMap_SpecialFunctionRegisterAddresses_IsValidAddress(ushort address)
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Act
+            bool isValid = memoryMap.IsValidAddress(address);
+
+            // Assert
+            Assert.True(isValid);
+        }
+
+        [Theory]
+        [InlineData(0x0000)]  // Start of SFR range
+        [InlineData(0x0050)]  // Middle of SFR range
+        [InlineData(0x00FF)]  // End of SFR range
+        public void MemoryMap_SpecialFunctionRegisterAddresses_InCorrectRegion(ushort address)
         {
             // Arrange
             var memoryMap = new MemoryMap();
 
             // Act
             MemoryRegionInfo region = memoryMap.GetRegion(address);
-            bool isValid = memoryMap.IsValidAddress(address);
 
-            // Assert
-            Assert.True(isValid);
             Assert.Equal(MemoryRegion.SpecialFunctionRegisters, region.Region);
         }
 
         [Fact]
-        public void MemoryMap_SpecialFunctionRegisters_ReadWritePermissions()
+        public void MemoryMap_SpecialFunctionRegisters_AllowsReadAccess()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            // Assert - SFRs should allow read/write access
+            Assert.True(memoryMap.IsAccessAllowed(0x0050, MemoryAccessPermissions.Read));
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_AllowsWriteAccess()
+        {
+            // Arrange
+            var memoryMap = new MemoryMap();
+
+            Assert.True(memoryMap.IsAccessAllowed(0x0050, MemoryAccessPermissions.Write));
+        }
+
+        [Fact]
+        public void MemoryMap_SpecialFunctionRegisters_HasReadWritePermissions()
         {
             // Arrange
             var memoryMap = new MemoryMap();
@@ -250,9 +459,6 @@ public class PeripheralMemoryRegionTests
             // Act
             MemoryAccessPermissions permissions = memoryMap.GetPermissions(0x0050); // Middle of SFR range
 
-            // Assert - SFRs should allow read/write access
-            Assert.True(memoryMap.IsAccessAllowed(0x0050, MemoryAccessPermissions.Read));
-            Assert.True(memoryMap.IsAccessAllowed(0x0050, MemoryAccessPermissions.Write));
             Assert.Equal(MemoryAccessPermissions.ReadWrite, permissions);
         }
 

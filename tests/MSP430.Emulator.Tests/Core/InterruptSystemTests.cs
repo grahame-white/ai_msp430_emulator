@@ -16,6 +16,12 @@ namespace MSP430.Emulator.Tests.Core;
 /// - Various peripheral interrupt vectors at lower addresses
 /// 
 /// References:
+/// - docs/references/SLAU445/1.3_interrupts.md - Interrupts overview
+/// - docs/references/SLAU445/1.3.4_interrupt_processing.md - Interrupt processing specification
+/// - docs/references/SLAU445/1.3.4.1_interrupt_acceptance.md - Interrupt acceptance behavior
+/// - docs/references/SLAU445/1.3.4.2_return_from_interrupt.md - Return from interrupt behavior
+/// - docs/references/SLAU445/1.3.6_interrupt_vectors.md - Interrupt vectors specification
+/// - docs/references/SLAU445/1.3.7_sys_interrupt_vector_generators.md - SYS interrupt vector generators
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.3: Interrupts
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.3.4: Interrupt Processing
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 1.3.6: Interrupt Vectors

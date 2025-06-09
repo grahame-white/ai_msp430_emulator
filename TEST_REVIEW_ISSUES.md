@@ -204,11 +204,11 @@ features and extended instruction sets:
 
 ### 3. Extended Instruction Set Coverage (MEDIUM PRIORITY)
 
-- **Document ID**: SLAU131Y (MSP430 Assembly Language Tools User's Guide)
+- **Document ID**: SLAU445I (MSP430FR2xx FR4xx Family User's Guide)
 - **Sections of Interest**:
-  - 4.4 MSP430X Instruction Set (20-bit addressing extensions)
-  - 4.5.7-4.5.8 Advanced Addressing Modes (indexed modes with 20-bit addresses)
-  - 4.6 Instruction Timing (cycle-accurate timing specifications)
+  - 4.5.2 MSP430X Instruction Set (20-bit addressing extensions)
+  - 4.5.2.7 MSP430X Instruction Cycles and Lengths (cycle-accurate timing specifications)
+  - 4.5.1.5 MSP430 Instruction Cycles and Lengths (standard instruction timing)
 - **Current State**: Core instruction set tested (arithmetic, logic, data movement)
 - **Impact**: Complete instruction emulation for MSP430X extended capabilities
 - **Recommended Action**: Add MSP430X instruction tests for 20-bit addressing and extended operations
@@ -217,20 +217,22 @@ features and extended instruction sets:
 
 - **Document ID**: SLAU445I (MSP430FR2xx FR4xx Family User's Guide)
 - **Sections of Interest**:
-  - 5.5 Power Supply Voltage Supervision (brownout detection)
-  - 5.6 LPMx.5 Ultra-Low Power Modes (RTC-only operation)
-  - 5.7 Wake-up Time Specifications (transition timing)
+  - 1.4.3 Low-Power Modes LPM3.5 and LPM4.5 (LPMx.5) - ultra-low power modes
+  - 1.4.4 Extended Time in Low-Power Modes - power optimization strategies
+  - 1.5 Principles for Low-Power Applications - power management best practices
 - **Current State**: Core power management testing implemented (21 tests) covering LPM0-LPM4.5
 - **Impact**: Enhanced power management emulation for battery-powered applications
-- **Recommended Action**: Extend existing power tests to cover voltage supervision and ultra-low power modes
+- **Recommended Action**: Extend existing power tests to cover advanced LPMx.5 features and wake-up timing
 
 ### 5. Peripheral Module Integration (LOW PRIORITY)
 
-- **Document ID**: SLASEC4D (MSP430FR235x Mixed-Signal Microcontrollers)
+- **Document ID**: SLAU445I (MSP430FR2xx FR4xx Family User's Guide)
 - **Sections of Interest**:
-  - 7.1-7.8 Timer A/B Advanced Features (capture/compare, PWM generation)
-  - 8.1-8.4 ADC12 Conversion Engine (sampling, conversion timing)
-  - 9.1-9.3 Communication Interfaces (UART, SPI, I2C timing and protocols)
+  - 13 Timer A (capture/compare, PWM generation)
+  - 21 ADC12_B - Analog-to-Digital Converter (sampling, conversion timing)
+  - 22 Enhanced Universal Serial Communication Interface (eUSCI) - UART Mode
+  - 23 Enhanced Universal Serial Communication Interface (eUSCI) - SPI Mode
+  - 24 Enhanced Universal Serial Communication Interface (eUSCI) - I²C Mode
 - **Current State**: Peripheral memory regions tested (37 tests) covering address spaces
 - **Impact**: Functional peripheral emulation beyond memory mapping
 - **Recommended Action**: Implement functional peripheral behavior tests for Timer, ADC, and communication modules

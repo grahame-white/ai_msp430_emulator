@@ -16,6 +16,10 @@ namespace MSP430.Emulator.Tests.Cpu;
 /// - R4-R15: General-purpose registers
 /// 
 /// References:
+/// - docs/references/SLAU445/4.3_cpu_registers.md - CPU Registers overview
+/// - docs/references/SLAU445/4.3.3_status_register_(sr).md - Status Register (SR) specification
+/// - docs/references/SLAU445/4.3.4_constant_generator_registers_(cg1_and_cg2).md - Constant Generator specification
+/// - docs/references/SLAU445/4.3.5_general_purpose_registers_(r4_to_r15).md - General-purpose registers specification
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3: CPU Registers
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.1: Program Counter (PC)
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.3.2: Stack Pointer (SP)

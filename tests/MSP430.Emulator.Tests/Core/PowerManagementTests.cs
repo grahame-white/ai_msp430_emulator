@@ -9,6 +9,7 @@ namespace MSP430.Emulator.Tests.Core;
 /// Tests for Low Power Mode (LPM) behavior in MSP430FR2355.
 /// 
 /// These tests validate power management functionality based on:
+/// - docs/references/SLAU445/1_system_resets_interrupts_and_operating_modes_system_control_module_sys.md - System operating modes overview
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) Section 1.4: "Operating Modes"
 /// - MSP430FR235x Mixed-Signal Microcontrollers (SLASEC4D) power consumption specifications
 /// 
@@ -315,13 +316,18 @@ public class PowerManagementTests
     #region Test Infrastructure and Documentation
 
     [Fact]
-    public void PowerManagementTests_VerifyTestInfrastructure()
+    public void PowerManagementTests_TestInfrastructure_RegisterFileInstantiable()
     {
         // Verify test infrastructure supports power management testing
         var registerFile = new RegisterFile();
         Assert.NotNull(registerFile);
+    }
 
+    [Fact]
+    public void PowerManagementTests_StatusRegister_CanBeManipulatedForLPMTesting()
+    {
         // Verify SR register can be manipulated for LPM testing
+        var registerFile = new RegisterFile();
         registerFile.WriteRegister(RegisterName.SR, 0x1234);
         Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.SR));
 

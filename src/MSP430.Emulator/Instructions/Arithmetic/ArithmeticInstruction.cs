@@ -110,10 +110,7 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         int extensionIndex = 0;
 
         // Source operand extension word
-        if (_sourceAddressingMode == AddressingMode.Immediate ||
-            _sourceAddressingMode == AddressingMode.Absolute ||
-            _sourceAddressingMode == AddressingMode.Symbolic ||
-            _sourceAddressingMode == AddressingMode.Indexed)
+        if (NeedsExtensionWord(_sourceRegister, _sourceAddressingMode))
         {
             if (extensionIndex >= extensionWords.Length)
             {
@@ -123,9 +120,7 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         }
 
         // Destination operand extension word
-        if (_destinationAddressingMode == AddressingMode.Absolute ||
-            _destinationAddressingMode == AddressingMode.Symbolic ||
-            _destinationAddressingMode == AddressingMode.Indexed)
+        if (NeedsExtensionWord(_destinationRegister, _destinationAddressingMode))
         {
             if (extensionIndex >= extensionWords.Length)
             {
@@ -232,5 +227,47 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
         };
 
         return baseCycles + sourceCycles + destinationCycles;
+    }
+
+    /// <summary>
+    /// Determines if a register and addressing mode combination needs an extension word.
+    /// Constant generators don't need extension words even if they use Immediate mode.
+    /// </summary>
+    /// <param name="register">The register.</param>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <returns>True if an extension word is needed, false otherwise.</returns>
+    private static bool NeedsExtensionWord(RegisterName register, AddressingMode addressingMode)
+    {
+        // Constant generators don't need extension words
+        if (IsConstantGenerator(register, addressingMode))
+        {
+            return false;
+        }
+
+        // Regular extension word requirements
+        return addressingMode == AddressingMode.Immediate ||
+               addressingMode == AddressingMode.Absolute ||
+               addressingMode == AddressingMode.Symbolic ||
+               addressingMode == AddressingMode.Indexed;
+    }
+
+    /// <summary>
+    /// Determines if a register and addressing mode combination represents a constant generator.
+    /// </summary>
+    /// <param name="register">The register.</param>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <returns>True if this is a constant generator, false otherwise.</returns>
+    private static bool IsConstantGenerator(RegisterName register, AddressingMode addressingMode)
+    {
+        return register switch
+        {
+            // R2 constant generators: As=10 (Indirect) → +4, As=11 (IndirectAutoIncrement) → +8
+            // R2 As=01 (Absolute) is NOT a constant generator - it's legitimate absolute addressing
+            RegisterName.R2 => addressingMode == AddressingMode.Indirect || addressingMode == AddressingMode.IndirectAutoIncrement,
+
+            // R3 constant generators: As=00 (Register) → 0, As=01/10/11 (Immediate) → 1/2/-1
+            RegisterName.R3 => addressingMode == AddressingMode.Register || addressingMode == AddressingMode.Immediate,
+            _ => false
+        };
     }
 }

@@ -80,6 +80,13 @@ public static class InstructionHelpers
         byte[] memory,
         ushort extensionWord)
     {
+        // Handle constant generators first - these are special cases where
+        // register + addressing mode combinations generate constants
+        if (IsConstantGenerator(register, addressingMode))
+        {
+            return GetConstantGeneratorValue(register, addressingMode, isByteOperation);
+        }
+
         switch (addressingMode)
         {
             case AddressingMode.Register:
@@ -269,5 +276,67 @@ public static class InstructionHelpers
     public static ushort SignExtendByte(ushort byteValue)
     {
         return (ushort)((sbyte)(byte)(byteValue & 0xFF));
+    }
+
+    /// <summary>
+    /// Determines if a register and addressing mode combination represents a constant generator.
+    /// </summary>
+    /// <param name="register">The register.</param>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <returns>True if this is a constant generator, false otherwise.</returns>
+    private static bool IsConstantGenerator(RegisterName register, AddressingMode addressingMode)
+    {
+        return register switch
+        {
+            // R2 constant generators: As=10 (Indirect) → +4, As=11 (IndirectAutoIncrement) → +8
+            // R2 As=01 (Absolute) is NOT a constant generator - it's legitimate absolute addressing
+            RegisterName.R2 => addressingMode == AddressingMode.Indirect || addressingMode == AddressingMode.IndirectAutoIncrement,
+
+            // R3 constant generators: As=00 (Register) → 0, As=01/10/11 (Immediate) → 1/2/-1
+            RegisterName.R3 => addressingMode == AddressingMode.Register || addressingMode == AddressingMode.Immediate,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// Gets the constant value for a constant generator combination.
+    /// 
+    /// MSP430 constant generators (per SLAU445I Section 4.3.4):
+    /// R2 As=10 (Indirect) → +4
+    /// R2 As=11 (IndirectAutoIncrement) → +8  
+    /// R3 As=00 (Register) → 0
+    /// R3 As=01/10/11 (Immediate) → +1, +2, -1 respectively
+    /// 
+    /// Note: The specific R3 constant (1, 2, or -1) cannot be determined from
+    /// addressing mode alone since they all decode to Immediate. This is a limitation
+    /// of the current decoder design that would need architectural changes to fix properly.
+    /// For now, we implement partial support for the most common case.
+    /// </summary>
+    /// <param name="register">The register.</param>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <returns>The constant value.</returns>
+    private static ushort GetConstantGeneratorValue(RegisterName register, AddressingMode addressingMode, bool isByteOperation)
+    {
+        ushort constant = register switch
+        {
+            RegisterName.R2 => addressingMode switch
+            {
+                AddressingMode.Indirect => 4,                    // R2 As=10 → +4
+                AddressingMode.IndirectAutoIncrement => 8,       // R2 As=11 → +8
+                _ => 0
+            },
+            RegisterName.R3 => addressingMode switch
+            {
+                AddressingMode.Register => 0,                    // R3 As=00 → 0
+                AddressingMode.Immediate => 1,                   // R3 As=01 → +1 (most common)
+                                                                 // Note: R3 As=10 → +2 and R3 As=11 → -1 
+                                                                 // cannot be distinguished in current architecture
+                _ => 0
+            },
+            _ => 0
+        };
+
+        return isByteOperation ? (ushort)(constant & 0xFF) : constant;
     }
 }

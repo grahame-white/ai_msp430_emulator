@@ -258,6 +258,30 @@ public static class InstructionHelpers
         statusRegister.Overflow = overflow;
     }
 
+    /// <summary>
+    /// Updates CPU flags for single-operand instructions that clear V and preserve C.
+    /// 
+    /// This method is used by instructions like SWPB and SXT that:
+    /// - Set N and Z flags based on the result
+    /// - Clear the V (overflow) flag
+    /// - Preserve the C (carry) flag
+    /// </summary>
+    /// <param name="result">The result value.</param>
+    /// <param name="statusRegister">The CPU status register to update.</param>
+    public static void UpdateFlagsForSingleOperandInstruction(ushort result, StatusRegister statusRegister)
+    {
+        // Zero flag: Set if result is zero
+        statusRegister.Zero = result == 0;
+
+        // Negative flag: Set if the sign bit (bit 15) is set
+        statusRegister.Negative = (result & 0x8000) != 0;
+
+        // Overflow flag: Always cleared for these instructions
+        statusRegister.Overflow = false;
+
+        // Carry flag: Preserved (not modified)
+    }
+
     private static ushort ReadFromMemory(ushort address, bool isByteOperation, byte[] memory)
     {
         if (address >= memory.Length)

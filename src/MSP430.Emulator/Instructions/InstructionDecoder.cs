@@ -147,7 +147,7 @@ public class InstructionDecoder : IInstructionDecoder
     /// <summary>
     /// Decodes a Format II (single-operand) instruction.
     /// </summary>
-    private FormatIIInstruction DecodeFormatII(ushort instructionWord, ushort opcode)
+    private Instruction DecodeFormatII(ushort instructionWord, ushort opcode)
     {
         // Extract fields from Format II instruction
         bool byteWord = (instructionWord & 0x0040) != 0;                     // Bit 6
@@ -168,10 +168,16 @@ public class InstructionDecoder : IInstructionDecoder
             throw new InvalidInstructionException(instructionWord, "Invalid addressing mode in Format II instruction");
         }
 
-        // Calculate extension word count to avoid virtual calls during construction
-        int extensionWordCount = AddressingModeDecoder.RequiresExtensionWord(sourceMode) ? 1 : 0;
-
-        return new FormatIIInstruction(opcode, instructionWord, sourceReg, sourceMode, byteWord, extensionWordCount);
+        // Create specific instruction type based on opcode
+        // Note: This implementation uses separate opcodes for SWPB (0x10) and SXT (0x11)
+        // rather than the standard MSP430 sub-opcode approach within 0x10
+        return opcode switch
+        {
+            0x10 when (instructionWord & 0x00C0) == 0x0080 => new SwpbInstruction(instructionWord, sourceReg, sourceMode), // SWPB: bits 7:6 = 10
+            0x11 when (instructionWord & 0x00C0) == 0x0080 => new SxtInstruction(instructionWord, sourceReg, sourceMode),  // SXT: bits 7:6 = 10  
+            _ => new FormatIIInstruction(opcode, instructionWord, sourceReg, sourceMode, byteWord,
+                AddressingModeDecoder.RequiresExtensionWord(sourceMode) ? 1 : 0)
+        };
     }
 
     /// <summary>

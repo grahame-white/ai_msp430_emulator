@@ -165,4 +165,67 @@ public class InstructionDecoderExecutionTests
         Assert.True(addInstruction.IsByteOperation, "Should be a byte operation");
         Assert.Equal("ADD.B", addInstruction.Mnemonic);
     }
+
+    [Theory]
+    [InlineData(0x1084, typeof(SwpbInstruction))]  // SWPB R4
+    [InlineData(0x1185, typeof(SxtInstruction))]   // SXT R5
+    public void Decode_FormatIIInstruction_CreatesSpecificExecutableInstruction(ushort instructionWord, Type expectedType)
+    {
+        // Arrange
+        var decoder = new InstructionDecoder();
+
+        // Act
+        Instruction instruction = decoder.Decode(instructionWord);
+
+        // Assert
+        Assert.IsType(expectedType, instruction);
+        Assert.IsAssignableFrom<IExecutableInstruction>(instruction);
+        Assert.Equal(InstructionFormat.FormatII, instruction.Format);
+    }
+
+    [Fact]
+    public void Decode_SwpbInstruction_CanExecuteSuccessfully()
+    {
+        // Arrange
+        var decoder = new InstructionDecoder();
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set up test value: 0x1234 should become 0x3412 after byte swap
+        registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        ushort swpbInstructionWord = 0x1084; // SWPB R4
+
+        // Act
+        Instruction instruction = decoder.Decode(swpbInstructionWord);
+        var executableInstruction = (IExecutableInstruction)instruction;
+        uint cycles = executableInstruction.Execute(registerFile, memory, System.Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x3412, registerFile.ReadRegister(RegisterName.R4)); // Bytes swapped
+        Assert.True(cycles > 0, "Execution should consume at least one cycle");
+    }
+
+    [Fact]
+    public void Decode_SxtInstruction_CanExecuteSuccessfully()
+    {
+        // Arrange
+        var decoder = new InstructionDecoder();
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set up test value: 0x0080 should become 0xFF80 after sign extension
+        registerFile.WriteRegister(RegisterName.R5, 0x0080);
+
+        ushort sxtInstructionWord = 0x1185; // SXT R5
+
+        // Act
+        Instruction instruction = decoder.Decode(sxtInstructionWord);
+        var executableInstruction = (IExecutableInstruction)instruction;
+        uint cycles = executableInstruction.Execute(registerFile, memory, System.Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0xFF80, registerFile.ReadRegister(RegisterName.R5)); // Sign extended
+        Assert.True(cycles > 0, "Execution should consume at least one cycle");
+    }
 }

@@ -254,8 +254,8 @@
       - 4.6.2.45 SETZ
       - 4.6.2.46 SUB
       - 4.6.2.47 SUBC
-      - [4.6.2.48 SWPB](SLAU445/4.6.2.48_swpb.md)
-      - [4.6.2.49 SXT](SLAU445/4.6.2.49_sxt.md)
+      - 4.6.2.48 SWPB
+      - 4.6.2.49 SXT
       - 4.6.2.50 TST
       - 4.6.2.51 XOR
     - 4.6.3 Extended Instructions

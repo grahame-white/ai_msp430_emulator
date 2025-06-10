@@ -101,7 +101,7 @@ public class SxtInstruction : Instruction, IExecutableInstruction
             extensionWord);
 
         // Update flags: SXT sets N and Z based on result, clears V, preserves C
-        UpdateFlags(result, registerFile.StatusRegister);
+        InstructionHelpers.UpdateFlagsForSingleOperandInstruction(result, registerFile.StatusRegister);
 
         // Return cycle count based on addressing mode
         return InstructionHelpers.GetSingleOperandCycleCount(_destinationAddressingMode);
@@ -114,28 +114,5 @@ public class SxtInstruction : Instruction, IExecutableInstruction
     public override string ToString()
     {
         return $"{Mnemonic} {InstructionHelpers.FormatOperand(_destinationRegister, _destinationAddressingMode)}";
-    }
-
-    /// <summary>
-    /// Updates CPU flags based on the sign-extended value.
-    /// SXT instruction sets N and Z flags based on the result, clears V flag, and preserves C flag.
-    /// 
-    /// References:
-    /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.6.2.49: "SXT" - Flag behavior
-    /// </summary>
-    /// <param name="result">The result value after sign extension.</param>
-    /// <param name="statusRegister">The CPU status register to update.</param>
-    private static void UpdateFlags(ushort result, StatusRegister statusRegister)
-    {
-        // Zero flag: Set if result is zero
-        statusRegister.Zero = result == 0;
-
-        // Negative flag: Set if the sign bit (bit 15) is set
-        statusRegister.Negative = (result & 0x8000) != 0;
-
-        // Overflow flag: Always cleared for SXT instruction
-        statusRegister.Overflow = false;
-
-        // Carry flag: Preserved (not modified by SXT)
     }
 }

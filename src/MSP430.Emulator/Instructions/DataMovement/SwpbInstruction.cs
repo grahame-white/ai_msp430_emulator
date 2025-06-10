@@ -100,7 +100,7 @@ public class SwpbInstruction : Instruction, IExecutableInstruction
             extensionWord);
 
         // Update flags: SWPB sets N and Z based on result, clears V, preserves C
-        UpdateFlags(result, registerFile.StatusRegister);
+        InstructionHelpers.UpdateFlagsForSingleOperandInstruction(result, registerFile.StatusRegister);
 
         // Return cycle count based on addressing mode
         return InstructionHelpers.GetSingleOperandCycleCount(_destinationAddressingMode);
@@ -113,28 +113,5 @@ public class SwpbInstruction : Instruction, IExecutableInstruction
     public override string ToString()
     {
         return $"{Mnemonic} {InstructionHelpers.FormatOperand(_destinationRegister, _destinationAddressingMode)}";
-    }
-
-    /// <summary>
-    /// Updates CPU flags based on the swapped value.
-    /// SWPB instruction sets N and Z flags based on the result, clears V flag, and preserves C flag.
-    /// 
-    /// References:
-    /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.6.2.48: "SWPB" - Flag behavior
-    /// </summary>
-    /// <param name="result">The result value after byte swapping.</param>
-    /// <param name="statusRegister">The CPU status register to update.</param>
-    private static void UpdateFlags(ushort result, StatusRegister statusRegister)
-    {
-        // Zero flag: Set if result is zero
-        statusRegister.Zero = result == 0;
-
-        // Negative flag: Set if the sign bit (bit 15) is set
-        statusRegister.Negative = (result & 0x8000) != 0;
-
-        // Overflow flag: Always cleared for SWPB instruction
-        statusRegister.Overflow = false;
-
-        // Carry flag: Preserved (not modified by SWPB)
     }
 }

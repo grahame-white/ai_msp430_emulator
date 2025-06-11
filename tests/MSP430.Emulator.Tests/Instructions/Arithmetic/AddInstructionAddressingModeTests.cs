@@ -299,7 +299,7 @@ public class AddInstructionAddressingModeTests
         // Assert
         Assert.Equal(0xAC, registerFile.ReadRegister(RegisterName.R6) & 0xFF); // 0x34 + 0x78 = 0xAC
         Assert.Equal(0x2001, registerFile.ReadRegister(RegisterName.R5)); // R5 should be incremented by 1 for byte operation
-        Assert.Equal(3u, cycles);
+        Assert.Equal(2u, cycles); // Per SLAU445I Table 4-10: @Rn+ → Rm = 2 cycles
     }
 
     [Fact]

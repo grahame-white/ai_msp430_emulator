@@ -6,7 +6,8 @@ This document describes the implementation of instruction cycle counts based on 
 
 ## Implementation
 
-The cycle count implementation uses a lookup table approach in `InstructionCycleLookup.cs` that directly maps addressing mode combinations to their correct cycle counts as specified in SLAU445I Section 4.5.1.5.4 Table 4-10.
+The cycle count implementation uses a lookup table approach in `InstructionCycleLookup.cs` that directly maps
+addressing mode combinations to their correct cycle counts as specified in SLAU445I Section 4.5.1.5.4 Table 4-10.
 
 ### Key Features
 
@@ -38,7 +39,8 @@ Per SLAU445I Table 4-10 footnote [1], MOV, BIT, and CMP instructions execute in 
 
 ### Constant Generators
 
-Constant generators (R2/R3 combinations) are mapped to register addressing mode for cycle counting purposes since they provide immediate constants without additional memory access cycles.
+Constant generators (R2/R3 combinations) are mapped to register addressing mode for cycle counting purposes
+since they provide immediate constants without additional memory access cycles.
 
 ### Validation
 

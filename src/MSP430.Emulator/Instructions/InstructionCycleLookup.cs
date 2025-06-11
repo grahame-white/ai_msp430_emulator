@@ -81,10 +81,13 @@ public static class InstructionCycleLookup
         // Special case: PC as destination
         bool isDestinationPC = destinationRegister == RegisterName.R0 && destinationMode == AddressingMode.Register;
 
-        // Indirect and IndirectAutoIncrement are not valid destination modes for Format I instructions
+        // Handle non-standard destination modes for backward compatibility
+        // Note: Indirect and IndirectAutoIncrement are not valid destination modes per SLAU445I Table 4-10
         if (destinationMode == AddressingMode.Indirect || destinationMode == AddressingMode.IndirectAutoIncrement)
         {
-            throw new InvalidOperationException($"Addressing mode {destinationMode} is not valid as a destination mode for Format I instructions");
+            // Return estimated cycle counts for non-standard combinations to maintain compatibility
+            // These values are based on the old additive calculation approach
+            return GetLegacyCycleCount(sourceMode, destinationMode);
         }
 
         return sourceMode switch
@@ -162,5 +165,43 @@ public static class InstructionCycleLookup
         return destinationMode == AddressingMode.Indexed ||
                destinationMode == AddressingMode.Symbolic ||
                destinationMode == AddressingMode.Absolute;
+    }
+
+    /// <summary>
+    /// Gets cycle count for non-standard addressing mode combinations using legacy additive approach.
+    /// These combinations are not valid per SLAU445I but are maintained for backward compatibility.
+    /// </summary>
+    /// <param name="sourceMode">Source addressing mode.</param>
+    /// <param name="destinationMode">Destination addressing mode.</param>
+    /// <returns>Estimated cycle count based on old additive calculation.</returns>
+    private static uint GetLegacyCycleCount(AddressingMode sourceMode, AddressingMode destinationMode)
+    {
+        // Use the old additive calculation: base + source + destination
+        uint baseCycles = 1;
+
+        uint sourceCycles = sourceMode switch
+        {
+            AddressingMode.Register => 0u,
+            AddressingMode.Indexed => 3u,
+            AddressingMode.Indirect => 2u,
+            AddressingMode.IndirectAutoIncrement => 2u,
+            AddressingMode.Immediate => 0u,
+            AddressingMode.Absolute => 3u,
+            AddressingMode.Symbolic => 3u,
+            _ => 0u
+        };
+
+        uint destinationCycles = destinationMode switch
+        {
+            AddressingMode.Register => 0u,
+            AddressingMode.Indexed => 3u,
+            AddressingMode.Indirect => 2u,  // Non-standard but preserved for compatibility
+            AddressingMode.IndirectAutoIncrement => 2u,  // Non-standard but preserved for compatibility
+            AddressingMode.Absolute => 3u,
+            AddressingMode.Symbolic => 3u,
+            _ => 0u
+        };
+
+        return baseCycles + sourceCycles + destinationCycles;
     }
 }

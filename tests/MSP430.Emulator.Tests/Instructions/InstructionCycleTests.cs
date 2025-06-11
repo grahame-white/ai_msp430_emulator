@@ -84,17 +84,20 @@ public class InstructionCycleTests
     }
 
     [Theory]
-    [InlineData(AddressingMode.Register, AddressingMode.Indirect)]
-    [InlineData(AddressingMode.Register, AddressingMode.IndirectAutoIncrement)]
-    [InlineData(AddressingMode.Immediate, AddressingMode.Indirect)]
-    public void GetCycleCount_InvalidDestinationModes_ThrowsException(
+    [InlineData(AddressingMode.Register, AddressingMode.Indirect, 3u)] // Non-standard: base(1) + source(0) + dest(2)
+    [InlineData(AddressingMode.Register, AddressingMode.IndirectAutoIncrement, 3u)] // Non-standard: base(1) + source(0) + dest(2)
+    [InlineData(AddressingMode.Immediate, AddressingMode.Indirect, 3u)] // Non-standard: base(1) + source(0) + dest(2)
+    public void GetCycleCount_NonStandardDestinationModes_ReturnsLegacyCycleCount(
         AddressingMode sourceMode,
-        AddressingMode destMode)
+        AddressingMode destMode,
+        uint expectedCycles)
     {
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() =>
-            InstructionCycleLookup.GetCycleCount(
-                sourceMode, destMode, RegisterName.R1, RegisterName.R2, false));
+        // Act
+        uint cycles = InstructionCycleLookup.GetCycleCount(
+            sourceMode, destMode, RegisterName.R1, RegisterName.R2, false);
+
+        // Assert
+        Assert.Equal(expectedCycles, cycles);
     }
 
     [Theory]

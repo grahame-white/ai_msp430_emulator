@@ -5,6 +5,7 @@
 ## Contents
 
 - Preface
+- [📋 SLAU445 Implementation Review - MSP430 Emulator Compliance Analysis](../../SLAU445_IMPLEMENTATION_REVIEW.md)
 - [1 System Resets, Interrupts, and Operating Modes, System Control Module (SYS)](SLAU445/1_system_resets_interrupts_and_operating_modes_system_control_module_sys.md)
   - [1.1 System Control Module (SYS) Introduction](SLAU445/1.1_system_control_module_sys_introduction.md)
   - [1.2 System Reset and Initialization](SLAU445/1.2_system_reset_and_initialization.md)

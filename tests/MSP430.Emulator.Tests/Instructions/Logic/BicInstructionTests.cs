@@ -835,7 +835,7 @@ public class BicInstructionTests
     }
 
     [Fact]
-    public void Execute_ImmediateToRegister_Takes1Cycle()
+    public void Execute_ImmediateToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -888,7 +888,7 @@ public class BicInstructionTests
     }
 
     [Fact]
-    public void Execute_IndexedToRegister_Takes4Cycles()
+    public void Execute_IndexedToRegister_Takes3Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -917,7 +917,7 @@ public class BicInstructionTests
     }
 
     [Fact]
-    public void Execute_IndirectToRegister_Takes3Cycles()
+    public void Execute_IndirectToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -971,7 +971,7 @@ public class BicInstructionTests
     }
 
     [Fact]
-    public void Execute_AbsoluteToAbsolute_Takes7Cycles()
+    public void Execute_AbsoluteToAbsolute_Takes6Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -1002,7 +1002,7 @@ public class BicInstructionTests
     }
 
     [Fact]
-    public void Execute_SymbolicToSymbolic_Takes7Cycles()
+    public void Execute_SymbolicToSymbolic_Takes6Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -1034,7 +1034,7 @@ public class BicInstructionTests
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrementToRegister_Takes3Cycles()
+    public void Execute_IndirectAutoIncrementToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();

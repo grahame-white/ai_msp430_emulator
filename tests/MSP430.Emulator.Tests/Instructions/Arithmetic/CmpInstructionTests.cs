@@ -787,7 +787,7 @@ public class CmpInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(1u, cycles);
+        Assert.Equal(2u, cycles);
     }
 
     [Fact]
@@ -817,11 +817,10 @@ public class CmpInstructionTests
     // Cycle count tests
     [Theory]
     [InlineData(AddressingMode.Register, AddressingMode.Register, 1u)]
-    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 1u)]
-    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 4u)]
-    [InlineData(AddressingMode.Register, AddressingMode.Indirect, 3u)]
-    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 7u)]
-    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 7u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 2u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 3u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 5u)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 5u)]
     public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
     {
         // Arrange
@@ -844,7 +843,6 @@ public class CmpInstructionTests
             AddressingMode.Absolute when destMode == AddressingMode.Absolute => [0x1000, 0x2000],
             AddressingMode.Symbolic when destMode == AddressingMode.Symbolic => [0x1000, 0x2000],
             AddressingMode.Register when destMode == AddressingMode.Indexed => [0x0010],
-            AddressingMode.Register when destMode == AddressingMode.Indirect => Array.Empty<ushort>(),
             _ => Array.Empty<ushort>()
         };
 

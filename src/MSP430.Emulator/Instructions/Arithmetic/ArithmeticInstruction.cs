@@ -194,41 +194,20 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
 
     /// <summary>
     /// Gets the number of CPU cycles required for this instruction based on addressing modes.
+    /// Uses SLAU445I Table 4-10 lookup instead of additive cycle calculation.
     /// </summary>
     /// <returns>The number of CPU cycles.</returns>
     private uint GetCycleCount()
     {
-        // Base cycle count for Format I instructions
-        uint baseCycles = 1;
+        // Determine if this is a CMP instruction (which gets cycle reduction)
+        bool isCmpInstruction = BaseMnemonic == "CMP";
 
-        // Add cycles for source addressing mode (account for constant generators)
-        uint sourceCycles = InstructionHelpers.IsConstantGenerator(_sourceRegister, _sourceAddressingMode)
-            ? 0u  // Constant generators take 0 additional cycles
-            : _sourceAddressingMode switch
-            {
-                AddressingMode.Register => 0u,
-                AddressingMode.Indexed => 3u,
-                AddressingMode.Indirect => 2u,
-                AddressingMode.IndirectAutoIncrement => 2u,
-                AddressingMode.Immediate => 0u,
-                AddressingMode.Absolute => 3u,
-                AddressingMode.Symbolic => 3u,
-                _ => 0u
-            };
-
-        // Add cycles for destination addressing mode (never constant generators)
-        uint destinationCycles = _destinationAddressingMode switch
-        {
-            AddressingMode.Register => 0,
-            AddressingMode.Indexed => 3,
-            AddressingMode.Indirect => 2,
-            AddressingMode.IndirectAutoIncrement => 2,
-            AddressingMode.Absolute => 3,
-            AddressingMode.Symbolic => 3,
-            _ => 0
-        };
-
-        return baseCycles + sourceCycles + destinationCycles;
+        return InstructionCycleLookup.GetCycleCount(
+            _sourceAddressingMode,
+            _destinationAddressingMode,
+            _sourceRegister,
+            _destinationRegister,
+            isMovBitOrCmpInstruction: isCmpInstruction);
     }
 
     /// <summary>

@@ -211,6 +211,11 @@ public abstract class LogicalInstruction : Instruction, IExecutableInstruction
     /// <summary>
     /// Gets the number of CPU cycles required for this instruction based on addressing modes.
     /// Uses SLAU445I Table 4-10 lookup instead of additive cycle calculation.
+    /// 
+    /// References:
+    /// - SLAU445I Section 4.5.1.5.4 Table 4-10 - Format I (Double-Operand) Instruction Cycles and Lengths
+    /// - All logical instructions now follow the same cycle counting as MOV, arithmetic, and BIT instructions
+    /// - BIT instruction gets MOV/BIT/CMP cycle reduction per Table 4-10 footnote [1]
     /// </summary>
     /// <returns>The number of CPU cycles.</returns>
     private uint GetCycleCount()

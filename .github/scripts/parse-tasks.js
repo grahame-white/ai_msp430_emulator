@@ -34,8 +34,8 @@ class TaskParser {
      * Extract all tasks from the markdown content
      */
     extractTasks() {
-        // Split content into sections by task headers (### Task X.Y:)
-        const taskRegex = /### Task (\d+\.\d+): (.+?)(?=### Task|\n## |$)/gs;
+        // Split content into sections by task headers (### Task X.Y: or ### Task X.Y.Z:)
+        const taskRegex = /### Task (\d+\.\d+(?:\.\d+)?): (.+?)(?=### Task|\n## |$)/gs;
         let match;
 
         while ((match = taskRegex.exec(this.content)) !== null) {

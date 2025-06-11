@@ -5,7 +5,6 @@
 ## Contents
 
 - Preface
-- [📋 SLAU445 Implementation Review - MSP430 Emulator Compliance Analysis](../../SLAU445_IMPLEMENTATION_REVIEW.md)
 - [1 System Resets, Interrupts, and Operating Modes, System Control Module (SYS)](SLAU445/1_system_resets_interrupts_and_operating_modes_system_control_module_sys.md)
   - [1.1 System Control Module (SYS) Introduction](SLAU445/1.1_system_control_module_sys_introduction.md)
   - [1.2 System Reset and Initialization](SLAU445/1.2_system_reset_and_initialization.md)
@@ -183,29 +182,29 @@
       - [4.4.7.1 MSP430 Instructions With Immediate Mode](SLAU445/4.4.7.1_msp430_instructions_with_immediate_mode.md)
       - [4.4.7.2 MSP430X Instructions With Immediate Mode](SLAU445/4.4.7.2_msp430x_instructions_with_immediate_mode.md)
   - [4.5 MSP430 and MSP430X Instructions](SLAU445/4.5_msp430_and_msp430x_instructions.md)
-    - 4.5.1 MSP430 Instructions
-      - 4.5.1.1 MSP430 Double-Operand (Format I) Instructions
-      - 4.5.1.2 MSP430 Single-Operand (Format II) Instructions
-      - 4.5.1.3 Jump Instructions
-      - 4.5.1.4 Emulated Instructions
-      - 4.5.1.5 MSP430 Instruction Execution
-        - 4.5.1.5.1 Instruction Cycles and Length for Interrupt, Reset, and Subroutines
-        - 4.5.1.5.2 Format II (Single-Operand) Instruction Cycles and Lengths
-        - 4.5.1.5.3 Jump Instructions Cycles and Lengths
-        - 4.5.1.5.4 Format I (Double-Operand) Instruction Cycles and Lengths
-    - 4.5.2 MSP430X Extended Instructions
-      - 4.5.2.1 Register Mode Extension Word
-      - 4.5.2.2 Non-Register Mode Extension Word
-      - 4.5.2.3 Extended Double-Operand (Format I) Instructions
-      - 4.5.2.4 Extended Single-Operand (Format II) Instructions
-        - 4.5.2.4.1 Extended Format II Instruction Format Exceptions
-      - 4.5.2.5 Extended Emulated Instructions
-      - 4.5.2.6 MSP430X Address Instructions
-      - 4.5.2.7 MSP430X Instruction Execution
-        - 4.5.2.7.1 MSP430X Format II (Single-Operand) Instruction Cycles and Lengths
-        - 4.5.2.7.2 MSP430X Format I (Double-Operand) Instruction Cycles and Lengths
-        - 4.5.2.7.3 MSP430X Address Instruction Cycles and Lengths
-  - 4.6 Instruction Set Description
+    - [4.5.1 MSP430 Instructions](SLAU445/4.5.1_msp430_instructions.md)
+      - [4.5.1.1 MSP430 Double-Operand (Format I) Instructions](SLAU445/4.5.1.1_msp430_double-operand_\(format_i\)_instructions.md)
+      - [4.5.1.2 MSP430 Single-Operand (Format II) Instructions](SLAU445/4.5.1.2_msp430_single-operand_\(format_ii\)_instructions.md)
+      - [4.5.1.3 Jump Instructions](SLAU445/4.5.1.3_jump_instructions.md)
+      - [4.5.1.4 Emulated Instructions](SLAU445/4.5.1.4_emulated_instructions.md)
+      - [4.5.1.5 MSP430 Instruction Execution](SLAU445/4.5.1.5_msp430_instruction_execution.md)
+        - [4.5.1.5.1 Instruction Cycles and Length for Interrupt, Reset, and Subroutines](SLAU445/4.5.1.5.1_instruction_cycles_and_length_for_interrupt_reset_and_subroutines.md)
+        - [4.5.1.5.2 Format II (Single-Operand) Instruction Cycles and Lengths](SLAU445/format_ii_\(single-operand\)_instruction_cycles_and_lengths.md)
+        - [4.5.1.5.3 Jump Instructions Cycles and Lengths](SLAU445/4.5.1.5.3_jump_instructions_cycles_and_lengths.md)
+        - [4.5.1.5.4 Format I (Double-Operand) Instruction Cycles and Lengths](SLAU445/4.5.1.5.4_format_i\(double-operand\)_instruction_cycles_and_lengths.md)
+    - [4.5.2 MSP430X Extended Instructions](SLAU445/4.5.2_msp430x_extended_instructions.md)
+      - [4.5.2.1 Register Mode Extension Word](SLAU445/4.5.2.1_register_mode_extension_word.md)
+      - [4.5.2.2 Non-Register Mode Extension Word](SLAU445/4.5.2.2_non-register_mode_extension_word.md)
+      - [4.5.2.3 Extended Double-Operand (Format I) Instructions](SLAU445/4.5.2.3_extended_double-operand_\(format_i\)_instructions.md)
+      - [4.5.2.4 Extended Single-Operand (Format II) Instructions](SLAU445/4.5.2.4_extended_single-operand_\(format_ii\)instructions.md)
+        - [4.5.2.4.1 Extended Format II Instruction Format Exceptions](SLAU445/4.5.2.4.1_extended_format_ii_instruction_format_exceptions.md)
+      - [4.5.2.5 Extended Emulated Instructions](SLAU445/4.5.2.5_extended_emulated_instructions.md)
+      - [4.5.2.6 MSP430X Address Instructions](SLAU445/4.5.2.6_msp430x_address_instructions.md)
+      - [4.5.2.7 MSP430X Instruction Execution](SLAU445/4.5.2.7_msp430x_instruction_execution.md)
+        - [4.5.2.7.1 MSP430X Format II (Single-Operand) Instruction Cycles and Lengths](SLAU445/4.5.2.7.1_msp430x_format_ii_\(single-operand\)_instruction_cycles_and_lengths.md)
+        - [4.5.2.7.2 MSP430X Format I (Double-Operand) Instruction Cycles and Lengths](SLAU445/4.5.2.7.2_msp430x_format_i_\(double-operand\)_instruction_cycles_and_lengths.md)
+        - [4.5.2.7.3 MSP430X Address Instruction Cycles and Lengths](SLAU445/4.5.2.7.3_msp430x_address_instruction_cycles_and_lengths.md)
+  - [4.6 Instruction Set Description](SLAU445/4.6_instruction_set_description.md)
     - 4.6.1 Extended Instruction Binary Descriptions
     - 4.6.2 MSP430 Instructions
       - 4.6.2.1 ADC

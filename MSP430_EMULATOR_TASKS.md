@@ -1030,7 +1030,7 @@ src/MSP430.Emulator/Instructions/Arithmetic/ArithmeticInstruction.cs
 src/MSP430.Emulator/Instructions/DataMovement/MovInstruction.cs
 src/MSP430.Emulator/Instructions/InstructionCycleLookup.cs (new)
 tests/MSP430.Emulator.Tests/Instructions/InstructionCycleTests.cs (new)
-```
+```text
 
 **Testing Strategy**:
 
@@ -1067,7 +1067,7 @@ tests/MSP430.Emulator.Tests/Instructions/InstructionCycleTests.cs (new)
 src/MSP430.Emulator/Instructions/InstructionDecoder.cs (FormatIIIInstruction class)
 src/MSP430.Emulator/Instructions/ControlFlow/JumpCondition.cs (new)
 tests/MSP430.Emulator.Tests/Instructions/ControlFlow/FormatIIIInstructionTests.cs (new)
-```
+```text
 
 **Testing Strategy**:
 
@@ -1102,7 +1102,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/FormatIIIInstructionTests.c
 ```text
 src/MSP430.Emulator/Core/EmulatorCore.cs
 tests/MSP430.Emulator.Tests/Core/EmulatorCoreResetTests.cs (new)
-```
+```text
 
 **Testing Strategy**:
 
@@ -1546,7 +1546,7 @@ src/MSP430.Emulator/Instructions/Extended/ExtendedInstruction.cs
 src/MSP430.Emulator/Instructions/Extended/ExtendedFormatI.cs
 src/MSP430.Emulator/Instructions/Extended/ExtendedFormatII.cs
 tests/MSP430.Emulator.Tests/Instructions/Extended/ExtendedInstructionTests.cs
-```
+```text
 
 **Testing Strategy**:
 

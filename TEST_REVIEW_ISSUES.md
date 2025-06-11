@@ -8,12 +8,12 @@ gaps resolved and comprehensive MSP430 documentation compliance achieved.
 
 **Current Test Status:**
 
-- **Total Tests**: 3033 (3021 unit + 12 integration) - **ALL PASSING**
-- **Recent Additions**: 196 new tests (22 interrupt + 55 CPU register + 36 clock system +
-  37 peripheral memory + 25 FRAM behavior + 21 power management)
+- **Total Tests**: 3181 (3140 unit + 41 integration) - **ALL PASSING**
+- **Recent Additions**: 196+ new tests (22 interrupt + 55 CPU register + 36 clock system +
+  37 peripheral memory + 25 FRAM behavior + 21 power management + additional integration tests)
 - **MSP430 Compliance**: All tests aligned with MSP430FR2355 specifications
-- **Documentation Compliance**: 90% (37/41 files) - all MSP430-specific tests documented
-- **Coverage**: High coverage maintained (87.8% line, 74.8% branch)
+- **Documentation Compliance**: 91% (42/46 files) - all MSP430-specific tests documented
+- **Coverage**: High coverage maintained (87.8%+ line, 74.8%+ branch)
 
 **Review Status: ✅ COMPLETE**
 
@@ -118,7 +118,7 @@ gaps resolved and comprehensive MSP430 documentation compliance achieved.
 
 - **Issue**: Previously 25 out of 41 test files (61%) lacked proper MSP430 documentation references
 - **Resolution**: **COMPLETED** - All MSP430-specific test files now have proper TI specification references
-- **Current State**: 37 out of 41 test files (90%) have proper TI specification references
+- **Current State**: 42 out of 46 test files (91%) have proper TI specification references
 - **Progress Completed**:
   - ✅ All instruction test files have proper TI document references (14 files)
   - ✅ All core emulator component tests have MSP430 references (4 files)
@@ -134,17 +134,22 @@ gaps resolved and comprehensive MSP430 documentation compliance achieved.
 - **Impact**: **EXCELLENT** traceability to MSP430FR2355 specifications for all relevant tests
 - **Status**: **ISSUE RESOLVED** - All MSP430-specific functionality has proper documentation references
 
-### 2. Limited Instruction Set Test Coverage ⚠️ LOW PRIORITY
+### 2. Limited Instruction Set Test Coverage ⚠️ MEDIUM PRIORITY
 
-- **Issue**: Only partial instruction set testing (arithmetic, logic, data movement)
-- **Current State**: Basic instruction categories tested
+- **Issue**: Jump/branch instructions and MSP430X extended instruction set have generic test coverage only
+- **Current State**:
+  - Format I (two-operand) instructions: Comprehensive individual test coverage ✅
+  - Format II (single-operand) instructions: Comprehensive individual test coverage ✅
+  - Format III (jump/branch) instructions: Generic `FormatIIIInstruction` testing only ⚠️
+  - Status bit instructions: Comprehensive test coverage ✅
 - **Missing Coverage**:
-  - Complete MSP430X instruction set
-  - Addressing mode edge cases
-  - Instruction timing validation
-  - CPU flag behavior edge cases
-- **Required Documentation**: SLAU131Y Section 4 (MSP430 Instruction Set)
-- **Impact**: Instruction emulation completeness
+  - Individual jump/branch instruction tests (JMP, JEQ, JNE, JC, JNC, JN, JGE, JL)
+  - Complete MSP430X extended instruction set (20-bit addressing)
+  - Addressing mode edge cases for extended instructions
+  - Instruction timing validation for cycle-accurate emulation
+- **Required Documentation**: SLAU131Y Section 4 (MSP430 Instruction Set), SLAU445I Section 4.5.2
+  (MSP430X)
+- **Impact**: Complete instruction emulation accuracy for all MSP430FR2355 capabilities
 
 ## Architectural Issues (Require Larger Changes)
 
@@ -167,7 +172,7 @@ gaps resolved and comprehensive MSP430 documentation compliance achieved.
 
 - **Status**: ✅ **COMPLETED**
 - **Achievement**: All 37 MSP430-specific test files now have proper TI specification references
-- **Compliance**: 90% of all test files have documentation (37/41) - remaining 4 files are infrastructure
+- **Compliance**: 91% of all test files have documentation (42/46) - remaining 4 files are infrastructure
   components that don't require MSP430 references
 - **Impact**: Excellent specification traceability achieved for all MSP430FR2355 functionality
 
@@ -187,7 +192,7 @@ features and extended instruction sets:
 ### 1. Test Documentation Standardization ✅ COMPLETED
 
 - **Status**: **COMPLETED** - All 37 MSP430-specific test files now have proper TI specification references
-- **Achievement**: Improved from 61% gap to 90% compliance (37/41 files documented)
+- **Achievement**: Improved from 61% gap to 91% compliance (42/46 files documented)
 - **Remaining Files**: 4 infrastructure/logging files that don't require MSP430 references
 - **Impact**: **EXCELLENT** - Complete traceability to MSP430FR2355 specifications for all relevant functionality
 
@@ -273,29 +278,32 @@ features and extended instruction sets:
 
 ## Validation Status
 
-✅ **Integration Tests**: 12 tests added, all passing (previously missing)
-✅ **Memory Layout**: Validated against MSP430FR2355 specifications
-✅ **Memory Permissions**: Validated against MSP430FR2355 access rules
-✅ **Configuration Values**: Memory totalSize corrected from 32KB to 64KB (commit e25f976)
-✅ **CPU Frequency**: Test values updated from unverified 2MHz to conservative 1MHz default
-✅ **Interrupt System**: 22 comprehensive interrupt tests added, all passing with SLAU445I
-   Section 1.3 compliance
-✅ **CPU Register Behavior**: 55 comprehensive register behavior tests added, all passing with
-   SLAU445I Section 4.3 compliance
-✅ **Clock System Behavior**: 36 comprehensive clock system tests added, all passing with
-   SLASEC4D Section 5.12 compliance
-✅ **Peripheral Memory Regions**: 37 comprehensive peripheral memory tests added, all passing
-   with MSP430FR2355 compliance
-✅ **FRAM Behavior**: 25 comprehensive FRAM behavior tests added, all passing with
-   SLAU445I Section 6 compliance
-✅ **Power Management**: 21 comprehensive power management tests added, all passing with
-   SLAU445I Section 1.4 compliance
-⚠️ **FRAM vs Flash Naming**: Enum uses `Flash` name for FRAM region - architectural inconsistency identified
-⚠️ **Instruction Set**: Partial coverage (arithmetic, logic, data movement) - missing MSP430X
-   instructions
-⚠️ **Test Documentation**: 4 infrastructure test files don't require MSP430 references (logging/diagnostics) -
-   all MSP430-specific tests have proper documentation
-📝 **Technical Documentation**: Remaining gaps identified for TI specification references
+- ✅ **Integration Tests**: 41 tests added, all passing (improved from 12)
+- ✅ **Memory Layout**: Validated against MSP430FR2355 specifications
+- ✅ **Memory Permissions**: Validated against MSP430FR2355 access rules
+- ✅ **Configuration Values**: Memory totalSize corrected from 32KB to 64KB (commit e25f976)
+- ✅ **CPU Frequency**: Test values updated from unverified 2MHz to conservative 1MHz default
+- ✅ **Interrupt System**: 22 comprehensive interrupt tests added, all passing with SLAU445I
+  Section 1.3 compliance
+- ✅ **CPU Register Behavior**: 55 comprehensive register behavior tests added, all passing with
+  SLAU445I Section 4.3 compliance
+- ✅ **Clock System Behavior**: 36 comprehensive clock system tests added, all passing with
+  SLASEC4D Section 5.12 compliance
+- ✅ **Peripheral Memory Regions**: 37 comprehensive peripheral memory tests added, all passing
+  with MSP430FR2355 compliance
+- ✅ **FRAM Behavior**: 25 comprehensive FRAM behavior tests added, all passing with
+  SLAU445I Section 6 compliance
+- ✅ **Power Management**: 21 comprehensive power management tests added, all passing with
+  SLAU445I Section 1.4 compliance
+- ✅ **Test Documentation**: 42 MSP430-specific test files (91%) have proper TI specification
+  references
+- ⚠️ **FRAM vs Flash Naming**: Enum uses `Flash` name for FRAM region - architectural
+  inconsistency documented
+- ⚠️ **Instruction Set**: Comprehensive coverage for Format I/II instructions, generic coverage
+  for Format III (jump/branch)
+- ⚠️ **Extended Instruction Set**: MSP430X extended instructions not individually tested
+- 📝 **Technical Documentation**: Remaining gaps identified for advanced features and extended
+  instruction sets
 
 ## Next Steps
 
@@ -311,8 +319,8 @@ features and extended instruction sets:
 5. ✅ **Power Management Tests**: LPM mode transition tests implemented based on SLAU445I Section 1.4
 6. ✅ **Document FRAM vs Flash Naming**: Clear documentation added about the naming
    inconsistency for future architectural consideration
-7. ✅ **Test Documentation Standardization**: All 37 MSP430-specific test files now have proper TI
-   specification references - **COMPLETED**
+7. ✅ **Test Documentation Standardization**: All MSP430-specific test files now have proper TI
+   specification references - **COMPLETED** (42/46 files documented)
 
 ### Medium-term Improvements
 
@@ -331,8 +339,9 @@ features and extended instruction sets:
 3. ✅ **Clock System**: System Clock Generator control, oscillator control, frequency validation
 4. ✅ **FRAM Controller**: Wait state control, ECC behavior, power control modes
 5. ✅ **Power Management**: LPM0-LPM4.5 transitions, wake-up events, Status Register manipulation
-6. **Complete Instruction Set**: MSP430X instruction set, addressing mode edge cases, timing validation
-7. ✅ **Test Documentation**: All MSP430-specific test files (37/37) have proper TI specification references
+6. ⚠️ **Complete Instruction Set**: MSP430X instruction set, jump/branch instructions, addressing
+   mode edge cases, timing validation
+7. ✅ **Test Documentation**: All MSP430-specific test files (42/42) have proper TI specification references
 
 ### Architectural Considerations
 

@@ -44,12 +44,14 @@ since they provide immediate constants without additional memory access cycles.
 
 ### Validation
 
-The implementation validates addressing mode combinations:
+The implementation handles addressing mode combinations as follows:
 
-- **Valid destinations**: Register, Indexed, Symbolic, Absolute
-- **Invalid destinations**: Indirect, IndirectAutoIncrement (throws InvalidOperationException)
+- **Valid destinations**: Register, Indexed, Symbolic, Absolute (per SLAU445I Table 4-10)
+- **Invalid destinations**: Indirect, IndirectAutoIncrement (returns legacy cycle counts for backward compatibility)
 
-This matches SLAU445 Table 4-10 which only defines cycles for valid Format I instruction addressing mode combinations.
+Note: While SLAU445I Table 4-10 only defines cycles for valid Format I instruction addressing mode combinations, the
+implementation maintains backward compatibility by returning estimated cycle counts for invalid destination modes using
+the legacy additive calculation approach.
 
 ## References
 

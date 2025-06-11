@@ -58,12 +58,23 @@ public static class InstructionCycleLookup
     /// 
     /// All constant generators should behave like register operations (0 additional cycles)
     /// since they provide immediate constants without memory access.
+    /// 
+    /// Note: The mode parameter is intentionally unused as all constant generators
+    /// map to Register addressing mode for cycle calculation purposes, regardless
+    /// of their original addressing mode (Indirect, IndirectAutoIncrement, etc.).
+    /// This design reflects the MSP430 architecture where constant generators
+    /// provide immediate values without additional memory access cycles.
     /// </summary>
     /// <param name="register">The register used in constant generation.</param>
-    /// <param name="mode">The addressing mode used in constant generation.</param>
+    /// <param name="mode">The addressing mode used in constant generation (unused - documented above).</param>
     /// <returns>The effective addressing mode for cycle calculation purposes.</returns>
     private static AddressingMode MapConstantGeneratorToEffectiveMode(RegisterName register, AddressingMode mode)
     {
+        // Suppress unused parameter warning - mode parameter is intentionally unused
+        // as documented above. All constant generators map to Register mode.
+        _ = mode;
+        _ = register; // Also unused as all generators map to Register regardless of which register
+
         // All constant generators should map to register mode for cycle purposes
         // since they provide immediate constants without additional memory access cycles
         return AddressingMode.Register;

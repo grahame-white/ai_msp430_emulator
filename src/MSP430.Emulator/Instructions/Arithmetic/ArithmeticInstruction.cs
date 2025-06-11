@@ -193,21 +193,31 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
     protected virtual bool ShouldWriteResult() => true;
 
     /// <summary>
+    /// Determines whether this arithmetic instruction is a CMP, BIT, or MOV instruction
+    /// that gets cycle count reduction per SLAU445I Table 4-10 footnote [1].
+    /// 
+    /// By default, only CMP instructions get this reduction. MOV and BIT instructions
+    /// should override this in their respective implementations.
+    /// </summary>
+    /// <returns>True if this instruction gets MOV/BIT/CMP cycle reduction, false otherwise.</returns>
+    protected virtual bool IsMovBitOrCmpInstruction => !ShouldWriteResult();
+
+    /// <summary>
     /// Gets the number of CPU cycles required for this instruction based on addressing modes.
     /// Uses SLAU445I Table 4-10 lookup instead of additive cycle calculation.
     /// </summary>
     /// <returns>The number of CPU cycles.</returns>
     private uint GetCycleCount()
     {
-        // Determine if this is a CMP instruction (which gets cycle reduction)
-        bool isCmpInstruction = BaseMnemonic == "CMP";
+        // Use virtual property instead of string comparison for better type safety
+        bool isMovBitOrCmpInstruction = IsMovBitOrCmpInstruction;
 
         return InstructionCycleLookup.GetCycleCount(
             _sourceAddressingMode,
             _destinationAddressingMode,
             _sourceRegister,
             _destinationRegister,
-            isMovBitOrCmpInstruction: isCmpInstruction);
+            isMovBitOrCmpInstruction: isMovBitOrCmpInstruction);
     }
 
     /// <summary>

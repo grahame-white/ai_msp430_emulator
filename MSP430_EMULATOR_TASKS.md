@@ -1684,13 +1684,13 @@ tests/MSP430.Emulator.Tests/Debug/DebuggerTests.cs
 
 ---
 
-### Task 9.4: Binary Loading and ELF Support
+### Task 9.4: Binary Loading and File Format Support
 
 **Priority**: Medium
-**Estimated Effort**: 3-4 hours
+**Estimated Effort**: 4-5 hours
 **Dependencies**: Task 9.3
 
-Implement support for loading MSP430 binaries and ELF files into emulator memory.
+Implement support for loading MSP430 binaries, ELF files, and TI-TXT format files into emulator memory.
 
 **Acceptance Criteria**:
 
@@ -1699,10 +1699,21 @@ Implement support for loading MSP430 binaries and ELF files into emulator memory
 - [ ] Create `IBinaryLoader` interface in `src/MSP430.Emulator/Loading/IBinaryLoader.cs`
 - [ ] Implement `ElfLoader` class in `src/MSP430.Emulator/Loading/ElfLoader.cs`
 - [ ] Implement `BinaryLoader` class in `src/MSP430.Emulator/Loading/BinaryLoader.cs`
+- [ ] Implement `TiTxtLoader` class in `src/MSP430.Emulator/Loading/TiTxtLoader.cs`
 - [ ] Support ELF file parsing and loading
 - [ ] Add symbol table extraction
 - [ ] Implement memory initialization from binary
-- [ ] Create comprehensive unit tests for loading functionality
+- [ ] Support TI-TXT format parsing (@address, hex bytes, q terminator)
+- [ ] Add TI-TXT format validation and error handling
+- [ ] Create comprehensive unit tests for all loading functionality
+
+**TI-TXT Format Specification**:
+
+- `@12346` - Indicates memory address (hexadecimal)
+- `AA BB CC DD` - Sequence of bytes to write to memory (hexadecimal)
+- `q` - Indicates end of file
+- Support for multiple address sections in single file
+- Ignore whitespace and comments (lines starting with `;`)
 
 **Files to Create**:
 
@@ -1710,9 +1721,11 @@ Implement support for loading MSP430 binaries and ELF files into emulator memory
 src/MSP430.Emulator/Loading/IBinaryLoader.cs
 src/MSP430.Emulator/Loading/ElfLoader.cs
 src/MSP430.Emulator/Loading/BinaryLoader.cs
+src/MSP430.Emulator/Loading/TiTxtLoader.cs
 src/MSP430.Emulator/Loading/SymbolTable.cs
 tests/MSP430.Emulator.Tests/Loading/ElfLoaderTests.cs
 tests/MSP430.Emulator.Tests/Loading/BinaryLoaderTests.cs
+tests/MSP430.Emulator.Tests/Loading/TiTxtLoaderTests.cs
 ```
 
 **Testing Strategy**:
@@ -1720,6 +1733,8 @@ tests/MSP430.Emulator.Tests/Loading/BinaryLoaderTests.cs
 - Test ELF file parsing
 - Test memory loading accuracy
 - Test symbol table extraction
+- Test TI-TXT format parsing with various address ranges
+- Test TI-TXT error conditions and malformed files
 
 ---
 
@@ -1773,13 +1788,13 @@ tests/MSP430.Emulator.IntegrationTests/ProgramExecutionTests.cs
 
 ---
 
-### Task 10.2: Accuracy Validation and Benchmarking
+### Task 10.2: Accuracy Validation and Hardware Benchmarking
 
 **Priority**: High
-**Estimated Effort**: 4-5 hours
+**Estimated Effort**: 6-7 hours
 **Dependencies**: Task 10.1
 
-Implement validation tests against real MSP430 hardware or reference implementations.
+Implement validation tests against real MSP430 hardware and reference implementations using LaunchPad dev board experiments.
 
 **Acceptance Criteria**:
 
@@ -1791,6 +1806,19 @@ Implement validation tests against real MSP430 hardware or reference implementat
 - [ ] Create accuracy measurement framework
 - [ ] Implement performance benchmarking
 - [ ] Add regression test capabilities
+- [ ] Develop LaunchPad hardware validation experiments
+- [ ] Create step-by-step hardware test procedures
+- [ ] Implement hardware data collection and comparison tools
+
+**LaunchPad Hardware Validation Experiments**:
+
+- **Instruction Timing Validation**: Simple programs to measure actual cycle counts vs emulator
+- **Register State Verification**: Programs that manipulate CPU registers and dump final states
+- **Memory Access Patterns**: Tests for RAM, Flash, and information memory behavior
+- **Interrupt Response Testing**: Hardware interrupt latency and context switching validation
+- **Peripheral I/O Validation**: GPIO, timer, and UART behavior comparison
+- **Power Mode Transitions**: Low-power mode entry/exit behavior verification
+- **Reset Behavior Testing**: Power-on-reset and software reset sequence validation
 
 **Files to Create**:
 
@@ -1799,13 +1827,29 @@ tests/MSP430.Emulator.ValidationTests/InstructionTimingTests.cs
 tests/MSP430.Emulator.ValidationTests/PeripheralBehaviorTests.cs
 tests/MSP430.Emulator.ValidationTests/AccuracyMeasurement.cs
 tests/MSP430.Emulator.ValidationTests/PerformanceBenchmarks.cs
+tests/MSP430.Emulator.ValidationTests/Hardware/LaunchPadExperiments.cs
+tests/MSP430.Emulator.ValidationTests/Hardware/HardwareDataCollector.cs
+docs/validation/LaunchPadTestProcedures.md
+examples/validation/timing_test.c
+examples/validation/register_dump.c
+examples/validation/memory_test.c
+examples/validation/interrupt_test.c
 ```
+
+**Hardware Test Procedures**:
+
+- Step-by-step instructions for humans to run validation experiments on LaunchPad
+- Automated test program generation for consistent hardware testing
+- Data collection scripts for comparing hardware vs emulator output
+- Standardized test report format for hardware validation results
 
 **Testing Strategy**:
 
 - Compare timing with hardware specifications
 - Validate peripheral behavior accuracy
 - Measure emulation performance
+- Cross-validate emulator output with real hardware data
+- Document discrepancies and implementation gaps
 
 ---
 

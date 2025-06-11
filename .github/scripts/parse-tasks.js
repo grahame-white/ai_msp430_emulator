@@ -86,7 +86,14 @@ class TaskParser {
      */
     extractPriority(content) {
         const match = content.match(/\*\*Priority\*\*:\s*(.+)/);
-        return match ? match[1].trim() : 'Medium';
+        if (!match) {
+            return 'Medium';
+        }
+        
+        // Extract just the priority level (first word), ignoring any explanatory text in parentheses
+        const priorityText = match[1].trim();
+        const priorityMatch = priorityText.match(/^(Critical|High|Medium|Low)/i);
+        return priorityMatch ? priorityMatch[1] : priorityText.split(/\s+/)[0];
     }
 
     /**

@@ -79,7 +79,7 @@ public class AddInstructionAddressingModeTests
 
         // Assert
         Assert.Equal(0x1500, registerFile.ReadRegister(RegisterName.R6));
-        Assert.Equal(1u, cycles); // Immediate to register should be 1 cycle
+        Assert.Equal(2u, cycles); // #N → Rm = 2 cycles per SLAU445 Table 4-10
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class AddInstructionAddressingModeTests
 
         // Assert
         Assert.Equal(0x2234, registerFile.ReadRegister(RegisterName.R6)); // 0x1000 + 0x1234 = 0x2234
-        Assert.Equal(4u, cycles); // Absolute to register should be 4 cycles (1 + 3 for absolute)
+        Assert.Equal(3u, cycles); // &EDE → Rm = 3 cycles per SLAU445 Table 4-10
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public class AddInstructionAddressingModeTests
         // Assert - memory should contain 0x1000 + 0x0234 = 0x1234
         Assert.Equal(0x34, memory[0x2000]); // Low byte
         Assert.Equal(0x12, memory[0x2001]); // High byte
-        Assert.Equal(4u, cycles); // Register to absolute should be 4 cycles (1 + 3 for absolute)
+        Assert.Equal(4u, cycles); // Rn → &EDE = 4 cycles per SLAU445 Table 4-10
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public class AddInstructionAddressingModeTests
 
         // Assert
         Assert.Equal(0x68AC, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0x5678 = 0x68AC
-        Assert.Equal(3u, cycles); // Indirect to register should be 3 cycles (1 + 2 for indirect)
+        Assert.Equal(2u, cycles); // @Rn → Rm = 2 cycles per SLAU445 Table 4-10
     }
 
     [Fact]
@@ -267,7 +267,7 @@ public class AddInstructionAddressingModeTests
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(3u, cycles); // Indirect autoincrement to register should be 3 cycles (1 + 2 for indirect autoinc)
+        Assert.Equal(2u, cycles); // @Rn+ → Rm = 2 cycles per SLAU445 Table 4-10
     }
 
     [Fact]
@@ -299,7 +299,7 @@ public class AddInstructionAddressingModeTests
         // Assert
         Assert.Equal(0xAC, registerFile.ReadRegister(RegisterName.R6) & 0xFF); // 0x34 + 0x78 = 0xAC
         Assert.Equal(0x2001, registerFile.ReadRegister(RegisterName.R5)); // R5 should be incremented by 1 for byte operation
-        Assert.Equal(3u, cycles);
+        Assert.Equal(2u, cycles); // Per SLAU445I Table 4-10: @Rn+ → Rm = 2 cycles
     }
 
     [Fact]
@@ -333,7 +333,7 @@ public class AddInstructionAddressingModeTests
 
         // Assert
         Assert.Equal(0x68AC, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0x5678 = 0x68AC
-        Assert.Equal(4u, cycles); // Indexed to register should be 4 cycles (1 + 3 for indexed)
+        Assert.Equal(3u, cycles); // x(Rn) → Rm = 3 cycles per SLAU445 Table 4-10
     }
 
     [Fact]
@@ -368,7 +368,7 @@ public class AddInstructionAddressingModeTests
         // Assert - memory at 0x2010 should contain 0x1000 + 0x0234 = 0x1234
         Assert.Equal(0x34, memory[0x2010]); // Low byte
         Assert.Equal(0x12, memory[0x2011]); // High byte
-        Assert.Equal(4u, cycles); // Register to indexed should be 4 cycles (1 + 3 for indexed)
+        Assert.Equal(4u, cycles); // Rn → x(Rm) = 4 cycles per SLAU445 Table 4-10
     }
 
     [Fact]
@@ -402,7 +402,7 @@ public class AddInstructionAddressingModeTests
 
         // Assert
         Assert.Equal(0x68AC, registerFile.ReadRegister(RegisterName.R6)); // 0x1234 + 0x5678 = 0x68AC
-        Assert.Equal(4u, cycles); // Symbolic to register should be 4 cycles (1 + 3 for symbolic)
+        Assert.Equal(3u, cycles); // EDE → Rm = 3 cycles per SLAU445 Table 4-10
     }
 
     [Fact]
@@ -437,7 +437,7 @@ public class AddInstructionAddressingModeTests
         // Assert - memory at 0x2000 should contain 0x1000 + 0x0234 = 0x1234
         Assert.Equal(0x34, memory[0x2000]); // Low byte
         Assert.Equal(0x12, memory[0x2001]); // High byte
-        Assert.Equal(4u, cycles); // Register to symbolic should be 4 cycles (1 + 3 for symbolic)
+        Assert.Equal(4u, cycles); // Rn → EDE = 4 cycles per SLAU445 Table 4-10
     }
 
     [Fact]

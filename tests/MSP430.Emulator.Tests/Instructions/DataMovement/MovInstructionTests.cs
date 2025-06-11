@@ -754,10 +754,10 @@ public class MovInstructionTests
     // Cycle count tests for key addressing mode combinations
     [Theory]
     [InlineData(AddressingMode.Register, AddressingMode.Register, 1u)]
-    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 1u)]
-    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 4u)]
-    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 7u)]
-    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 7u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 2u)]
+    [InlineData(AddressingMode.Register, AddressingMode.Indexed, 3u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 5u)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 5u)]
     public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
     {
         // Arrange

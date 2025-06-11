@@ -200,11 +200,33 @@ public abstract class LogicalInstruction : Instruction, IExecutableInstruction
     protected virtual bool ShouldWriteResult() => true;
 
     /// <summary>
+    /// Determines whether this logical instruction is a BIT instruction
+    /// that gets cycle count reduction per SLAU445I Table 4-10 footnote [1].
+    /// 
+    /// By default, only BIT instructions get this reduction.
+    /// </summary>
+    /// <returns>True if this instruction gets BIT cycle reduction, false otherwise.</returns>
+    protected virtual bool IsBitInstruction => !ShouldWriteResult();
+
+    /// <summary>
     /// Gets the number of CPU cycles required for this instruction based on addressing modes.
+    /// Uses SLAU445I Table 4-10 lookup for BIT instructions, legacy calculation for others.
     /// </summary>
     /// <returns>The number of CPU cycles.</returns>
     private uint GetCycleCount()
     {
+        // BIT instruction should use the lookup table like MOV/CMP
+        if (IsBitInstruction)
+        {
+            return InstructionCycleLookup.GetCycleCount(
+                _sourceAddressingMode,
+                _destinationAddressingMode,
+                _sourceRegister,
+                _destinationRegister,
+                isMovBitOrCmpInstruction: true);
+        }
+
+        // Other logical instructions use legacy additive calculation
         // Base cycle count for Format I instructions
         uint baseCycles = 1;
 

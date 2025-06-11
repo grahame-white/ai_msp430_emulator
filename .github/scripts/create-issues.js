@@ -372,6 +372,46 @@ class GitHubIssuesCreator {
                 color: 'c5def5',
                 description: 'Phase 3: Memory System Implementation'
             },
+            {
+                name: 'phase-4',
+                color: 'c5def5',
+                description: 'Phase 4: CPU Core Implementation'
+            },
+            {
+                name: 'phase-5',
+                color: 'c5def5',
+                description: 'Phase 5: CPU Instruction Set Implementation'
+            },
+            {
+                name: 'phase-6',
+                color: 'c5def5',
+                description: 'Phase 6: CPU Instruction Set - Control Flow'
+            },
+            {
+                name: 'phase-7',
+                color: 'c5def5',
+                description: 'Phase 7: CPU Instruction Set - System Control'
+            },
+            {
+                name: 'phase-8',
+                color: 'c5def5',
+                description: 'Phase 8: Interrupt System'
+            },
+            {
+                name: 'phase-9',
+                color: 'c5def5',
+                description: 'Phase 9: Binary File Import/Export'
+            },
+            {
+                name: 'phase-10',
+                color: 'c5def5',
+                description: 'Phase 10: Hardware Validation & Testing'
+            },
+            {
+                name: 'phase-11',
+                color: 'c5def5',
+                description: 'Phase 11: Documentation & Advanced Features'
+            },
             { name: 'priority-critical', color: 'd73a49', description: 'Critical priority task' },
             { name: 'priority-high', color: 'fd7e14', description: 'High priority task' },
             { name: 'priority-medium', color: 'fbca04', description: 'Medium priority task' },

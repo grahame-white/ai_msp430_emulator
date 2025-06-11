@@ -316,8 +316,8 @@ features and extended instruction sets:
 5. ✅ **Power Management Tests**: LPM mode transition tests implemented based on SLAU445I Section 1.4
 6. ✅ **Document FRAM vs Flash Naming**: Clear documentation added about the naming
    inconsistency for future architectural consideration
-7. ✅ **Test Documentation Standardization**: All 37 MSP430-specific test files now have proper TI
-   specification references - **COMPLETED**
+7. ✅ **Test Documentation Standardization**: All MSP430-specific test files now have proper TI
+   specification references - **COMPLETED** (42/46 files documented)
 
 ### Medium-term Improvements
 

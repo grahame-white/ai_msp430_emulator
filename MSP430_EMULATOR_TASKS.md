@@ -1705,6 +1705,8 @@ Implement support for loading MSP430 binaries, ELF files, and TI-TXT format file
 - [ ] Implement memory initialization from binary
 - [ ] Support TI-TXT format parsing (@address, hex bytes, q terminator)
 - [ ] Add TI-TXT format validation and error handling
+- [ ] Support map file parsing to provide additional metadata for binaries
+- [ ] Add map file symbol and memory layout extraction
 - [ ] Create comprehensive unit tests for all loading functionality
 
 **TI-TXT Format Specification**:
@@ -1715,6 +1717,15 @@ Implement support for loading MSP430 binaries, ELF files, and TI-TXT format file
 - Support for multiple address sections in single file
 - Ignore whitespace and comments (lines starting with `;`)
 
+**Map File Support Specification**:
+
+- Parse linker-generated map files (.map) for symbol information
+- Extract function and variable symbol addresses
+- Support memory section layout information
+- Provide debugging metadata for binary analysis
+- Enable symbol name lookup by address
+- Support both TI and GCC toolchain map file formats
+
 **Files to Create**:
 
 ```text
@@ -1722,10 +1733,12 @@ src/MSP430.Emulator/Loading/IBinaryLoader.cs
 src/MSP430.Emulator/Loading/ElfLoader.cs
 src/MSP430.Emulator/Loading/BinaryLoader.cs
 src/MSP430.Emulator/Loading/TiTxtLoader.cs
+src/MSP430.Emulator/Loading/MapFileParser.cs
 src/MSP430.Emulator/Loading/SymbolTable.cs
 tests/MSP430.Emulator.Tests/Loading/ElfLoaderTests.cs
 tests/MSP430.Emulator.Tests/Loading/BinaryLoaderTests.cs
 tests/MSP430.Emulator.Tests/Loading/TiTxtLoaderTests.cs
+tests/MSP430.Emulator.Tests/Loading/MapFileParserTests.cs
 ```
 
 **Testing Strategy**:
@@ -1735,6 +1748,8 @@ tests/MSP430.Emulator.Tests/Loading/TiTxtLoaderTests.cs
 - Test symbol table extraction
 - Test TI-TXT format parsing with various address ranges
 - Test TI-TXT error conditions and malformed files
+- Test map file parsing for symbol extraction
+- Test map file symbol address lookup functionality
 
 ---
 

@@ -106,12 +106,12 @@ class TaskParser {
             return [];
         }
 
-        // Parse dependencies like "Task 1.1" or "Task 1.1, Task 1.2"
+        // Parse dependencies like "Task 1.1", "Task 1.1, Task 1.2", or "Task 5.5.1"
         const depString = match[1].trim();
         const deps = depString
             .split(',')
             .map(dep => {
-                const taskMatch = dep.trim().match(/Task (\d+\.\d+)/);
+                const taskMatch = dep.trim().match(/Task (\d+\.\d+(?:\.\d+)?)/);
                 return taskMatch ? taskMatch[1] : null;
             })
             .filter(Boolean);

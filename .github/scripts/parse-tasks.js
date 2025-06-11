@@ -89,7 +89,7 @@ class TaskParser {
         if (!match) {
             return 'Medium';
         }
-        
+
         // Extract just the priority level (first word), ignoring any explanatory text in parentheses
         const priorityText = match[1].trim();
         const priorityMatch = priorityText.match(/^(Critical|High|Medium|Low)/i);

@@ -794,11 +794,6 @@ Implement increment/decrement operations with proper addressing mode support.
 - [x] Implement proper status flag updates
 - [x] Handle memory and register destinations
 - [x] Add comprehensive unit tests for both instructions
-- [ ] Implement `DecInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/DecInstruction.cs`
-- [ ] Support all applicable addressing modes
-- [ ] Implement proper status flag updates
-- [ ] Handle memory and register destinations
-- [ ] Add comprehensive unit tests for both instructions
 
 **Files to Create**:
 

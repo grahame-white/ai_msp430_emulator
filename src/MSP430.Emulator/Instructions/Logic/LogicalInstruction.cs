@@ -215,7 +215,8 @@ public abstract class LogicalInstruction : Instruction, IExecutableInstruction
     /// References:
     /// - SLAU445I Section 4.5.1.5.4 Table 4-10 - Format I (Double-Operand) Instruction Cycles and Lengths
     /// - All logical instructions now follow the same cycle counting as MOV, arithmetic, and BIT instructions
-    /// - BIT instruction gets MOV/BIT/CMP cycle reduction per Table 4-10 footnote [1]
+    /// - BIT instruction gets MOV/BIT/CMP cycle reduction per Table 4-10 footnote [1]: Execute in one 
+    ///   fewer cycle for destination modes x(Rm), EDE, and &EDE
     /// </summary>
     /// <returns>The number of CPU cycles.</returns>
     private uint GetCycleCount()

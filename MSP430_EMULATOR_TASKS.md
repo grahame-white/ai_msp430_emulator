@@ -1029,10 +1029,12 @@ Table 4-10 lookup table specifications.
 
 ```text
 src/MSP430.Emulator/Instructions/Logical/LogicalInstruction.cs
+src/MSP430.Emulator/Instructions/InstructionCycleLookup.cs
 tests/MSP430.Emulator.Tests/Instructions/Logical/AndInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Logical/BicInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Logical/BisInstructionTests.cs
 tests/MSP430.Emulator.Tests/Instructions/Logical/XorInstructionTests.cs
+tests/MSP430.Emulator.Tests/Instructions/Logical/BitInstructionTests.cs
 ```
 
 **Testing Strategy**:

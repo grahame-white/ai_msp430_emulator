@@ -93,8 +93,15 @@ public class EmulatorCore : IEmulatorCore
         // Reset execution statistics
         _statistics.Reset();
 
-        // Clear memory (optional - real hardware doesn't clear RAM on reset)
-        Array.Clear(_memory, 0, _memory.Length);
+        // Load PC from reset vector BEFORE clearing memory (SLAU445I Section 1.2.1)
+        // "Upon completion of the boot code, the PC is loaded with the address 
+        // contained at the SYSRSTIV reset location (0FFFEh)."
+        LoadProgramCounterFromResetVector();
+
+        // Clear RAM memory only (optional - real hardware doesn't clear RAM on reset)
+        // Preserve interrupt vector table area (0xFFE0-0xFFFF) and other non-volatile memory
+        // Only clear RAM region (0x2000-0x2FFF) to simulate realistic reset behavior
+        Array.Clear(_memory, 0x2000, 0x1000); // Clear 4KB RAM region
 
         // Set execution state to reset
         _stateManager.Reset();
@@ -357,6 +364,43 @@ public class EmulatorCore : IEmulatorCore
 
     /// <inheritdoc />
     public bool HasBreakpoint(ushort address) => _breakpoints.Contains(address);
+
+    /// <summary>
+    /// Loads the Program Counter from the reset vector at address 0xFFFE-0xFFFF.
+    /// 
+    /// According to SLAU445I Section 1.2.1: "Upon completion of the boot code, 
+    /// the PC is loaded with the address contained at the SYSRSTIV reset location (0FFFEh)."
+    /// 
+    /// This method handles cases where the reset vector is uninitialized (0x0000) 
+    /// by leaving the PC at 0x0000, which is a valid default behavior.
+    /// </summary>
+    private void LoadProgramCounterFromResetVector()
+    {
+        const ushort ResetVectorAddress = 0xFFFE;
+
+        try
+        {
+            // Read 16-bit reset vector from memory (little-endian)
+            ushort resetVectorValue = ReadMemoryWord(ResetVectorAddress);
+
+            // Load PC with the reset vector value
+            _registerFile.SetProgramCounter(resetVectorValue);
+
+            _logger?.Info($"Program Counter loaded from reset vector: PC = 0x{resetVectorValue:X4} (from address 0x{ResetVectorAddress:X4})");
+        }
+        catch (MemoryAccessException ex)
+        {
+            // If we can't read the reset vector due to memory access validation failures,
+            // leave PC at 0x0000 as a safe default
+            _logger?.Warning($"Failed to load reset vector from 0x{ResetVectorAddress:X4}: {ex.Message}. PC remains at 0x0000.");
+        }
+        catch (ArgumentException ex)
+        {
+            // If there are argument validation issues with memory access,
+            // leave PC at 0x0000 as a safe default
+            _logger?.Warning($"Invalid memory access for reset vector at 0x{ResetVectorAddress:X4}: {ex.Message}. PC remains at 0x0000.");
+        }
+    }
 
     private uint ExecuteInstruction()
     {

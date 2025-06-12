@@ -109,11 +109,12 @@ public class EmulatorCoreTests
     }
 
     [Fact]
-    public void Reset_ResetsProgramCounter()
+    public void Reset_LoadsProgramCounterFromResetVector()
     {
         _emulatorCore.Reset();
 
-        // Verify register file was reset by checking PC is 0
+        // When memory is uninitialized (all zeros), reset vector at 0xFFFE-0xFFFF will be 0x0000
+        // So PC should be loaded with 0x0000 from the reset vector, not just reset to 0
         Assert.Equal((ushort)0, _registerFile.GetProgramCounter());
     }
 

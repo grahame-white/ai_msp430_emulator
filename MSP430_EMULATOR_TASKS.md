@@ -1988,11 +1988,17 @@ src/MSP430.Emulator/Loading/TiTxtFormatLoader.cs
 tests/MSP430.Emulator.Tests/Loading/TiTxtFormatLoaderTests.cs
 examples/blinky/blinky.c
 examples/blinky/blinky.txt
+examples/blinky/blinky.map
 examples/blinky/README.md
 docs/validation/BlinkyHardwareValidation.md
 docs/validation/DefectManagementProcedures.md
 tests/MSP430.Emulator.ValidationTests/Framework/HardwareComparisonBase.cs
 ```
+
+**Additional Resources**:
+
+- **Map File**: A linker-generated map file (`blinky.map`) containing symbol addresses, memory layout, and debugging
+  information for comprehensive validation of memory mapping accuracy and symbol resolution during emulation testing
 
 **Testing Strategy**:
 
@@ -2002,6 +2008,9 @@ tests/MSP430.Emulator.ValidationTests/Framework/HardwareComparisonBase.cs
 - Measure software delay loop timing accuracy
 - Test reset vector loading and program counter initialization
 - Compare emulated GPIO behavior with hardware specifications
+- Use map file to verify symbol addresses and memory layout accuracy
+- Validate code placement at expected memory addresses from map file
+- Cross-reference emulator memory state with map file symbol information
 - Document behavioral discrepancies and create defect reports
 - Implement regression tests for identified issues
 

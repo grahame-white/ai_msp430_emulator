@@ -1872,11 +1872,154 @@ examples/validation/interrupt_test.c
 
 ---
 
-### Task 10.3: Command Line Interface Implementation
+### Task 10.3: Classic Blinky Example Implementation and Validation
+
+**Priority**: High
+**Estimated Effort**: 4-5 hours
+**Dependencies**: Task 10.2
+
+Implement and validate the classic embedded "blinky" LED example to test emulator accuracy against real MSP430
+hardware behavior using the provided source code and binary.
+
+**Acceptance Criteria**:
+
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [ ] Create blinky example test suite in `tests/MSP430.Emulator.ValidationTests/Examples/`
+- [ ] Implement TI-TXT format binary loader for the provided blinky binary
+- [ ] Add test cases for watchdog timer disable (WDTCTL = WDTPW | WDTHOLD)
+- [ ] Validate GPIO power-on default high-impedance mode disable (PM5CTL0 &= ~LOCKLPM5)
+- [ ] Test P1DIR register configuration for output direction (P1DIR |= 0x01)
+- [ ] Verify P1OUT XOR toggle operation (P1OUT ^= 0x01)
+- [ ] Implement software delay loop execution validation
+- [ ] Create emulation vs hardware behavior comparison framework
+- [ ] Add defect management procedures for behavioral discrepancies
+- [ ] Implement manual testing procedures for hardware validation
+- [ ] Create step-by-step LaunchPad validation experiments
+
+**Blinky Source Code Integration**:
+
+```c
+//***************************************************************************************
+//  MSP430 Blink the LED Demo - Software Toggle P1.0
+//
+//  Description; Toggle P1.0 by xor'ing P1.0 inside of a software loop.
+//  ACLK = n/a, MCLK = SMCLK = default DCO
+//
+//                MSP430x5xx
+//             -----------------
+//         /|\|              XIN|-
+//          | |                 |
+//          --|RST          XOUT|-
+//            |                 |
+//            |             P1.0|-->LED
+//
+//  Texas Instruments, Inc
+//  July 2013
+//***************************************************************************************
+
+#include <msp430.h>
+
+void main(void) {
+    WDTCTL = WDTPW | WDTHOLD;               // Stop watchdog timer
+    PM5CTL0 &= ~LOCKLPM5;                   // Disable the GPIO power-on default high-impedance mode
+                                            // to activate previously configured port settings
+    P1DIR |= 0x01;                          // Set P1.0 to output direction
+
+    for(;;) {
+        volatile unsigned int i;            // volatile to prevent optimization
+
+        P1OUT ^= 0x01;                      // Toggle P1.0 using exclusive-OR
+
+        i = 10000;                          // SW Delay
+        do i--;
+        while(i != 0);
+    }
+}
+```
+
+**TI-TXT Binary Format**:
+
+```txt
+@8000
+31 80 06 00 3E 40 00 00 3E F0 3F 00 81 4E 00 00 
+3F 40 01 00 1F F3 81 4F 02 00 3D 40 01 00 1D F3 
+81 4D 04 00 5E 06 5F 02 0F DE 1F D1 04 00 3F D0 
+00 A5 82 4F 60 01 31 50 06 00 10 01 21 83 B2 40 
+80 5A CC 01 92 C3 30 01 D2 D3 04 02 D2 E3 02 02 
+B1 40 10 27 00 00 91 83 00 00 81 93 00 00 F6 27 
+FA 3F 03 43 03 43 FF 3F 03 43 1C 43 10 01 31 40 
+00 30 B0 13 00 80 B0 13 6A 80 0C 43 B0 13 3C 80 
+1C 43 B0 13 64 80 32 D0 10 00 FD 3F 03 43 
+@ff80
+FF FF FF FF FF FF FF FF FF FF FF FF 
+@ffa0
+FF FF 
+@ffce
+86 80 86 80 86 80 86 80 86 80 86 80 86 80 86 80 
+86 80 86 80 86 80 86 80 86 80 86 80 86 80 86 80 
+86 80 86 80 86 80 86 80 86 80 86 80 86 80 86 80 
+6E 80 
+q
+```
+
+**Hardware Validation Discrepancy Procedures**:
+
+When emulated behavior deviates from expected MSP430 hardware behavior:
+
+1. **Defect Creation**: Raise defects using the established defect management system with:
+   - Detailed reproduction steps
+   - Expected vs actual behavior comparison
+   - Reference to MSP430FR2355 datasheet sections
+   - Hardware test procedure used for validation
+
+2. **Manual Testing Proposals**: Create step-by-step procedures for humans to validate on real hardware:
+   - LaunchPad MSP430FR2355 setup instructions  
+   - Code loading and execution procedures
+   - Expected LED blinking pattern measurement
+   - Timing and behavior validation methods
+   - GPIO state verification procedures
+
+**Files to Create**:
+
+```text
+tests/MSP430.Emulator.ValidationTests/Examples/BlinkyExampleTests.cs
+src/MSP430.Emulator/Loading/TiTxtFormatLoader.cs
+tests/MSP430.Emulator.Tests/Loading/TiTxtFormatLoaderTests.cs
+examples/blinky/blinky.c
+examples/blinky/blinky.txt
+examples/blinky/README.md
+docs/validation/BlinkyHardwareValidation.md
+docs/validation/DefectManagementProcedures.md
+tests/MSP430.Emulator.ValidationTests/Framework/HardwareComparisonBase.cs
+```
+
+**Testing Strategy**:
+
+- Load blinky binary using TI-TXT format loader
+- Execute program and monitor P1OUT register changes
+- Validate watchdog timer and GPIO configuration steps
+- Measure software delay loop timing accuracy
+- Test reset vector loading and program counter initialization
+- Compare emulated GPIO behavior with hardware specifications
+- Document behavioral discrepancies and create defect reports
+- Implement regression tests for identified issues
+
+**Hardware Validation Experiments**:
+
+- **LED Blink Pattern Verification**: Visual confirmation of blinking on LaunchPad hardware
+- **Timing Measurement**: Oscilloscope measurement of actual vs emulated blink frequency
+- **Register State Validation**: JTAG debugging to verify register states match emulator
+- **Power Consumption Analysis**: Measure current draw patterns for accuracy validation
+- **Reset Sequence Testing**: Validate power-on and software reset behavior
+
+---
+
+### Task 10.4: Command Line Interface Implementation
 
 **Priority**: Medium
 **Estimated Effort**: 3-4 hours
-**Dependencies**: Task 10.2
+**Dependencies**: Task 10.3
 
 Create a command-line interface for running and debugging MSP430 programs.
 
@@ -1917,7 +2060,7 @@ tests/MSP430.Emulator.Tests/CLI/CommandTests.cs
 
 **Priority**: Medium
 **Estimated Effort**: 4-5 hours
-**Dependencies**: Task 10.3
+**Dependencies**: Task 10.4
 
 Generate comprehensive API documentation with clear and consistent visual diagrams and architecture guides.
 

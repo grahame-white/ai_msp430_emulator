@@ -10,7 +10,7 @@ namespace MSP430.Emulator.Instructions.ControlFlow;
 /// lower 64K address space. It supports all source addressing modes and is implemented
 /// as a MOV instruction with the Program Counter (PC) as the destination.
 /// 
-/// Operation: dst → PC
+/// Operation: src → PC
 /// Emulation: MOV src,PC
 /// 
 /// The branch instruction is a word instruction that does not affect status flags.
@@ -95,6 +95,10 @@ public class BranchInstruction : Instruction, IExecutableInstruction
             {
                 throw new ArgumentException("Instruction requires 1 extension word but none provided", nameof(extensionWords));
             }
+            if (extensionWords.Length > 1)
+            {
+                throw new ArgumentException("Instruction requires exactly 1 extension word but multiple provided", nameof(extensionWords));
+            }
             sourceExtensionWord = extensionWords[0];
         }
 
@@ -159,6 +163,10 @@ public class BranchInstruction : Instruction, IExecutableInstruction
 
     /// <summary>
     /// Formats an operand for display in assembly format.
+    /// 
+    /// MSP430 Assembly Conventions:
+    /// - Absolute mode: Uses '&' prefix (e.g., &0x8000)
+    /// - Symbolic mode: No prefix (e.g., 0x1000) - follows MSP430 assembly standard
     /// </summary>
     /// <param name="register">The register used by the operand.</param>
     /// <param name="addressingMode">The addressing mode of the operand.</param>

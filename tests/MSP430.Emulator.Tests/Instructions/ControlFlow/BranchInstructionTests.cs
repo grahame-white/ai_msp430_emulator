@@ -442,6 +442,20 @@ public class BranchInstructionTests
         }
 
         [Fact]
+        public void Execute_TooManyExtensionWords_ThrowsArgumentException()
+        {
+            // Arrange
+            var registerFile = new RegisterFile();
+            byte[] memory = new byte[65536];
+            var instruction = new BranchInstruction(0x4080, RegisterName.R0, AddressingMode.Immediate);
+
+            // Act & Assert
+            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+                instruction.Execute(registerFile, memory, new ushort[] { 0x8000, 0x9000 }));
+            Assert.Contains("requires exactly 1 extension word but multiple provided", exception.Message);
+        }
+
+        [Fact]
         public void Execute_WordAlignment_EnsuresPCIsWordAligned()
         {
             // Arrange

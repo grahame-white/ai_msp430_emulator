@@ -28,6 +28,15 @@ public class EmulatorCore : IEmulatorCore
     private readonly byte[] _memory;
     private const int MemorySize = 0x10000; // 64KB address space
 
+    // MSP430FR235x RAM region constants (SLAU445I)
+    private const ushort RamStartAddress = 0x2000;
+    private const ushort RamSize = 0x1000; // 4KB RAM region
+
+    /// <summary>
+    /// Internal accessor for memory - used for testing purposes.
+    /// </summary>
+    internal byte[] Memory => _memory;
+
     /// <summary>
     /// Initializes a new instance of the EmulatorCore class.
     /// </summary>
@@ -100,8 +109,8 @@ public class EmulatorCore : IEmulatorCore
 
         // Clear RAM memory only (optional - real hardware doesn't clear RAM on reset)
         // Preserve interrupt vector table area (0xFFE0-0xFFFF) and other non-volatile memory
-        // Only clear RAM region (0x2000-0x2FFF) to simulate realistic reset behavior
-        Array.Clear(_memory, 0x2000, 0x1000); // Clear 4KB RAM region
+        // Only clear RAM region to simulate realistic reset behavior
+        Array.Clear(_memory, RamStartAddress, RamSize);
 
         // Set execution state to reset
         _stateManager.Reset();

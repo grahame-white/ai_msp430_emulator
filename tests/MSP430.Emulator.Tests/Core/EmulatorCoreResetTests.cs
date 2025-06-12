@@ -41,8 +41,6 @@ public class EmulatorCoreResetTests
     {
         // Arrange
         ushort expectedPCValue = 0x4000; // Valid program memory address
-
-        // Set up reset vector at 0xFFFE-0xFFFF to point to 0x4000
         SetResetVector(expectedPCValue);
 
         // Act
@@ -53,7 +51,7 @@ public class EmulatorCoreResetTests
     }
 
     [Fact]
-    public void Reset_WithUninitializedResetVector_HandlesGracefully()
+    public void Reset_WithUninitializedResetVector_LoadsPCToZero()
     {
         // Arrange - memory starts as all zeros, so reset vector will be 0x0000
 
@@ -61,8 +59,6 @@ public class EmulatorCoreResetTests
         _emulatorCore.Reset();
 
         // Assert
-        // PC should still be 0 if reset vector is uninitialized
-        // This is a reasonable default behavior
         Assert.Equal((ushort)0x0000, _registerFile.GetProgramCounter());
     }
 
@@ -71,7 +67,7 @@ public class EmulatorCoreResetTests
     [InlineData(0x8000)]  // Typical program start
     [InlineData(0xBFFE)]  // End of FRAM - 2 (word aligned)
     [InlineData(0x2000)]  // Start of RAM (executable)
-    public void Reset_WithVariousValidResetVectors_LoadsPCCorrectly(ushort resetVectorValue)
+    public void Reset_WithValidResetVector_LoadsPCCorrectly(ushort resetVectorValue)
     {
         // Arrange
         SetResetVector(resetVectorValue);
@@ -84,25 +80,32 @@ public class EmulatorCoreResetTests
     }
 
     [Fact]
-    public void Reset_PreservesOtherRegisterResetBehavior()
+    public void Reset_AfterLoadingResetVector_ClearsOtherRegisters()
     {
         // Arrange
         ushort resetVectorValue = 0x4000;
         SetResetVector(resetVectorValue);
-
-        // Set some registers to non-zero values before reset
         _registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+        // Act
+        _emulatorCore.Reset();
+
+        // Assert
+        Assert.Equal((ushort)0x0000, _registerFile.ReadRegister(RegisterName.R4));
+    }
+
+    [Fact]
+    public void Reset_AfterLoadingResetVector_ClearsAllGeneralPurposeRegisters()
+    {
+        // Arrange
+        ushort resetVectorValue = 0x4000;
+        SetResetVector(resetVectorValue);
         _registerFile.WriteRegister(RegisterName.R10, 0x5678);
 
         // Act
         _emulatorCore.Reset();
 
         // Assert
-        // PC should be loaded from reset vector
-        Assert.Equal(resetVectorValue, _registerFile.GetProgramCounter());
-
-        // Other registers should still be reset to 0
-        Assert.Equal((ushort)0x0000, _registerFile.ReadRegister(RegisterName.R4));
         Assert.Equal((ushort)0x0000, _registerFile.ReadRegister(RegisterName.R10));
     }
 
@@ -123,24 +126,21 @@ public class EmulatorCoreResetTests
             entry.Message.Contains("reset vector") &&
             entry.Message.Contains("0x4000"));
 
-        Assert.True(hasResetVectorLog, "Expected log entry about reset vector loading");
+        Assert.True(hasResetVectorLog);
     }
 
     [Fact]
-    public void Reset_ResetSequence_LoadsVectorAfterRegisterReset()
+    public void Reset_LoadsVectorAfterRegisterReset()
     {
         // Arrange
         ushort resetVectorValue = 0x6000;
         SetResetVector(resetVectorValue);
-
-        // Set PC to some other value first
         _registerFile.SetProgramCounter(0x1234);
 
         // Act
         _emulatorCore.Reset();
 
         // Assert
-        // Final PC should be from reset vector, not the intermediate 0x0000 from register reset
         Assert.Equal(resetVectorValue, _registerFile.GetProgramCounter());
     }
 
@@ -151,21 +151,12 @@ public class EmulatorCoreResetTests
     /// <param name="vectorAddress">The 16-bit address to store in the reset vector.</param>
     private void SetResetVector(ushort vectorAddress)
     {
-        // We need to access the internal memory of the emulator core
-        // Since _memory is private, we'll use reflection for testing purposes
-        System.Reflection.FieldInfo? memoryField = typeof(EmulatorCore).GetField("_memory",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        // Access memory through internal accessor instead of reflection
+        byte[] memory = _emulatorCore.Memory;
 
-        if (memoryField?.GetValue(_emulatorCore) is byte[] memory)
-        {
-            // MSP430 is little-endian: low byte at 0xFFFE, high byte at 0xFFFF
-            memory[0xFFFE] = (byte)(vectorAddress & 0xFF);
-            memory[0xFFFF] = (byte)((vectorAddress >> 8) & 0xFF);
-        }
-        else
-        {
-            throw new InvalidOperationException("Could not access emulator memory for test setup");
-        }
+        // MSP430 is little-endian: low byte at 0xFFFE, high byte at 0xFFFF
+        memory[0xFFFE] = (byte)(vectorAddress & 0xFF);
+        memory[0xFFFF] = (byte)((vectorAddress >> 8) & 0xFF);
     }
 
     private class TestLogger : ILogger

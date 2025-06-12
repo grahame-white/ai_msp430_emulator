@@ -167,8 +167,7 @@ class GitHubIssuesUpdater {
 
             // Filter to only issues that have "Task" in the title (to match the previous search behavior)
             return issues.data.filter(
-                issue =>
-                    issue.title.includes('Task') && TASK_UTILS.isTaskIssueTitle(issue.title)
+                issue => issue.title.includes('Task') && TASK_UTILS.isTaskIssueTitle(issue.title)
             );
         } catch (error) {
             console.warn(`Warning: Could not fetch task issues: ${error.message}`);

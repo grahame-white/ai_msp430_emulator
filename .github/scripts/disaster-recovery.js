@@ -356,8 +356,7 @@ class DisasterRecovery {
 
             // Filter to only issues that have "Task" in the title
             const recoveredIssues = issues.data.filter(
-                issue =>
-                    issue.title.includes('Task') && TASK_UTILS.isTaskIssueTitle(issue.title)
+                issue => issue.title.includes('Task') && TASK_UTILS.isTaskIssueTitle(issue.title)
             );
             const taskIds = new Set(tasks.map(task => task.id));
             const recoveredTaskIds = new Set();

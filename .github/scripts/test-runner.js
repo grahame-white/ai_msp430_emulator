@@ -496,6 +496,315 @@ runner.test('TaskParser can be imported and instantiated', () => {
     }
 });
 
+// Test: TASK_ID_PATTERNS regex patterns work correctly
+runner.test('TASK_ID_PATTERNS supports both 2-part and 3-part task IDs', () => {
+    const { TASK_ID_PATTERNS } = require('./config.js');
+
+    // Test 2-part task IDs
+    const twoPartTests = [
+        { input: 'Task 1.1: Some Title', expected: '1.1' },
+        { input: 'Task 5.5: Another Title', expected: '5.5' },
+        { input: 'Task 10.15: Complex Title', expected: '10.15' }
+    ];
+
+    for (const { input, expected } of twoPartTests) {
+        const match = input.match(TASK_ID_PATTERNS.ISSUE_TITLE);
+        runner.assert(match, `Should match 2-part task ID in: ${input}`);
+        runner.assertEqual(
+            match[1],
+            expected,
+            `Should extract correct 2-part task ID from: ${input}`
+        );
+    }
+
+    // Test 3-part task IDs (the main fix)
+    const threePartTests = [
+        { input: 'Task 5.5.2: Some Title', expected: '5.5.2' },
+        { input: 'Task 5.5.3: Another Title', expected: '5.5.3' },
+        { input: 'Task 1.2.10: Complex Title', expected: '1.2.10' }
+    ];
+
+    for (const { input, expected } of threePartTests) {
+        const match = input.match(TASK_ID_PATTERNS.ISSUE_TITLE);
+        runner.assert(match, `Should match 3-part task ID in: ${input}`);
+        runner.assertEqual(
+            match[1],
+            expected,
+            `Should extract correct 3-part task ID from: ${input}`
+        );
+    }
+
+    // Test strict validation
+    runner.assert(
+        TASK_ID_PATTERNS.ISSUE_TITLE_STRICT.test('Task 1.1: Title'),
+        'Should validate 2-part task title'
+    );
+    runner.assert(
+        TASK_ID_PATTERNS.ISSUE_TITLE_STRICT.test('Task 5.5.2: Title'),
+        'Should validate 3-part task title'
+    );
+    runner.assert(
+        !TASK_ID_PATTERNS.ISSUE_TITLE_STRICT.test('Not a task title'),
+        'Should reject non-task titles'
+    );
+});
+
+// Test: TASK_UTILS utility functions work correctly
+runner.test('TASK_UTILS functions handle both 2-part and 3-part task IDs', () => {
+    const { TASK_UTILS } = require('./config.js');
+
+    // Test extractTaskIdFromTitle
+    runner.assertEqual(
+        TASK_UTILS.extractTaskIdFromTitle('Task 1.1: Some Title'),
+        '1.1',
+        'Should extract 2-part task ID'
+    );
+    runner.assertEqual(
+        TASK_UTILS.extractTaskIdFromTitle('Task 5.5.2: Some Title'),
+        '5.5.2',
+        'Should extract 3-part task ID'
+    );
+    runner.assertEqual(
+        TASK_UTILS.extractTaskIdFromTitle('Not a task title'),
+        null,
+        'Should return null for non-task titles'
+    );
+
+    // Test isValidTaskId
+    runner.assert(TASK_UTILS.isValidTaskId('1.1'), 'Should validate 2-part task ID');
+    runner.assert(TASK_UTILS.isValidTaskId('5.5.2'), 'Should validate 3-part task ID');
+    runner.assert(!TASK_UTILS.isValidTaskId('1'), 'Should reject single number');
+    runner.assert(!TASK_UTILS.isValidTaskId('1.1.1.1'), 'Should reject 4-part task ID');
+    runner.assert(!TASK_UTILS.isValidTaskId('abc.def'), 'Should reject non-numeric task ID');
+
+    // Test isTaskIssueTitle
+    runner.assert(
+        TASK_UTILS.isTaskIssueTitle('Task 1.1: Title'),
+        'Should recognize 2-part task issue title'
+    );
+    runner.assert(
+        TASK_UTILS.isTaskIssueTitle('Task 5.5.2: Title'),
+        'Should recognize 3-part task issue title'
+    );
+    runner.assert(
+        !TASK_UTILS.isTaskIssueTitle('Some other title'),
+        'Should reject non-task titles'
+    );
+
+    // Test formatIssueTitle
+    runner.assertEqual(
+        TASK_UTILS.formatIssueTitle('1.1', 'Test Task'),
+        'Task 1.1: Test Task',
+        'Should format 2-part task issue title'
+    );
+    runner.assertEqual(
+        TASK_UTILS.formatIssueTitle('5.5.2', 'Test Task'),
+        'Task 5.5.2: Test Task',
+        'Should format 3-part task issue title'
+    );
+});
+
+// Test: TASK_UTILS issueMatchesTaskId function (core duplicate prevention logic)
+runner.test('TASK_UTILS.issueMatchesTaskId prevents duplicate issues', () => {
+    const { TASK_UTILS } = require('./config.js');
+
+    // Mock GitHub issue objects
+    const issue2Part = { title: 'Task 1.1: Some Task' };
+    const issue3Part = { title: 'Task 5.5.2: Some Task' };
+    const nonTaskIssue = { title: 'Bug: Some Bug Report' };
+
+    // Test matching
+    runner.assert(TASK_UTILS.issueMatchesTaskId(issue2Part, '1.1'), 'Should match 2-part task ID');
+    runner.assert(
+        TASK_UTILS.issueMatchesTaskId(issue3Part, '5.5.2'),
+        'Should match 3-part task ID'
+    );
+
+    // Test non-matching
+    runner.assert(
+        !TASK_UTILS.issueMatchesTaskId(issue2Part, '1.2'),
+        'Should not match different 2-part task ID'
+    );
+    runner.assert(
+        !TASK_UTILS.issueMatchesTaskId(issue3Part, '5.5.3'),
+        'Should not match different 3-part task ID'
+    );
+    runner.assert(
+        !TASK_UTILS.issueMatchesTaskId(nonTaskIssue, '1.1'),
+        'Should not match non-task issues'
+    );
+
+    // Test the specific case from the bug report
+    runner.assert(
+        TASK_UTILS.issueMatchesTaskId({ title: 'Task 5.5.2: Implement X' }, '5.5.2'),
+        'Should match the problematic 3-part task ID 5.5.2'
+    );
+    runner.assert(
+        TASK_UTILS.issueMatchesTaskId({ title: 'Task 5.5.3: Implement Y' }, '5.5.3'),
+        'Should match the problematic 3-part task ID 5.5.3'
+    );
+});
+
+// Test: TASK_UTILS parseTaskId function handles complex parsing
+runner.test('TASK_UTILS.parseTaskId correctly parses and validates task IDs', () => {
+    const { TASK_UTILS } = require('./config.js');
+
+    // Test 2-part task ID parsing
+    const parsed2Part = TASK_UTILS.parseTaskId('1.1');
+    runner.assert(parsed2Part.valid, '2-part task ID should be valid');
+    runner.assertEqual(parsed2Part.major, 1, 'Should parse major version correctly');
+    runner.assertEqual(parsed2Part.minor, 1, 'Should parse minor version correctly');
+    runner.assertEqual(parsed2Part.patch, null, 'Should have null patch for 2-part ID');
+    runner.assert(!parsed2Part.is3Part, 'Should not be marked as 3-part');
+
+    // Test 3-part task ID parsing
+    const parsed3Part = TASK_UTILS.parseTaskId('5.5.2');
+    runner.assert(parsed3Part.valid, '3-part task ID should be valid');
+    runner.assertEqual(parsed3Part.major, 5, 'Should parse major version correctly');
+    runner.assertEqual(parsed3Part.minor, 5, 'Should parse minor version correctly');
+    runner.assertEqual(parsed3Part.patch, 2, 'Should parse patch version correctly');
+    runner.assert(parsed3Part.is3Part, 'Should be marked as 3-part');
+
+    // Test invalid task ID
+    const parsedInvalid = TASK_UTILS.parseTaskId('invalid');
+    runner.assert(!parsedInvalid.valid, 'Invalid task ID should be marked as invalid');
+    runner.assertEqual(parsedInvalid.major, null, 'Invalid ID should have null major');
+    runner.assertEqual(parsedInvalid.minor, null, 'Invalid ID should have null minor');
+    runner.assertEqual(parsedInvalid.patch, null, 'Invalid ID should have null patch');
+});
+
+// Test: TASK_UTILS compareTaskIds function for sorting
+runner.test('TASK_UTILS.compareTaskIds correctly sorts task IDs', () => {
+    const { TASK_UTILS } = require('./config.js');
+
+    // Test 2-part comparisons
+    runner.assert(TASK_UTILS.compareTaskIds('1.1', '1.2') < 0, '1.1 should come before 1.2');
+    runner.assert(TASK_UTILS.compareTaskIds('1.2', '1.1') > 0, '1.2 should come after 1.1');
+    runner.assert(TASK_UTILS.compareTaskIds('1.1', '1.1') === 0, '1.1 should equal 1.1');
+
+    // Test 3-part comparisons
+    runner.assert(
+        TASK_UTILS.compareTaskIds('5.5.2', '5.5.3') < 0,
+        '5.5.2 should come before 5.5.3'
+    );
+    runner.assert(TASK_UTILS.compareTaskIds('5.5.3', '5.5.2') > 0, '5.5.3 should come after 5.5.2');
+
+    // Test mixed 2-part and 3-part (treating missing patch as 0)
+    runner.assert(TASK_UTILS.compareTaskIds('5.5', '5.5.1') < 0, '5.5 should come before 5.5.1');
+    runner.assert(TASK_UTILS.compareTaskIds('5.5.1', '5.5') > 0, '5.5.1 should come after 5.5');
+    runner.assert(TASK_UTILS.compareTaskIds('5.5', '5.5.0') === 0, '5.5 should equal 5.5.0');
+});
+
+// Test: TASK_UTILS extractTaskIdsFromIssues function
+runner.test('TASK_UTILS.extractTaskIdsFromIssues extracts all task IDs', () => {
+    const { TASK_UTILS } = require('./config.js');
+
+    const mockIssues = [
+        { title: 'Task 1.1: First Task' },
+        { title: 'Task 5.5.2: Second Task' },
+        { title: 'Bug: Not a task' },
+        { title: 'Task 5.5.3: Third Task' },
+        { title: 'Feature request: Also not a task' }
+    ];
+
+    const extractedIds = TASK_UTILS.extractTaskIdsFromIssues(mockIssues);
+    runner.assertEqual(extractedIds.length, 3, 'Should extract 3 task IDs');
+    runner.assert(extractedIds.includes('1.1'), 'Should include 2-part task ID');
+    runner.assert(extractedIds.includes('5.5.2'), 'Should include first 3-part task ID');
+    runner.assert(extractedIds.includes('5.5.3'), 'Should include second 3-part task ID');
+    runner.assert(!extractedIds.includes(null), 'Should not include null values');
+});
+
+// Test: Edge cases and error conditions for regex patterns
+runner.test('TASK_ID_PATTERNS handles edge cases correctly', () => {
+    const { TASK_ID_PATTERNS } = require('./config.js');
+
+    // Test edge cases that should NOT match with ISSUE_TITLE
+    const negativeTests = [
+        'Task 1: Missing minor version',
+        'Task 1.1.1.1: Too many parts',
+        'Task a.b: Non-numeric',
+        'task 1.1: Lowercase task (case sensitive)', // Note: ISSUE_TITLE is case sensitive
+        'Task 1.1 Missing colon'
+    ];
+
+    for (const input of negativeTests) {
+        const match = input.match(TASK_ID_PATTERNS.ISSUE_TITLE);
+        runner.assert(!match, `Should NOT match edge case: "${input}"`);
+    }
+
+    // Test boundary conditions that SHOULD match with ISSUE_TITLE
+    const positiveTests = [
+        { input: 'Task 0.0: Zero values', expected: '0.0' },
+        { input: 'Task 99.99: Large numbers', expected: '99.99' },
+        { input: 'Task 1.1.0: Zero patch', expected: '1.1.0' },
+        { input: 'Task 10.20.30: Multiple digits', expected: '10.20.30' },
+        { input: 'Pre Task 1.1: Prefix', expected: '1.1' } // ISSUE_TITLE matches anywhere
+    ];
+
+    for (const { input, expected } of positiveTests) {
+        const match = input.match(TASK_ID_PATTERNS.ISSUE_TITLE);
+        runner.assert(match, `Should match valid case: "${input}"`);
+        runner.assertEqual(match[1], expected, `Should extract correct ID from: "${input}"`);
+    }
+
+    // Test ISSUE_TITLE_STRICT for validation (should only match at start)
+    runner.assert(
+        TASK_ID_PATTERNS.ISSUE_TITLE_STRICT.test('Task 1.1: Valid'),
+        'STRICT should match at start of line'
+    );
+    runner.assert(
+        !TASK_ID_PATTERNS.ISSUE_TITLE_STRICT.test('Pre Task 1.1: Invalid'),
+        'STRICT should NOT match with prefix'
+    );
+    runner.assert(
+        !TASK_ID_PATTERNS.ISSUE_TITLE_STRICT.test(''),
+        'STRICT should NOT match empty string'
+    );
+});
+
+// Test: Scenario-based testing for the original duplicate issue problem
+runner.test('Duplicate issue prevention scenario (original bug reproduction)', () => {
+    const { TASK_UTILS } = require('./config.js');
+
+    // Simulate the original problem scenario
+    // Before fix: Task 5.5.2 would create multiple issues #150, #147, #140
+    // After fix: Should correctly identify existing issues
+
+    const existingIssues = [
+        { number: 150, title: 'Task 5.5.2: Implement Feature X' },
+        { number: 147, title: 'Task 5.5.2: Implement Feature X' }, // duplicate
+        { number: 140, title: 'Task 5.5.2: Implement Feature X' }, // duplicate
+        { number: 151, title: 'Task 5.5.3: Implement Feature Y' },
+        { number: 148, title: 'Task 5.5.3: Implement Feature Y' }, // duplicate
+        { number: 141, title: 'Task 5.5.3: Implement Feature Y' }, // duplicate
+        { number: 100, title: 'Task 1.1: Basic 2-part task' },
+        { number: 99, title: 'Bug: Not a task issue' }
+    ];
+
+    // Test that we can correctly identify all existing issues for task 5.5.2
+    const task552Issues = existingIssues.filter(issue =>
+        TASK_UTILS.issueMatchesTaskId(issue, '5.5.2')
+    );
+    runner.assertEqual(task552Issues.length, 3, 'Should find all 3 existing issues for task 5.5.2');
+
+    // Test that we can correctly identify all existing issues for task 5.5.3
+    const task553Issues = existingIssues.filter(issue =>
+        TASK_UTILS.issueMatchesTaskId(issue, '5.5.3')
+    );
+    runner.assertEqual(task553Issues.length, 3, 'Should find all 3 existing issues for task 5.5.3');
+
+    // Test that 2-part tasks still work
+    const task11Issues = existingIssues.filter(issue =>
+        TASK_UTILS.issueMatchesTaskId(issue, '1.1')
+    );
+    runner.assertEqual(task11Issues.length, 1, 'Should find 1 existing issue for task 1.1');
+
+    // Test that non-existent tasks return empty
+    const noIssues = existingIssues.filter(issue => TASK_UTILS.issueMatchesTaskId(issue, '99.99'));
+    runner.assertEqual(noIssues.length, 0, 'Should find no issues for non-existent task');
+});
+
 // Run all tests
 async function main() {
     const success = await runner.run();

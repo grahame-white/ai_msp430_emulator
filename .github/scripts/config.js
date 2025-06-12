@@ -1,9 +1,9 @@
 /**
  * Shared configuration constants for GitHub automation scripts
- * 
+ *
  * This file provides centralized configuration for all GitHub issues automation,
  * including task ID patterns, utility functions, and shared constants.
- * 
+ *
  * IMPORTANT: All task ID regex patterns are centralized here to ensure consistency
  * across all automation scripts. When modifying task ID formats, only update
  * the patterns in this file.
@@ -19,16 +19,16 @@ const EXCLUDED_TASKS = ['1.1', '1.2', '1.3', '1.4', '1.5'];
 const TASK_ID_PATTERNS = {
     // Matches task IDs in format X.Y or X.Y.Z (e.g., "1.1", "5.5.2")
     TASK_ID: /(\d+\.\d+(?:\.\d+)?)/,
-    
+
     // Matches full task headers in markdown (e.g., "### Task 1.1: Some Title")
     TASK_HEADER: /### Task (\d+\.\d+(?:\.\d+)?): (.+?)(?=### Task|\n## |$)/gs,
-    
+
     // Matches task titles in GitHub issues (e.g., "Task 1.1: Some Title")
     ISSUE_TITLE: /Task (\d+\.\d+(?:\.\d+)?): /,
-    
+
     // Matches task titles at start of line (for validation)
     ISSUE_TITLE_STRICT: /^Task \d+\.\d+(?:\.\d+)?:/,
-    
+
     // Matches any task reference in text (e.g., "Task 1.1" or "task 5.5.2")
     TASK_REFERENCE: /Task (\d+\.\d+(?:\.\d+)?)/i
 };

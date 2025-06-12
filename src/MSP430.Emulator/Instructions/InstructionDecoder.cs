@@ -1,5 +1,7 @@
+using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions.Arithmetic;
+using MSP430.Emulator.Instructions.ControlFlow;
 using MSP430.Emulator.Instructions.DataMovement;
 using MSP430.Emulator.Instructions.Logic;
 
@@ -316,20 +318,121 @@ internal class FormatIIInstruction : Instruction
 }
 
 /// <summary>
-/// Placeholder implementation for Format III instructions.
-/// This will be expanded in future tasks with specific instruction implementations.
+/// Represents Format III (jump) instructions for the MSP430 processor.
+/// 
+/// Format III instructions provide conditional and unconditional jumps with PC-relative addressing.
+/// The instruction format includes a 3-bit condition code and a 10-bit signed offset.
+/// 
+/// Implementation based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019,
+/// Section 4.5.1.3: "Jump Instructions" - Table 4-11 and Figure 4-16.
 /// </summary>
-internal class FormatIIIInstruction : Instruction
+internal class FormatIIIInstruction : Instruction, IExecutableInstruction
 {
+    private readonly JumpCondition _condition;
+
     public FormatIIIInstruction(ushort opcode, ushort instructionWord, short offset)
         : base(InstructionFormat.FormatIII, opcode, instructionWord)
     {
         Offset = offset;
+        // Extract condition from bits 12:10 of the instruction word
+        _condition = (JumpCondition)((instructionWord >> 10) & 0x07);
     }
 
+    /// <summary>
+    /// Gets the 10-bit signed offset for the jump instruction.
+    /// </summary>
     public short Offset { get; }
 
-    public override string Mnemonic => $"FORMAT_III_{Opcode:X}";
+    /// <summary>
+    /// Gets the jump condition code.
+    /// </summary>
+    public JumpCondition Condition => _condition;
+
+    public override string Mnemonic => _condition switch
+    {
+        JumpCondition.JEQ => "JEQ",
+        JumpCondition.JNE => "JNE", 
+        JumpCondition.JC => "JC",
+        JumpCondition.JNC => "JNC",
+        JumpCondition.JN => "JN",
+        JumpCondition.JGE => "JGE",
+        JumpCondition.JL => "JL",
+        JumpCondition.JMP => "JMP",
+        _ => $"UNKNOWN_JUMP_{(byte)_condition}"
+    };
+
+    /// <summary>
+    /// Executes the jump instruction, evaluating the condition and updating the program counter if necessary.
+    /// 
+    /// Jump offset calculation: PC = PC + 2 + (offset × 2)
+    /// - The PC is already pointing to the next instruction when Execute is called
+    /// - We add 2 more to account for the instruction length
+    /// - Offset is multiplied by 2 since it represents word offsets
+    /// 
+    /// Range validation: -1024 to +1022 bytes from current instruction
+    /// </summary>
+    /// <param name="registerFile">The CPU register file for reading/writing registers.</param>
+    /// <param name="memory">The system memory (not used for jump instructions).</param>
+    /// <param name="extensionWords">Extension words (not used for Format III instructions).</param>
+    /// <returns>The number of CPU cycles consumed by this instruction (2 cycles for jumps).</returns>
+    public uint Execute(IRegisterFile registerFile, byte[] memory, ushort[] extensionWords)
+    {
+        // Evaluate the jump condition based on status register flags
+        bool shouldJump = EvaluateCondition(registerFile.StatusRegister);
+
+        if (shouldJump)
+        {
+            // Calculate target address: PC + 2 + (offset × 2)
+            ushort currentPC = registerFile.GetProgramCounter();
+            int targetAddress = currentPC + 2 + (Offset * 2);
+
+            // Validate range: offset should be within -1024 to +1022 bytes
+            // This corresponds to offset values of -512 to +511 words
+            if (Offset < -512 || Offset > 511)
+            {
+                throw new InvalidOperationException($"Jump offset {Offset} is out of valid range (-512 to +511 words, -1024 to +1022 bytes)");
+            }
+
+            // Ensure target address is within valid range and word-aligned
+            if (targetAddress < 0 || targetAddress > 0xFFFF)
+            {
+                throw new InvalidOperationException($"Jump target address 0x{targetAddress:X} is out of valid 16-bit range");
+            }
+
+            if ((targetAddress & 1) != 0)
+            {
+                throw new InvalidOperationException($"Jump target address 0x{targetAddress:X} is not word-aligned");
+            }
+
+            // Update program counter
+            registerFile.SetProgramCounter((ushort)targetAddress);
+        }
+
+        // Jump instructions consume 2 CPU cycles regardless of whether the jump is taken
+        // Based on SLAU445I Table 4-12: "Format III (Jump) Instruction Cycles"
+        return 2;
+    }
+
+    /// <summary>
+    /// Evaluates the jump condition based on the current status register flags.
+    /// </summary>
+    /// <param name="statusRegister">The status register containing the flags to test.</param>
+    /// <returns>True if the condition is met and the jump should be taken, false otherwise.</returns>
+    private bool EvaluateCondition(StatusRegister statusRegister)
+    {
+        return _condition switch
+        {
+            JumpCondition.JEQ => statusRegister.Zero,                                    // Z = 1
+            JumpCondition.JNE => !statusRegister.Zero,                                  // Z = 0
+            JumpCondition.JC => statusRegister.Carry,                                   // C = 1
+            JumpCondition.JNC => !statusRegister.Carry,                                 // C = 0
+            JumpCondition.JN => statusRegister.Negative,                                // N = 1
+            JumpCondition.JGE => statusRegister.Negative == statusRegister.Overflow,    // N ⊕ V = 0
+            JumpCondition.JL => statusRegister.Negative != statusRegister.Overflow,     // N ⊕ V = 1
+            JumpCondition.JMP => true,                                                  // Always
+            _ => throw new InvalidOperationException($"Unknown jump condition: {_condition}")
+        };
+    }
 
     public override string ToString()
     {

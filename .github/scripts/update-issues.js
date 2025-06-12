@@ -9,7 +9,7 @@
 
 const { Octokit } = require('@octokit/rest');
 const { TaskParser } = require('./parse-tasks.js');
-const { BOT_USER_AGENT, EXCLUDED_TASKS } = require('./config.js');
+const { BOT_USER_AGENT, EXCLUDED_TASKS, TASK_UTILS } = require('./config.js');
 
 class GitHubIssuesUpdater {
     constructor(token, owner, repo) {
@@ -167,7 +167,7 @@ class GitHubIssuesUpdater {
 
             // Filter to only issues that have "Task" in the title (to match the previous search behavior)
             return issues.data.filter(
-                issue => issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+:/)
+                issue => issue.title.includes('Task') && TASK_UTILS.isTaskIssueTitle(issue.title)
             );
         } catch (error) {
             console.warn(`Warning: Could not fetch task issues: ${error.message}`);
@@ -184,10 +184,7 @@ class GitHubIssuesUpdater {
      * Find the GitHub issue corresponding to a task
      */
     findIssueForTask(issues, task) {
-        return issues.find(issue => {
-            const titleMatch = issue.title.match(/Task (\d+\.\d+):/);
-            return titleMatch && titleMatch[1] === task.id;
-        });
+        return issues.find(issue => TASK_UTILS.issueMatchesTaskId(issue, task.id));
     }
 
     /**

@@ -9,12 +9,13 @@
 
 const { Octokit } = require('@octokit/rest');
 const { isPermissionError, executeWithPermissionHandling } = require('./github-utils.js');
+const { BOT_USER_AGENT, TASK_UTILS } = require('./config.js');
 
 class ManualIssueProtector {
     constructor(token, owner, repo) {
         this.octokit = new Octokit({
             auth: token,
-            userAgent: 'MSP430-Emulator-Issues-Bot v1.0.0'
+            userAgent: BOT_USER_AGENT
         });
         this.owner = owner;
         this.repo = repo;
@@ -225,7 +226,7 @@ class ManualIssueProtector {
         };
 
         // Check title format
-        if (!issue.title.match(/^Task \d+\.\d+:/)) {
+        if (!TASK_UTILS.isTaskIssueTitle(issue.title)) {
             indicators.score += 0.4;
             indicators.reasons.push('non-standard title format');
         }

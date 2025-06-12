@@ -945,11 +945,11 @@ public class AndInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(7u, cycles); // 1 base + 3 for absolute source + 3 for absolute destination
+        Assert.Equal(6u, cycles); // SLAU445 Table 4-10: &EDE→&TONI = 6 cycles
     }
 
     [Fact]
-    public void Execute_ImmediateToRegister_Takes1Cycle()
+    public void Execute_ImmediateToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -969,7 +969,7 @@ public class AndInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(1u, cycles); // 1 base + 0 source (immediate) + 0 dest (register)
+        Assert.Equal(2u, cycles); // SLAU445 Table 4-10: #N→Rm = 2 cycles
     }
 
     [Fact]
@@ -998,11 +998,11 @@ public class AndInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(4u, cycles); // 1 base + 0 source (register) + 3 dest (indexed)
+        Assert.Equal(4u, cycles); // SLAU445 Table 4-10: Rn→x(Rm) = 4 cycles
     }
 
     [Fact]
-    public void Execute_IndexedToRegister_Takes4Cycles()
+    public void Execute_IndexedToRegister_Takes3Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -1027,11 +1027,11 @@ public class AndInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(4u, cycles); // 1 base + 3 source (indexed) + 0 dest (register)
+        Assert.Equal(3u, cycles); // SLAU445 Table 4-10: x(Rn)→Rm = 3 cycles
     }
 
     [Fact]
-    public void Execute_IndirectToRegister_Takes3Cycles()
+    public void Execute_IndirectToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -1056,7 +1056,7 @@ public class AndInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(3u, cycles); // 1 base + 2 source (indirect) + 0 dest (register)
+        Assert.Equal(2u, cycles); // SLAU445 Table 4-10: @Rn→Rm = 2 cycles
     }
 
     [Fact]
@@ -1085,11 +1085,11 @@ public class AndInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(3u, cycles); // 1 base + 0 source (register) + 2 dest (indirect)
+        Assert.Equal(3u, cycles); // Register→Indirect addressing: 3 cycles per SLAU445I Table 4-10
     }
 
     [Fact]
-    public void Execute_SymbolicToSymbolic_Takes7Cycles()
+    public void Execute_SymbolicToSymbolic_Takes6Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -1117,11 +1117,11 @@ public class AndInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(7u, cycles); // 1 base + 3 source (symbolic) + 3 dest (symbolic)
+        Assert.Equal(6u, cycles); // SLAU445 Table 4-10: EDE→TONI = 6 cycles
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrementToRegister_Takes3Cycles()
+    public void Execute_IndirectAutoIncrementToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -1146,7 +1146,7 @@ public class AndInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(3u, cycles); // 1 base + 2 source (indirect auto-increment) + 0 dest (register)
+        Assert.Equal(2u, cycles); // SLAU445 Table 4-10: @Rn+→Rm = 2 cycles
     }
 
     [Fact]

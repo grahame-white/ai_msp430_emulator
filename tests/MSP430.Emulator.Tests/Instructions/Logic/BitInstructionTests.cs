@@ -490,7 +490,7 @@ public class BitInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_Returns1Cycle()
+    public void Execute_RegisterToRegister_Takes1Cycle()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -987,7 +987,7 @@ public class BitInstructionTests
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrementToRegister_Returns2Cycles()
+    public void Execute_IndirectAutoIncrementToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();

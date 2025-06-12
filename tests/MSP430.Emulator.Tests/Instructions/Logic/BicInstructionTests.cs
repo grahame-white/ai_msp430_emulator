@@ -967,7 +967,7 @@ public class BicInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(3u, cycles); // Non-standard destination mode: legacy calculation = 3 cycles
+        Assert.Equal(3u, cycles); // Register→Indirect addressing: 3 cycles per SLAU445I Table 4-10
     }
 
     [Fact]

@@ -112,7 +112,7 @@ Format III instructions provide conditional and unconditional jumps with PC-rela
 |-------|------|-------------|---------|
 | **Prefix** | 15:13 | Always 001 | 001 (binary) |
 | **Condition** | 12:10 | Jump condition code | 0-7 |
-| **Offset** | 9:0 | Signed offset (words) | -512 to +511 words |
+| **Offset** | 9:0 | Signed offset (words) | -511 to +512 words |
 
 ### Condition Codes
 
@@ -132,7 +132,7 @@ Format III instructions provide conditional and unconditional jumps with PC-rela
 The 10-bit offset is sign-extended to 16 bits and represents the number of **words** (not bytes) to jump:
 
 - Effective address = PC + 2 + (offset × 2)
-- Range: -1024 to +1022 bytes from current instruction
+- Range: -1022 to +1024 bytes from current instruction
 
 ### Examples
 

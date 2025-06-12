@@ -1,3 +1,4 @@
+using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions.Arithmetic;
 using MSP430.Emulator.Instructions.DataMovement;
@@ -315,24 +316,4 @@ internal class FormatIIInstruction : Instruction
     }
 }
 
-/// <summary>
-/// Placeholder implementation for Format III instructions.
-/// This will be expanded in future tasks with specific instruction implementations.
-/// </summary>
-internal class FormatIIIInstruction : Instruction
-{
-    public FormatIIIInstruction(ushort opcode, ushort instructionWord, short offset)
-        : base(InstructionFormat.FormatIII, opcode, instructionWord)
-    {
-        Offset = offset;
-    }
 
-    public short Offset { get; }
-
-    public override string Mnemonic => $"FORMAT_III_{Opcode:X}";
-
-    public override string ToString()
-    {
-        return $"{Mnemonic} {Offset:+#;-#;0}";
-    }
-}

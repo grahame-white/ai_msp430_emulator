@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { TASK_ID_PATTERNS } = require('./config.js');
 
 class TaskParser {
     constructor(filePath) {
@@ -35,7 +36,7 @@ class TaskParser {
      */
     extractTasks() {
         // Split content into sections by task headers (### Task X.Y: or ### Task X.Y.Z:)
-        const taskRegex = /### Task (\d+\.\d+(?:\.\d+)?): (.+?)(?=### Task|\n## |$)/gs;
+        const taskRegex = TASK_ID_PATTERNS.TASK_HEADER;
         let match;
 
         while ((match = taskRegex.exec(this.content)) !== null) {
@@ -118,7 +119,7 @@ class TaskParser {
         const deps = depString
             .split(',')
             .map(dep => {
-                const taskMatch = dep.trim().match(/Task (\d+\.\d+(?:\.\d+)?)/);
+                const taskMatch = dep.trim().match(TASK_ID_PATTERNS.TASK_REFERENCE);
                 return taskMatch ? taskMatch[1] : null;
             })
             .filter(Boolean);

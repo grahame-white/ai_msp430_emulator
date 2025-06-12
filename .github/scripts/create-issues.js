@@ -15,7 +15,7 @@ const {
     executeWithRateLimit,
     smartDelay
 } = require('./github-utils.js');
-const { BOT_USER_AGENT, EXCLUDED_TASKS } = require('./config.js');
+const { BOT_USER_AGENT, EXCLUDED_TASKS, TASK_UTILS } = require('./config.js');
 
 class GitHubIssuesCreator {
     constructor(token, owner, repo) {
@@ -132,8 +132,7 @@ class GitHubIssuesCreator {
 
             // Check if any issue matches our exact task ID
             for (const issue of issues.data) {
-                const titleMatch = issue.title.match(/Task (\d+\.\d+(?:\.\d+)?): /);
-                if (titleMatch && titleMatch[1] === task.id) {
+                if (TASK_UTILS.issueMatchesTaskId(issue, task.id)) {
                     return issue;
                 }
             }
@@ -151,7 +150,7 @@ class GitHubIssuesCreator {
      * Format task data for GitHub issue creation
      */
     formatIssueData(task) {
-        const title = `Task ${task.id}: ${task.title}`;
+        const title = TASK_UTILS.formatIssueTitle(task.id, task.title);
         const body = this.generateIssueBody(task);
 
         return {

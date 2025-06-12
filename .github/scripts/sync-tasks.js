@@ -12,7 +12,7 @@ const { TaskParser } = require('./parse-tasks.js');
 const { GitHubIssuesCreator } = require('./create-issues.js');
 const { GitHubIssuesUpdater } = require('./update-issues.js');
 const { executeWithRateLimit, smartDelay } = require('./github-utils.js');
-const { BOT_USER_AGENT, EXCLUDED_TASKS } = require('./config.js');
+const { BOT_USER_AGENT, EXCLUDED_TASKS, TASK_UTILS } = require('./config.js');
 
 class GitHubIssuesSynchronizer {
     constructor(token, owner, repo) {
@@ -297,12 +297,10 @@ class GitHubIssuesSynchronizer {
             const taskIds = new Set(tasks.map(task => task.id));
 
             for (const issue of allIssues) {
-                const titleMatch = issue.title.match(/Task (\d+\.\d+(?:\.\d+)?):/);
-                if (!titleMatch) {
+                const issueTaskId = TASK_UTILS.extractTaskIdFromTitle(issue.title);
+                if (!issueTaskId) {
                     continue;
                 }
-
-                const issueTaskId = titleMatch[1];
                 if (!taskIds.has(issueTaskId)) {
                     // This issue corresponds to a task that no longer exists
 
@@ -460,7 +458,7 @@ class GitHubIssuesSynchronizer {
             // Filter to only issues that have "Task" in the title (to match the previous search behavior)
             return issues.data.filter(
                 issue =>
-                    issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+(?:\.\d+)?:/)
+                    issue.title.includes('Task') && TASK_UTILS.isTaskIssueTitle(issue.title)
             );
         } catch (error) {
             console.warn(`Warning: Could not fetch task issues: ${error.message}`);
@@ -472,10 +470,7 @@ class GitHubIssuesSynchronizer {
      * Find the GitHub issue corresponding to a task
      */
     findIssueForTask(issues, task) {
-        return issues.find(issue => {
-            const titleMatch = issue.title.match(/Task (\d+\.\d+(?:\.\d+)?):/);
-            return titleMatch && titleMatch[1] === task.id;
-        });
+        return issues.find(issue => TASK_UTILS.issueMatchesTaskId(issue, task.id));
     }
 
     /**

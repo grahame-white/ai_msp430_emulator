@@ -10,12 +10,13 @@
 const { Octokit } = require('@octokit/rest');
 const { TaskParser } = require('./parse-tasks.js');
 const { GitHubIssuesCreator } = require('./create-issues.js');
+const { BOT_USER_AGENT, TASK_UTILS } = require('./config.js');
 
 class DisasterRecovery {
     constructor(token, owner, repo) {
         this.octokit = new Octokit({
             auth: token,
-            userAgent: 'MSP430-Emulator-Issues-Bot v1.0.0'
+            userAgent: BOT_USER_AGENT
         });
         this.owner = owner;
         this.repo = repo;
@@ -356,7 +357,7 @@ class DisasterRecovery {
             // Filter to only issues that have "Task" in the title
             const recoveredIssues = issues.data.filter(
                 issue =>
-                    issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+(?:\.\d+)?:/)
+                    issue.title.includes('Task') && TASK_UTILS.isTaskIssueTitle(issue.title)
             );
             const taskIds = new Set(tasks.map(task => task.id));
             const recoveredTaskIds = new Set();
@@ -386,8 +387,7 @@ class DisasterRecovery {
      * Extract task ID from issue title
      */
     extractTaskId(title) {
-        const match = title.match(/Task (\d+\.\d+(?:\.\d+)?):/);
-        return match ? match[1] : null;
+        return TASK_UTILS.extractTaskIdFromTitle(title);
     }
 
     /**

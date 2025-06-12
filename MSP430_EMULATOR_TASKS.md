@@ -1017,6 +1017,8 @@ Table 4-10 lookup table specifications.
 
 **Acceptance Criteria**:
 
+- [x] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [x] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [x] Replace additive cycle calculation with SLAU445 Table 4-10 lookup implementation
 - [x] Update `ArithmeticInstruction.GetCycleCount()` method
 - [x] Update `MovInstruction.GetCycleCount()` method
@@ -1057,6 +1059,8 @@ tests/MSP430.Emulator.Tests/Instructions/Logical/BitInstructionTests.cs
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `IExecutableInstruction` interface for `FormatIIIInstruction`
 - [ ] Add `Execute()` method with proper PC modification logic
 - [ ] Implement all 8 jump conditions: JEQ/JZ, JNE/JNZ, JC, JNC, JN, JGE, JL, JMP
@@ -1095,6 +1099,8 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/FormatIIIInstructionTests.c
 
 **Acceptance Criteria**:
 
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Modify `EmulatorCore.Reset()` to load PC from reset vector (0xFFFE-0xFFFF)
 - [ ] Implement proper 16-bit vector address loading from memory
 - [ ] Add validation for reset vector address range
@@ -1130,9 +1136,9 @@ This task focuses on additional branch instruction variants and comprehensive te
 
 **Acceptance Criteria**:
 
-- [x] Format III JMP instruction decoding and execution (completed in Tasks 2.3 and 5.5.2)
 - [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [x] Format III JMP instruction decoding and execution (completed in Tasks 2.3 and 5.5.2)
 - [ ] Implement additional branch instruction variants in `src/MSP430.Emulator/Instructions/ControlFlow/BranchInstruction.cs`
 - [ ] Support relative and absolute addressing
 - [ ] Handle program counter updates correctly
@@ -1166,9 +1172,9 @@ instruction execution in Task 5.5.2. This task provides additional structure and
 
 **Acceptance Criteria**:
 
-- [x] All conditional jump execution logic (completed in Task 5.5.2)
 - [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [x] All conditional jump execution logic (completed in Task 5.5.2)
 - [ ] Optional: Implement conditional jump base class in
       `src/MSP430.Emulator/Instructions/ControlFlow/ConditionalJumpInstruction.cs`
 - [ ] Optional: Implement individual jump classes (JZ, JNZ, JC, JNC, JN, JGE, JL) for better organization

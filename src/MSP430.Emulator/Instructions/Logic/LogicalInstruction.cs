@@ -200,39 +200,34 @@ public abstract class LogicalInstruction : Instruction, IExecutableInstruction
     protected virtual bool ShouldWriteResult() => true;
 
     /// <summary>
+    /// Determines whether this logical instruction is a BIT instruction
+    /// that gets cycle count reduction per SLAU445I Table 4-10 footnote [1].
+    /// 
+    /// By default, only BIT instructions get this reduction.
+    /// </summary>
+    /// <returns>True if this instruction gets BIT cycle reduction, false otherwise.</returns>
+    protected virtual bool IsBitInstruction => !ShouldWriteResult();
+
+    /// <summary>
     /// Gets the number of CPU cycles required for this instruction based on addressing modes.
+    /// Uses SLAU445I Table 4-10 lookup instead of additive cycle calculation.
+    /// 
+    /// References:
+    /// - SLAU445I Section 4.5.1.5.4 Table 4-10 - Format I (Double-Operand) Instruction Cycles and Lengths
+    /// - All logical instructions now follow the same cycle counting as MOV, arithmetic, and BIT instructions
+    /// - BIT instruction gets MOV/BIT/CMP cycle reduction per Table 4-10 footnote [1]: Execute in one 
+    ///   fewer cycle for destination modes x(Rm), EDE, and &EDE
     /// </summary>
     /// <returns>The number of CPU cycles.</returns>
     private uint GetCycleCount()
     {
-        // Base cycle count for Format I instructions
-        uint baseCycles = 1;
-
-        // Add cycles for source addressing mode
-        uint sourceCycles = _sourceAddressingMode switch
-        {
-            AddressingMode.Register => 0,
-            AddressingMode.Indexed => 3,
-            AddressingMode.Indirect => 2,
-            AddressingMode.IndirectAutoIncrement => 2,
-            AddressingMode.Immediate => 0,
-            AddressingMode.Absolute => 3,
-            AddressingMode.Symbolic => 3,
-            _ => 0
-        };
-
-        // Add cycles for destination addressing mode
-        uint destinationCycles = _destinationAddressingMode switch
-        {
-            AddressingMode.Register => 0,
-            AddressingMode.Indexed => 3,
-            AddressingMode.Indirect => 2,
-            AddressingMode.IndirectAutoIncrement => 2,
-            AddressingMode.Absolute => 3,
-            AddressingMode.Symbolic => 3,
-            _ => 0
-        };
-
-        return baseCycles + sourceCycles + destinationCycles;
+        // All logical instructions now use SLAU445I Table 4-10 lookup
+        // BIT instruction gets MOV/BIT/CMP cycle reduction per footnote [1]
+        return InstructionCycleLookup.GetCycleCount(
+            _sourceAddressingMode,
+            _destinationAddressingMode,
+            _sourceRegister,
+            _destinationRegister,
+            isMovBitOrCmpInstruction: IsBitInstruction);
     }
 }

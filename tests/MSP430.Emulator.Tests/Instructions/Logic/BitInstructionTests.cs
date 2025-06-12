@@ -490,7 +490,7 @@ public class BitInstructionTests
     }
 
     [Fact]
-    public void Execute_RegisterToRegister_Returns1Cycle()
+    public void Execute_RegisterToRegister_Takes1Cycle()
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -784,7 +784,7 @@ public class BitInstructionTests
     }
 
     [Fact]
-    public void Execute_ImmediateToRegister_Takes1Cycle()
+    public void Execute_ImmediateToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -804,11 +804,11 @@ public class BitInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(1u, cycles); // 1 base + 0 source (immediate) + 0 dest (register)
+        Assert.Equal(2u, cycles); // Per SLAU445I Table 4-10: #N → Rm = 2 cycles
     }
 
     [Fact]
-    public void Execute_RegisterToIndexed_Takes4Cycles()
+    public void Execute_RegisterToIndexed_Takes3Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -833,11 +833,11 @@ public class BitInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(4u, cycles); // 1 base + 0 source (register) + 3 dest (indexed)
+        Assert.Equal(3u, cycles); // Per SLAU445I Table 4-10: Rn → x(Rm) = 4 cycles, BIT reduction = 3 cycles
     }
 
     [Fact]
-    public void Execute_IndexedToRegister_Takes4Cycles()
+    public void Execute_IndexedToRegister_Takes3Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -862,11 +862,11 @@ public class BitInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(4u, cycles); // 1 base + 3 source (indexed) + 0 dest (register)
+        Assert.Equal(3u, cycles); // Per SLAU445I Table 4-10: x(Rn) → Rm = 3 cycles
     }
 
     [Fact]
-    public void Execute_IndirectToRegister_Takes3Cycles()
+    public void Execute_IndirectToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -891,7 +891,7 @@ public class BitInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(3u, cycles); // 1 base + 2 source (indirect) + 0 dest (register)
+        Assert.Equal(2u, cycles); // Per SLAU445I Table 4-10: @Rn → Rm = 2 cycles
     }
 
     [Fact]
@@ -924,7 +924,7 @@ public class BitInstructionTests
     }
 
     [Fact]
-    public void Execute_AbsoluteToAbsolute_Takes7Cycles()
+    public void Execute_AbsoluteToAbsolute_Takes5Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -951,11 +951,11 @@ public class BitInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(7u, cycles); // 1 base + 3 source (absolute) + 3 dest (absolute)
+        Assert.Equal(5u, cycles); // Per SLAU445I Table 4-10: &EDE → &EDE = 6 cycles, BIT reduction = 5 cycles
     }
 
     [Fact]
-    public void Execute_SymbolicToSymbolic_Takes7Cycles()
+    public void Execute_SymbolicToSymbolic_Takes5Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -983,11 +983,11 @@ public class BitInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(7u, cycles); // 1 base + 3 source (symbolic) + 3 dest (symbolic)
+        Assert.Equal(5u, cycles); // Per SLAU445I Table 4-10: EDE → EDE = 6 cycles, BIT reduction = 5 cycles
     }
 
     [Fact]
-    public void Execute_IndirectAutoIncrementToRegister_Returns3Cycles()
+    public void Execute_IndirectAutoIncrementToRegister_Takes2Cycles()
     {
         // Arrange
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateTestEnvironment();
@@ -1012,7 +1012,7 @@ public class BitInstructionTests
         uint cycles = instruction.Execute(registerFile, memory, extensionWords);
 
         // Assert
-        Assert.Equal(3u, cycles); // 1 base + 2 source (indirect auto-increment) + 0 dest (register)
+        Assert.Equal(2u, cycles); // Per SLAU445I Table 4-10: @Rn+ → Rm = 2 cycles
     }
 
     [Fact]

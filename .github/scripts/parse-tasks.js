@@ -34,8 +34,8 @@ class TaskParser {
      * Extract all tasks from the markdown content
      */
     extractTasks() {
-        // Split content into sections by task headers (### Task X.Y:)
-        const taskRegex = /### Task (\d+\.\d+): (.+?)(?=### Task|\n## |$)/gs;
+        // Split content into sections by task headers (### Task X.Y: or ### Task X.Y.Z:)
+        const taskRegex = /### Task (\d+\.\d+(?:\.\d+)?): (.+?)(?=### Task|\n## |$)/gs;
         let match;
 
         while ((match = taskRegex.exec(this.content)) !== null) {
@@ -86,7 +86,14 @@ class TaskParser {
      */
     extractPriority(content) {
         const match = content.match(/\*\*Priority\*\*:\s*(.+)/);
-        return match ? match[1].trim() : 'Medium';
+        if (!match) {
+            return 'Medium';
+        }
+
+        // Extract just the priority level (first word), ignoring any explanatory text in parentheses
+        const priorityText = match[1].trim();
+        const priorityMatch = priorityText.match(/^(Critical|High|Medium|Low)/i);
+        return priorityMatch ? priorityMatch[1] : priorityText.split(/\s+/)[0];
     }
 
     /**
@@ -106,12 +113,12 @@ class TaskParser {
             return [];
         }
 
-        // Parse dependencies like "Task 1.1" or "Task 1.1, Task 1.2"
+        // Parse dependencies like "Task 1.1", "Task 1.1, Task 1.2", or "Task 5.5.1"
         const depString = match[1].trim();
         const deps = depString
             .split(',')
             .map(dep => {
-                const taskMatch = dep.trim().match(/Task (\d+\.\d+)/);
+                const taskMatch = dep.trim().match(/Task (\d+\.\d+(?:\.\d+)?)/);
                 return taskMatch ? taskMatch[1] : null;
             })
             .filter(Boolean);

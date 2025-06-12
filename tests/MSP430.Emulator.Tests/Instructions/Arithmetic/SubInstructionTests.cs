@@ -883,27 +883,25 @@ public class SubInstructionTests
 
     /// <summary>
     /// Tests cycle counts for SUB instruction addressing mode combinations.
-    /// Based on MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5: "MSP430 and MSP430X Instructions"
-    /// Cycle counts per TI specification: base (1) + source cycles + destination cycles.
+    /// Based on SLAU445I Table 4-10 - Format I (Double-Operand) Instruction Cycles and Lengths.
+    /// SUB instruction does not get MOV/BIT/CMP cycle reduction.
     /// </summary>
     [Theory]
     [InlineData(AddressingMode.Register, AddressingMode.Register, 1u)]
-    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 1u)]
-    [InlineData(AddressingMode.Indirect, AddressingMode.Register, 3u)]
-    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Register, 3u)]
-    [InlineData(AddressingMode.Indexed, AddressingMode.Register, 4u)]
-    [InlineData(AddressingMode.Absolute, AddressingMode.Register, 4u)]
-    [InlineData(AddressingMode.Symbolic, AddressingMode.Register, 4u)]
-    [InlineData(AddressingMode.Register, AddressingMode.Indirect, 3u)]
-    [InlineData(AddressingMode.Register, AddressingMode.IndirectAutoIncrement, 3u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Register, 2u)]
+    [InlineData(AddressingMode.Indirect, AddressingMode.Register, 2u)]
+    [InlineData(AddressingMode.IndirectAutoIncrement, AddressingMode.Register, 2u)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Register, 3u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Register, 3u)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Register, 3u)]
     [InlineData(AddressingMode.Register, AddressingMode.Indexed, 4u)]
     [InlineData(AddressingMode.Register, AddressingMode.Absolute, 4u)]
     [InlineData(AddressingMode.Register, AddressingMode.Symbolic, 4u)]
-    [InlineData(AddressingMode.Immediate, AddressingMode.Indexed, 4u)]
-    [InlineData(AddressingMode.Immediate, AddressingMode.Absolute, 4u)]
-    [InlineData(AddressingMode.Indexed, AddressingMode.Indexed, 7u)]
-    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 7u)]
-    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 7u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Indexed, 5u)]
+    [InlineData(AddressingMode.Immediate, AddressingMode.Absolute, 5u)]
+    [InlineData(AddressingMode.Indexed, AddressingMode.Indexed, 6u)]
+    [InlineData(AddressingMode.Absolute, AddressingMode.Absolute, 6u)]
+    [InlineData(AddressingMode.Symbolic, AddressingMode.Symbolic, 6u)]
     public void Execute_CycleCounts_AreCorrect(AddressingMode sourceMode, AddressingMode destMode, uint expectedCycles)
     {
         // Arrange

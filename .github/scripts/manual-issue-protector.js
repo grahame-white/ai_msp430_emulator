@@ -225,7 +225,7 @@ class ManualIssueProtector {
         };
 
         // Check title format
-        if (!issue.title.match(/^Task \d+\.\d+:/)) {
+        if (!issue.title.match(/^Task \d+\.\d+(?:\.\d+)?:/)) {
             indicators.score += 0.4;
             indicators.reasons.push('non-standard title format');
         }

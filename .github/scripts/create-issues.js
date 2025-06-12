@@ -132,7 +132,7 @@ class GitHubIssuesCreator {
 
             // Check if any issue matches our exact task ID
             for (const issue of issues.data) {
-                const titleMatch = issue.title.match(/Task (\d+\.\d+):/);
+                const titleMatch = issue.title.match(/Task (\d+\.\d+(?:\.\d+)?): /);
                 if (titleMatch && titleMatch[1] === task.id) {
                     return issue;
                 }

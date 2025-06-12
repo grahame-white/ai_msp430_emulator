@@ -355,7 +355,8 @@ class DisasterRecovery {
 
             // Filter to only issues that have "Task" in the title
             const recoveredIssues = issues.data.filter(
-                issue => issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+:/)
+                issue =>
+                    issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+(?:\.\d+)?:/)
             );
             const taskIds = new Set(tasks.map(task => task.id));
             const recoveredTaskIds = new Set();
@@ -385,7 +386,7 @@ class DisasterRecovery {
      * Extract task ID from issue title
      */
     extractTaskId(title) {
-        const match = title.match(/Task (\d+\.\d+):/);
+        const match = title.match(/Task (\d+\.\d+(?:\.\d+)?):/);
         return match ? match[1] : null;
     }
 

@@ -167,7 +167,8 @@ class GitHubIssuesUpdater {
 
             // Filter to only issues that have "Task" in the title (to match the previous search behavior)
             return issues.data.filter(
-                issue => issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+:/)
+                issue =>
+                    issue.title.includes('Task') && issue.title.match(/Task \d+\.\d+(?:\.\d+)?:/)
             );
         } catch (error) {
             console.warn(`Warning: Could not fetch task issues: ${error.message}`);
@@ -185,7 +186,7 @@ class GitHubIssuesUpdater {
      */
     findIssueForTask(issues, task) {
         return issues.find(issue => {
-            const titleMatch = issue.title.match(/Task (\d+\.\d+):/);
+            const titleMatch = issue.title.match(/Task (\d+\.\d+(?:\.\d+)?):/);
             return titleMatch && titleMatch[1] === task.id;
         });
     }

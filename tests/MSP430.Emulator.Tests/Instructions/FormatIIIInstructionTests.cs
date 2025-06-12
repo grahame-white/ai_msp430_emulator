@@ -353,8 +353,8 @@ public class FormatIIIInstructionTests
     public class OffsetAndPCTests
     {
         [Theory]
-        [InlineData(-512)] // Minimum valid offset
-        [InlineData(511)]  // Maximum valid offset
+        [InlineData(-511)] // Minimum valid offset per SLAU445I
+        [InlineData(512)]  // Maximum valid offset per SLAU445I
         [InlineData(0)]    // Zero offset
         [InlineData(-256)] // Negative offset
         [InlineData(256)]  // Positive offset
@@ -373,8 +373,8 @@ public class FormatIIIInstructionTests
         }
 
         [Theory]
-        [InlineData(-513)] // Below minimum valid offset
-        [InlineData(512)]  // Above maximum valid offset
+        [InlineData(-512)] // Below minimum valid offset (TI range is -511 to +512)
+        [InlineData(513)]  // Above maximum valid offset
         [InlineData(-1000)] // Far below minimum
         [InlineData(1000)]  // Far above maximum
         public void Execute_InvalidOffsetRange_ThrowsInvalidOperationException(short offset)

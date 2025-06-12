@@ -347,10 +347,11 @@ public class FormatIIIInstruction : Instruction, IExecutableInstruction
     /// <returns>The number of CPU cycles consumed (always 2 per SLAU445I specification).</returns>
     public uint Execute(IRegisterFile registerFile, byte[] memory, ushort[] extensionWords)
     {
-        // Validate offset range: -1024 to +1022 bytes (-512 to +511 words)
-        if (Offset < -512 || Offset > 511)
+        // Validate offset range: -1022 to +1024 bytes (-511 to +512 words)
+        // Per SLAU445I Section 4.5.1.3: "This allows jumps in a range of –511 to +512 words"
+        if (Offset < -511 || Offset > 512)
         {
-            throw new InvalidOperationException($"Jump offset {Offset} is outside valid range (-512 to +511 words)");
+            throw new InvalidOperationException($"Jump offset {Offset} is outside valid range (-511 to +512 words)");
         }
 
         // Evaluate jump condition based on status register flags

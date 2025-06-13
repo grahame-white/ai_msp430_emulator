@@ -10,40 +10,41 @@ namespace MSP430.Emulator.Instructions.ControlFlow;
 /// 2. Creating defined waiting times in code
 /// 3. Pipeline synchronization (e.g., after DINT/EINT per TI recommendations)
 /// 
-/// This instruction is emulated as MOV #0, R3 and takes 1 cycle.
+/// This instruction is emulated as MOV R3, R3 per Table 4-7 and takes 1 cycle.
+/// This truly performs no operation since it moves R3 into itself.
 /// 
 /// Operation: None (no registers or memory affected)
-/// Emulation: MOV #0, R3
-/// Cycles: 1 (per Format I immediate mode MOV instruction)
+/// Emulation: MOV R3, R3
+/// Cycles: 1 (per Format I register mode MOV instruction)
 /// Flags: Not affected
 /// 
 /// References:
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.6.2.33: NOP
 /// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.5.1.4: Table 4-7 Emulated Instructions
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.6.2.33: NOP
 /// </summary>
 public class NopInstruction : Instruction, IExecutableInstruction
 {
     /// <summary>
     /// Initializes a new instance of the NopInstruction class.
     /// </summary>
-    /// <param name="instructionWord">The 16-bit instruction word (NOP is emulated as MOV #0, R3).</param>
+    /// <param name="instructionWord">The 16-bit instruction word (NOP is emulated as MOV R3, R3).</param>
     public NopInstruction(ushort instructionWord)
         : base(InstructionFormat.FormatI, 0x4, instructionWord) // Emulated as MOV instruction
     {
     }
 
     /// <summary>
-    /// Gets the source register for this instruction (always CG1/R2 for constant #0).
+    /// Gets the source register for this instruction (always R3 for MOV R3, R3).
     /// </summary>
-    public override RegisterName? SourceRegister => RegisterName.R2;
+    public override RegisterName? SourceRegister => RegisterName.R3;
 
     /// <summary>
-    /// Gets the destination register for this instruction (always R3).
+    /// Gets the destination register for this instruction (always R3 for MOV R3, R3).
     /// </summary>
     public override RegisterName? DestinationRegister => RegisterName.R3;
 
     /// <summary>
-    /// Gets the source addressing mode for this instruction (always Register mode for constant generator).
+    /// Gets the source addressing mode for this instruction (always Register mode for R3).
     /// </summary>
     public override AddressingMode? SourceAddressingMode => AddressingMode.Register;
 
@@ -75,15 +76,16 @@ public class NopInstruction : Instruction, IExecutableInstruction
     /// <param name="registerFile">The CPU register file for reading/writing registers.</param>
     /// <param name="memory">The system memory for reading/writing memory locations.</param>
     /// <param name="extensionWords">Extension words associated with this instruction (not used for NOP).</param>
-    /// <returns>The number of CPU cycles consumed by this instruction (always 1 for emulated MOV #0, R3).</returns>
+    /// <returns>The number of CPU cycles consumed by this instruction (always 1 for emulated MOV R3, R3).</returns>
     public uint Execute(IRegisterFile registerFile, byte[] memory, ushort[] extensionWords)
     {
-        // NOP performs no operation - it's essentially MOV #0, R3 but we don't actually
-        // need to modify R3 since the purpose is to do nothing
+        // NOP performs no operation - it's emulated as MOV R3, R3 per Table 4-7
+        // Since R3 is moved to itself, no actual register changes occur
+        // This is a true "no operation" that only consumes cycles
 
         // NOP instructions do not affect status flags per SLAU445I specification
 
-        // Return cycle count for emulated MOV #0, R3 instruction (1 cycle)
+        // Return cycle count for emulated MOV R3, R3 instruction (1 cycle)
         return 1;
     }
 

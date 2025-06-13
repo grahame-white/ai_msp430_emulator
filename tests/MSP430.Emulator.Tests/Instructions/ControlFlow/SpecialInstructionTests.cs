@@ -37,7 +37,7 @@ public class SpecialInstructionTests
         [Fact]
         public void Mnemonic_ReturnsNOP()
         {
-            var instruction = new NopInstruction(0x4343); // MOV #0, R3 encoding
+            var instruction = new NopInstruction(0x4343); // MOV R3, R3 encoding
             Assert.Equal("NOP", instruction.Mnemonic);
         }
 
@@ -70,10 +70,10 @@ public class SpecialInstructionTests
         }
 
         [Fact]
-        public void SourceRegister_ReturnsR2()
+        public void SourceRegister_ReturnsR3()
         {
             var instruction = new NopInstruction(0x4343);
-            Assert.Equal(RegisterName.R2, instruction.SourceRegister);
+            Assert.Equal(RegisterName.R3, instruction.SourceRegister);
         }
 
         [Fact]

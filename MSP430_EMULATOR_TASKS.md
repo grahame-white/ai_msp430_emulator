@@ -885,6 +885,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/SubcInstructionTests.cs
 Implement decimal arithmetic operations (DADD) for BCD operations.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2.16 DADD - Add source to destination decimally (BCD)
 
 **Acceptance Criteria**:
@@ -921,6 +922,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DaddInstructionTests.cs
 Implement increment/decrement operations with proper addressing mode support.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2.21 INC - Increment destination by 1
 - SLAU445I Section 4.6.2.22 INCD - Increment destination by 2  
 - SLAU445I Section 4.6.2.17 DEC - Decrement destination by 1
@@ -963,6 +965,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DecInstructionTests.cs
 Implement bitwise logical operations (AND, OR, XOR, BIT) with comprehensive addressing mode support.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2.4 AND - Source AND destination → destination
 - SLAU445I Section 4.6.2.6 BIS - Source OR destination → destination (bit set)
 - SLAU445I Section 4.6.2.51 XOR - Source XOR destination → destination
@@ -1011,6 +1014,7 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/BitInstructionTests.cs
 Implement individual bit manipulation operations (BIC, SETC, CLRC, etc.).
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2.5 BIC - Clear bits in destination
 - SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions: SETC, CLRC, SETN, CLRN, SETZ, CLRZ
 
@@ -1052,6 +1056,7 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/StatusBitInstructionTests.cs
 Implement data movement instructions (MOV) with all addressing modes and size variations.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2.32 MOV - Move source to destination
 
 **Acceptance Criteria**:
@@ -1408,6 +1413,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetInstructionTests.cs
 Implement interrupt-related and special control instructions (RETI, NOP, etc.).
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2.37 RETI - Return from interrupt
 - SLAU445I Section 4.6.2.33 NOP - No operation
 - SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions (DINT, EINT)
@@ -1449,6 +1455,7 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/SpecialInstructionTests.cs
 Ensure comprehensive coverage and validation of all MSP430 emulated instructions per SLAU445I Table 4-7.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions (25 instructions)
 - SLAU445I Section 4.6.2 MSP430 Instructions (underlying core instructions)
 
@@ -1476,6 +1483,7 @@ Ensure comprehensive coverage and validation of all MSP430 emulated instructions
 - [ ] EINT → BIS #8, SR (enable interrupts) ⚠️ Needs validation
 
 **Arithmetic Emulated**:
+
 - [ ] ADC(.B) dst → ADDC(.B) #0, dst (add carry)
 - [ ] SBC(.B) dst → SUBC(.B) #0, dst (subtract carry)  
 - [ ] DADC(.B) dst → DADD(.B) #0, dst (decimal add carry)
@@ -1485,22 +1493,27 @@ Ensure comprehensive coverage and validation of all MSP430 emulated instructions
 - [ ] INCD(.B) dst → ADD(.B) #2, dst (increment by 2)
 
 **Data Movement Emulated**:
+
 - [ ] CLR(.B) dst → MOV(.B) #0, dst (clear destination)
 - [ ] POP dst → MOV @SP+, dst (pop from stack)
 
 **Control Flow Emulated**:
+
 - [ ] BR dst → MOV dst, PC (branch indirect)
 - [ ] RET → MOV @SP+, PC (return from subroutine)
 
 **Logical Emulated**:
+
 - [ ] INV(.B) dst → XOR(.B) #-1, dst (invert destination)
 - [ ] TST(.B) dst → CMP(.B) #0, dst (test destination)
 
 **Rotation Emulated**:
+
 - [ ] RLA(.B) dst → ADD(.B) dst, dst (rotate left arithmetic)
 - [ ] RLC(.B) dst → ADDC(.B) dst, dst (rotate left through carry)
 
 **Special Emulated**:
+
 - [ ] NOP → MOV R3, R3 (no operation)
 
 **Files to Create**:
@@ -1814,9 +1827,12 @@ tests/MSP430.Emulator.Tests/Instructions/Extended/ExtendedInstructionTests.cs
 
 ## Phase 8.5: Comprehensive MSP430 Instruction Coverage
 
-**TI Documentation Reference**: SLAU445I Section 4.6.2 MSP430 Instructions (complete instruction set), Section 4.5.1.4 Emulated Instructions (Table 4-7)
+**TI Documentation Reference**: SLAU445I Section 4.6.2 MSP430 Instructions (complete instruction set),  
+Section 4.5.1.4 Emulated Instructions (Table 4-7)
 
-*This phase ensures complete coverage of all 51 MSP430 core instructions and emulated instructions as documented in SLAU445I. Many instructions are already implemented in Phases 4-6, but this phase identifies any gaps and adds missing instruction support.*
+*This phase ensures complete coverage of all 51 MSP430 core instructions and emulated instructions as  
+documented in SLAU445I. Many instructions are already implemented in Phases 4-6, but this phase  
+identifies any gaps and adds missing instruction support.*
 
 ### Task 8.5.1: Core Instruction Set Audit and Gap Analysis
 
@@ -1824,9 +1840,11 @@ tests/MSP430.Emulator.Tests/Instructions/Extended/ExtendedInstructionTests.cs
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 8.3
 
-Audit current instruction implementation against SLAU445I Section 4.6.2 complete instruction list to identify any missing instructions.
+Audit current instruction implementation against SLAU445I Section 4.6.2 complete instruction list to  
+identify any missing instructions.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2 MSP430 Instructions (complete list of 51 instructions)
 - SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions
 
@@ -1843,6 +1861,7 @@ Audit current instruction implementation against SLAU445I Section 4.6.2 complete
 **Core MSP430 Instructions (per SLAU445I Section 4.6.2)**:
 
 **Arithmetic Instructions**:
+
 - [x] ADD (4.6.2.2) - ✅ Implemented in Task 4.1
 - [x] ADDC (4.6.2.3) - ✅ Implemented in Task 4.2
 - [x] SUB (4.6.2.46) - ✅ Implemented in Task 4.1
@@ -1855,6 +1874,7 @@ Audit current instruction implementation against SLAU445I Section 4.6.2 complete
 - [x] DECD (4.6.2.18) - ✅ Implemented in Task 4.4
 
 **Logical Instructions**:
+
 - [x] AND (4.6.2.4) - ✅ Implemented in Task 4.5
 - [x] BIS (4.6.2.6) - ✅ Implemented in Task 4.5
 - [x] BIC (4.6.2.5) - ✅ Implemented in Task 4.6
@@ -1862,6 +1882,7 @@ Audit current instruction implementation against SLAU445I Section 4.6.2 complete
 - [x] XOR (4.6.2.51) - ✅ Implemented in Task 4.5
 
 **Data Movement Instructions**:
+
 - [x] MOV (4.6.2.32) - ✅ Implemented in Task 5.1
 - [x] PUSH (4.6.2.35) - ✅ Implemented in Task 5.2
 - [x] POP (4.6.2.34) - ✅ Implemented in Task 5.2
@@ -1869,12 +1890,14 @@ Audit current instruction implementation against SLAU445I Section 4.6.2 complete
 - [x] SXT (4.6.2.49) - ✅ Implemented in Task 5.3
 
 **Rotation Instructions**:
+
 - [x] RRA (4.6.2.40) - ✅ Implemented in Task 5.3
 - [x] RRC (4.6.2.41) - ✅ Implemented in Task 5.3
 - [ ] RLA (4.6.2.38) - ⚠️ May need verification
 - [ ] RLC (4.6.2.39) - ⚠️ May need verification
 
 **Control Flow Instructions**:
+
 - [x] JMP (4.6.2.28) - ✅ Implemented in Task 5.5.2
 - [x] JEQ/JZ (4.6.2.25) - ✅ Implemented in Task 5.5.2
 - [x] JNE/JNZ (4.6.2.31) - ✅ Implemented in Task 5.5.2
@@ -1888,14 +1911,17 @@ Audit current instruction implementation against SLAU445I Section 4.6.2 complete
 - [ ] RETI (4.6.2.37) - ⚠️ Needs implementation in Task 6.4
 
 **Special Instructions**:
+
 - [ ] NOP (4.6.2.33) - ⚠️ May need verification
 - [ ] BR/BRANCH (4.6.2.8) - ⚠️ May need verification
 
 **Interrupt Control Instructions** (Emulated):
+
 - [ ] DINT (Table 4-7) - ⚠️ Needs implementation
 - [ ] EINT (Table 4-7) - ⚠️ Needs implementation
 
 **Emulated Instructions Status** (per SLAU445I Table 4-7):
+
 - [ ] ADC - Emulated as ADDC #0, dst
 - [ ] BR - Emulated as MOV dst, PC  
 - [ ] CLR - Emulated as MOV #0, dst
@@ -1938,6 +1964,7 @@ Audit current instruction implementation against SLAU445I Section 4.6.2 complete
 Implement comprehensive coverage of MSP430X extended instructions per SLAU445I Section 4.6.3.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.3 Extended Instructions (37 instructions)
 - SLAU445I Section 4.5.2.5 Table 4-15 Extended Emulated Instructions
 - SLAU445I Section 4.6.4 Address Instructions (11 instructions)
@@ -1956,6 +1983,7 @@ Implement comprehensive coverage of MSP430X extended instructions per SLAU445I S
 **MSP430X Extended Instructions** (per SLAU445I Section 4.6.3):
 
 **Extended Arithmetic**:
+
 - [ ] ADDX (4.6.3.2) - Add source to destination (20-bit)
 - [ ] ADDCX (4.6.3.3) - Add source and carry to destination (20-bit)
 - [ ] SUBX (4.6.3.32) - Subtract source from destination (20-bit)
@@ -1964,6 +1992,7 @@ Implement comprehensive coverage of MSP430X extended instructions per SLAU445I S
 - [ ] DADDX (4.6.3.11) - Add source to destination decimally (20-bit)
 
 **Extended Logical**:
+
 - [ ] ANDX (4.6.3.4) - Source AND destination → destination (20-bit)
 - [ ] BICX (4.6.3.5) - Clear bits in destination (20-bit)
 - [ ] BISX (4.6.3.6) - Set bits in destination (20-bit)
@@ -1971,6 +2000,7 @@ Implement comprehensive coverage of MSP430X extended instructions per SLAU445I S
 - [ ] XORX (4.6.3.37) - Source XOR destination → destination (20-bit)
 
 **Extended Data Movement**:
+
 - [ ] MOVX (4.6.3.17) - Move source to destination (20-bit)
 - [ ] PUSHX (4.6.3.21) - Push operand onto stack (20-bit)
 - [ ] POPX (4.6.3.20) - Pop operand from stack (20-bit)
@@ -1978,10 +2008,12 @@ Implement comprehensive coverage of MSP430X extended instructions per SLAU445I S
 - [ ] SXTX (4.6.3.35) - Sign extend destination (20-bit)
 
 **Extended Multiple Operations**:
+
 - [ ] POPM (4.6.3.18) - Pop multiple registers from stack
 - [ ] PUSHM (4.6.3.19) - Push multiple registers to stack
 
 **Extended Rotation**:
+
 - [ ] RLAX (4.6.3.23) - Rotate left arithmetically (20-bit)
 - [ ] RLCX (4.6.3.24) - Rotate left through carry (20-bit)
 - [ ] RRAX (4.6.3.26) - Rotate right arithmetically (20-bit)
@@ -1993,6 +2025,7 @@ Implement comprehensive coverage of MSP430X extended instructions per SLAU445I S
 - [ ] RRCM (4.6.3.27) - Rotate right through carry multiple times
 
 **MSP430X Address Instructions** (per SLAU445I Section 4.6.4):
+
 - [ ] ADDA (4.6.4.1) - Add 20-bit source to 20-bit destination register
 - [ ] BRA (4.6.4.2) - Branch to 20-bit address
 - [ ] CALLA (4.6.4.3) - Call subroutine at 20-bit address  
@@ -2006,6 +2039,7 @@ Implement comprehensive coverage of MSP430X extended instructions per SLAU445I S
 - [ ] TSTA (4.6.4.11) - Test 20-bit register
 
 **Extended Emulated Instructions** (per SLAU445I Table 4-15):
+
 - [ ] ADCX - Emulated as ADDCX #0, dst
 - [ ] BRA - Address instruction (not emulated)
 - [ ] RETA - Address instruction (not emulated)

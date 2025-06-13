@@ -63,6 +63,45 @@ public static class InstructionHelpers
     }
 
     /// <summary>
+    /// Calculates the number of extension words required by a single-operand (destination) instruction.
+    /// Used by emulated instructions that only have a destination operand.
+    /// </summary>
+    /// <param name="destinationAddressingMode">The destination addressing mode.</param>
+    /// <returns>The number of extension words required (0-1).</returns>
+    public static int CalculateDestinationOnlyExtensionWordCount(AddressingMode destinationAddressingMode)
+    {
+        // Only destination operand can require extension words
+        if (destinationAddressingMode == AddressingMode.Absolute ||
+            destinationAddressingMode == AddressingMode.Symbolic ||
+            destinationAddressingMode == AddressingMode.Indexed)
+        {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    /// Calculates the number of extension words required by a single-operand (source) instruction.
+    /// Used by emulated instructions that only have a source operand (like BR).
+    /// </summary>
+    /// <param name="sourceAddressingMode">The source addressing mode.</param>
+    /// <returns>The number of extension words required (0-1).</returns>
+    public static int CalculateSourceOnlyExtensionWordCount(AddressingMode sourceAddressingMode)
+    {
+        // Source operand can require extension words for several addressing modes
+        if (sourceAddressingMode == AddressingMode.Immediate ||
+            sourceAddressingMode == AddressingMode.Absolute ||
+            sourceAddressingMode == AddressingMode.Symbolic ||
+            sourceAddressingMode == AddressingMode.Indexed)
+        {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /// <summary>
     /// Reads an operand value based on the addressing mode.
     /// </summary>
     /// <param name="register">The register used by the addressing mode.</param>

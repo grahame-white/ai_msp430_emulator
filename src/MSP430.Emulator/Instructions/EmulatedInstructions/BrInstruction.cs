@@ -66,22 +66,8 @@ public class BrInstruction : Instruction, IExecutableInstruction
     /// <summary>
     /// Gets the number of additional words (extension words) required by this instruction.
     /// </summary>
-    public override int ExtensionWordCount
-    {
-        get
-        {
-            // Only source operand can require extension words
-            if (_sourceAddressingMode == AddressingMode.Absolute ||
-                _sourceAddressingMode == AddressingMode.Symbolic ||
-                _sourceAddressingMode == AddressingMode.Indexed ||
-                _sourceAddressingMode == AddressingMode.Immediate)
-            {
-                return 1;
-            }
-
-            return 0;
-        }
-    }
+    public override int ExtensionWordCount =>
+        InstructionHelpers.CalculateSourceOnlyExtensionWordCount(_sourceAddressingMode);
 
     /// <summary>
     /// Gets the mnemonic for the BR instruction.

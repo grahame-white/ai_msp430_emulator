@@ -70,21 +70,8 @@ public class InvInstruction : Instruction, IExecutableInstruction
     /// <summary>
     /// Gets the number of additional words (extension words) required by this instruction.
     /// </summary>
-    public override int ExtensionWordCount
-    {
-        get
-        {
-            // Only destination operand can require extension words
-            if (_destinationAddressingMode == AddressingMode.Absolute ||
-                _destinationAddressingMode == AddressingMode.Symbolic ||
-                _destinationAddressingMode == AddressingMode.Indexed)
-            {
-                return 1;
-            }
-
-            return 0;
-        }
-    }
+    public override int ExtensionWordCount =>
+        InstructionHelpers.CalculateDestinationOnlyExtensionWordCount(_destinationAddressingMode);
 
     /// <summary>
     /// Gets the mnemonic for the INV instruction.

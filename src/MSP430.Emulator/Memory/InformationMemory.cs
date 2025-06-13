@@ -339,7 +339,7 @@ public class InformationMemory : IInformationMemory
     {
         if ((address & 1) != 0)
         {
-            throw new ArgumentException($"Address 0x{address:X4} is not word-aligned", nameof(address));
+            throw new ArgumentException($"Address 0x{address:X4} is not word-aligned (must be even)", nameof(address));
         }
     }
 }

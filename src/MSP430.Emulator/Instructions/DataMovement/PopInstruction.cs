@@ -85,12 +85,14 @@ public class PopInstruction : Instruction, IExecutableInstruction
         // Get current stack pointer
         ushort currentSP = registerFile.GetStackPointer();
 
-        // Check for stack underflow - ensure SP is within valid memory range
+        // Check for stack overflow - ensure SP is within valid memory range
+        // Note: This checks if SP would access beyond memory bounds but uses
+        // standardized "Stack overflow detected" message per CONTRIBUTING.md guidelines
         // For byte operations, only need to check one byte; for word operations, check two bytes
         int bytesToCheck = _isByteOperation ? 1 : 2;
         if (currentSP + bytesToCheck - 1 >= memory.Length)
         {
-            throw new InvalidOperationException($"Stack underflow detected: Stack pointer 0x{currentSP:X4} accesses memory beyond bounds");
+            throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would access memory beyond bounds");
         }
 
         // Read value from current stack location
@@ -103,7 +105,7 @@ public class PopInstruction : Instruction, IExecutableInstruction
         // Check for potential stack pointer overflow
         if (newSP < currentSP) // Overflow detection
         {
-            throw new InvalidOperationException($"Stack pointer overflow detected: Stack pointer 0x{currentSP:X4} would overflow on POP operation");
+            throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would overflow on POP operation");
         }
 
         // Update stack pointer (RegisterFile handles word-alignment automatically)

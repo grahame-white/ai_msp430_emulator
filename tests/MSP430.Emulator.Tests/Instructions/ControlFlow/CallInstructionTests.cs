@@ -21,8 +21,8 @@ public class CallInstructionTests
     /// <param name="r4Value">Initial value for R4 register (default: 0x9000)</param>
     /// <returns>Tuple containing register file and memory array</returns>
     private static (RegisterFile RegisterFile, byte[] Memory) CreateTestEnvironment(
-        ushort stackPointer = 0x1000, 
-        ushort programCounter = 0x8000, 
+        ushort stackPointer = 0x1000,
+        ushort programCounter = 0x8000,
         ushort r4Value = 0x9000)
     {
         var registerFile = new RegisterFile();
@@ -58,7 +58,7 @@ public class CallInstructionTests
         public void Constructor_ValidParameters_SetsFormat()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            CallInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(InstructionFormat.FormatII, instruction.Format);
@@ -68,7 +68,7 @@ public class CallInstructionTests
         public void Constructor_ValidParameters_SetsOpcode()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            CallInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(0x12, instruction.Opcode);
@@ -78,7 +78,7 @@ public class CallInstructionTests
         public void Constructor_ValidParameters_SetsSourceRegister()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction(RegisterName.R5);
+            CallInstruction instruction = CreateTestInstruction(RegisterName.R5);
 
             // Assert
             Assert.Equal(RegisterName.R5, instruction.SourceRegister);
@@ -88,7 +88,7 @@ public class CallInstructionTests
         public void Constructor_ValidParameters_SetsSourceAddressingMode()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction(addressingMode: AddressingMode.Indirect);
+            CallInstruction instruction = CreateTestInstruction(addressingMode: AddressingMode.Indirect);
 
             // Assert
             Assert.Equal(AddressingMode.Indirect, instruction.SourceAddressingMode);
@@ -98,7 +98,7 @@ public class CallInstructionTests
         public void Constructor_ValidParameters_SetsIsByteOperation()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            CallInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.False(instruction.IsByteOperation); // CALL is always word operation
@@ -108,7 +108,7 @@ public class CallInstructionTests
         public void Mnemonic_ReturnsCorrectValue()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            CallInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal("CALL", instruction.Mnemonic);
@@ -125,7 +125,7 @@ public class CallInstructionTests
         public void ExtensionWordCount_ReturnsCorrectValue(AddressingMode mode, int expectedWords)
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction(addressingMode: mode);
+            CallInstruction instruction = CreateTestInstruction(addressingMode: mode);
 
             // Assert
             Assert.Equal(expectedWords, instruction.ExtensionWordCount);
@@ -141,11 +141,11 @@ public class CallInstructionTests
         public void Execute_RegisterMode_CallsSubroutineCorrectly()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x1000,
                 programCounter: 0x8000,
                 r4Value: 0x9000);
-            var instruction = CreateTestInstruction(RegisterName.R4, AddressingMode.Register);
+            CallInstruction instruction = CreateTestInstruction(RegisterName.R4, AddressingMode.Register);
 
             // Act
             uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -168,7 +168,7 @@ public class CallInstructionTests
         public void Execute_IndirectMode_CallsSubroutineCorrectly()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x1000,
                 programCounter: 0x8000);
 
@@ -177,7 +177,7 @@ public class CallInstructionTests
             memory[0x2000] = 0x00; // Low byte of 0x9500
             memory[0x2001] = 0x95; // High byte of 0x9500
 
-            var instruction = CreateTestInstruction(RegisterName.R4, AddressingMode.Indirect);
+            CallInstruction instruction = CreateTestInstruction(RegisterName.R4, AddressingMode.Indirect);
 
             // Act
             uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -200,11 +200,11 @@ public class CallInstructionTests
         public void Execute_ImmediateMode_CallsSubroutineCorrectly()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x1000,
                 programCounter: 0x8000);
 
-            var instruction = CreateTestInstruction(RegisterName.R0, AddressingMode.Immediate);
+            CallInstruction instruction = CreateTestInstruction(RegisterName.R0, AddressingMode.Immediate);
             ushort[] extensionWords = { 0xA000 }; // Immediate destination address
 
             // Act
@@ -234,11 +234,11 @@ public class CallInstructionTests
         public void Execute_StackOverflow_ThrowsException()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(stackPointer: 1); // Stack pointer too low
-            var instruction = CreateTestInstruction();
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(stackPointer: 1); // Stack pointer too low
+            CallInstruction instruction = CreateTestInstruction();
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => instruction.Execute(registerFile, memory, Array.Empty<ushort>()));
             Assert.Contains("Stack overflow detected", exception.Message);
         }
@@ -251,10 +251,10 @@ public class CallInstructionTests
             byte[] memory = new byte[4]; // Very limited memory (addresses 0-3)
             registerFile.SetStackPointer(0x0006); // SP that would decrement to 0x0004, accessing 0x0004 and 0x0005 (beyond bounds)
             registerFile.WriteRegister(RegisterName.R4, 0x9000);
-            var instruction = CreateTestInstruction();
+            CallInstruction instruction = CreateTestInstruction();
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => instruction.Execute(registerFile, memory, Array.Empty<ushort>()));
             Assert.Contains("Stack overflow detected", exception.Message);
         }
@@ -263,11 +263,11 @@ public class CallInstructionTests
         public void Execute_NestedCalls_MaintainsStackCorrectly()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x1000,
                 programCounter: 0x8000);
 
-            var instruction1 = CreateTestInstruction(RegisterName.R4, AddressingMode.Register);
+            CallInstruction instruction1 = CreateTestInstruction(RegisterName.R4, AddressingMode.Register);
             registerFile.WriteRegister(RegisterName.R4, 0x9000);
 
             // First call
@@ -276,7 +276,7 @@ public class CallInstructionTests
             // Setup for second call from within first subroutine
             registerFile.SetProgramCounter(0x9010); // Simulate execution in first subroutine
             registerFile.WriteRegister(RegisterName.R5, 0xA000);
-            var instruction2 = CreateTestInstruction(RegisterName.R5, AddressingMode.Register);
+            CallInstruction instruction2 = CreateTestInstruction(RegisterName.R5, AddressingMode.Register);
 
             // Act - Second call (nested)
             instruction2.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -311,7 +311,7 @@ public class CallInstructionTests
             RegisterName register, AddressingMode mode, string expected)
         {
             // Arrange
-            var instruction = CreateTestInstruction(register, mode);
+            CallInstruction instruction = CreateTestInstruction(register, mode);
 
             // Act
             string result = instruction.ToString();
@@ -338,8 +338,8 @@ public class CallInstructionTests
             AddressingMode mode, uint expectedCycles)
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment();
-            var instruction = CreateTestInstruction(RegisterName.R4, mode);
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            CallInstruction instruction = CreateTestInstruction(RegisterName.R4, mode);
             ushort[] extensionWords;
             if (mode == AddressingMode.Immediate)
             {

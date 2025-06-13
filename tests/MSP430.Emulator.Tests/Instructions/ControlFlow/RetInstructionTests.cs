@@ -20,7 +20,7 @@ public class RetInstructionTests
     /// <param name="programCounter">Initial program counter value (default: 0x9000 - in subroutine)</param>
     /// <returns>Tuple containing register file and memory array</returns>
     private static (RegisterFile RegisterFile, byte[] Memory) CreateTestEnvironment(
-        ushort stackPointer = 0x0FFE, 
+        ushort stackPointer = 0x0FFE,
         ushort programCounter = 0x9000)
     {
         var registerFile = new RegisterFile();
@@ -64,7 +64,7 @@ public class RetInstructionTests
         public void Constructor_ValidParameters_SetsFormat()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(InstructionFormat.FormatI, instruction.Format); // Emulated as MOV
@@ -74,7 +74,7 @@ public class RetInstructionTests
         public void Constructor_ValidParameters_SetsOpcode()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(0x4, instruction.Opcode); // MOV instruction opcode
@@ -84,7 +84,7 @@ public class RetInstructionTests
         public void Constructor_ValidParameters_SetsSourceRegister()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(RegisterName.R1, instruction.SourceRegister); // SP
@@ -94,7 +94,7 @@ public class RetInstructionTests
         public void Constructor_ValidParameters_SetsDestinationRegister()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(RegisterName.R0, instruction.DestinationRegister); // PC
@@ -104,7 +104,7 @@ public class RetInstructionTests
         public void Constructor_ValidParameters_SetsSourceAddressingMode()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(AddressingMode.IndirectAutoIncrement, instruction.SourceAddressingMode); // @SP+
@@ -114,7 +114,7 @@ public class RetInstructionTests
         public void Constructor_ValidParameters_SetsDestinationAddressingMode()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(AddressingMode.Register, instruction.DestinationAddressingMode); // PC register
@@ -124,7 +124,7 @@ public class RetInstructionTests
         public void Constructor_ValidParameters_SetsIsByteOperation()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.False(instruction.IsByteOperation); // RET is always word operation
@@ -134,7 +134,7 @@ public class RetInstructionTests
         public void ExtensionWordCount_ReturnsZero()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal(0, instruction.ExtensionWordCount); // RET doesn't need extension words
@@ -144,7 +144,7 @@ public class RetInstructionTests
         public void Mnemonic_ReturnsCorrectValue()
         {
             // Arrange & Act
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Assert
             Assert.Equal("RET", instruction.Mnemonic);
@@ -160,14 +160,14 @@ public class RetInstructionTests
         public void Execute_SimpleReturn_ReturnsToCorrectAddress()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x0FFE,
                 programCounter: 0x9000);
 
             // Simulate a previous CALL that pushed return address 0x8000
             SimulateCall(memory, 0x0FFE, 0x8000);
 
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Act
             uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -186,17 +186,17 @@ public class RetInstructionTests
         public void Execute_ReturnFromNestedCall_ReturnsToCorrectAddress()
         {
             // Arrange - Simulate nested calls
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x0FFC, // After two CALLs
                 programCounter: 0xA000); // In second subroutine
 
             // First CALL pushed 0x8000 (main program)
             SimulateCall(memory, 0x0FFE, 0x8000);
-            
+
             // Second CALL pushed 0x9010 (first subroutine)
             SimulateCall(memory, 0x0FFC, 0x9010);
 
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Act - Return from second subroutine
             uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -211,7 +211,7 @@ public class RetInstructionTests
             Assert.Equal(4u, cycles);
 
             // Now simulate second RET to return to main program
-            var instruction2 = CreateTestInstruction();
+            RetInstruction instruction2 = CreateTestInstruction();
             uint cycles2 = instruction2.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert - Check that PC was set to main program address
@@ -228,7 +228,7 @@ public class RetInstructionTests
         public void Execute_LittleEndianReturnAddress_HandlesCorrectly()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x0FFE,
                 programCounter: 0x9000);
 
@@ -236,7 +236,7 @@ public class RetInstructionTests
             memory[0x0FFE] = 0x34; // Low byte
             memory[0x0FFF] = 0x12; // High byte
 
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Act
             instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -258,10 +258,10 @@ public class RetInstructionTests
             var registerFile = new RegisterFile();
             byte[] memory = new byte[4]; // Very limited memory (addresses 0-3)
             registerFile.SetStackPointer(0x0004); // SP pointing to memory beyond bounds
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => instruction.Execute(registerFile, memory, Array.Empty<ushort>()));
             Assert.Contains("Stack underflow detected", exception.Message);
         }
@@ -270,16 +270,16 @@ public class RetInstructionTests
         public void Execute_StackPointerOverflow_ThrowsException()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0xFFFE); // SP + 2 would overflow
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Simulate return address on stack
             memory[0xFFFE] = 0x00;
             memory[0xFFFF] = 0x80;
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => instruction.Execute(registerFile, memory, Array.Empty<ushort>()));
             Assert.Contains("Stack pointer overflow detected", exception.Message);
         }
@@ -288,14 +288,14 @@ public class RetInstructionTests
         public void Execute_ValidStackBoundaries_WorksCorrectly()
         {
             // Arrange - Test near boundaries but within valid range
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x0002); // Minimum valid SP for RET
-            
+
             // Set return address
             memory[0x0002] = 0x00;
             memory[0x0003] = 0x80; // Return to 0x8000
 
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Act
             instruction.Execute(registerFile, memory, Array.Empty<ushort>());
@@ -315,7 +315,7 @@ public class RetInstructionTests
         public void Execute_CallReturnSequence_RestoresOriginalState()
         {
             // Arrange - Setup initial state
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x1000,
                 programCounter: 0x8000);
 
@@ -333,7 +333,7 @@ public class RetInstructionTests
             Assert.Equal(0x9000, registerFile.GetProgramCounter()); // PC set to subroutine
 
             // Act - Execute RET
-            var retInstruction = CreateTestInstruction();
+            RetInstruction retInstruction = CreateTestInstruction();
             retInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert - Check that original state is restored
@@ -345,7 +345,7 @@ public class RetInstructionTests
         public void Execute_MultipleCallReturnSequences_MaintainsStackIntegrity()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment(
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
                 stackPointer: 0x1000,
                 programCounter: 0x8000);
 
@@ -364,7 +364,7 @@ public class RetInstructionTests
                 Assert.Equal((ushort)(currentSP - 2), registerFile.GetStackPointer());
 
                 // RET
-                var retInstruction = CreateTestInstruction();
+                RetInstruction retInstruction = CreateTestInstruction();
                 retInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
                 // Verify RET restored state
@@ -383,7 +383,7 @@ public class RetInstructionTests
         public void ToString_ReturnsCorrectMnemonic()
         {
             // Arrange
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Act
             string result = instruction.ToString();
@@ -402,9 +402,9 @@ public class RetInstructionTests
         public void Execute_AlwaysReturns4Cycles()
         {
             // Arrange
-            var (registerFile, memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
             SimulateCall(memory, 0x0FFE, 0x8000);
-            var instruction = CreateTestInstruction();
+            RetInstruction instruction = CreateTestInstruction();
 
             // Act
             uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());

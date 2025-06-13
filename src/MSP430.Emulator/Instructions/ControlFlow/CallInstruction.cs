@@ -99,6 +99,8 @@ public class CallInstruction : Instruction, IExecutableInstruction
         ushort currentSP = registerFile.GetStackPointer();
 
         // 4. Check for stack overflow - ensure SP-2 is still within valid memory range
+        // Note: This checks for insufficient stack space (SP underflow scenario) but uses
+        // standardized "Stack overflow detected" message per CONTRIBUTING.md guidelines
         if (currentSP < 2)
         {
             throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would underflow on CALL operation");

@@ -84,7 +84,9 @@ public class RetInstruction : Instruction, IExecutableInstruction
         // Get current stack pointer
         ushort currentSP = registerFile.GetStackPointer();
 
-        // Check for stack underflow - ensure SP+1 is within valid memory range
+        // Check for stack overflow - ensure SP+1 is within valid memory range
+        // Note: This checks if SP would access beyond memory bounds but uses
+        // standardized "Stack overflow detected" message per CONTRIBUTING.md guidelines
         // RET always operates on words (2 bytes)
         if (currentSP + 1 >= memory.Length)
         {

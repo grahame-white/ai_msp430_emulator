@@ -133,8 +133,11 @@ public class InstructionDecoder : IInstructionDecoder
         {
             0x4 => new MovInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
             0x5 => new AddInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0x6 => new AddcInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0x7 => new SubcInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
             0x8 => new SubInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
             0x9 => new CmpInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
+            0xA => new DaddInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
             0xB => new BitInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
             0xC => new BicInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),
             0xD => new BisInstruction(instructionWord, sourceReg, destReg, sourceMode, destMode, byteWord),

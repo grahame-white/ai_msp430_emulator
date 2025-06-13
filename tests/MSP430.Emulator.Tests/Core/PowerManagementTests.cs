@@ -21,12 +21,7 @@ namespace MSP430.Emulator.Tests.Core;
 /// </summary>
 public class PowerManagementTests
 {
-    private readonly RegisterFile _registerFile;
-
-    public PowerManagementTests()
-    {
-        _registerFile = new RegisterFile();
-    }
+    private RegisterFile CreateRegisterFile() => new RegisterFile();
     #region LPM Mode Transition Tests (SLAU445I Section 1.4.2)
 
     [Theory]
@@ -38,6 +33,7 @@ public class PowerManagementTests
     public void LowPowerModes_ValidModeNumbers_AcceptedByStatusRegister(int lpmMode)
     {
         // LPM modes are encoded in Status Register bits SR[7:4] (SLAU445I Section 1.4.2)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Calculate SR value for LPM mode
         // LPM encoding: GIE=1, SCG1 and SCG0 bits control oscillators
@@ -63,10 +59,10 @@ public class PowerManagementTests
         }
 
         // Set SR register to enter LPM mode
-        _registerFile.WriteRegister(RegisterName.SR, srValue);
+        registerFile.WriteRegister(RegisterName.SR, srValue);
 
         // Verify LPM bits are set correctly
-        ushort actualSR = _registerFile.ReadRegister(RegisterName.SR);
+        ushort actualSR = registerFile.ReadRegister(RegisterName.SR);
         Assert.Equal(srValue, actualSR);
 
         // Verify LPM mode is within valid range
@@ -78,13 +74,14 @@ public class PowerManagementTests
     public void LowPowerMode_CPUOFFBit_DisablesCpuExecution()
     {
         // CPUOFF bit (SR[4]) disables CPU execution (SLAU445I Section 1.4.2)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Set CPUOFF bit in Status Register
         ushort srValue = 0x0010; // CPUOFF = 1 (bit 4)
-        _registerFile.WriteRegister(RegisterName.SR, srValue);
+        registerFile.WriteRegister(RegisterName.SR, srValue);
 
         // Verify CPUOFF bit is set
-        ushort actualSR = _registerFile.ReadRegister(RegisterName.SR);
+        ushort actualSR = registerFile.ReadRegister(RegisterName.SR);
         Assert.True((actualSR & 0x0010) != 0, "CPUOFF bit should be set");
 
         // CPU execution should be disabled (cannot verify without CPU emulation)
@@ -95,13 +92,14 @@ public class PowerManagementTests
     public void LowPowerMode_SCG1Bit_DisablesSMCLK()
     {
         // SCG1 bit (SR[5]) disables SMCLK (SLAU445I Section 1.4.2)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Set SCG1 bit to disable SMCLK
         ushort srValue = 0x0020; // SCG1 = 1 (bit 5) 
-        _registerFile.WriteRegister(RegisterName.SR, srValue);
+        registerFile.WriteRegister(RegisterName.SR, srValue);
 
         // Verify SCG1 bit is set
-        ushort actualSR = _registerFile.ReadRegister(RegisterName.SR);
+        ushort actualSR = registerFile.ReadRegister(RegisterName.SR);
         Assert.True((actualSR & 0x0020) != 0, "SCG1 bit should be set");
 
         // SMCLK should be disabled (LPM2/LPM3 behavior)
@@ -111,13 +109,14 @@ public class PowerManagementTests
     public void LowPowerMode_SCG0Bit_DisablesACLK()
     {
         // SCG0 bit (SR[6]) disables ACLK (SLAU445I Section 1.4.2)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Set SCG0 bit to disable ACLK  
         ushort srValue = 0x0040; // SCG0 = 1 (bit 6)
-        _registerFile.WriteRegister(RegisterName.SR, srValue);
+        registerFile.WriteRegister(RegisterName.SR, srValue);
 
         // Verify SCG0 bit is set
-        ushort actualSR = _registerFile.ReadRegister(RegisterName.SR);
+        ushort actualSR = registerFile.ReadRegister(RegisterName.SR);
         Assert.True((actualSR & 0x0040) != 0, "SCG0 bit should be set");
 
         // ACLK should be disabled (LPM4 behavior)
@@ -133,6 +132,7 @@ public class PowerManagementTests
     public void LowPowerMode_LPMx5_UltraLowPowerModes(int baseLpmMode)
     {
         // LPMx.5 modes provide ultra-low power consumption (SLAU445I Section 1.4.3)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // LPMx.5 modes are variants of LPM3/LPM4 with additional power savings
         // Entry requires specific sequence documented in SLAU445I Section 1.4.3.1
@@ -144,10 +144,10 @@ public class PowerManagementTests
             srValue |= 0x0040; // Add SCG0 for LPM4
         }
 
-        _registerFile.WriteRegister(RegisterName.SR, srValue);
+        registerFile.WriteRegister(RegisterName.SR, srValue);
 
         // Verify base LPM bits are set
-        ushort actualSR = _registerFile.ReadRegister(RegisterName.SR);
+        ushort actualSR = registerFile.ReadRegister(RegisterName.SR);
         Assert.True((actualSR & 0x0010) != 0, "CPUOFF should be set for LPMx.5");
         Assert.True((actualSR & 0x0020) != 0, "SCG1 should be set for LPMx.5");
 
@@ -164,17 +164,18 @@ public class PowerManagementTests
     public void LowPowerMode_LPM35_RetainsSRAMContent()
     {
         // LPM3.5 retains SRAM content (SLAU445I Section 1.4.3)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Store test data in register (simulating SRAM retention)
         const ushort testData = 0x1234;
-        _registerFile.WriteRegister(RegisterName.R15, testData);
+        registerFile.WriteRegister(RegisterName.R15, testData);
 
         // Enter LPM3.5 equivalent (CPUOFF + SCG1)
         ushort lpm35SR = 0x0010 | 0x0020; // CPUOFF + SCG1
-        _registerFile.WriteRegister(RegisterName.SR, lpm35SR);
+        registerFile.WriteRegister(RegisterName.SR, lpm35SR);
 
         // Verify data is retained after LPM3.5 entry
-        ushort retainedData = _registerFile.ReadRegister(RegisterName.R15);
+        ushort retainedData = registerFile.ReadRegister(RegisterName.R15);
         Assert.Equal(testData, retainedData);
 
         // Note: True LPM3.5 would require power management module simulation
@@ -186,13 +187,14 @@ public class PowerManagementTests
     {
         // LPM4.5 does not retain SRAM content (SLAU445I Section 1.4.3)
         // This test documents the behavioral difference from LPM3.5
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Enter LPM4.5 equivalent (CPUOFF + SCG1 + SCG0)
         ushort lpm45SR = 0x0010 | 0x0020 | 0x0040; // CPUOFF + SCG1 + SCG0
-        _registerFile.WriteRegister(RegisterName.SR, lpm45SR);
+        registerFile.WriteRegister(RegisterName.SR, lpm45SR);
 
         // Verify LPM4.5 bits are set correctly
-        ushort actualSR = _registerFile.ReadRegister(RegisterName.SR);
+        ushort actualSR = registerFile.ReadRegister(RegisterName.SR);
         Assert.Equal(lpm45SR, actualSR);
 
         // Note: Actual LPM4.5 would clear SRAM content - this requires PMM simulation
@@ -207,21 +209,22 @@ public class PowerManagementTests
     public void LowPowerMode_WakeupEvent_RestoresCPUExecution()
     {
         // Wake-up events clear CPUOFF bit to restore CPU execution (SLAU445I Section 1.4.3.2)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Enter LPM mode (set CPUOFF)
         ushort lpmSR = 0x0010; // CPUOFF = 1
-        _registerFile.WriteRegister(RegisterName.SR, lpmSR);
+        registerFile.WriteRegister(RegisterName.SR, lpmSR);
 
         // Verify CPU is in low power mode
-        ushort srBeforeWakeup = _registerFile.ReadRegister(RegisterName.SR);
+        ushort srBeforeWakeup = registerFile.ReadRegister(RegisterName.SR);
         Assert.True((srBeforeWakeup & 0x0010) != 0, "CPUOFF should be set before wakeup");
 
         // Simulate wake-up event by clearing CPUOFF bit
         ushort wakeupSR = (ushort)(srBeforeWakeup & ~0x0010); // Clear CPUOFF
-        _registerFile.WriteRegister(RegisterName.SR, wakeupSR);
+        registerFile.WriteRegister(RegisterName.SR, wakeupSR);
 
         // Verify CPU execution is restored
-        ushort srAfterWakeup = _registerFile.ReadRegister(RegisterName.SR);
+        ushort srAfterWakeup = registerFile.ReadRegister(RegisterName.SR);
         Assert.True((srAfterWakeup & 0x0010) == 0, "CPUOFF should be cleared after wakeup");
     }
 
@@ -229,17 +232,18 @@ public class PowerManagementTests
     public void LowPowerMode_InterruptWakeup_PreservesGIEBit()
     {
         // Interrupt-driven wake-up preserves GIE bit state (SLAU445I Section 1.4.3.2)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Enter LPM with interrupts enabled
         ushort lpmSR = 0x0008 | 0x0010; // GIE = 1, CPUOFF = 1
-        _registerFile.WriteRegister(RegisterName.SR, lpmSR);
+        registerFile.WriteRegister(RegisterName.SR, lpmSR);
 
         // Simulate interrupt wake-up (clears CPUOFF, preserves GIE)
         ushort wakeupSR = (ushort)(lpmSR & ~0x0010); // Clear CPUOFF only
-        _registerFile.WriteRegister(RegisterName.SR, wakeupSR);
+        registerFile.WriteRegister(RegisterName.SR, wakeupSR);
 
         // Verify GIE bit is preserved
-        ushort srAfterWakeup = _registerFile.ReadRegister(RegisterName.SR);
+        ushort srAfterWakeup = registerFile.ReadRegister(RegisterName.SR);
         Assert.True((srAfterWakeup & 0x0008) != 0, "GIE should be preserved after interrupt wakeup");
         Assert.True((srAfterWakeup & 0x0010) == 0, "CPUOFF should be cleared after wakeup");
     }
@@ -257,6 +261,7 @@ public class PowerManagementTests
     public void LowPowerMode_ClockBehavior_ControlsClockSources(int lpmMode, bool mclkOff, bool smclkExpected, bool aclkExpected)
     {
         // Clock behavior in LPM modes follows specific patterns (SLAU445I Section 1.4.1)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Configure SR for specified LPM mode
         ushort srValue = 0x0010; // CPUOFF = 1 (MCLK always off in LPM)
@@ -271,10 +276,10 @@ public class PowerManagementTests
             srValue |= 0x0040; // SCG0 = 1 (ACLK off)
         }
 
-        _registerFile.WriteRegister(RegisterName.SR, srValue);
+        registerFile.WriteRegister(RegisterName.SR, srValue);
 
         // Verify SR configuration matches expected LPM mode
-        ushort actualSR = _registerFile.ReadRegister(RegisterName.SR);
+        ushort actualSR = registerFile.ReadRegister(RegisterName.SR);
         Assert.Equal(srValue, actualSR);
 
         // Verify clock control bits match expected behavior
@@ -291,13 +296,14 @@ public class PowerManagementTests
     public void LowPowerMode_ClockRequests_DetermineActiveClocksInLPM()
     {
         // Active peripheral clock requests determine which clocks remain active (SLAU445I Section 1.4.1)
+        RegisterFile registerFile = CreateRegisterFile();
 
         // Enter LPM2 (SMCLK normally off)
         ushort lpm2SR = 0x0010 | 0x0020; // CPUOFF + SCG1
-        _registerFile.WriteRegister(RegisterName.SR, lpm2SR);
+        registerFile.WriteRegister(RegisterName.SR, lpm2SR);
 
         // Verify LPM2 configuration
-        ushort actualSR = _registerFile.ReadRegister(RegisterName.SR);
+        ushort actualSR = registerFile.ReadRegister(RegisterName.SR);
         Assert.True((actualSR & 0x0020) != 0, "SCG1 should be set in LPM2");
 
         // Note: Actual peripheral clock request handling would require
@@ -313,15 +319,17 @@ public class PowerManagementTests
     public void PowerManagementTests_TestInfrastructure_RegisterFileInstantiable()
     {
         // Verify test infrastructure supports power management testing
-        Assert.NotNull(_registerFile);
+        RegisterFile registerFile = CreateRegisterFile();
+        Assert.NotNull(registerFile);
     }
 
     [Fact]
     public void PowerManagementTests_StatusRegister_CanBeManipulatedForLPMTesting()
     {
         // Verify SR register can be manipulated for LPM testing
-        _registerFile.WriteRegister(RegisterName.SR, 0x1234);
-        Assert.Equal(0x1234, _registerFile.ReadRegister(RegisterName.SR));
+        RegisterFile registerFile = CreateRegisterFile();
+        registerFile.WriteRegister(RegisterName.SR, 0x1234);
+        Assert.Equal(0x1234, registerFile.ReadRegister(RegisterName.SR));
 
         // Document that these tests focus on SR bit manipulation
         // Full power management would require CPU and peripheral simulation

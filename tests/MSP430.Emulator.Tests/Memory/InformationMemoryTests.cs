@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MSP430.Emulator.Logging;
 using MSP430.Emulator.Memory;
+using MSP430.Emulator.Tests.TestUtilities;
 
 namespace MSP430.Emulator.Tests.Memory;
 
@@ -701,48 +702,19 @@ public class InformationMemoryTests
         Assert.False(result); // Should return false because Segment A couldn't be initialized
     }
 
-    [Fact]
-    public void Initialize_WithPattern_InitializesSegmentD()
+    [Theory]
+    [InlineData(0x1800, 0x55)] // Segment D should have pattern
+    [InlineData(0x1880, 0x55)] // Segment C should have pattern  
+    [InlineData(0x1900, 0x55)] // Segment B should have pattern
+    [InlineData(0x1980, 0xFF)] // Segment A should remain erased (protected)
+    public void Initialize_WithPattern_InitializesSegmentsCorrectly(ushort testAddress, byte expectedValue)
     {
         var infoMemory = new InformationMemory(_logger);
         const byte pattern = 0x55;
 
         infoMemory.Initialize(pattern);
 
-        Assert.Equal(pattern, infoMemory.ReadByte(0x1800)); // Segment D should have pattern
-    }
-
-    [Fact]
-    public void Initialize_WithPattern_InitializesSegmentC()
-    {
-        var infoMemory = new InformationMemory(_logger);
-        const byte pattern = 0x55;
-
-        infoMemory.Initialize(pattern);
-
-        Assert.Equal(pattern, infoMemory.ReadByte(0x1880)); // Segment C should have pattern
-    }
-
-    [Fact]
-    public void Initialize_WithPattern_InitializesSegmentB()
-    {
-        var infoMemory = new InformationMemory(_logger);
-        const byte pattern = 0x55;
-
-        infoMemory.Initialize(pattern);
-
-        Assert.Equal(pattern, infoMemory.ReadByte(0x1900)); // Segment B should have pattern
-    }
-
-    [Fact]
-    public void Initialize_WithPattern_SegmentARemainsErased()
-    {
-        var infoMemory = new InformationMemory(_logger);
-        const byte pattern = 0x55;
-
-        infoMemory.Initialize(pattern);
-
-        Assert.Equal(0xFF, infoMemory.ReadByte(0x1980)); // Segment A should remain erased (protected)
+        Assert.Equal(expectedValue, infoMemory.ReadByte(testAddress));
     }
 
     [Theory]
@@ -803,41 +775,4 @@ public class InformationMemoryTests
 
         Assert.Equal(128, segmentInfo.Size); // 0x19FF - 0x1980 + 1 = 128
     }
-
-    private class TestLogger : ILogger
-    {
-        public LogLevel MinimumLevel { get; set; } = LogLevel.Warning;
-        public List<LogEntry> LogEntries { get; } = new();
-
-        public void Log(LogLevel level, string message)
-        {
-            if (IsEnabled(level))
-            {
-                LogEntries.Add(new LogEntry(level, message, null));
-            }
-        }
-
-        public void Log(LogLevel level, string message, object? context)
-        {
-            if (IsEnabled(level))
-            {
-                LogEntries.Add(new LogEntry(level, message, context));
-            }
-        }
-
-        public void Debug(string message) => Log(LogLevel.Debug, message);
-        public void Debug(string message, object? context) => Log(LogLevel.Debug, message, context);
-        public void Info(string message) => Log(LogLevel.Info, message);
-        public void Info(string message, object? context) => Log(LogLevel.Info, message, context);
-        public void Warning(string message) => Log(LogLevel.Warning, message);
-        public void Warning(string message, object? context) => Log(LogLevel.Warning, message, context);
-        public void Error(string message) => Log(LogLevel.Error, message);
-        public void Error(string message, object? context) => Log(LogLevel.Error, message, context);
-        public void Fatal(string message) => Log(LogLevel.Fatal, message);
-        public void Fatal(string message, object? context) => Log(LogLevel.Fatal, message, context);
-
-        public bool IsEnabled(LogLevel level) => level >= MinimumLevel;
-    }
-
-    private record LogEntry(LogLevel Level, string Message, object? Context);
 }

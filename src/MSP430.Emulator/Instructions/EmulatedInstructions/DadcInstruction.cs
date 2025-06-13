@@ -105,9 +105,9 @@ public class DadcInstruction : Instruction, IExecutableInstruction
         // DADC dst is emulated as DADD #0, dst
         var daddInstruction = new DaddInstruction(
             InstructionWord,
-            RegisterName.R2, // Source: CG1 for constant #0
+            RegisterName.R3, // Source: CG2 for constant #0
             _destinationRegister,
-            AddressingMode.Immediate, // Source: immediate mode for #0
+            AddressingMode.Register, // Source: register mode for #0 constant
             _destinationAddressingMode,
             _isByteOperation);
 

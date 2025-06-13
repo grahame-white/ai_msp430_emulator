@@ -49,8 +49,9 @@ public class SubInstruction : ArithmeticInstruction
     /// <param name="sourceValue">The source operand value.</param>
     /// <param name="destinationValue">The destination operand value.</param>
     /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <param name="registerFile">The register file (not used for SUB operation).</param>
     /// <returns>A tuple containing the result, carry flag, and overflow flag.</returns>
-    protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation)
+    protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation, IRegisterFile registerFile)
     {
         // Subtraction is performed as: dst = dst + (~src) + 1, which is dst + twos_complement(src)
         uint result = (uint)destinationValue - (uint)sourceValue;

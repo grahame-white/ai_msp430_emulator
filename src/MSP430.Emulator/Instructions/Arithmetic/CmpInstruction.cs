@@ -51,8 +51,9 @@ public class CmpInstruction : ArithmeticInstruction
     /// <param name="sourceValue">The source operand value.</param>
     /// <param name="destinationValue">The destination operand value.</param>
     /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <param name="registerFile">The register file (not used for CMP operation).</param>
     /// <returns>A tuple containing the result, carry flag, and overflow flag.</returns>
-    protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation)
+    protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation, IRegisterFile registerFile)
     {
         // CMP performs the same operation as SUB: dst - src
         uint result = (uint)destinationValue - (uint)sourceValue;

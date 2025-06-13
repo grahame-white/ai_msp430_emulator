@@ -48,14 +48,14 @@ public class AdcInstruction : Instruction, IExecutableInstruction
     public override RegisterName? DestinationRegister => _destinationRegister;
 
     /// <summary>
-    /// Gets the source register for this instruction (always CG1/R2 for constant #0).
+    /// Gets the source register for this instruction (always CG2/R3 for constant #0).
     /// </summary>
-    public override RegisterName? SourceRegister => RegisterName.R2;
+    public override RegisterName? SourceRegister => RegisterName.R3;
 
     /// <summary>
-    /// Gets the source addressing mode for this instruction (always Immediate mode for #0).
+    /// Gets the source addressing mode for this instruction (always Register mode for #0).
     /// </summary>
-    public override AddressingMode? SourceAddressingMode => AddressingMode.Immediate;
+    public override AddressingMode? SourceAddressingMode => AddressingMode.Register;
 
     /// <summary>
     /// Gets the destination addressing mode for this instruction.
@@ -74,7 +74,7 @@ public class AdcInstruction : Instruction, IExecutableInstruction
     {
         get
         {
-            // Only destination operand can require extension words
+            // Only destination operand can require extension words since source is constant generator
             if (_destinationAddressingMode == AddressingMode.Absolute ||
                 _destinationAddressingMode == AddressingMode.Symbolic ||
                 _destinationAddressingMode == AddressingMode.Indexed)
@@ -105,9 +105,9 @@ public class AdcInstruction : Instruction, IExecutableInstruction
         // ADC dst is emulated as ADDC #0, dst
         var addcInstruction = new AddcInstruction(
             InstructionWord,
-            RegisterName.R2, // Source: CG1 for constant #0
+            RegisterName.R3, // Source: CG2 for constant #0
             _destinationRegister,
-            AddressingMode.Immediate, // Source: immediate mode for #0
+            AddressingMode.Register, // Source: register mode for #0 constant
             _destinationAddressingMode,
             _isByteOperation);
 

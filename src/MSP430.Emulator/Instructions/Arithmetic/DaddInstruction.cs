@@ -49,18 +49,18 @@ public class DaddInstruction : ArithmeticInstruction
     /// <summary>
     /// Performs the DADD arithmetic operation.
     /// Adds the source operand to the destination operand using BCD arithmetic with carry.
-    /// NOTE: Current implementation does not include carry input. This will be enhanced
-    /// in a future version to properly access the status register carry flag.
     /// </summary>
     /// <param name="sourceValue">The source operand value.</param>
     /// <param name="destinationValue">The destination operand value.</param>
     /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <param name="registerFile">The register file for accessing the carry flag.</param>
     /// <returns>A tuple containing the result and flags (carry, overflow).</returns>
     protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(
-        ushort sourceValue, ushort destinationValue, bool isByteOperation)
+        ushort sourceValue, ushort destinationValue, bool isByteOperation, IRegisterFile registerFile)
     {
-        // NOTE: Need to access status register carry flag for proper DADD implementation
-        // For now, implementing simple BCD addition without carry input
+        // Read the current carry flag from the status register
+        int carryInput = registerFile.StatusRegister.Carry ? 1 : 0;
+
         if (isByteOperation)
         {
             // Mask to 8 bits for byte operations
@@ -68,7 +68,7 @@ public class DaddInstruction : ArithmeticInstruction
             byte dst = (byte)(destinationValue & 0xFF);
 
             // Perform BCD addition for byte (2 nibbles)
-            int result = PerformBcdAddition(src, dst, 0, 2); // 0 = no carry input for now
+            int result = PerformBcdAddition(src, dst, carryInput, 2);
             byte finalResult = (byte)(result & 0xFF);
 
             // Calculate flags for byte operation
@@ -84,7 +84,7 @@ public class DaddInstruction : ArithmeticInstruction
         else
         {
             // Word operation (4 nibbles)
-            int result = PerformBcdAddition(sourceValue, destinationValue, 0, 4); // 0 = no carry input for now
+            int result = PerformBcdAddition(sourceValue, destinationValue, carryInput, 4);
             ushort finalResult = (ushort)(result & 0xFFFF);
 
             // Calculate flags for word operation

@@ -49,25 +49,29 @@ public class SubcInstruction : ArithmeticInstruction
     /// <summary>
     /// Performs the SUBC arithmetic operation.
     /// Subtracts the source operand from the destination operand with borrow (carry).
-    /// NOTE: Current implementation does not include carry input. This will be enhanced
-    /// in a future version to properly access the status register carry flag.
+    /// Operation: dst = dst - src - (1 - C) which is equivalent to dst = dst + ~src + C
     /// </summary>
     /// <param name="sourceValue">The source operand value.</param>
     /// <param name="destinationValue">The destination operand value.</param>
     /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <param name="registerFile">The register file for accessing the carry flag.</param>
     /// <returns>A tuple containing the result and flags (carry, overflow).</returns>
     protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(
-        ushort sourceValue, ushort destinationValue, bool isByteOperation)
+        ushort sourceValue, ushort destinationValue, bool isByteOperation, IRegisterFile registerFile)
     {
-        // NOTE: Need to access status register carry flag for proper SUBC implementation
-        // For now, implementing as simple SUB (this is a temporary limitation)
-        uint result = (uint)destinationValue - (uint)sourceValue;
+        // Read the current carry flag from the status register
+        // In MSP430, carry acts as "no borrow" flag for subtract operations
+        uint carryInput = registerFile.StatusRegister.Carry ? 1u : 0u;
+
+        // Perform SUBC: dst = dst - src - (1 - C) = dst + ~src + C
+        uint result = (uint)destinationValue + (uint)(~sourceValue) + carryInput;
 
         bool carry, overflow;
         if (isByteOperation)
         {
             // For byte operations, check borrow (inverse carry) at 8-bit boundaries
-            carry = destinationValue < sourceValue; // No borrow means carry is set
+            // Carry is set when no borrow is needed (result >= 0)
+            carry = result > 0xFF;
 
             // Overflow occurs when subtracting numbers of different signs yields wrong sign
             byte src8 = (byte)(sourceValue & 0xFF);
@@ -79,7 +83,7 @@ public class SubcInstruction : ArithmeticInstruction
         else
         {
             // For word operations, check borrow (inverse carry) at 16-bit boundaries
-            carry = destinationValue < sourceValue; // No borrow means carry is set
+            carry = result > 0xFFFF;
 
             // Overflow occurs when subtracting numbers of different signs yields wrong sign
             overflow = ((sourceValue & 0x8000) != (destinationValue & 0x8000)) && ((destinationValue & 0x8000) != (result & 0x8000));

@@ -48,19 +48,20 @@ public class AddcInstruction : ArithmeticInstruction
     /// <summary>
     /// Performs the ADDC arithmetic operation.
     /// Adds the source operand and the carry bit to the destination operand.
-    /// NOTE: Current implementation does not include carry input. This will be enhanced
-    /// in a future version to properly access the status register carry flag.
     /// </summary>
     /// <param name="sourceValue">The source operand value.</param>
     /// <param name="destinationValue">The destination operand value.</param>
     /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <param name="registerFile">The register file for accessing the carry flag.</param>
     /// <returns>A tuple containing the result and flags (carry, overflow).</returns>
     protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(
-        ushort sourceValue, ushort destinationValue, bool isByteOperation)
+        ushort sourceValue, ushort destinationValue, bool isByteOperation, IRegisterFile registerFile)
     {
-        // NOTE: Need to access status register carry flag for proper ADDC implementation
-        // For now, implementing as simple ADD (this is a temporary limitation)
-        uint result = (uint)sourceValue + (uint)destinationValue;
+        // Read the current carry flag from the status register
+        uint carryInput = registerFile.StatusRegister.Carry ? 1u : 0u;
+
+        // Perform the addition: dst = src + dst + C
+        uint result = (uint)sourceValue + (uint)destinationValue + carryInput;
 
         bool carry, overflow;
         if (isByteOperation)

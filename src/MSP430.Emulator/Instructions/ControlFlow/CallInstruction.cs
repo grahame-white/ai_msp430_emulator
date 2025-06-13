@@ -128,8 +128,29 @@ public class CallInstruction : Instruction, IExecutableInstruction
 
         // CALL instructions do not affect status flags per SLAU445I specification
 
-        // Return cycle count based on addressing mode
-        return InstructionHelpers.GetSingleOperandCycleCount(_sourceAddressingMode);
+        // Return cycle count based on addressing mode per SLAU445I Table 4-9
+        return GetCallInstructionCycleCount(_sourceAddressingMode);
+    }
+
+    /// <summary>
+    /// Gets the number of CPU cycles for a CALL instruction based on addressing mode.
+    /// Based on SLAU445I Table 4-9: MSP430 Format II Instruction Cycles and Length.
+    /// </summary>
+    /// <param name="addressingMode">The addressing mode.</param>
+    /// <returns>The number of CPU cycles per SLAU445I Table 4-9.</returns>
+    private static uint GetCallInstructionCycleCount(AddressingMode addressingMode)
+    {
+        return addressingMode switch
+        {
+            AddressingMode.Register => 4,                  // Rn
+            AddressingMode.Indirect => 4,                  // @Rn  
+            AddressingMode.IndirectAutoIncrement => 4,     // @Rn+
+            AddressingMode.Immediate => 4,                 // #N
+            AddressingMode.Indexed => 5,                   // X(Rn)
+            AddressingMode.Symbolic => 5,                  // EDE (PC-relative)
+            AddressingMode.Absolute => 6,                  // &EDE
+            _ => 4 // Default for unknown modes
+        };
     }
 
     /// <summary>

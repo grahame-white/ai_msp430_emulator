@@ -160,8 +160,8 @@ public class CallInstructionTests
             // Assert - Check that PC was set to destination
             Assert.Equal(0x9000, registerFile.GetProgramCounter());
 
-            // Assert - Check cycle count for register mode
-            Assert.Equal(1u, cycles);
+            // Assert - Check cycle count for register mode per SLAU445I Table 4-9
+            Assert.Equal(4u, cycles);
         }
 
         [Fact]
@@ -192,8 +192,8 @@ public class CallInstructionTests
             // Assert - Check that PC was set to destination from memory
             Assert.Equal(0x9500, registerFile.GetProgramCounter());
 
-            // Assert - Check cycle count for indirect mode
-            Assert.Equal(3u, cycles);
+            // Assert - Check cycle count for indirect mode per SLAU445I Table 4-9
+            Assert.Equal(4u, cycles);
         }
 
         [Fact]
@@ -220,8 +220,8 @@ public class CallInstructionTests
             // Assert - Check that PC was set to immediate value
             Assert.Equal(0xA000, registerFile.GetProgramCounter());
 
-            // Assert - Check cycle count for immediate mode
-            Assert.Equal(1u, cycles);
+            // Assert - Check cycle count for immediate mode per SLAU445I Table 4-9
+            Assert.Equal(4u, cycles);
         }
     }
 
@@ -327,13 +327,13 @@ public class CallInstructionTests
     public class CycleCountTests
     {
         [Theory]
-        [InlineData(AddressingMode.Register, 1u)]
-        [InlineData(AddressingMode.Indexed, 4u)]
-        [InlineData(AddressingMode.Indirect, 3u)]
-        [InlineData(AddressingMode.IndirectAutoIncrement, 3u)]
-        [InlineData(AddressingMode.Immediate, 1u)]
-        [InlineData(AddressingMode.Absolute, 4u)]
-        [InlineData(AddressingMode.Symbolic, 4u)]
+        [InlineData(AddressingMode.Register, 4u)]
+        [InlineData(AddressingMode.Indexed, 5u)]
+        [InlineData(AddressingMode.Indirect, 4u)]
+        [InlineData(AddressingMode.IndirectAutoIncrement, 4u)]
+        [InlineData(AddressingMode.Immediate, 4u)]
+        [InlineData(AddressingMode.Absolute, 6u)]
+        [InlineData(AddressingMode.Symbolic, 5u)]
         public void Execute_VariousAddressingModes_ReturnsCorrectCycleCount(
             AddressingMode mode, uint expectedCycles)
         {

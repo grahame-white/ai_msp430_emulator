@@ -17,46 +17,142 @@ namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
 public class ConditionalJumpInstructionPropertiesTests
 {
     [Fact]
-    public void AllConditionalJumpInstructions_HaveCorrectFormat()
+    public void JzInstruction_HasCorrectFormat()
     {
         // Arrange & Act
-        var jz = new JzInstruction(0x2000, 0);
-        var jnz = new JnzInstruction(0x2000, 0);
-        var jc = new JcInstruction(0x2000, 0);
-        var jnc = new JncInstruction(0x2000, 0);
-        var jn = new JnInstruction(0x2000, 0);
-        var jge = new JgeInstruction(0x2000, 0);
-        var jl = new JlInstruction(0x2000, 0);
+        var instruction = new JzInstruction(0x2000, 0);
 
         // Assert
-        Assert.Equal(InstructionFormat.FormatIII, jz.Format);
-        Assert.Equal(InstructionFormat.FormatIII, jnz.Format);
-        Assert.Equal(InstructionFormat.FormatIII, jc.Format);
-        Assert.Equal(InstructionFormat.FormatIII, jnc.Format);
-        Assert.Equal(InstructionFormat.FormatIII, jn.Format);
-        Assert.Equal(InstructionFormat.FormatIII, jge.Format);
-        Assert.Equal(InstructionFormat.FormatIII, jl.Format);
+        Assert.Equal(InstructionFormat.FormatIII, instruction.Format);
     }
 
     [Fact]
-    public void AllConditionalJumpInstructions_HaveZeroExtensionWords()
+    public void JnzInstruction_HasCorrectFormat()
     {
         // Arrange & Act
-        var jz = new JzInstruction(0x2000, 0);
-        var jnz = new JnzInstruction(0x2000, 0);
-        var jc = new JcInstruction(0x2000, 0);
-        var jnc = new JncInstruction(0x2000, 0);
-        var jn = new JnInstruction(0x2000, 0);
-        var jge = new JgeInstruction(0x2000, 0);
-        var jl = new JlInstruction(0x2000, 0);
+        var instruction = new JnzInstruction(0x2000, 0);
 
         // Assert
-        Assert.Equal(0, jz.ExtensionWordCount);
-        Assert.Equal(0, jnz.ExtensionWordCount);
-        Assert.Equal(0, jc.ExtensionWordCount);
-        Assert.Equal(0, jnc.ExtensionWordCount);
-        Assert.Equal(0, jn.ExtensionWordCount);
-        Assert.Equal(0, jge.ExtensionWordCount);
-        Assert.Equal(0, jl.ExtensionWordCount);
+        Assert.Equal(InstructionFormat.FormatIII, instruction.Format);
+    }
+
+    [Fact]
+    public void JcInstruction_HasCorrectFormat()
+    {
+        // Arrange & Act
+        var instruction = new JcInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(InstructionFormat.FormatIII, instruction.Format);
+    }
+
+    [Fact]
+    public void JncInstruction_HasCorrectFormat()
+    {
+        // Arrange & Act
+        var instruction = new JncInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(InstructionFormat.FormatIII, instruction.Format);
+    }
+
+    [Fact]
+    public void JnInstruction_HasCorrectFormat()
+    {
+        // Arrange & Act
+        var instruction = new JnInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(InstructionFormat.FormatIII, instruction.Format);
+    }
+
+    [Fact]
+    public void JgeInstruction_HasCorrectFormat()
+    {
+        // Arrange & Act
+        var instruction = new JgeInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(InstructionFormat.FormatIII, instruction.Format);
+    }
+
+    [Fact]
+    public void JlInstruction_HasCorrectFormat()
+    {
+        // Arrange & Act
+        var instruction = new JlInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(InstructionFormat.FormatIII, instruction.Format);
+    }
+
+    [Fact]
+    public void JzInstruction_HasZeroExtensionWords()
+    {
+        // Arrange & Act
+        var instruction = new JzInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(0, instruction.ExtensionWordCount);
+    }
+
+    [Fact]
+    public void JnzInstruction_HasZeroExtensionWords()
+    {
+        // Arrange & Act
+        var instruction = new JnzInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(0, instruction.ExtensionWordCount);
+    }
+
+    [Fact]
+    public void JcInstruction_HasZeroExtensionWords()
+    {
+        // Arrange & Act
+        var instruction = new JcInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(0, instruction.ExtensionWordCount);
+    }
+
+    [Fact]
+    public void JncInstruction_HasZeroExtensionWords()
+    {
+        // Arrange & Act
+        var instruction = new JncInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(0, instruction.ExtensionWordCount);
+    }
+
+    [Fact]
+    public void JnInstruction_HasZeroExtensionWords()
+    {
+        // Arrange & Act
+        var instruction = new JnInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(0, instruction.ExtensionWordCount);
+    }
+
+    [Fact]
+    public void JgeInstruction_HasZeroExtensionWords()
+    {
+        // Arrange & Act
+        var instruction = new JgeInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(0, instruction.ExtensionWordCount);
+    }
+
+    [Fact]
+    public void JlInstruction_HasZeroExtensionWords()
+    {
+        // Arrange & Act
+        var instruction = new JlInstruction(0x2000, 0);
+
+        // Assert
+        Assert.Equal(0, instruction.ExtensionWordCount);
     }
 }

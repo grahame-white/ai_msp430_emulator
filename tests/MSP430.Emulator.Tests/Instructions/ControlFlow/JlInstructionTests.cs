@@ -42,7 +42,7 @@ public class JlInstructionTests
     [InlineData(false, false, false)] // N=0, V=0 → N⊕V=0 → JL doesn't jump
     [InlineData(true, false, true)]  // N=1, V=0 → N⊕V=1 → JL jumps
     [InlineData(false, true, true)]  // N=0, V=1 → N⊕V=1 → JL jumps
-    public void Execute_NegativeXorOverflow_BehavesCorrectly(bool negative, bool overflow, bool shouldJump)
+    public void Execute_NegativeXorOverflow_UpdatesProgramCounterCorrectly(bool negative, bool overflow, bool shouldJump)
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -55,7 +55,7 @@ public class JlInstructionTests
         registerFile.StatusRegister.Overflow = overflow;
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         if (shouldJump)
@@ -66,6 +66,24 @@ public class JlInstructionTests
         {
             Assert.Equal(originalPC, registerFile.GetProgramCounter());
         }
+    }
+
+    [Fact]
+    public void Execute_AlwaysTakesTwoCycles()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        var instruction = new JlInstruction(0x2000, -8);
+
+        registerFile.SetProgramCounter(0x1000);
+        registerFile.StatusRegister.Negative = true;
+        registerFile.StatusRegister.Overflow = false; // Set up for jump (N⊕V=1)
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(2u, cycles);
     }
 }

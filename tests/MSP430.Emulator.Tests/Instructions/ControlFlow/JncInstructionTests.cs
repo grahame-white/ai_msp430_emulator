@@ -40,7 +40,7 @@ public class JncInstructionTests
     [Theory]
     [InlineData(true, false)] // C=1 should not jump
     [InlineData(false, true)] // C=0 should jump
-    public void Execute_CarryFlag_BehavesCorrectly(bool carryFlag, bool shouldJump)
+    public void Execute_CarryFlag_UpdatesProgramCounterCorrectly(bool carryFlag, bool shouldJump)
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -52,7 +52,7 @@ public class JncInstructionTests
         registerFile.StatusRegister.Carry = carryFlag;
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         if (shouldJump)
@@ -63,6 +63,23 @@ public class JncInstructionTests
         {
             Assert.Equal(originalPC, registerFile.GetProgramCounter());
         }
+    }
+
+    [Fact]
+    public void Execute_AlwaysTakesTwoCycles()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        var instruction = new JncInstruction(0x2000, -15);
+
+        registerFile.SetProgramCounter(0x1000);
+        registerFile.StatusRegister.Carry = false; // Set up for jump
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(2u, cycles);
     }
 }

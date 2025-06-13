@@ -42,7 +42,7 @@ public class JgeInstructionTests
     [InlineData(false, false, true)] // N=0, V=0 → N⊕V=0 → JGE jumps
     [InlineData(true, false, false)] // N=1, V=0 → N⊕V=1 → JGE doesn't jump
     [InlineData(false, true, false)] // N=0, V=1 → N⊕V=1 → JGE doesn't jump
-    public void Execute_NegativeXorOverflow_BehavesCorrectly(bool negative, bool overflow, bool shouldJump)
+    public void Execute_NegativeXorOverflow_UpdatesProgramCounterCorrectly(bool negative, bool overflow, bool shouldJump)
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -55,7 +55,7 @@ public class JgeInstructionTests
         registerFile.StatusRegister.Overflow = overflow;
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         if (shouldJump)
@@ -66,6 +66,24 @@ public class JgeInstructionTests
         {
             Assert.Equal(originalPC, registerFile.GetProgramCounter());
         }
+    }
+
+    [Fact]
+    public void Execute_AlwaysTakesTwoCycles()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        var instruction = new JgeInstruction(0x2000, 12);
+
+        registerFile.SetProgramCounter(0x1000);
+        registerFile.StatusRegister.Negative = false;
+        registerFile.StatusRegister.Overflow = false; // Set up for jump (N⊕V=0)
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(2u, cycles);
     }
 }

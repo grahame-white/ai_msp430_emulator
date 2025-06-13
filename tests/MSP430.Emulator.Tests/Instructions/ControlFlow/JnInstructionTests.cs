@@ -40,7 +40,7 @@ public class JnInstructionTests
     [Theory]
     [InlineData(true, true)] // N=1 should jump
     [InlineData(false, false)] // N=0 should not jump
-    public void Execute_NegativeFlag_BehavesCorrectly(bool negativeFlag, bool shouldJump)
+    public void Execute_NegativeFlag_UpdatesProgramCounterCorrectly(bool negativeFlag, bool shouldJump)
     {
         // Arrange
         var registerFile = new RegisterFile();
@@ -52,7 +52,7 @@ public class JnInstructionTests
         registerFile.StatusRegister.Negative = negativeFlag;
 
         // Act
-        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
         if (shouldJump)
@@ -63,6 +63,23 @@ public class JnInstructionTests
         {
             Assert.Equal(originalPC, registerFile.GetProgramCounter());
         }
+    }
+
+    [Fact]
+    public void Execute_AlwaysTakesTwoCycles()
+    {
+        // Arrange
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[65536];
+        var instruction = new JnInstruction(0x2000, 8);
+
+        registerFile.SetProgramCounter(0x1000);
+        registerFile.StatusRegister.Negative = true; // Set up for jump
+
+        // Act
+        uint cycles = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+        // Assert
         Assert.Equal(2u, cycles);
     }
 }

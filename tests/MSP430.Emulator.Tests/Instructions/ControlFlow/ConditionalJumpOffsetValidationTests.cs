@@ -22,15 +22,81 @@ public class ConditionalJumpOffsetValidationTests
     [InlineData(0)]
     [InlineData(100)]
     [InlineData(-100)]
-    public void ConditionalJumpInstructions_ValidOffsetRange_DoesNotThrow(short offset)
+    public void JzInstruction_ValidOffsetRange_DoesNotThrow(short offset)
     {
         // Arrange & Act & Assert
         Assert.Null(Record.Exception(() => new JzInstruction(0x2000, offset)));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset)]
+    [InlineData(0)]
+    [InlineData(100)]
+    [InlineData(-100)]
+    public void JnzInstruction_ValidOffsetRange_DoesNotThrow(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Null(Record.Exception(() => new JnzInstruction(0x2000, offset)));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset)]
+    [InlineData(0)]
+    [InlineData(100)]
+    [InlineData(-100)]
+    public void JcInstruction_ValidOffsetRange_DoesNotThrow(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Null(Record.Exception(() => new JcInstruction(0x2000, offset)));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset)]
+    [InlineData(0)]
+    [InlineData(100)]
+    [InlineData(-100)]
+    public void JncInstruction_ValidOffsetRange_DoesNotThrow(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Null(Record.Exception(() => new JncInstruction(0x2000, offset)));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset)]
+    [InlineData(0)]
+    [InlineData(100)]
+    [InlineData(-100)]
+    public void JnInstruction_ValidOffsetRange_DoesNotThrow(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Null(Record.Exception(() => new JnInstruction(0x2000, offset)));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset)]
+    [InlineData(0)]
+    [InlineData(100)]
+    [InlineData(-100)]
+    public void JgeInstruction_ValidOffsetRange_DoesNotThrow(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Null(Record.Exception(() => new JgeInstruction(0x2000, offset)));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset)]
+    [InlineData(0)]
+    [InlineData(100)]
+    [InlineData(-100)]
+    public void JlInstruction_ValidOffsetRange_DoesNotThrow(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Null(Record.Exception(() => new JlInstruction(0x2000, offset)));
     }
 
@@ -39,15 +105,75 @@ public class ConditionalJumpOffsetValidationTests
     [InlineData(ConditionalJumpInstruction.MaxOffset + 1)]
     [InlineData(-1000)]
     [InlineData(1000)]
-    public void ConditionalJumpInstructions_InvalidOffsetRange_ThrowsArgumentOutOfRangeException(short offset)
+    public void JzInstruction_InvalidOffsetRange_ThrowsArgumentOutOfRangeException(short offset)
     {
         // Arrange & Act & Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => new JzInstruction(0x2000, offset));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset - 1)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset + 1)]
+    [InlineData(-1000)]
+    [InlineData(1000)]
+    public void JnzInstruction_InvalidOffsetRange_ThrowsArgumentOutOfRangeException(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => new JnzInstruction(0x2000, offset));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset - 1)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset + 1)]
+    [InlineData(-1000)]
+    [InlineData(1000)]
+    public void JcInstruction_InvalidOffsetRange_ThrowsArgumentOutOfRangeException(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => new JcInstruction(0x2000, offset));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset - 1)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset + 1)]
+    [InlineData(-1000)]
+    [InlineData(1000)]
+    public void JncInstruction_InvalidOffsetRange_ThrowsArgumentOutOfRangeException(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => new JncInstruction(0x2000, offset));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset - 1)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset + 1)]
+    [InlineData(-1000)]
+    [InlineData(1000)]
+    public void JnInstruction_InvalidOffsetRange_ThrowsArgumentOutOfRangeException(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => new JnInstruction(0x2000, offset));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset - 1)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset + 1)]
+    [InlineData(-1000)]
+    [InlineData(1000)]
+    public void JgeInstruction_InvalidOffsetRange_ThrowsArgumentOutOfRangeException(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => new JgeInstruction(0x2000, offset));
+    }
+
+    [Theory]
+    [InlineData(ConditionalJumpInstruction.MinOffset - 1)]
+    [InlineData(ConditionalJumpInstruction.MaxOffset + 1)]
+    [InlineData(-1000)]
+    [InlineData(1000)]
+    public void JlInstruction_InvalidOffsetRange_ThrowsArgumentOutOfRangeException(short offset)
+    {
+        // Arrange & Act & Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => new JlInstruction(0x2000, offset));
     }
 }

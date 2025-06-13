@@ -86,6 +86,57 @@ AI developers working on this project should regularly reassess and update this 
 - **Cross-Reference Validation**: Regularly verify task implementation against MSP430 specifications
 - **Community Integration**: Incorporate feedback from hardware experts and emulation community
 
+### Policy Compliance Requirements
+
+**All tasks must comply with repository policies as documented in [DOCUMENTATION_STANDARDS.md](docs/DOCUMENTATION_STANDARDS.md) and [AI Developer Guidelines](.github/copilot-instructions.md).**
+
+**Texas Instruments Documentation Compliance**:
+
+- **Primary Source Requirements**: All MSP430FR2355 implementation details **must** reference official TI documentation
+- **Required Format**: Include exact document title, revision/version number, and specific section numbers
+- **Example**: `SLAU445I Section 4.6.2.2 ADD - Add source to destination`
+- **Document Verification**: Contributors must verify that referenced sections exist in specified document versions
+
+**Required Primary Documents for Task Implementation**:
+
+- **SLAU445I**: MSP430FR2xx FR4xx Family User's Guide - Programming model and architecture
+- **SLAU131Y**: MSP430 Assembly Language Tools User's Guide - Instruction set and assembly syntax  
+- **SLASEC4D**: MSP430FR235x/FR215x Mixed-Signal Microcontrollers - Hardware specifications
+
+**Code Standards Compliance**:
+
+- **File Organization**: Each file must contain exactly one type (class, interface, enum, struct)
+- **Naming Convention**: Filename must match type name exactly
+- **Test Coverage**: Minimum 80% line coverage, 70% branch coverage
+- **Documentation**: Include inline comments explaining TI specification compliance
+- **Static Analysis**: Code must pass all linting and static analysis checks
+
+**Development Workflow Compliance**:
+
+- **Pre-commit Validation**: Run `./script/format && ./script/lint && ./script/test` before each commit
+- **Build Integration**: All tools must integrate into "Scripts to Rule Them All" pattern
+- **Automation Scripts**: Changes to `.github/scripts/` require `npm run validate:all && npm test`
+
+**Task Documentation Standards**:
+
+- **TI References**: Every instruction task must include specific SLAU445I section references
+- **Acceptance Criteria**: Must be measurable and testable
+- **Testing Strategy**: Must include specific test scenarios per repository standards
+- **Policy Acknowledgment**: Each task must include policy compliance checkboxes
+
+**Validation Commands**:
+
+```bash
+# Pre-commit validation (required)
+./script/format && ./script/lint && ./script/test
+
+# Documentation validation
+npm run lint:docs
+
+# Complete validation pipeline
+./script/cibuild
+```
+
 ## Task Ordering Philosophy
 
 Tasks are ordered to establish a solid foundation first, then build complexity incrementally:
@@ -744,6 +795,7 @@ tests/MSP430.Emulator.Tests/Memory/MemoryControllerTests.cs
 Implement fundamental arithmetic operations (ADD, SUB, CMP) with proper flag handling.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2.2 ADD - Add source to destination  
 - SLAU445I Section 4.6.2.46 SUB - Subtract source from destination
 - SLAU445I Section 4.6.2.14 CMP - Compare source and destination
@@ -792,6 +844,7 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/CmpInstructionTests.cs
 Implement carry-related arithmetic operations (ADDC, SUBC) with proper flag handling.
 
 **TI Documentation References**:
+
 - SLAU445I Section 4.6.2.3 ADDC - Add source and carry to destination
 - SLAU445I Section 4.6.2.47 SUBC - Subtract source and borrow /.NOT. carry from destination
 
@@ -1354,13 +1407,18 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetInstructionTests.cs
 
 Implement interrupt-related and special control instructions (RETI, NOP, etc.).
 
+**TI Documentation References**:
+- SLAU445I Section 4.6.2.37 RETI - Return from interrupt
+- SLAU445I Section 4.6.2.33 NOP - No operation
+- SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions (DINT, EINT)
+
 **Acceptance Criteria**:
 
 - [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `RetiInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/RetiInstruction.cs`
 - [ ] Implement `NopInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/NopInstruction.cs`
-- [ ] Implement interrupt enable/disable instructions
+- [ ] Implement interrupt enable/disable instructions (DINT, EINT emulated instructions)
 - [ ] Handle status register restoration for RETI
 - [ ] Add comprehensive unit tests for special instructions
 
@@ -1379,6 +1437,85 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/SpecialInstructionTests.cs
 - Test interrupt return behavior
 - Test status register restoration
 - Test interrupt enable/disable
+
+---
+
+### Task 6.5: Emulated Instruction Implementation and Validation
+
+**Priority**: Low  
+**Estimated Effort**: 2-3 hours
+**Dependencies**: Task 6.4
+
+Ensure comprehensive coverage and validation of all MSP430 emulated instructions per SLAU445I Table 4-7.
+
+**TI Documentation References**:
+- SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions (25 instructions)
+- SLAU445I Section 4.6.2 MSP430 Instructions (underlying core instructions)
+
+**Acceptance Criteria**:
+
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [ ] Validate all 25 emulated instructions from Table 4-7 are properly supported
+- [ ] Ensure emulated instructions behave identically to their core instruction equivalents
+- [ ] Test that assembler/disassembler recognizes emulated instruction mnemonics
+- [ ] Verify cycle counts match the underlying core instructions
+- [ ] Add comprehensive tests for emulated instruction equivalence
+
+**Emulated Instructions to Validate** (per SLAU445I Table 4-7):
+
+**Status Register Manipulation**:
+
+- [x] SETC → BIS #1, SR (set carry)
+- [x] CLRC → BIC #1, SR (clear carry)
+- [x] SETN → BIS #4, SR (set negative)
+- [x] CLRN → BIC #4, SR (clear negative)
+- [x] SETZ → BIS #2, SR (set zero)
+- [x] CLRZ → BIC #2, SR (clear zero)
+- [ ] DINT → BIC #8, SR (disable interrupts) ⚠️ Needs validation
+- [ ] EINT → BIS #8, SR (enable interrupts) ⚠️ Needs validation
+
+**Arithmetic Emulated**:
+- [ ] ADC(.B) dst → ADDC(.B) #0, dst (add carry)
+- [ ] SBC(.B) dst → SUBC(.B) #0, dst (subtract carry)  
+- [ ] DADC(.B) dst → DADD(.B) #0, dst (decimal add carry)
+- [ ] DEC(.B) dst → SUB(.B) #1, dst (decrement by 1)
+- [ ] DECD(.B) dst → SUB(.B) #2, dst (decrement by 2)
+- [ ] INC(.B) dst → ADD(.B) #1, dst (increment by 1)
+- [ ] INCD(.B) dst → ADD(.B) #2, dst (increment by 2)
+
+**Data Movement Emulated**:
+- [ ] CLR(.B) dst → MOV(.B) #0, dst (clear destination)
+- [ ] POP dst → MOV @SP+, dst (pop from stack)
+
+**Control Flow Emulated**:
+- [ ] BR dst → MOV dst, PC (branch indirect)
+- [ ] RET → MOV @SP+, PC (return from subroutine)
+
+**Logical Emulated**:
+- [ ] INV(.B) dst → XOR(.B) #-1, dst (invert destination)
+- [ ] TST(.B) dst → CMP(.B) #0, dst (test destination)
+
+**Rotation Emulated**:
+- [ ] RLA(.B) dst → ADD(.B) dst, dst (rotate left arithmetic)
+- [ ] RLC(.B) dst → ADDC(.B) dst, dst (rotate left through carry)
+
+**Special Emulated**:
+- [ ] NOP → MOV R3, R3 (no operation)
+
+**Files to Create**:
+
+```text
+src/MSP430.Emulator/Instructions/EmulatedInstructions/ (directory)
+tests/MSP430.Emulator.Tests/Instructions/EmulatedInstructions/EmulatedInstructionValidationTests.cs
+```
+
+**Testing Strategy**:
+
+- Test each emulated instruction produces identical results to core instruction equivalent
+- Test cycle count accuracy for emulated instructions
+- Test assembler/disassembler recognition of emulated mnemonics
+- Test status flag behavior matches core instructions
 
 ---
 

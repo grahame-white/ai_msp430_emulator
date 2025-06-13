@@ -138,16 +138,20 @@ public class InstructionDecoderExecutionTests
     }
 
     [Theory]
-    [InlineData(0x6000)]  // Unsupported opcode 6 (ADDC - not implemented yet)
-    [InlineData(0x7000)]  // Unsupported opcode 7 (SUBC - not implemented yet)
-    [InlineData(0xA000)]  // Unsupported opcode A (DADD - not implemented yet)
-    public void Decode_UnsupportedInstruction_ThrowsInvalidInstructionException(ushort instructionWord)
+    [InlineData(0x6000, "ADDC")]  // ADDC instruction - now implemented
+    [InlineData(0x7000, "SUBC")]  // SUBC instruction - now implemented
+    [InlineData(0xA000, "DADD")]  // DADD instruction - now implemented
+    public void Decode_NewlyImplementedInstructions_DecodesSuccessfully(ushort instructionWord, string expectedMnemonic)
     {
         // Arrange
         var decoder = new InstructionDecoder();
 
-        // Act & Assert
-        Assert.Throws<InvalidInstructionException>(() => decoder.Decode(instructionWord));
+        // Act
+        Instruction instruction = decoder.Decode(instructionWord);
+
+        // Assert
+        Assert.NotNull(instruction);
+        Assert.StartsWith(expectedMnemonic, instruction.Mnemonic);
     }
 
     [Fact]

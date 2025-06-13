@@ -86,6 +86,57 @@ AI developers working on this project should regularly reassess and update this 
 - **Cross-Reference Validation**: Regularly verify task implementation against MSP430 specifications
 - **Community Integration**: Incorporate feedback from hardware experts and emulation community
 
+### Policy Compliance Requirements
+
+**All tasks must comply with repository policies as documented in [DOCUMENTATION_STANDARDS.md](docs/DOCUMENTATION_STANDARDS.md) and [AI Developer Guidelines](.github/copilot-instructions.md).**
+
+**Texas Instruments Documentation Compliance**:
+
+- **Primary Source Requirements**: All MSP430FR2355 implementation details **must** reference official TI documentation
+- **Required Format**: Include exact document title, revision/version number, and specific section numbers
+- **Example**: `SLAU445I Section 4.6.2.2 ADD - Add source to destination`
+- **Document Verification**: Contributors must verify that referenced sections exist in specified document versions
+
+**Required Primary Documents for Task Implementation**:
+
+- **SLAU445I**: MSP430FR2xx FR4xx Family User's Guide - Programming model and architecture
+- **SLAU131Y**: MSP430 Assembly Language Tools User's Guide - Instruction set and assembly syntax  
+- **SLASEC4D**: MSP430FR235x/FR215x Mixed-Signal Microcontrollers - Hardware specifications
+
+**Code Standards Compliance**:
+
+- **File Organization**: Each file must contain exactly one type (class, interface, enum, struct)
+- **Naming Convention**: Filename must match type name exactly
+- **Test Coverage**: Minimum 80% line coverage, 70% branch coverage
+- **Documentation**: Include inline comments explaining TI specification compliance
+- **Static Analysis**: Code must pass all linting and static analysis checks
+
+**Development Workflow Compliance**:
+
+- **Pre-commit Validation**: Run `./script/format && ./script/lint && ./script/test` before each commit
+- **Build Integration**: All tools must integrate into "Scripts to Rule Them All" pattern
+- **Automation Scripts**: Changes to `.github/scripts/` require `npm run validate:all && npm test`
+
+**Task Documentation Standards**:
+
+- **TI References**: Every instruction task must include specific SLAU445I section references
+- **Acceptance Criteria**: Must be measurable and testable
+- **Testing Strategy**: Must include specific test scenarios per repository standards
+- **Policy Acknowledgment**: Each task must include policy compliance checkboxes
+
+**Validation Commands**:
+
+```bash
+# Pre-commit validation (required)
+./script/format && ./script/lint && ./script/test
+
+# Documentation validation
+npm run lint:docs
+
+# Complete validation pipeline
+./script/cibuild
+```
+
 ## Task Ordering Philosophy
 
 Tasks are ordered to establish a solid foundation first, then build complexity incrementally:
@@ -733,6 +784,8 @@ tests/MSP430.Emulator.Tests/Memory/MemoryControllerTests.cs
 
 ## Phase 4: CPU Instruction Set - Arithmetic and Logic
 
+**TI Documentation Reference**: SLAU445I Section 4.5.1 MSP430 Instructions, Section 4.6.2 MSP430 Instructions (detailed descriptions)
+
 ### Task 4.1: Basic Arithmetic Instructions ✅ COMPLETED
 
 **Priority**: Critical
@@ -740,6 +793,12 @@ tests/MSP430.Emulator.Tests/Memory/MemoryControllerTests.cs
 **Dependencies**: Task 2.4
 
 Implement fundamental arithmetic operations (ADD, SUB, CMP) with proper flag handling.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2.2 ADD - Add source to destination  
+- SLAU445I Section 4.6.2.46 SUB - Subtract source from destination
+- SLAU445I Section 4.6.2.14 CMP - Compare source and destination
 
 **Acceptance Criteria**:
 
@@ -776,13 +835,98 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/CmpInstructionTests.cs
 
 ---
 
-### Task 4.2: Increment and Decrement Instructions ✅ COMPLETED
+### Task 4.2: Arithmetic with Carry Instructions ✅ COMPLETED
 
 **Priority**: High
 **Estimated Effort**: 2-3 hours
 **Dependencies**: Task 4.1
 
+Implement carry-related arithmetic operations (ADDC, SUBC) with proper flag handling.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2.3 ADDC - Add source and carry to destination
+- SLAU445I Section 4.6.2.47 SUBC - Subtract source and borrow /.NOT. carry from destination
+
+**Acceptance Criteria**:
+
+- [x] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [x] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [x] Implement `AddcInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/AddcInstruction.cs`
+- [x] Implement `SubcInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/SubcInstruction.cs`
+- [x] Support all addressing modes for each instruction
+- [x] Implement proper carry flag integration
+- [x] Handle 8-bit and 16-bit operand sizes
+- [x] Create comprehensive unit tests for each instruction
+
+**Files to Create**:
+
+```text
+src/MSP430.Emulator/Instructions/Arithmetic/AddcInstruction.cs
+src/MSP430.Emulator/Instructions/Arithmetic/SubcInstruction.cs
+tests/MSP430.Emulator.Tests/Instructions/Arithmetic/AddcInstructionTests.cs
+tests/MSP430.Emulator.Tests/Instructions/Arithmetic/SubcInstructionTests.cs
+```
+
+**Testing Strategy**:
+
+- Test carry flag integration behavior
+- Test flag setting for all possible outcomes
+- Test addressing mode combinations
+
+---
+
+### Task 4.3: Decimal Arithmetic Instructions ✅ COMPLETED
+
+**Priority**: Medium
+**Estimated Effort**: 2-3 hours  
+**Dependencies**: Task 4.2
+
+Implement decimal arithmetic operations (DADD) for BCD operations.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2.16 DADD - Add source to destination decimally (BCD)
+
+**Acceptance Criteria**:
+
+- [x] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [x] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [x] Implement `DaddInstruction` class in `src/MSP430.Emulator/Instructions/Arithmetic/DaddInstruction.cs`
+- [x] Support BCD arithmetic operations
+- [x] Handle carry flag for decimal operations
+- [x] Support all addressing modes
+- [x] Create comprehensive unit tests for decimal arithmetic
+
+**Files to Create**:
+
+```text
+src/MSP430.Emulator/Instructions/Arithmetic/DaddInstruction.cs
+tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DaddInstructionTests.cs
+```
+
+**Testing Strategy**:
+
+- Test BCD arithmetic correctness
+- Test carry propagation in decimal mode
+- Test addressing mode support
+
+---
+
+### Task 4.4: Increment and Decrement Instructions ✅ COMPLETED
+
+**Priority**: High
+**Estimated Effort**: 2-3 hours
+**Dependencies**: Task 4.3
+
 Implement increment/decrement operations with proper addressing mode support.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2.21 INC - Increment destination by 1
+- SLAU445I Section 4.6.2.22 INCD - Increment destination by 2  
+- SLAU445I Section 4.6.2.17 DEC - Decrement destination by 1
+- SLAU445I Section 4.6.2.18 DECD - Decrement destination by 2
 
 **Acceptance Criteria**:
 
@@ -806,19 +950,26 @@ tests/MSP430.Emulator.Tests/Instructions/Arithmetic/DecInstructionTests.cs
 
 **Testing Strategy**:
 
-- Test increment/decrement on registers and memory
+- Test single and double increment/decrement operations
 - Test flag behavior at boundaries (0xFFFF to 0x0000)
 - Test addressing mode combinations
 
 ---
 
-### Task 4.3: Logical Operation Instructions ✅ COMPLETED
+### Task 4.5: Logical Operation Instructions ✅ COMPLETED
 
 **Priority**: High
 **Estimated Effort**: 3-4 hours
-**Dependencies**: Task 4.2
+**Dependencies**: Task 4.4
 
 Implement bitwise logical operations (AND, OR, XOR, BIT) with comprehensive addressing mode support.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2.4 AND - Source AND destination → destination
+- SLAU445I Section 4.6.2.6 BIS - Source OR destination → destination (bit set)
+- SLAU445I Section 4.6.2.51 XOR - Source XOR destination → destination
+- SLAU445I Section 4.6.2.7 BIT - Source AND destination (test bits, result not written)
 
 **Acceptance Criteria**:
 
@@ -854,13 +1005,18 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/BitInstructionTests.cs
 
 ---
 
-### Task 4.4: Bit Manipulation Instructions ✅ COMPLETED
+### Task 4.6: Bit Manipulation Instructions ✅ COMPLETED
 
 **Priority**: Medium
 **Estimated Effort**: 2-3 hours
-**Dependencies**: Task 4.3
+**Dependencies**: Task 4.5
 
 Implement individual bit manipulation operations (BIC, SETC, CLRC, etc.).
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2.5 BIC - Clear bits in destination
+- SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions: SETC, CLRC, SETN, CLRN, SETZ, CLRZ
 
 **Acceptance Criteria**:
 
@@ -898,6 +1054,10 @@ tests/MSP430.Emulator.Tests/Instructions/Logic/StatusBitInstructionTests.cs
 **Dependencies**: Task 4.1
 
 Implement data movement instructions (MOV) with all addressing modes and size variations.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2.32 MOV - Move source to destination
 
 **Acceptance Criteria**:
 
@@ -1252,13 +1412,19 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/RetInstructionTests.cs
 
 Implement interrupt-related and special control instructions (RETI, NOP, etc.).
 
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2.37 RETI - Return from interrupt
+- SLAU445I Section 4.6.2.33 NOP - No operation
+- SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions (DINT, EINT)
+
 **Acceptance Criteria**:
 
 - [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
 - [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
 - [ ] Implement `RetiInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/RetiInstruction.cs`
 - [ ] Implement `NopInstruction` class in `src/MSP430.Emulator/Instructions/ControlFlow/NopInstruction.cs`
-- [ ] Implement interrupt enable/disable instructions
+- [ ] Implement interrupt enable/disable instructions (DINT, EINT emulated instructions)
 - [ ] Handle status register restoration for RETI
 - [ ] Add comprehensive unit tests for special instructions
 
@@ -1277,6 +1443,92 @@ tests/MSP430.Emulator.Tests/Instructions/ControlFlow/SpecialInstructionTests.cs
 - Test interrupt return behavior
 - Test status register restoration
 - Test interrupt enable/disable
+
+---
+
+### Task 6.5: Emulated Instruction Implementation and Validation
+
+**Priority**: Low  
+**Estimated Effort**: 2-3 hours
+**Dependencies**: Task 6.4
+
+Ensure comprehensive coverage and validation of all MSP430 emulated instructions per SLAU445I Table 4-7.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions (25 instructions)
+- SLAU445I Section 4.6.2 MSP430 Instructions (underlying core instructions)
+
+**Acceptance Criteria**:
+
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [ ] Validate all 25 emulated instructions from Table 4-7 are properly supported
+- [ ] Ensure emulated instructions behave identically to their core instruction equivalents
+- [ ] Test that assembler/disassembler recognizes emulated instruction mnemonics
+- [ ] Verify cycle counts match the underlying core instructions
+- [ ] Add comprehensive tests for emulated instruction equivalence
+
+**Emulated Instructions to Validate** (per SLAU445I Table 4-7):
+
+**Status Register Manipulation**:
+
+- [x] SETC → BIS #1, SR (set carry)
+- [x] CLRC → BIC #1, SR (clear carry)
+- [x] SETN → BIS #4, SR (set negative)
+- [x] CLRN → BIC #4, SR (clear negative)
+- [x] SETZ → BIS #2, SR (set zero)
+- [x] CLRZ → BIC #2, SR (clear zero)
+- [ ] DINT → BIC #8, SR (disable interrupts) ⚠️ Needs validation
+- [ ] EINT → BIS #8, SR (enable interrupts) ⚠️ Needs validation
+
+**Arithmetic Emulated**:
+
+- [ ] ADC(.B) dst → ADDC(.B) #0, dst (add carry)
+- [ ] SBC(.B) dst → SUBC(.B) #0, dst (subtract carry)  
+- [ ] DADC(.B) dst → DADD(.B) #0, dst (decimal add carry)
+- [ ] DEC(.B) dst → SUB(.B) #1, dst (decrement by 1)
+- [ ] DECD(.B) dst → SUB(.B) #2, dst (decrement by 2)
+- [ ] INC(.B) dst → ADD(.B) #1, dst (increment by 1)
+- [ ] INCD(.B) dst → ADD(.B) #2, dst (increment by 2)
+
+**Data Movement Emulated**:
+
+- [ ] CLR(.B) dst → MOV(.B) #0, dst (clear destination)
+- [ ] POP dst → MOV @SP+, dst (pop from stack)
+
+**Control Flow Emulated**:
+
+- [ ] BR dst → MOV dst, PC (branch indirect)
+- [ ] RET → MOV @SP+, PC (return from subroutine)
+
+**Logical Emulated**:
+
+- [ ] INV(.B) dst → XOR(.B) #-1, dst (invert destination)
+- [ ] TST(.B) dst → CMP(.B) #0, dst (test destination)
+
+**Rotation Emulated**:
+
+- [ ] RLA(.B) dst → ADD(.B) dst, dst (rotate left arithmetic)
+- [ ] RLC(.B) dst → ADDC(.B) dst, dst (rotate left through carry)
+
+**Special Emulated**:
+
+- [ ] NOP → MOV R3, R3 (no operation)
+
+**Files to Create**:
+
+```text
+src/MSP430.Emulator/Instructions/EmulatedInstructions/ (directory)
+tests/MSP430.Emulator.Tests/Instructions/EmulatedInstructions/EmulatedInstructionValidationTests.cs
+```
+
+**Testing Strategy**:
+
+- Test each emulated instruction produces identical results to core instruction equivalent
+- Test cycle count accuracy for emulated instructions
+- Test assembler/disassembler recognition of emulated mnemonics
+- Test status flag behavior matches core instructions
 
 ---
 
@@ -1570,6 +1822,262 @@ tests/MSP430.Emulator.Tests/Instructions/Extended/ExtendedInstructionTests.cs
 - Test 20-bit address calculation
 - Test extended instruction execution
 - Test compatibility with standard 16-bit instructions
+
+---
+
+## Phase 8.5: Comprehensive MSP430 Instruction Coverage
+
+**TI Documentation Reference**: SLAU445I Section 4.6.2 MSP430 Instructions (complete instruction set),  
+Section 4.5.1.4 Emulated Instructions (Table 4-7)
+
+*This phase ensures complete coverage of all 51 MSP430 core instructions and emulated instructions as  
+documented in SLAU445I. Many instructions are already implemented in Phases 4-6, but this phase  
+identifies any gaps and adds missing instruction support.*
+
+### Task 8.5.1: Core Instruction Set Audit and Gap Analysis
+
+**Priority**: Medium
+**Estimated Effort**: 2-3 hours
+**Dependencies**: Task 8.3
+
+Audit current instruction implementation against SLAU445I Section 4.6.2 complete instruction list to  
+identify any missing instructions.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.2 MSP430 Instructions (complete list of 51 instructions)
+- SLAU445I Section 4.5.1.4 Table 4-7 Emulated Instructions
+
+**Acceptance Criteria**:
+
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [ ] Audit all 51 MSP430 instructions from SLAU445I Section 4.6.2 against current implementation
+- [ ] Verify coverage of all emulated instructions from Table 4-7
+- [ ] Document any missing instruction implementations
+- [ ] Create implementation plan for any identified gaps
+- [ ] Ensure all instruction classes follow repository coding standards
+
+**Core MSP430 Instructions (per SLAU445I Section 4.6.2)**:
+
+**Arithmetic Instructions**:
+
+- [x] ADD (4.6.2.2) - ✅ Implemented in Task 4.1
+- [x] ADDC (4.6.2.3) - ✅ Implemented in Task 4.2
+- [x] SUB (4.6.2.46) - ✅ Implemented in Task 4.1
+- [x] SUBC (4.6.2.47) - ✅ Implemented in Task 4.2
+- [x] CMP (4.6.2.14) - ✅ Implemented in Task 4.1
+- [x] DADD (4.6.2.16) - ✅ Implemented in Task 4.3
+- [x] INC (4.6.2.21) - ✅ Implemented in Task 4.4
+- [x] INCD (4.6.2.22) - ✅ Implemented in Task 4.4
+- [x] DEC (4.6.2.17) - ✅ Implemented in Task 4.4
+- [x] DECD (4.6.2.18) - ✅ Implemented in Task 4.4
+
+**Logical Instructions**:
+
+- [x] AND (4.6.2.4) - ✅ Implemented in Task 4.5
+- [x] BIS (4.6.2.6) - ✅ Implemented in Task 4.5
+- [x] BIC (4.6.2.5) - ✅ Implemented in Task 4.6
+- [x] BIT (4.6.2.7) - ✅ Implemented in Task 4.5
+- [x] XOR (4.6.2.51) - ✅ Implemented in Task 4.5
+
+**Data Movement Instructions**:
+
+- [x] MOV (4.6.2.32) - ✅ Implemented in Task 5.1
+- [x] PUSH (4.6.2.35) - ✅ Implemented in Task 5.2
+- [x] POP (4.6.2.34) - ✅ Implemented in Task 5.2
+- [x] SWPB (4.6.2.48) - ✅ Implemented in Task 5.3
+- [x] SXT (4.6.2.49) - ✅ Implemented in Task 5.3
+
+**Rotation Instructions**:
+
+- [x] RRA (4.6.2.40) - ✅ Implemented in Task 5.3
+- [x] RRC (4.6.2.41) - ✅ Implemented in Task 5.3
+- [ ] RLA (4.6.2.38) - ⚠️ May need verification
+- [ ] RLC (4.6.2.39) - ⚠️ May need verification
+
+**Control Flow Instructions**:
+
+- [x] JMP (4.6.2.28) - ✅ Implemented in Task 5.5.2
+- [x] JEQ/JZ (4.6.2.25) - ✅ Implemented in Task 5.5.2
+- [x] JNE/JNZ (4.6.2.31) - ✅ Implemented in Task 5.5.2
+- [x] JC/JHS (4.6.2.24) - ✅ Implemented in Task 5.5.2
+- [x] JNC/JLO (4.6.2.30) - ✅ Implemented in Task 5.5.2
+- [x] JN (4.6.2.29) - ✅ Implemented in Task 5.5.2
+- [x] JGE (4.6.2.26) - ✅ Implemented in Task 5.5.2
+- [x] JL (4.6.2.27) - ✅ Implemented in Task 5.5.2
+- [ ] CALL (4.6.2.9) - ⚠️ Needs implementation in Task 6.3
+- [ ] RET (4.6.2.36) - ⚠️ Needs implementation in Task 6.3
+- [ ] RETI (4.6.2.37) - ⚠️ Needs implementation in Task 6.4
+
+**Special Instructions**:
+
+- [ ] NOP (4.6.2.33) - ⚠️ May need verification
+- [ ] BR/BRANCH (4.6.2.8) - ⚠️ May need verification
+
+**Interrupt Control Instructions** (Emulated):
+
+- [ ] DINT (Table 4-7) - ⚠️ Needs implementation
+- [ ] EINT (Table 4-7) - ⚠️ Needs implementation
+
+**Emulated Instructions Status** (per SLAU445I Table 4-7):
+
+- [ ] ADC - Emulated as ADDC #0, dst
+- [ ] BR - Emulated as MOV dst, PC  
+- [ ] CLR - Emulated as MOV #0, dst
+- [ ] CLRC - Emulated as BIC #1, SR
+- [ ] CLRN - Emulated as BIC #4, SR
+- [ ] CLRZ - Emulated as BIC #2, SR
+- [ ] DADC - Emulated as DADD #0, dst
+- [ ] DEC - Core instruction (not emulated)
+- [ ] DECD - Core instruction (not emulated)
+- [ ] DINT - Emulated as BIC #8, SR
+- [ ] EINT - Emulated as BIS #8, SR
+- [ ] INC - Core instruction (not emulated)
+- [ ] INCD - Core instruction (not emulated)
+- [ ] INV - Emulated as XOR #-1, dst
+- [ ] NOP - Emulated as MOV R3, R3
+- [ ] POP - Core instruction (not emulated)
+- [ ] RET - Emulated as MOV @SP+, PC
+- [ ] RLA - Emulated as ADD dst, dst
+- [ ] RLC - Emulated as ADDC dst, dst
+- [ ] SBC - Emulated as SUBC #0, dst
+- [ ] SETC - Emulated as BIS #1, SR
+- [ ] SETN - Emulated as BIS #4, SR
+- [ ] SETZ - Emulated as BIS #2, SR
+- [ ] TST - Emulated as CMP #0, dst
+
+**Testing Strategy**:
+
+- Verify implementation status of all 51 MSP430 instructions
+- Test emulated instruction behavior matches core instruction equivalents
+- Validate instruction cycle counts against SLAU445I specifications
+
+---
+
+### Task 8.5.2: MSP430X Extended Instruction Coverage
+
+**Priority**: Low
+**Estimated Effort**: 4-5 hours
+**Dependencies**: Task 8.5.1
+
+Implement comprehensive coverage of MSP430X extended instructions per SLAU445I Section 4.6.3.
+
+**TI Documentation References**:
+
+- SLAU445I Section 4.6.3 Extended Instructions (37 instructions)
+- SLAU445I Section 4.5.2.5 Table 4-15 Extended Emulated Instructions
+- SLAU445I Section 4.6.4 Address Instructions (11 instructions)
+
+**Acceptance Criteria**:
+
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [ ] Implement all 37 MSP430X extended instructions from Section 4.6.3
+- [ ] Implement all 11 MSP430X address instructions from Section 4.6.4
+- [ ] Support .B, .W, and .A operand size modifiers
+- [ ] Implement 20-bit address space support
+- [ ] Add extension word parsing for MSP430X instructions
+- [ ] Create comprehensive unit tests for extended instruction set
+
+**MSP430X Extended Instructions** (per SLAU445I Section 4.6.3):
+
+**Extended Arithmetic**:
+
+- [ ] ADDX (4.6.3.2) - Add source to destination (20-bit)
+- [ ] ADDCX (4.6.3.3) - Add source and carry to destination (20-bit)
+- [ ] SUBX (4.6.3.32) - Subtract source from destination (20-bit)
+- [ ] SUBCX (4.6.3.33) - Subtract source and carry from destination (20-bit)
+- [ ] CMPX (4.6.3.9) - Compare source and destination (20-bit)
+- [ ] DADDX (4.6.3.11) - Add source to destination decimally (20-bit)
+
+**Extended Logical**:
+
+- [ ] ANDX (4.6.3.4) - Source AND destination → destination (20-bit)
+- [ ] BICX (4.6.3.5) - Clear bits in destination (20-bit)
+- [ ] BISX (4.6.3.6) - Set bits in destination (20-bit)
+- [ ] BITX (4.6.3.7) - Test bits in destination (20-bit)
+- [ ] XORX (4.6.3.37) - Source XOR destination → destination (20-bit)
+
+**Extended Data Movement**:
+
+- [ ] MOVX (4.6.3.17) - Move source to destination (20-bit)
+- [ ] PUSHX (4.6.3.21) - Push operand onto stack (20-bit)
+- [ ] POPX (4.6.3.20) - Pop operand from stack (20-bit)
+- [ ] SWPBX (4.6.3.34) - Swap bytes in destination (20-bit)
+- [ ] SXTX (4.6.3.35) - Sign extend destination (20-bit)
+
+**Extended Multiple Operations**:
+
+- [ ] POPM (4.6.3.18) - Pop multiple registers from stack
+- [ ] PUSHM (4.6.3.19) - Push multiple registers to stack
+
+**Extended Rotation**:
+
+- [ ] RLAX (4.6.3.23) - Rotate left arithmetically (20-bit)
+- [ ] RLCX (4.6.3.24) - Rotate left through carry (20-bit)
+- [ ] RRAX (4.6.3.26) - Rotate right arithmetically (20-bit)
+- [ ] RRCX (4.6.3.28) - Rotate right through carry (20-bit)
+- [ ] RRUM (4.6.3.29) - Rotate right through carry multiple times
+- [ ] RRUX (4.6.3.30) - Rotate right unsigned (20-bit)
+- [ ] RLAM (4.6.3.22) - Rotate left arithmetically multiple times
+- [ ] RRAM (4.6.3.25) - Rotate right arithmetically multiple times
+- [ ] RRCM (4.6.3.27) - Rotate right through carry multiple times
+
+**MSP430X Address Instructions** (per SLAU445I Section 4.6.4):
+
+- [ ] ADDA (4.6.4.1) - Add 20-bit source to 20-bit destination register
+- [ ] BRA (4.6.4.2) - Branch to 20-bit address
+- [ ] CALLA (4.6.4.3) - Call subroutine at 20-bit address  
+- [ ] CLRA (4.6.4.4) - Clear 20-bit register
+- [ ] CMPA (4.6.4.5) - Compare 20-bit values
+- [ ] DECDA (4.6.4.6) - Decrement 20-bit register by 2
+- [ ] INCDA (4.6.4.7) - Increment 20-bit register by 2
+- [ ] MOVA (4.6.4.8) - Move 20-bit value
+- [ ] RETA (4.6.4.9) - Return from subroutine (20-bit PC)
+- [ ] SUBA (4.6.4.10) - Subtract 20-bit source from destination
+- [ ] TSTA (4.6.4.11) - Test 20-bit register
+
+**Extended Emulated Instructions** (per SLAU445I Table 4-15):
+
+- [ ] ADCX - Emulated as ADDCX #0, dst
+- [ ] BRA - Address instruction (not emulated)
+- [ ] RETA - Address instruction (not emulated)
+- [ ] CLRA - Address instruction (not emulated)
+- [ ] CLRX - Emulated as MOVX #0, dst
+- [ ] DADCX - Emulated as DADDX #0, dst
+- [ ] DECX - Emulated as SUBX #1, dst
+- [ ] DECDA - Address instruction (not emulated)
+- [ ] DECDX - Emulated as SUBX #2, dst
+- [ ] INCX - Emulated as ADDX #1, dst
+- [ ] INCDA - Address instruction (not emulated)
+- [ ] INCDX - Emulated as ADDX #2, dst
+- [ ] INVX - Emulated as XORX #-1, dst
+- [ ] RLAX - Emulated as ADDX dst, dst
+- [ ] RLCX - Emulated as ADDCX dst, dst
+- [ ] SBCX - Emulated as SUBCX #0, dst
+- [ ] TSTA - Address instruction (not emulated)
+- [ ] TSTX - Emulated as CMPX #0, dst
+- [ ] POPX - Core extended instruction (not emulated)
+
+**Files to Create**:
+
+```text
+src/MSP430.Emulator/Instructions/Extended/ (directory)
+src/MSP430.Emulator/Instructions/Extended/ExtendedArithmetic/ (directory)
+src/MSP430.Emulator/Instructions/Extended/ExtendedLogical/ (directory)
+src/MSP430.Emulator/Instructions/Extended/ExtendedDataMovement/ (directory)
+src/MSP430.Emulator/Instructions/Extended/ExtendedRotation/ (directory)
+src/MSP430.Emulator/Instructions/Extended/AddressInstructions/ (directory)
+tests/MSP430.Emulator.Tests/Instructions/Extended/ (directory)
+```
+
+**Testing Strategy**:
+
+- Test all MSP430X instructions with 20-bit addressing
+- Test extension word parsing and generation
+- Test compatibility with 16-bit MSP430 instructions
+- Test .B, .W, .A operand size modifiers
 
 ---
 

@@ -148,7 +148,7 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
             destinationExtensionWord);
 
         // Perform the arithmetic operation (implemented by derived classes)
-        (ushort result, bool carry, bool overflow) = PerformArithmeticOperation(sourceValue, destinationValue, _isByteOperation);
+        (ushort result, bool carry, bool overflow) = PerformArithmeticOperation(sourceValue, destinationValue, _isByteOperation, registerFile);
 
         // For byte operations, mask to 8 bits
         if (_isByteOperation)
@@ -182,8 +182,9 @@ public abstract class ArithmeticInstruction : Instruction, IExecutableInstructio
     /// <param name="sourceValue">The source operand value.</param>
     /// <param name="destinationValue">The destination operand value.</param>
     /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
+    /// <param name="registerFile">The register file for accessing status flags.</param>
     /// <returns>A tuple containing the result, carry flag, and overflow flag.</returns>
-    protected abstract (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation);
+    protected abstract (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation, IRegisterFile registerFile);
 
     /// <summary>
     /// Determines whether this instruction should write the result back to the destination.

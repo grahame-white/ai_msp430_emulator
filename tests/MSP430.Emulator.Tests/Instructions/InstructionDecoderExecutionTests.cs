@@ -138,16 +138,109 @@ public class InstructionDecoderExecutionTests
     }
 
     [Theory]
-    [InlineData(0x6000)]  // Unsupported opcode 6 (ADDC - not implemented yet)
-    [InlineData(0x7000)]  // Unsupported opcode 7 (SUBC - not implemented yet)
-    [InlineData(0xA000)]  // Unsupported opcode A (DADD - not implemented yet)
-    public void Decode_UnsupportedInstruction_ThrowsInvalidInstructionException(ushort instructionWord)
+    [InlineData(0x6000, "ADDC")]  // ADDC instruction - now implemented
+    [InlineData(0x7000, "SUBC")]  // SUBC instruction - now implemented
+    [InlineData(0xA000, "DADD")]  // DADD instruction - now implemented
+    public void Decode_NewlyImplementedInstructions_DecodesSuccessfully(ushort instructionWord, string expectedMnemonic)
     {
         // Arrange
         var decoder = new InstructionDecoder();
 
-        // Act & Assert
-        Assert.Throws<InvalidInstructionException>(() => decoder.Decode(instructionWord));
+        // Act
+        Instruction instruction = decoder.Decode(instructionWord);
+
+        // Assert
+        Assert.NotNull(instruction);
+        Assert.StartsWith(expectedMnemonic, instruction.Mnemonic);
+    }
+
+    [Fact]
+    public void Decode_AddcInstruction_CanExecuteSuccessfullyWithCarry()
+    {
+        // Arrange
+        var decoder = new InstructionDecoder();
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set up test values: R5 = 0x1000, R6 = 0x2000, and set carry flag
+        registerFile.WriteRegister(RegisterName.R5, 0x1000);
+        registerFile.WriteRegister(RegisterName.R6, 0x2000);
+        registerFile.WriteRegister(RegisterName.SR, 0x0001); // Set carry flag
+
+        ushort addcInstructionWord = 0x6506; // ADDC R5, R6 (opcode=6, src=R5, as=00, bw=0, ad=0, dst=R6)
+
+        // Act
+        Instruction instruction = decoder.Decode(addcInstructionWord);
+        var executableInstruction = (IExecutableInstruction)instruction;
+        uint cycles = executableInstruction.Execute(registerFile, memory, System.Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x3001, registerFile.ReadRegister(RegisterName.R6)); // 0x2000 + 0x1000 + 0x0001 (carry)
+        Assert.True(cycles > 0, "Execution should consume at least one cycle");
+
+        // Verify status flags are set correctly
+        ushort statusRegister = registerFile.ReadRegister(RegisterName.SR);
+        Assert.False((statusRegister & 0x0002) != 0, "Zero flag should be clear");
+        Assert.False((statusRegister & 0x0004) != 0, "Negative flag should be clear");
+    }
+
+    [Fact]
+    public void Decode_SubcInstruction_CanExecuteSuccessfullyWithCarry()
+    {
+        // Arrange
+        var decoder = new InstructionDecoder();
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set up test values: R5 = 0x1000, R6 = 0x3000, and set carry flag
+        registerFile.WriteRegister(RegisterName.R5, 0x1000);
+        registerFile.WriteRegister(RegisterName.R6, 0x3000);
+        registerFile.WriteRegister(RegisterName.SR, 0x0001); // Set carry flag
+
+        ushort subcInstructionWord = 0x7506; // SUBC R5, R6 (opcode=7, src=R5, as=00, bw=0, ad=0, dst=R6)
+
+        // Act
+        Instruction instruction = decoder.Decode(subcInstructionWord);
+        var executableInstruction = (IExecutableInstruction)instruction;
+        uint cycles = executableInstruction.Execute(registerFile, memory, System.Array.Empty<ushort>());
+
+        // Assert  
+        Assert.Equal(0x2000, registerFile.ReadRegister(RegisterName.R6)); // 0x3000 - 0x1000 + 0x0001 (carry) - 1
+        Assert.True(cycles > 0, "Execution should consume at least one cycle");
+
+        // Verify status flags are set correctly
+        ushort statusRegister = registerFile.ReadRegister(RegisterName.SR);
+        Assert.False((statusRegister & 0x0002) != 0, "Zero flag should be clear");
+        Assert.False((statusRegister & 0x0004) != 0, "Negative flag should be clear");
+    }
+
+    [Fact]
+    public void Decode_DaddInstruction_CanExecuteSuccessfullyWithDecimalArithmetic()
+    {
+        // Arrange
+        var decoder = new InstructionDecoder();
+        var registerFile = new RegisterFile();
+        byte[] memory = new byte[0x10000];
+
+        // Set up test values for decimal addition: R5 = 0x0099, R6 = 0x0001 (99 + 1 = 100 in BCD)
+        registerFile.WriteRegister(RegisterName.R5, 0x0099);
+        registerFile.WriteRegister(RegisterName.R6, 0x0001);
+
+        ushort daddInstructionWord = 0xA506; // DADD R5, R6 (opcode=A, src=R5, as=00, bw=0, ad=0, dst=R6)
+
+        // Act
+        Instruction instruction = decoder.Decode(daddInstructionWord);
+        var executableInstruction = (IExecutableInstruction)instruction;
+        uint cycles = executableInstruction.Execute(registerFile, memory, System.Array.Empty<ushort>());
+
+        // Assert
+        Assert.Equal(0x0100, registerFile.ReadRegister(RegisterName.R6)); // BCD: 99 + 01 = 100
+        Assert.True(cycles > 0, "Execution should consume at least one cycle");
+
+        // Verify status flags are set correctly
+        ushort statusRegister = registerFile.ReadRegister(RegisterName.SR);
+        Assert.False((statusRegister & 0x0002) != 0, "Zero flag should be clear");
+        Assert.False((statusRegister & 0x0004) != 0, "Negative flag should be clear");
     }
 
     [Fact]

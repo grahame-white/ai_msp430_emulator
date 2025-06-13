@@ -31,7 +31,7 @@ namespace MSP430.Emulator.Tests.Core;
 public class InterruptSystemTests
 {
     [Fact]
-    public void InterruptVectorTable_MemoryRegion_HasCorrectAddressRange()
+    public void InterruptVectorTable_MemoryRegion_HasCorrectStartAddress()
     {
         // Test validates that interrupt vector table region matches MSP430FR2355 specification
         // SLAU445I Section 1.3.6: Interrupt vector table at 0xFFE0-0xFFFF
@@ -40,6 +40,17 @@ public class InterruptSystemTests
         MemoryRegionInfo vectorTableInfo = memoryMap.GetRegionInfo(MemoryRegion.InterruptVectorTable);
 
         Assert.Equal((ushort)0xFFE0, vectorTableInfo.StartAddress);
+    }
+
+    [Fact]
+    public void InterruptVectorTable_MemoryRegion_HasCorrectEndAddress()
+    {
+        // Test validates that interrupt vector table region matches MSP430FR2355 specification
+        // SLAU445I Section 1.3.6: Interrupt vector table at 0xFFE0-0xFFFF
+        var memoryMap = new MemoryMap();
+
+        MemoryRegionInfo vectorTableInfo = memoryMap.GetRegionInfo(MemoryRegion.InterruptVectorTable);
+
         Assert.Equal((ushort)0xFFFF, vectorTableInfo.EndAddress);
     }
 
@@ -67,6 +78,18 @@ public class InterruptSystemTests
         var memoryMap = new MemoryMap();
 
         Assert.True(memoryMap.IsValidAddress(vectorAddress));
+    }
+
+    [Theory]
+    [InlineData(0xFFFE)] // Reset vector (highest priority)
+    [InlineData(0xFFFC)] // NMI vector
+    [InlineData(0xFFFA)] // Typical peripheral interrupt vector
+    [InlineData(0xFFE0)] // Lowest interrupt vector
+    public void InterruptVectorTable_AddressRange_BelongsToCorrectRegion(ushort vectorAddress)
+    {
+        // Test validates that interrupt vector addresses are within the correct memory region
+        // SLAU445I Section 1.3.6: All interrupt vectors must be in range 0xFFE0-0xFFFF
+        var memoryMap = new MemoryMap();
 
         MemoryRegionInfo region = memoryMap.GetRegion(vectorAddress);
         Assert.Equal(MemoryRegion.InterruptVectorTable, region.Region);

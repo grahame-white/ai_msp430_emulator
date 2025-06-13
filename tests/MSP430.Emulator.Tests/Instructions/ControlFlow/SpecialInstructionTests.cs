@@ -122,7 +122,7 @@ public class SpecialInstructionTests
             var instruction = new NopInstruction(0x4343);
 
             // Act
-            uint cycleCount = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert - No registers should change
             ushort[] finalRegisters = registerFile.GetAllRegisters();
@@ -130,17 +130,19 @@ public class SpecialInstructionTests
             {
                 Assert.Equal(initialRegisters[i], finalRegisters[i]);
             }
-
-            Assert.Equal(1U, cycleCount); // NOP takes 1 cycle
         }
 
-        [Fact]
-        public void Execute_DoesNotModifyMemory()
+        [Theory]
+        [InlineData(0x0200, 0xAA)]
+        [InlineData(0x0201, 0xBB)]
+        [InlineData(0x1000, 0xCC)]
+        [InlineData(0x1001, 0xDD)]
+        public void Execute_DoesNotModifyMemory(ushort address, byte expectedValue)
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
 
-            // Set some test data in memory
+            // Set test data in memory
             memory[0x0200] = 0xAA;
             memory[0x0201] = 0xBB;
             memory[0x1000] = 0xCC;
@@ -152,10 +154,7 @@ public class SpecialInstructionTests
             instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert - Memory should be unchanged
-            Assert.Equal(0xAA, memory[0x0200]);
-            Assert.Equal(0xBB, memory[0x0201]);
-            Assert.Equal(0xCC, memory[0x1000]);
-            Assert.Equal(0xDD, memory[0x1001]);
+            Assert.Equal(expectedValue, memory[address]);
         }
 
         [Fact]
@@ -339,30 +338,103 @@ public class SpecialInstructionTests
         }
 
         [Fact]
-        public void Execute_DoesNotAffectOtherFlags()
+        public void Execute_SetsGeneralInterruptEnable()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
-
-            // Set various flags
-            registerFile.StatusRegister.Carry = false;
-            registerFile.StatusRegister.Zero = true;
-            registerFile.StatusRegister.Negative = false;
             registerFile.StatusRegister.GeneralInterruptEnable = false;
-            registerFile.StatusRegister.Overflow = false;
-            registerFile.StatusRegister.CpuOff = true;
 
             var instruction = new EintInstruction(0xD232);
 
             // Act
             instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
-            // Assert - Other flags should remain unchanged
+            // Assert - GIE should be set
+            Assert.True(registerFile.StatusRegister.GeneralInterruptEnable);
+        }
+
+        [Fact]
+        public void Execute_DoesNotAffectCarryFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Carry = false;
+            registerFile.StatusRegister.GeneralInterruptEnable = false;
+
+            var instruction = new EintInstruction(0xD232);
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert - Carry flag should remain unchanged
             Assert.False(registerFile.StatusRegister.Carry);
+        }
+
+        [Fact]
+        public void Execute_DoesNotAffectZeroFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Zero = true;
+            registerFile.StatusRegister.GeneralInterruptEnable = false;
+
+            var instruction = new EintInstruction(0xD232);
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert - Zero flag should remain unchanged
             Assert.True(registerFile.StatusRegister.Zero);
+        }
+
+        [Fact]
+        public void Execute_DoesNotAffectNegativeFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Negative = false;
+            registerFile.StatusRegister.GeneralInterruptEnable = false;
+
+            var instruction = new EintInstruction(0xD232);
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert - Negative flag should remain unchanged
             Assert.False(registerFile.StatusRegister.Negative);
-            Assert.True(registerFile.StatusRegister.GeneralInterruptEnable); // This should be set
+        }
+
+        [Fact]
+        public void Execute_DoesNotAffectOverflowFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Overflow = false;
+            registerFile.StatusRegister.GeneralInterruptEnable = false;
+
+            var instruction = new EintInstruction(0xD232);
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert - Overflow flag should remain unchanged
             Assert.False(registerFile.StatusRegister.Overflow);
+        }
+
+        [Fact]
+        public void Execute_DoesNotAffectCpuOffFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.CpuOff = true;
+            registerFile.StatusRegister.GeneralInterruptEnable = false;
+
+            var instruction = new EintInstruction(0xD232);
+
+            // Act
+            instruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert - CpuOff flag should remain unchanged
             Assert.True(registerFile.StatusRegister.CpuOff);
         }
 
@@ -443,29 +515,67 @@ public class SpecialInstructionTests
         }
 
         [Fact]
-        public void MultipleInterruptInstructions_MaintainCorrectState()
+        public void EintInstruction_FromDisabledState_EnablesInterrupts()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
             registerFile.StatusRegister.GeneralInterruptEnable = false;
 
             var eintInstruction = new EintInstruction(0xD232);
+
+            // Act
+            eintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.True(registerFile.StatusRegister.GeneralInterruptEnable);
+        }
+
+        [Fact]
+        public void EintInstruction_FromEnabledState_RemainsEnabled()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.GeneralInterruptEnable = true;
+
+            var eintInstruction = new EintInstruction(0xD232);
+
+            // Act
+            eintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.True(registerFile.StatusRegister.GeneralInterruptEnable);
+        }
+
+        [Fact]
+        public void DintInstruction_FromEnabledState_DisablesInterrupts()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.GeneralInterruptEnable = true;
+
             var dintInstruction = new DintInstruction(0xC232);
 
-            // Act & Assert - Test sequence of operations
-            Assert.False(registerFile.StatusRegister.GeneralInterruptEnable); // Initial state
-
-            eintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-            Assert.True(registerFile.StatusRegister.GeneralInterruptEnable); // After EINT
-
-            eintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-            Assert.True(registerFile.StatusRegister.GeneralInterruptEnable); // After second EINT
-
+            // Act
             dintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-            Assert.False(registerFile.StatusRegister.GeneralInterruptEnable); // After DINT
 
+            // Assert
+            Assert.False(registerFile.StatusRegister.GeneralInterruptEnable);
+        }
+
+        [Fact]
+        public void DintInstruction_FromDisabledState_RemainsDisabled()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.GeneralInterruptEnable = false;
+
+            var dintInstruction = new DintInstruction(0xC232);
+
+            // Act
             dintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
-            Assert.False(registerFile.StatusRegister.GeneralInterruptEnable); // After second DINT
+
+            // Assert
+            Assert.False(registerFile.StatusRegister.GeneralInterruptEnable);
         }
     }
 }

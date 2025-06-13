@@ -1,26 +1,26 @@
-using System;
 using MSP430.Emulator.Cpu;
 
 namespace MSP430.Emulator.Instructions.Arithmetic;
 
 /// <summary>
-/// Represents the MSP430 ADD instruction.
+/// Implements the MSP430 ADDC (Add with Carry) instruction.
 /// 
-/// The ADD instruction adds the source operand to the destination operand.
-/// Format: ADD src, dst
-/// Operation: dst = dst + src
-/// Opcode: 0x5 (Format I)
+/// The ADDC instruction adds the source operand and the carry bit to the destination operand.
+/// This is a Format I (two-operand) instruction that supports all addressing modes.
+/// 
+/// Operation: dst = src + dst + C
+/// Format: ADDC(.B) src, dst
+/// Opcode: 0x6 (Format I)
 /// Flags affected: N, Z, C, V
 /// 
 /// References:
-/// - MSP430 Assembly Language Tools User's Guide (SLAU131Y) - October 2004–Revised June 2021, Section 4: "Assembler Description" - Instruction format and operation
-/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - October 2014–Revised March 2019, Section 4.5.1.1: "MSP430 Double-Operand (Format I) Instructions" - Instruction encoding
-/// - MSP430FR235x, MSP430FR215x Mixed-Signal Microcontrollers (SLASEC4D) - Section 6: "Detailed Description" - Instruction Set
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.6.2.1: ADDC
+/// - MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 4.5.1.1: Format I Instructions
 /// </summary>
-public class AddInstruction : ArithmeticInstruction
+public class AddcInstruction : ArithmeticInstruction
 {
     /// <summary>
-    /// Initializes a new instance of the AddInstruction class.
+    /// Initializes a new instance of the AddcInstruction class.
     /// </summary>
     /// <param name="instructionWord">The 16-bit instruction word.</param>
     /// <param name="sourceRegister">The source register.</param>
@@ -28,33 +28,40 @@ public class AddInstruction : ArithmeticInstruction
     /// <param name="sourceAddressingMode">The source addressing mode.</param>
     /// <param name="destinationAddressingMode">The destination addressing mode.</param>
     /// <param name="isByteOperation">True if this is a byte operation, false for word operation.</param>
-    public AddInstruction(
+    public AddcInstruction(
         ushort instructionWord,
         RegisterName sourceRegister,
         RegisterName destinationRegister,
         AddressingMode sourceAddressingMode,
         AddressingMode destinationAddressingMode,
         bool isByteOperation)
-        : base(0x5, instructionWord, sourceRegister, destinationRegister, sourceAddressingMode, destinationAddressingMode, isByteOperation)
+        : base(0x6, instructionWord, sourceRegister, destinationRegister,
+               sourceAddressingMode, destinationAddressingMode, isByteOperation)
     {
     }
 
     /// <summary>
-    /// Gets the base mnemonic for the ADD instruction.
+    /// Gets the base mnemonic for the ADDC instruction.
     /// </summary>
-    protected override string BaseMnemonic => "ADD";
+    protected override string BaseMnemonic => "ADDC";
 
     /// <summary>
-    /// Performs the ADD operation: dst = dst + src
+    /// Performs the ADDC arithmetic operation.
+    /// Adds the source operand and the carry bit to the destination operand.
     /// </summary>
     /// <param name="sourceValue">The source operand value.</param>
     /// <param name="destinationValue">The destination operand value.</param>
     /// <param name="isByteOperation">True for byte operations, false for word operations.</param>
-    /// <param name="registerFile">The register file (not used for ADD operation).</param>
-    /// <returns>A tuple containing the result, carry flag, and overflow flag.</returns>
-    protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(ushort sourceValue, ushort destinationValue, bool isByteOperation, IRegisterFile registerFile)
+    /// <param name="registerFile">The register file for accessing the carry flag.</param>
+    /// <returns>A tuple containing the result and flags (carry, overflow).</returns>
+    protected override (ushort result, bool carry, bool overflow) PerformArithmeticOperation(
+        ushort sourceValue, ushort destinationValue, bool isByteOperation, IRegisterFile registerFile)
     {
-        uint result = (uint)sourceValue + (uint)destinationValue;
+        // Read the current carry flag from the status register
+        uint carryInput = registerFile.StatusRegister.Carry ? 1u : 0u;
+
+        // Perform the addition: dst = src + dst + C
+        uint result = (uint)sourceValue + (uint)destinationValue + carryInput;
 
         bool carry, overflow;
         if (isByteOperation)

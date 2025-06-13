@@ -2015,11 +2015,138 @@ tests/MSP430.Emulator.ValidationTests/Framework/HardwareComparisonBase.cs
 
 ---
 
-### Task 10.4: Command Line Interface Implementation
+### Task 10.4: Endless Loop Example Implementation and Validation
+
+**Priority**: Medium
+**Estimated Effort**: 2-3 hours
+**Dependencies**: Task 10.3
+
+Implement and validate an endless loop example program to test emulator behavior with
+simple infinite loops, basic initialization sequences, and continuous execution patterns.
+
+**Acceptance Criteria**:
+
+- [ ] Review and comply with [AI Developer Guidelines](.github/copilot-instructions.md) for comprehensive development guidance
+- [ ] Review and comply with [CONTRIBUTING.md](CONTRIBUTING.md) (entire document)
+- [ ] Create endless loop example project with MSP430 assembly source
+- [ ] Implement TI-TXT format binary loading for the endless loop program
+- [ ] Add test cases for endless loop execution termination and control
+- [ ] Test stack pointer initialization (SP = __STACK_END)
+- [ ] Add test cases for watchdog timer disable (WDTCTL = WDTPW | WDTHOLD)
+- [ ] Validate endless loop execution (jmp _start instruction)
+- [ ] Test emulator halt and resume functionality during endless execution
+- [ ] Implement execution timeout mechanisms for endless loop testing
+- [ ] Create emulation vs hardware behavior comparison framework
+- [ ] Add defect management procedures for behavioral discrepancies
+- [ ] Implement manual testing procedures for hardware validation
+- [ ] Create step-by-step LaunchPad validation experiments
+
+**Endless Loop Source Code Integration**:
+
+```asm
+;-------------------------------------------------------------------------------
+; MSP430 Assembler Code Template for use with TI Code Composer Studio
+;-------------------------------------------------------------------------------
+            .cdecls C,LIST,"msp430.h"       ; Include device header file
+;-------------------------------------------------------------------------------
+            .def    RESET                   ; Export program entry-point to
+                                            ; make it known to linker.
+;-------------------------------------------------------------------------------
+            .text                           ; Assemble into program memory.
+            .retain                         ; Override ELF conditional linking
+                                            ; and retain current section.
+            .retainrefs                     ; And retain any sections that have
+                                            ; references to current section.
+;-------------------------------------------------------------------------------
+RESET       mov.w   #__STACK_END,SP         ; Initialize stackpointer
+StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
+;-------------------------------------------------------------------------------
+; Main loop here
+;-------------------------------------------------------------------------------
+_start      jmp     _start
+            nop
+;-------------------------------------------------------------------------------
+; Stack Pointer definition
+;-------------------------------------------------------------------------------
+            .global __STACK_END
+            .sect   .stack
+;-------------------------------------------------------------------------------
+; Interrupt Vectors
+;-------------------------------------------------------------------------------
+            .sect   ".reset"                ; MSP430 RESET Vector
+            .short  RESET
+```
+
+**TI-TXT Binary Format**:
+
+```txt
+@8000
+31 40 00 30 B2 40 80 5A CC 01 FF 3F 03 43 32 D0 
+10 00 FD 3F 03 43 
+@ff80
+FF FF FF FF FF FF FF FF FF FF FF FF 
+@ffa0
+FF FF 
+@ffce
+0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 
+0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 
+0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 0E 80 
+00 80 
+q
+```
+
+**Hardware Validation Discrepancy Procedures**:
+
+When emulated behavior deviates from expected MSP430 hardware behavior:
+
+1. **Defect Creation**: Raise defects using the established defect management system with:
+   - Detailed reproduction steps
+   - Expected vs actual behavior comparison
+   - Reference to MSP430FR2355 datasheet sections
+   - Hardware test procedure used for validation
+
+2. **Manual Testing Proposals**: Create step-by-step procedures for humans to validate on real hardware:
+   - LaunchPad MSP430FR2355 setup instructions  
+   - Code loading and execution procedures
+   - Expected endless loop behavior verification
+   - Instruction cycle count and timing validation methods
+   - Watchdog timer disable verification procedures
+   - Stack pointer initialization validation
+   - Interrupt vector setup verification
+
+**Files to Create**:
+
+```text
+tests/MSP430.Emulator.ValidationTests/Examples/EndlessLoopExampleTests.cs
+tests/MSP430.Emulator.Tests/Examples/EndlessLoopExecutionTests.cs
+examples/endless_loop/endless_loop.asm
+examples/endless_loop/endless_loop.txt
+examples/endless_loop/README.md
+docs/validation/EndlessLoopHardwareValidation.md
+tests/MSP430.Emulator.ValidationTests/Framework/EndlessLoopTestFramework.cs
+```
+
+**Testing Strategy**:
+
+- Load endless loop binary using TI-TXT format loader
+- Execute program with timeout mechanisms to prevent infinite test execution
+- Validate stack pointer initialization sequence
+- Test watchdog timer disable functionality
+- Verify jump instruction execution and program counter behavior
+- Test emulator halt/resume functionality during endless execution
+- **Endless Loop Pattern Verification**: Confirm consistent program counter cycling
+- **Timing Measurement**: Verify instruction cycle counts match specification
+- **Register State Validation**: JTAG debugging to verify register states match emulator
+- **Memory State Analysis**: Validate memory remains unchanged during loop execution
+- **Execution Control Testing**: Validate breakpoint and single-step functionality
+
+---
+
+### Task 10.5: Command Line Interface Implementation
 
 **Priority**: Medium
 **Estimated Effort**: 3-4 hours
-**Dependencies**: Task 10.3
+**Dependencies**: Task 10.4
 
 Create a command-line interface for running and debugging MSP430 programs.
 
@@ -2060,7 +2187,7 @@ tests/MSP430.Emulator.Tests/CLI/CommandTests.cs
 
 **Priority**: Medium
 **Estimated Effort**: 4-5 hours
-**Dependencies**: Task 10.4
+**Dependencies**: Task 10.5
 
 Generate comprehensive API documentation with clear and consistent visual diagrams and architecture guides.
 

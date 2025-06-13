@@ -48,9 +48,9 @@ public class DadcInstruction : Instruction, IExecutableInstruction
     public override RegisterName? DestinationRegister => _destinationRegister;
 
     /// <summary>
-    /// Gets the source register for this instruction (always CG1/R2 for constant #0).
+    /// Gets the source register for this instruction (always CG2/R3 for constant #0).
     /// </summary>
-    public override RegisterName? SourceRegister => RegisterName.R2;
+    public override RegisterName? SourceRegister => RegisterName.R3;
 
     /// <summary>
     /// Gets the source addressing mode for this instruction (always Immediate mode for #0).

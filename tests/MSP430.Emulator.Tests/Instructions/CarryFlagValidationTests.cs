@@ -315,5 +315,169 @@ public class CarryFlagValidationTests
             Assert.Equal(registerFile2.StatusRegister.Negative, registerFile1.StatusRegister.Negative);
             Assert.Equal(registerFile2.StatusRegister.Overflow, registerFile1.StatusRegister.Overflow);
         }
+
+        [Fact]
+        public void SBC_WithCarrySet_BehavesIdenticalToSUBC()
+        {
+            // Arrange
+            (RegisterFile registerFile1, byte[] memory1) = CreateTestEnvironment();
+            (RegisterFile registerFile2, byte[] memory2) = CreateTestEnvironment();
+
+            // Set up identical initial state
+            registerFile1.WriteRegister(RegisterName.R4, 0x1234);
+            registerFile2.WriteRegister(RegisterName.R4, 0x1234);
+            registerFile1.StatusRegister.Carry = true;
+            registerFile2.StatusRegister.Carry = true;
+
+            // Create SBC emulated instruction (SBC R4 = SUBC #0, R4)
+            var sbcInstruction = new SbcInstruction(
+                0x7304, // Emulated as SUBC #0, R4
+                RegisterName.R4,
+                AddressingMode.Register,
+                false);
+
+            // Create equivalent SUBC instruction (SUBC #0, R4)
+            var subcInstruction = new SubcInstruction(
+                0x7304, // SUBC #0, R4
+                RegisterName.R3, // CG2 for constant #0
+                RegisterName.R4,
+                AddressingMode.Register, // Use register mode for constant #0
+                AddressingMode.Register,
+                false);
+
+            // Act
+            sbcInstruction.Execute(registerFile1, memory1, System.Array.Empty<ushort>());
+            subcInstruction.Execute(registerFile2, memory2, System.Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(registerFile2.ReadRegister(RegisterName.R4), registerFile1.ReadRegister(RegisterName.R4));
+            Assert.Equal(registerFile2.StatusRegister.Carry, registerFile1.StatusRegister.Carry);
+            Assert.Equal(registerFile2.StatusRegister.Zero, registerFile1.StatusRegister.Zero);
+            Assert.Equal(registerFile2.StatusRegister.Negative, registerFile1.StatusRegister.Negative);
+            Assert.Equal(registerFile2.StatusRegister.Overflow, registerFile1.StatusRegister.Overflow);
+        }
+
+        [Fact]
+        public void ADC_WithCarryClear_BehavesIdenticalToADDC()
+        {
+            // Arrange
+            (RegisterFile registerFile1, byte[] memory1) = CreateTestEnvironment();
+            (RegisterFile registerFile2, byte[] memory2) = CreateTestEnvironment();
+
+            // Set up identical initial state
+            registerFile1.WriteRegister(RegisterName.R4, 0x1234);
+            registerFile2.WriteRegister(RegisterName.R4, 0x1234);
+            registerFile1.StatusRegister.Carry = false;
+            registerFile2.StatusRegister.Carry = false;
+
+            // Create ADC emulated instruction (ADC R4 = ADDC #0, R4)
+            var adcInstruction = new AdcInstruction(
+                0x6304, // Emulated as ADDC #0, R4
+                RegisterName.R4,
+                AddressingMode.Register,
+                false);
+
+            // Create equivalent ADDC instruction (ADDC #0, R4)
+            var addcInstruction = new AddcInstruction(
+                0x6304, // ADDC #0, R4
+                RegisterName.R3, // CG2 for constant #0
+                RegisterName.R4,
+                AddressingMode.Register, // Use register mode for constant #0
+                AddressingMode.Register,
+                false);
+
+            // Act
+            adcInstruction.Execute(registerFile1, memory1, System.Array.Empty<ushort>());
+            addcInstruction.Execute(registerFile2, memory2, System.Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(registerFile2.ReadRegister(RegisterName.R4), registerFile1.ReadRegister(RegisterName.R4));
+            Assert.Equal(registerFile2.StatusRegister.Carry, registerFile1.StatusRegister.Carry);
+            Assert.Equal(registerFile2.StatusRegister.Zero, registerFile1.StatusRegister.Zero);
+            Assert.Equal(registerFile2.StatusRegister.Negative, registerFile1.StatusRegister.Negative);
+            Assert.Equal(registerFile2.StatusRegister.Overflow, registerFile1.StatusRegister.Overflow);
+        }
+
+        [Fact]
+        public void DADC_WithCarrySet_BehavesIdenticalToDaddInstruction()
+        {
+            // Arrange
+            (RegisterFile registerFile1, byte[] memory1) = CreateTestEnvironment();
+            (RegisterFile registerFile2, byte[] memory2) = CreateTestEnvironment();
+
+            // Set up identical initial state with BCD values
+            registerFile1.WriteRegister(RegisterName.R4, 0x0009); // BCD 9
+            registerFile2.WriteRegister(RegisterName.R4, 0x0009); // BCD 9
+            registerFile1.StatusRegister.Carry = true;
+            registerFile2.StatusRegister.Carry = true;
+
+            // Create DADC emulated instruction (DADC R4 = DADD #0, R4)
+            var dadcInstruction = new DadcInstruction(
+                0xA304, // Emulated as DADD #0, R4
+                RegisterName.R4,
+                AddressingMode.Register,
+                false);
+
+            // Create equivalent DADD instruction (DADD #0, R4)
+            var daddInstruction = new DaddInstruction(
+                0xA304, // DADD #0, R4
+                RegisterName.R3, // CG2 for constant #0
+                RegisterName.R4,
+                AddressingMode.Register, // Use register mode for constant #0
+                AddressingMode.Register,
+                false);
+
+            // Act
+            dadcInstruction.Execute(registerFile1, memory1, System.Array.Empty<ushort>());
+            daddInstruction.Execute(registerFile2, memory2, System.Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(registerFile2.ReadRegister(RegisterName.R4), registerFile1.ReadRegister(RegisterName.R4));
+            Assert.Equal(registerFile2.StatusRegister.Carry, registerFile1.StatusRegister.Carry);
+            Assert.Equal(registerFile2.StatusRegister.Zero, registerFile1.StatusRegister.Zero);
+            Assert.Equal(registerFile2.StatusRegister.Negative, registerFile1.StatusRegister.Negative);
+            Assert.Equal(registerFile2.StatusRegister.Overflow, registerFile1.StatusRegister.Overflow);
+        }
+
+        [Fact]
+        public void DADC_WithCarryClear_BehavesIdenticalToDaddInstruction()
+        {
+            // Arrange
+            (RegisterFile registerFile1, byte[] memory1) = CreateTestEnvironment();
+            (RegisterFile registerFile2, byte[] memory2) = CreateTestEnvironment();
+
+            // Set up identical initial state with BCD values
+            registerFile1.WriteRegister(RegisterName.R4, 0x0008); // BCD 8
+            registerFile2.WriteRegister(RegisterName.R4, 0x0008); // BCD 8
+            registerFile1.StatusRegister.Carry = false;
+            registerFile2.StatusRegister.Carry = false;
+
+            // Create DADC emulated instruction (DADC R4 = DADD #0, R4)
+            var dadcInstruction = new DadcInstruction(
+                0xA304, // Emulated as DADD #0, R4
+                RegisterName.R4,
+                AddressingMode.Register,
+                false);
+
+            // Create equivalent DADD instruction (DADD #0, R4)
+            var daddInstruction = new DaddInstruction(
+                0xA304, // DADD #0, R4
+                RegisterName.R3, // CG2 for constant #0
+                RegisterName.R4,
+                AddressingMode.Register, // Use register mode for constant #0
+                AddressingMode.Register,
+                false);
+
+            // Act
+            dadcInstruction.Execute(registerFile1, memory1, System.Array.Empty<ushort>());
+            daddInstruction.Execute(registerFile2, memory2, System.Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(registerFile2.ReadRegister(RegisterName.R4), registerFile1.ReadRegister(RegisterName.R4));
+            Assert.Equal(registerFile2.StatusRegister.Carry, registerFile1.StatusRegister.Carry);
+            Assert.Equal(registerFile2.StatusRegister.Zero, registerFile1.StatusRegister.Zero);
+            Assert.Equal(registerFile2.StatusRegister.Negative, registerFile1.StatusRegister.Negative);
+            Assert.Equal(registerFile2.StatusRegister.Overflow, registerFile1.StatusRegister.Overflow);
+        }
     }
 }

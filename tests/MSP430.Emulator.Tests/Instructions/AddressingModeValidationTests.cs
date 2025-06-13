@@ -1,6 +1,7 @@
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Arithmetic;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions;
@@ -20,27 +21,6 @@ namespace MSP430.Emulator.Tests.Instructions;
 public class AddressingModeValidationTests
 {
     /// <summary>
-    /// Creates a test environment with initialized register file and memory.
-    /// </summary>
-    /// <returns>A tuple containing the register file and memory array.</returns>
-    private static (RegisterFile registerFile, byte[] memory) CreateTestEnvironment()
-    {
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000]; // 64KB memory space
-
-        // Initialize stack pointer to a safe location
-        registerFile.SetStackPointer(0x8000);
-
-        // Set up some test data in memory
-        memory[0x0200] = 0x34; // Low byte at absolute address 0x0200
-        memory[0x0201] = 0x12; // High byte at absolute address 0x0200
-        memory[0x0202] = 0x78; // Low byte at absolute address 0x0202
-        memory[0x0203] = 0x56; // High byte at absolute address 0x0202
-
-        return (registerFile, memory);
-    }
-
-    /// <summary>
     /// Tests for ADD instruction addressing mode combinations.
     /// </summary>
     public class AddInstructionAddressingModeTests
@@ -49,7 +29,7 @@ public class AddressingModeValidationTests
         public void ADD_RegisterToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R4, 0x1000);
             registerFile.WriteRegister(RegisterName.R5, 0x2000);
 
@@ -73,7 +53,7 @@ public class AddressingModeValidationTests
         public void ADD_IndirectToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory location
             registerFile.WriteRegister(RegisterName.R5, 0x1000);
 
@@ -98,7 +78,7 @@ public class AddressingModeValidationTests
         public void ADD_IndirectAutoIncrementToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory location
             registerFile.WriteRegister(RegisterName.R5, 0x1000);
 
@@ -125,7 +105,7 @@ public class AddressingModeValidationTests
         public void ADD_ImmediateToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R5, 0x1000);
 
             var addInstruction = new AddInstruction(
@@ -150,7 +130,7 @@ public class AddressingModeValidationTests
         public void ADD_RegisterToIndirect_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R4, 0x0500);
             registerFile.WriteRegister(RegisterName.R5, 0x0200); // Points to memory location
 
@@ -180,7 +160,7 @@ public class AddressingModeValidationTests
         public void ADD_AbsoluteToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R5, 0x1000);
 
             var addInstruction = new AddInstruction(
@@ -206,7 +186,7 @@ public class AddressingModeValidationTests
         public void ADD_SymbolicToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R5, 0x1000);
             registerFile.SetProgramCounter(0x0100); // Set PC for symbolic addressing
 
@@ -233,7 +213,7 @@ public class AddressingModeValidationTests
         public void ADD_IndexedToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R4, 0x0100); // Base address
             registerFile.WriteRegister(RegisterName.R5, 0x1000);
 
@@ -266,7 +246,7 @@ public class AddressingModeValidationTests
         public void ADD_Byte_RegisterToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R4, 0x12FF); // High byte should be ignored
             registerFile.WriteRegister(RegisterName.R5, 0x3401); // High byte should be preserved
 
@@ -294,7 +274,7 @@ public class AddressingModeValidationTests
         public void ADD_Byte_IndirectAutoIncrementToRegister_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R4, 0x0200); // Points to memory
             registerFile.WriteRegister(RegisterName.R5, 0x1200); // High byte should be preserved
 
@@ -327,7 +307,7 @@ public class AddressingModeValidationTests
         public void ADD_ConstantZero_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R5, 0x1234);
 
             var addInstruction = new AddInstruction(
@@ -352,7 +332,7 @@ public class AddressingModeValidationTests
         public void ADD_ConstantOne_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R5, 0x1234);
 
             var addInstruction = new AddInstruction(
@@ -377,7 +357,7 @@ public class AddressingModeValidationTests
         public void ADD_ConstantFour_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R5, 0x1230);
 
             var addInstruction = new AddInstruction(
@@ -400,7 +380,7 @@ public class AddressingModeValidationTests
         public void ADD_ConstantEight_WorksCorrectly()
         {
             // Arrange
-            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateAddressingTestEnvironment();
             registerFile.WriteRegister(RegisterName.R5, 0x1230);
 
             var addInstruction = new AddInstruction(

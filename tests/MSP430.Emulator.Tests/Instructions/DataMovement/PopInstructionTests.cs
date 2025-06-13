@@ -161,8 +161,7 @@ public class PopInstructionTests
     public void Execute_RegisterMode_IncrementsStackPointer()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1304, RegisterName.R4, AddressingMode.Register, false);
 
         registerFile.SetStackPointer(0x0FFE);
@@ -182,8 +181,7 @@ public class PopInstructionTests
     public void Execute_RegisterMode_PopsValueToRegister()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1304, RegisterName.R4, AddressingMode.Register, false);
 
         registerFile.SetStackPointer(0x0FFE);
@@ -203,8 +201,7 @@ public class PopInstructionTests
     public void Execute_RegisterMode_ReturnsCorrectCycleCount()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1304, RegisterName.R4, AddressingMode.Register, false);
 
         registerFile.SetStackPointer(0x0FFE);
@@ -224,8 +221,7 @@ public class PopInstructionTests
     public void Execute_ByteOperationWord_StoresOnlyLowByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1344, RegisterName.R4, AddressingMode.Register, true);
 
         registerFile.WriteRegister(RegisterName.R4, 0xFFFF); // Pre-fill register
@@ -248,8 +244,7 @@ public class PopInstructionTests
     public void Execute_IndexedMode_IncrementsStackPointer()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1314, RegisterName.R4, AddressingMode.Indexed, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x2000); // Base address
@@ -272,8 +267,7 @@ public class PopInstructionTests
     public void Execute_IndexedMode_WritesLowByteToIndexedLocation()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1314, RegisterName.R4, AddressingMode.Indexed, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x2000); // Base address
@@ -297,8 +291,7 @@ public class PopInstructionTests
     public void Execute_IndexedMode_WritesHighByteToIndexedLocation()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1314, RegisterName.R4, AddressingMode.Indexed, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x2000); // Base address
@@ -322,8 +315,7 @@ public class PopInstructionTests
     public void Execute_IndexedMode_ReturnsCorrectCycleCount()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1314, RegisterName.R4, AddressingMode.Indexed, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x2000); // Base address
@@ -346,8 +338,7 @@ public class PopInstructionTests
     public void Execute_StackUnderflow_MemoryOutOfBounds_ThrowsException()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x1000]; // Limited memory
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1304, RegisterName.R4, AddressingMode.Register, false);
 
         registerFile.SetStackPointer(0x1000); // SP that would access beyond memory bounds
@@ -362,8 +353,7 @@ public class PopInstructionTests
     public void Execute_StackPointerOverflow_ThrowsException()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1304, RegisterName.R4, AddressingMode.Register, false);
 
         registerFile.SetStackPointer(0xFFFF); // SP that would overflow when incremented
@@ -381,8 +371,7 @@ public class PopInstructionTests
     public void Execute_ValidStackOperation_MultipleOperations()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         // Simulate a push followed by a pop
         var pushInstruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
@@ -452,8 +441,7 @@ public class PopInstructionTests
     public void Execute_AllDestinationAddressingModes_ExecutesSuccessfully(AddressingMode destMode)
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         // Set up initial values
         registerFile.SetStackPointer(0x1000);

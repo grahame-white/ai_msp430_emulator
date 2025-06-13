@@ -1,6 +1,7 @@
 using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions;
@@ -120,8 +121,7 @@ public class FormatIIIInstructionTests
         public void Execute_JEQ_ZeroFlagSet_PerformsJump()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(0, 0x2000, 10); // JEQ
 
             registerFile.SetProgramCounter(0x1000);
@@ -138,8 +138,7 @@ public class FormatIIIInstructionTests
         public void Execute_JEQ_ZeroFlagClear_DoesNotJump()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(0, 0x2000, 10); // JEQ
 
             ushort originalPC = 0x1000;
@@ -157,8 +156,7 @@ public class FormatIIIInstructionTests
         public void Execute_JNE_ZeroFlagClear_PerformsJump()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(1, 0x2000, -5); // JNE
 
             registerFile.SetProgramCounter(0x1000);
@@ -175,8 +173,7 @@ public class FormatIIIInstructionTests
         public void Execute_JNE_ZeroFlagSet_DoesNotJump()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(1, 0x2000, -5); // JNE
 
             ushort originalPC = 0x1000;
@@ -194,8 +191,7 @@ public class FormatIIIInstructionTests
         public void Execute_JC_CarryFlagSet_PerformsJump()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(2, 0x2000, 20); // JC
 
             registerFile.SetProgramCounter(0x1000);
@@ -212,8 +208,7 @@ public class FormatIIIInstructionTests
         public void Execute_JNC_CarryFlagClear_PerformsJump()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(3, 0x2000, 15); // JNC
 
             registerFile.SetProgramCounter(0x1000);
@@ -230,8 +225,7 @@ public class FormatIIIInstructionTests
         public void Execute_JN_NegativeFlagSet_PerformsJump()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(4, 0x2000, 8); // JN
 
             registerFile.SetProgramCounter(0x1000);
@@ -252,8 +246,7 @@ public class FormatIIIInstructionTests
         public void Execute_JGE_NegativeXorOverflow_BehavesCorrectly(bool negative, bool overflow, bool shouldJump)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(5, 0x2000, 12); // JGE
 
             ushort originalPC = 0x1000;
@@ -283,8 +276,7 @@ public class FormatIIIInstructionTests
         public void Execute_JL_NegativeXorOverflow_BehavesCorrectly(bool negative, bool overflow, bool shouldJump)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(6, 0x2000, -8); // JL
 
             ushort originalPC = 0x1000;
@@ -310,8 +302,7 @@ public class FormatIIIInstructionTests
         public void Execute_JMP_AlwaysJumps()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(7, 0x2000, 100); // JMP
 
             registerFile.SetProgramCounter(0x1000);
@@ -332,8 +323,7 @@ public class FormatIIIInstructionTests
         public void Execute_InvalidConditionCode_DoesNotJump()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(8, 0x2000, 10); // Invalid condition
 
             ushort originalPC = 0x1000;
@@ -361,8 +351,7 @@ public class FormatIIIInstructionTests
         public void Execute_ValidOffsetRange_DoesNotThrow(short offset)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(7, 0x2000, offset); // JMP
 
             registerFile.SetProgramCounter(0x8000); // Middle of address space
@@ -380,8 +369,7 @@ public class FormatIIIInstructionTests
         public void Execute_InvalidOffsetRange_ThrowsInvalidOperationException(short offset)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(7, 0x2000, offset); // JMP
 
             registerFile.SetProgramCounter(0x8000);
@@ -400,8 +388,7 @@ public class FormatIIIInstructionTests
         public void Execute_PCCalculation_FollowsFormula(ushort currentPC, short offset, ushort expectedPC)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(7, 0x2000, offset); // JMP (always jumps)
 
             registerFile.SetProgramCounter(currentPC);
@@ -431,8 +418,7 @@ public class FormatIIIInstructionTests
         public void Execute_AllJumpConditions_Takes2Cycles(ushort conditionCode)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(conditionCode, 0x2000, 10);
 
             registerFile.SetProgramCounter(0x1000);
@@ -453,8 +439,7 @@ public class FormatIIIInstructionTests
         public void Execute_JumpTaken_Takes2Cycles()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(7, 0x2000, 10); // JMP (always taken)
 
             registerFile.SetProgramCounter(0x1000);
@@ -470,8 +455,7 @@ public class FormatIIIInstructionTests
         public void Execute_JumpNotTaken_Takes2Cycles()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new FormatIIIInstruction(0, 0x2000, 10); // JEQ
 
             registerFile.SetProgramCounter(0x1000);

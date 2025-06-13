@@ -233,8 +233,7 @@ public class XorInstructionTests
     public void Execute_RegisterToRegister_PerformsXorOperation()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -257,8 +256,7 @@ public class XorInstructionTests
     public void Execute_RegisterToRegister_SetsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -281,8 +279,7 @@ public class XorInstructionTests
     public void Execute_RegisterToRegister_SetsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -305,8 +302,7 @@ public class XorInstructionTests
     public void Execute_RegisterToRegister_ClearsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -329,8 +325,7 @@ public class XorInstructionTests
     public void Execute_RegisterToRegister_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -584,8 +579,7 @@ public class XorInstructionTests
     public void Execute_RegisterToRegister_ReturnsCycles()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xF0F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -608,8 +602,7 @@ public class XorInstructionTests
     public void Execute_ByteOperation_PerformsXorOnBytes()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x12AA);
         registerFile.WriteRegister(RegisterName.R5, 0x3455);
 
@@ -632,8 +625,7 @@ public class XorInstructionTests
     public void Execute_ByteOperation_SetsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x12AA);
         registerFile.WriteRegister(RegisterName.R5, 0x3455);
 
@@ -656,8 +648,7 @@ public class XorInstructionTests
     public void Execute_ByteOperation_SetsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x12AA);
         registerFile.WriteRegister(RegisterName.R5, 0x3455);
 

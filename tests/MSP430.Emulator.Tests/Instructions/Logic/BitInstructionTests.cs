@@ -372,8 +372,7 @@ public class BitInstructionTests
     public void Execute_RegisterToRegister_DestinationValueUnchanged()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
         ushort originalR5 = registerFile.ReadRegister(RegisterName.R5);
@@ -397,8 +396,7 @@ public class BitInstructionTests
     public void Execute_RegisterToRegister_ZeroFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -421,8 +419,7 @@ public class BitInstructionTests
     public void Execute_RegisterToRegister_NegativeFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -445,8 +442,7 @@ public class BitInstructionTests
     public void Execute_RegisterToRegister_CarryFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -469,8 +465,7 @@ public class BitInstructionTests
     public void Execute_RegisterToRegister_OverflowFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -493,8 +488,7 @@ public class BitInstructionTests
     public void Execute_RegisterToRegister_Takes1Cycle()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -517,8 +511,7 @@ public class BitInstructionTests
     public void Execute_ResultIsZero_DestinationValueUnchanged()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
         ushort originalR5 = registerFile.ReadRegister(RegisterName.R5);
@@ -542,8 +535,7 @@ public class BitInstructionTests
     public void Execute_ResultIsZero_SetsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -566,8 +558,7 @@ public class BitInstructionTests
     public void Execute_ResultIsZero_NegativeFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -590,8 +581,7 @@ public class BitInstructionTests
     public void Execute_ResultIsZero_CarryFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -614,8 +604,7 @@ public class BitInstructionTests
     public void Execute_ResultIsZero_OverflowFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -638,8 +627,7 @@ public class BitInstructionTests
     public void Execute_ImmediateSource_DestinationValueUnchanged()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R5, 0x12FF);
         ushort originalR5 = registerFile.ReadRegister(RegisterName.R5);
 
@@ -664,8 +652,7 @@ public class BitInstructionTests
     public void Execute_ImmediateSource_ZeroFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R5, 0x12FF);
 
         var instruction = new BitInstruction(
@@ -689,8 +676,7 @@ public class BitInstructionTests
     public void Execute_ImmediateSource_NegativeFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R5, 0x12FF);
 
         var instruction = new BitInstruction(
@@ -714,8 +700,7 @@ public class BitInstructionTests
     public void Execute_ByteOperation_DestinationValueUnchanged()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x12AB);
         registerFile.WriteRegister(RegisterName.R5, 0x34CD);
         ushort originalR5 = registerFile.ReadRegister(RegisterName.R5);
@@ -739,8 +724,7 @@ public class BitInstructionTests
     public void Execute_ByteOperation_ZeroFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x12AB);
         registerFile.WriteRegister(RegisterName.R5, 0x34CD);
 
@@ -763,8 +747,7 @@ public class BitInstructionTests
     public void Execute_ByteOperation_NegativeFlagSetCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x12AB);
         registerFile.WriteRegister(RegisterName.R5, 0x34CD);
 

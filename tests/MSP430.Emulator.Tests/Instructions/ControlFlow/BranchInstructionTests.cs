@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.ControlFlow;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
@@ -216,8 +217,7 @@ public class BranchInstructionTests
         public void Execute_RegisterMode_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R5, AddressingMode.Register);
 
             ushort targetAddress = 0x8000;
@@ -235,8 +235,7 @@ public class BranchInstructionTests
         public void Execute_ImmediateMode_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R0, AddressingMode.Immediate);
 
             ushort targetAddress = 0x8000;
@@ -254,8 +253,7 @@ public class BranchInstructionTests
         public void Execute_IndirectMode_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R5, AddressingMode.Indirect);
 
             ushort pointerAddress = 0x0200;
@@ -278,8 +276,7 @@ public class BranchInstructionTests
         public void Execute_IndirectAutoIncrementMode_UpdatesProgramCounterAndIncrementsRegister()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R5, AddressingMode.IndirectAutoIncrement);
 
             ushort pointerAddress = 0x0200;
@@ -303,8 +300,7 @@ public class BranchInstructionTests
         public void Execute_IndexedMode_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R5, AddressingMode.Indexed);
 
             ushort baseAddress = 0x0200;
@@ -330,8 +326,7 @@ public class BranchInstructionTests
         public void Execute_AbsoluteMode_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R2, AddressingMode.Absolute);
 
             ushort absoluteAddress = 0x0200;
@@ -354,8 +349,7 @@ public class BranchInstructionTests
         public void Execute_SymbolicMode_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R0, AddressingMode.Symbolic);
 
             ushort initialPC = 0x1000;
@@ -381,8 +375,7 @@ public class BranchInstructionTests
         public void Execute_DoesNotAffectOtherRegisters()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R8, AddressingMode.Register);
 
             // Set some register values
@@ -405,8 +398,7 @@ public class BranchInstructionTests
         public void Execute_DoesNotAffectStatusFlags()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R5, AddressingMode.Register);
 
             // Set some status flags
@@ -431,8 +423,7 @@ public class BranchInstructionTests
         public void Execute_MissingExtensionWord_ThrowsArgumentException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R0, AddressingMode.Immediate);
 
             // Act & Assert
@@ -445,8 +436,7 @@ public class BranchInstructionTests
         public void Execute_TooManyExtensionWords_ThrowsArgumentException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R0, AddressingMode.Immediate);
 
             // Act & Assert
@@ -459,8 +449,7 @@ public class BranchInstructionTests
         public void Execute_WordAlignment_EnsuresPCIsWordAligned()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new BranchInstruction(0x4080, RegisterName.R5, AddressingMode.Register);
 
             ushort oddAddress = 0x8001; // Odd address (not word-aligned)

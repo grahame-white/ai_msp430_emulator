@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.ControlFlow;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
@@ -23,8 +24,7 @@ public class RetInstructionTests
         ushort stackPointer = 0x0FFE,
         ushort programCounter = 0x9000)
     {
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         registerFile.SetStackPointer(stackPointer);
         registerFile.SetProgramCounter(programCounter);
@@ -255,8 +255,7 @@ public class RetInstructionTests
         public void Execute_StackUnderflow_ThrowsException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[4]; // Very limited memory (addresses 0-3)
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             registerFile.SetStackPointer(0x0004); // SP pointing to memory beyond bounds
             RetInstruction instruction = CreateTestInstruction();
 

@@ -88,7 +88,7 @@ public class RetInstruction : Instruction, IExecutableInstruction
         // RET always operates on words (2 bytes)
         if (currentSP + 1 >= memory.Length)
         {
-            throw new InvalidOperationException($"Stack underflow detected: Stack pointer 0x{currentSP:X4} accesses memory beyond bounds");
+            throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would access memory beyond bounds");
         }
 
         // Read return address from current stack location
@@ -101,7 +101,7 @@ public class RetInstruction : Instruction, IExecutableInstruction
         // Check for potential stack pointer overflow
         if (newSP < currentSP) // Overflow detection
         {
-            throw new InvalidOperationException($"Stack pointer overflow detected: Stack pointer 0x{currentSP:X4} would overflow on RET operation");
+            throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would overflow on RET operation");
         }
 
         // Update stack pointer (RegisterFile handles word-alignment automatically)

@@ -263,7 +263,7 @@ public class RetInstructionTests
             // Act & Assert
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => instruction.Execute(registerFile, memory, Array.Empty<ushort>()));
-            Assert.Contains("Stack underflow detected", exception.Message);
+            Assert.Contains("Stack overflow detected", exception.Message);
         }
 
         [Fact]
@@ -281,7 +281,7 @@ public class RetInstructionTests
             // Act & Assert
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => instruction.Execute(registerFile, memory, Array.Empty<ushort>()));
-            Assert.Contains("Stack pointer overflow detected", exception.Message);
+            Assert.Contains("Stack overflow detected", exception.Message);
         }
 
         [Fact]

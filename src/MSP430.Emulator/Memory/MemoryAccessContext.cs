@@ -78,7 +78,7 @@ public class MemoryAccessContext
     {
         if (IsWordAccess && (Address & 0x1) != 0)
         {
-            throw new ArgumentException($"Word access at address 0x{Address:X4} is not properly aligned (must be even)", nameof(Address));
+            throw new ArgumentException($"Address 0x{Address:X4} is not word-aligned (must be even)", nameof(Address));
         }
     }
 

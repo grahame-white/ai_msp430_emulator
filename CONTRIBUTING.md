@@ -278,6 +278,95 @@ cd .github/scripts
 npm test
 ```
 
+## Coding Standards
+
+### Exception Messages
+
+To ensure consistency and maintainability, all exception messages must follow these standards:
+
+#### Format Pattern
+
+Use this consistent format for all exception messages:
+
+```text
+{Error Type} detected: {Context} would {Action} {Additional Info}
+```
+
+#### Stack-Related Exceptions
+
+All stack-related errors should use **"Stack overflow detected:"** as the prefix, regardless of the specific condition:
+
+```csharp
+// Memory bounds errors
+throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would access memory beyond bounds");
+
+// Stack space exhaustion (SP decrements too far)
+throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would underflow on {OPERATION} operation");
+
+// Stack pointer arithmetic overflow (SP increments past limit)
+throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would overflow on {OPERATION} operation");
+```
+
+#### Address Validation Exceptions
+
+Use consistent phrasing for address validation:
+
+```csharp
+// Word alignment errors
+throw new ArgumentException($"Address 0x{address:X4} is not word-aligned (must be even)", nameof(address));
+
+// Memory mapping errors
+throw new ArgumentException($"Address 0x{address:X4} is not mapped to any memory region", nameof(address));
+```
+
+#### State Validation Exceptions
+
+Use consistent phrasing for state validation:
+
+```csharp
+// Invalid operation state
+throw new InvalidOperationException($"Cannot {action} in current state: {State}");
+```
+
+#### Addressing Mode Exceptions
+
+Use consistent phrasing for addressing mode errors:
+
+```csharp
+// Unsupported modes
+throw new ArgumentException($"Unsupported addressing mode: {addressingMode}");
+
+// Write-protected modes
+throw new ArgumentException($"Cannot write to addressing mode: {addressingMode}");
+```
+
+#### Voice and Tense Guidelines
+
+- **Use conditional tense**: "would underflow", "would access", "would overflow" (not "accesses" or "underflows")
+- **Be specific**: Include hex addresses, operation names, and context when relevant
+- **Be consistent**: Use the same phrasing for similar error conditions across all instructions
+- **Be descriptive**: Include enough context for debugging without being verbose
+
+#### Examples
+
+**✅ Good:**
+
+```csharp
+throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would underflow on CALL operation");
+```
+
+**❌ Bad:**
+
+```csharp
+throw new InvalidOperationException($"Stack underflow: SP {currentSP} accesses invalid memory");
+```
+
+### Error Context Guidelines
+
+- **Include operation context**: Always mention the instruction or operation that caused the error
+- **Use hexadecimal for addresses**: Format addresses as `0x{address:X4}` for consistency
+- **Provide actionable information**: Help developers understand what went wrong and why
+
 ## Continuous Integration
 
 Our CI pipeline runs the following checks:

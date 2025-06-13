@@ -19,6 +19,16 @@ namespace MSP430.Emulator.Instructions.ControlFlow;
 /// </summary>
 public abstract class ConditionalJumpInstruction : Instruction, IExecutableInstruction
 {
+    /// <summary>
+    /// The minimum allowed offset value for conditional jump instructions (-511 words).
+    /// </summary>
+    public const short MinOffset = -511;
+
+    /// <summary>
+    /// The maximum allowed offset value for conditional jump instructions (+512 words).
+    /// </summary>
+    public const short MaxOffset = 512;
+
     private readonly FormatIIIInstruction _formatIiiInstruction;
 
     /// <summary>
@@ -30,10 +40,10 @@ public abstract class ConditionalJumpInstruction : Instruction, IExecutableInstr
     protected ConditionalJumpInstruction(ushort conditionCode, ushort instructionWord, short offset)
         : base(InstructionFormat.FormatIII, conditionCode, instructionWord)
     {
-        if (offset < -511 || offset > 512)
+        if (offset < MinOffset || offset > MaxOffset)
         {
             throw new ArgumentOutOfRangeException(nameof(offset),
-                $"Jump offset {offset} is outside valid range (-511 to +512 words)");
+                $"Jump offset {offset} is outside valid range ({MinOffset} to +{MaxOffset} words)");
         }
 
         Offset = offset;

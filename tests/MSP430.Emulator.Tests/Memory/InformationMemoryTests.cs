@@ -239,7 +239,7 @@ public class InformationMemoryTests
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => infoMemory.ReadByte(invalidAddress));
+        MemoryTestHelpers.ValidateReadByteThrowsForInvalidAddress(infoMemory, invalidAddress);
     }
 
     [Fact]
@@ -259,7 +259,7 @@ public class InformationMemoryTests
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Throws<ArgumentException>(() => infoMemory.ReadWord(unalignedAddress));
+        MemoryTestHelpers.ValidateReadWordThrowsForUnalignedAddress(infoMemory, unalignedAddress);
     }
 
     [Theory]
@@ -269,7 +269,7 @@ public class InformationMemoryTests
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => infoMemory.ReadWord(invalidAddress));
+        MemoryTestHelpers.ValidateReadWordThrowsForInvalidAddress(infoMemory, invalidAddress);
     }
 
     [Fact]
@@ -401,7 +401,7 @@ public class InformationMemoryTests
     {
         var infoMemory = new InformationMemory(_logger);
 
-        Assert.Throws<ArgumentException>(() => infoMemory.WriteWord(unalignedAddress, 0x1234));
+        MemoryTestHelpers.ValidateWriteWordThrowsForUnalignedAddress(infoMemory, unalignedAddress, 0x1234);
     }
 
     [Theory]

@@ -140,7 +140,7 @@ public class RandomAccessMemoryTests
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => memory.ReadByte(invalidAddress));
+        MemoryTestHelpers.ValidateReadByteThrowsForInvalidAddress(memory, invalidAddress);
     }
 
     [Theory]
@@ -150,7 +150,7 @@ public class RandomAccessMemoryTests
     {
         var memory = new RandomAccessMemory(0x2000, 1024, _logger);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => memory.WriteByte(invalidAddress, 0xFF));
+        MemoryTestHelpers.ValidateWriteByteThrowsForInvalidAddress(memory, invalidAddress, 0xFF);
     }
 
     [Fact]

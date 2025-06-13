@@ -150,7 +150,7 @@ public class FlashMemoryTests
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => flash.ReadByte(invalidAddress));
+        MemoryTestHelpers.ValidateReadByteThrowsForInvalidAddress(flash, invalidAddress);
     }
 
     [Fact]
@@ -170,7 +170,7 @@ public class FlashMemoryTests
     {
         var flash = new FlashMemory(0x8000, 4096, 512, _logger);
 
-        Assert.Throws<ArgumentException>(() => flash.ReadWord(unalignedAddress));
+        MemoryTestHelpers.ValidateReadWordThrowsForUnalignedAddress(flash, unalignedAddress);
     }
 
     [Fact]

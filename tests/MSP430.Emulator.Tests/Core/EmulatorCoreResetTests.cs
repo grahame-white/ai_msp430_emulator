@@ -5,6 +5,7 @@ using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Logging;
 using MSP430.Emulator.Memory;
+using MSP430.Emulator.Tests.TestUtilities;
 
 namespace MSP430.Emulator.Tests.Core;
 
@@ -20,20 +21,11 @@ namespace MSP430.Emulator.Tests.Core;
 /// </summary>
 public class EmulatorCoreResetTests
 {
-    private readonly RegisterFile _registerFile;
-    private readonly MemoryMap _memoryMap;
-    private readonly InstructionDecoder _instructionDecoder;
-    private readonly TestLogger _logger;
-    private readonly EmulatorCore _emulatorCore;
+    private readonly EmulatorCoreTestFixture _fixture;
 
     public EmulatorCoreResetTests()
     {
-        _logger = new TestLogger();
-        _registerFile = new RegisterFile(_logger);
-        _memoryMap = new MemoryMap();
-        _instructionDecoder = new InstructionDecoder();
-
-        _emulatorCore = new EmulatorCore(_registerFile, _memoryMap, _instructionDecoder, _logger);
+        _fixture = new EmulatorCoreTestFixture();
     }
 
     [Fact]
@@ -44,10 +36,10 @@ public class EmulatorCoreResetTests
         SetResetVector(expectedPCValue);
 
         // Act
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         // Assert
-        Assert.Equal(expectedPCValue, _registerFile.GetProgramCounter());
+        Assert.Equal(expectedPCValue, _fixture.RegisterFile.GetProgramCounter());
     }
 
     [Fact]
@@ -56,10 +48,10 @@ public class EmulatorCoreResetTests
         // Arrange - memory starts as all zeros, so reset vector will be 0x0000
 
         // Act
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         // Assert
-        Assert.Equal((ushort)0x0000, _registerFile.GetProgramCounter());
+        Assert.Equal((ushort)0x0000, _fixture.RegisterFile.GetProgramCounter());
     }
 
     [Theory]
@@ -73,10 +65,10 @@ public class EmulatorCoreResetTests
         SetResetVector(resetVectorValue);
 
         // Act
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         // Assert
-        Assert.Equal(resetVectorValue, _registerFile.GetProgramCounter());
+        Assert.Equal(resetVectorValue, _fixture.RegisterFile.GetProgramCounter());
     }
 
     [Fact]
@@ -85,13 +77,13 @@ public class EmulatorCoreResetTests
         // Arrange
         ushort resetVectorValue = 0x4000;
         SetResetVector(resetVectorValue);
-        _registerFile.WriteRegister(RegisterName.R4, 0x1234);
+        _fixture.RegisterFile.WriteRegister(RegisterName.R4, 0x1234);
 
         // Act
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         // Assert
-        Assert.Equal((ushort)0x0000, _registerFile.ReadRegister(RegisterName.R4));
+        Assert.Equal((ushort)0x0000, _fixture.RegisterFile.ReadRegister(RegisterName.R4));
     }
 
     [Fact]
@@ -100,13 +92,13 @@ public class EmulatorCoreResetTests
         // Arrange
         ushort resetVectorValue = 0x4000;
         SetResetVector(resetVectorValue);
-        _registerFile.WriteRegister(RegisterName.R10, 0x5678);
+        _fixture.RegisterFile.WriteRegister(RegisterName.R10, 0x5678);
 
         // Act
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         // Assert
-        Assert.Equal((ushort)0x0000, _registerFile.ReadRegister(RegisterName.R10));
+        Assert.Equal((ushort)0x0000, _fixture.RegisterFile.ReadRegister(RegisterName.R10));
     }
 
     [Fact]
@@ -115,13 +107,13 @@ public class EmulatorCoreResetTests
         // Arrange
         ushort resetVectorValue = 0x4000;
         SetResetVector(resetVectorValue);
-        _logger.MinimumLevel = LogLevel.Debug;
+        _fixture.Logger.MinimumLevel = LogLevel.Debug;
 
         // Act
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         // Assert
-        bool hasResetVectorLog = _logger.LogEntries.Exists(entry =>
+        bool hasResetVectorLog = _fixture.Logger.LogEntries.Exists(entry =>
             entry.Level == LogLevel.Info &&
             entry.Message.Contains("reset vector") &&
             entry.Message.Contains("0x4000"));
@@ -135,13 +127,13 @@ public class EmulatorCoreResetTests
         // Arrange
         ushort resetVectorValue = 0x6000;
         SetResetVector(resetVectorValue);
-        _registerFile.SetProgramCounter(0x1234);
+        _fixture.RegisterFile.SetProgramCounter(0x1234);
 
         // Act
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         // Assert
-        Assert.Equal(resetVectorValue, _registerFile.GetProgramCounter());
+        Assert.Equal(resetVectorValue, _fixture.RegisterFile.GetProgramCounter());
     }
 
     /// <summary>
@@ -152,48 +144,10 @@ public class EmulatorCoreResetTests
     private void SetResetVector(ushort vectorAddress)
     {
         // Access memory through internal accessor instead of reflection
-        byte[] memory = _emulatorCore.Memory;
+        byte[] memory = _fixture.EmulatorCore.Memory;
 
         // MSP430 is little-endian: low byte at 0xFFFE, high byte at 0xFFFF
         memory[0xFFFE] = (byte)(vectorAddress & 0xFF);
         memory[0xFFFF] = (byte)((vectorAddress >> 8) & 0xFF);
     }
-
-    private class TestLogger : ILogger
-    {
-        public LogLevel MinimumLevel { get; set; } = LogLevel.Info;
-        public List<LogEntry> LogEntries { get; } = new();
-
-        public void Log(LogLevel level, string message)
-        {
-            if (IsEnabled(level))
-            {
-                LogEntries.Add(new LogEntry(level, message, null));
-            }
-        }
-
-        public void Log(LogLevel level, string message, object? context)
-        {
-            if (IsEnabled(level))
-            {
-                LogEntries.Add(new LogEntry(level, message, context));
-            }
-        }
-
-        public void Debug(string message) => Log(LogLevel.Debug, message);
-        public void Debug(string message, object? context) => Log(LogLevel.Debug, message, context);
-        public void Info(string message) => Log(LogLevel.Info, message);
-        public void Info(string message, object? context) => Log(LogLevel.Info, message, context);
-        public void Warning(string message) => Log(LogLevel.Warning, message);
-        public void Warning(string message, object? context) => Log(LogLevel.Warning, message, context);
-        public void Error(string message) => Log(LogLevel.Error, message);
-        public void Error(string message, object? context) => Log(LogLevel.Error, message, context);
-        public void Error(string message, Exception exception) => Log(LogLevel.Error, $"{message}: {exception}");
-        public void Fatal(string message) => Log(LogLevel.Fatal, message);
-        public void Fatal(string message, object? context) => Log(LogLevel.Fatal, message, context);
-
-        public bool IsEnabled(LogLevel level) => level >= MinimumLevel;
-    }
-
-    private record LogEntry(LogLevel Level, string Message, object? Context);
 }

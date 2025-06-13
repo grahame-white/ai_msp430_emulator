@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.ControlFlow;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
@@ -23,8 +24,7 @@ public class RetInstructionTests
         ushort stackPointer = 0x0FFE,
         ushort programCounter = 0x9000)
     {
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         registerFile.SetStackPointer(stackPointer);
         registerFile.SetProgramCounter(programCounter);
@@ -255,9 +255,8 @@ public class RetInstructionTests
         public void Execute_StackUnderflow_ThrowsException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[4]; // Very limited memory (addresses 0-3)
-            registerFile.SetStackPointer(0x0004); // SP pointing to memory beyond bounds
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
+            registerFile.SetStackPointer(0x0000); // SP pointing to memory beyond stack bounds
             RetInstruction instruction = CreateTestInstruction();
 
             // Act & Assert
@@ -289,11 +288,11 @@ public class RetInstructionTests
         {
             // Arrange - Test near boundaries but within valid range
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
-                stackPointer: 0x0002); // Minimum valid SP for RET
+                stackPointer: 0x0200); // Minimum valid SP for RET
 
             // Set return address
-            memory[0x0002] = 0x00;
-            memory[0x0003] = 0x80; // Return to 0x8000
+            memory[0x0200] = 0x00;
+            memory[0x0201] = 0x80; // Return to 0x8000
 
             RetInstruction instruction = CreateTestInstruction();
 
@@ -302,7 +301,7 @@ public class RetInstructionTests
 
             // Assert - Should work without exception
             Assert.Equal(0x8000, registerFile.GetProgramCounter());
-            Assert.Equal(0x0004, registerFile.GetStackPointer());
+            Assert.Equal(0x0202, registerFile.GetStackPointer());
         }
     }
 

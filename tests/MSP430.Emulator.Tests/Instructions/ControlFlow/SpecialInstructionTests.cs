@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.ControlFlow;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
@@ -24,8 +25,7 @@ public class SpecialInstructionTests
     /// <returns>A tuple containing the register file and memory array.</returns>
     private static (RegisterFile registerFile, byte[] memory) CreateTestEnvironment()
     {
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000]; // 64KB memory
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         return (registerFile, memory);
     }
 

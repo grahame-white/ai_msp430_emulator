@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.ControlFlow;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
@@ -144,8 +145,7 @@ public class JmpInstructionTests
         public void Execute_PositiveOffset_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new JmpInstruction(0x3C00, 10);
 
             ushort originalPC = 0x1000;
@@ -164,8 +164,7 @@ public class JmpInstructionTests
         public void Execute_NegativeOffset_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new JmpInstruction(0x3C00, -8);
 
             ushort originalPC = 0x1000;
@@ -184,8 +183,7 @@ public class JmpInstructionTests
         public void Execute_ZeroOffset_KeepsProgramCounterUnchanged()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new JmpInstruction(0x3C00, 0);
 
             ushort originalPC = 0x1000;
@@ -203,8 +201,7 @@ public class JmpInstructionTests
         public void Execute_MaximumPositiveOffset_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new JmpInstruction(0x3C00, 512);
 
             ushort originalPC = 0x1000;
@@ -223,8 +220,7 @@ public class JmpInstructionTests
         public void Execute_MaximumNegativeOffset_UpdatesProgramCounterCorrectly()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new JmpInstruction(0x3C00, -511);
 
             ushort originalPC = 0x1000;
@@ -243,8 +239,7 @@ public class JmpInstructionTests
         public void Execute_DoesNotAffectOtherRegisters()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new JmpInstruction(0x3C00, 5);
 
             // Set some register values
@@ -265,8 +260,7 @@ public class JmpInstructionTests
         public void Execute_DoesNotAffectStatusFlags()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new JmpInstruction(0x3C00, 5);
 
             // Set some status flags

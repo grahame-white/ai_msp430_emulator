@@ -242,8 +242,7 @@ public class AndInstructionTests
     public void Execute_RegisterToRegister_PerformsAndOperation()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -266,8 +265,7 @@ public class AndInstructionTests
     public void Execute_RegisterToRegister_ReturnsOneCycle()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -290,8 +288,7 @@ public class AndInstructionTests
     public void Execute_RegisterToRegister_SetsZeroFlagCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -314,8 +311,7 @@ public class AndInstructionTests
     public void Execute_RegisterToRegister_SetsNegativeFlagCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -338,8 +334,7 @@ public class AndInstructionTests
     public void Execute_RegisterToRegister_SetsCarryFlagCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -362,8 +357,7 @@ public class AndInstructionTests
     public void Execute_RegisterToRegister_SetsOverflowFlagCorrectly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF0F);
         registerFile.WriteRegister(RegisterName.R5, 0x0FF0);
 
@@ -386,8 +380,7 @@ public class AndInstructionTests
     public void Execute_ResultIsZero_ComputesCorrectResult()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -410,8 +403,7 @@ public class AndInstructionTests
     public void Execute_ResultIsZero_SetsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -434,8 +426,7 @@ public class AndInstructionTests
     public void Execute_ResultIsZero_ClearsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -458,8 +449,7 @@ public class AndInstructionTests
     public void Execute_ResultIsZero_ClearsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -482,8 +472,7 @@ public class AndInstructionTests
     public void Execute_ResultIsZero_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0xFF00);
         registerFile.WriteRegister(RegisterName.R5, 0x00FF);
 
@@ -506,8 +495,7 @@ public class AndInstructionTests
     public void Execute_WordResultNegative_ComputesCorrectResult()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x8000);
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
 
@@ -530,8 +518,7 @@ public class AndInstructionTests
     public void Execute_WordResultNegative_ClearsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x8000);
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
 
@@ -554,8 +541,7 @@ public class AndInstructionTests
     public void Execute_WordResultNegative_SetsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x8000);
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
 
@@ -578,8 +564,7 @@ public class AndInstructionTests
     public void Execute_WordResultNegative_ClearsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x8000);
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
 
@@ -602,8 +587,7 @@ public class AndInstructionTests
     public void Execute_WordResultNegative_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x8000);
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
 
@@ -626,8 +610,7 @@ public class AndInstructionTests
     public void Execute_ImmediateSource_UsesExtensionWord()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R5, 0xFFFF);
 
         var instruction = new AndInstruction(
@@ -651,8 +634,7 @@ public class AndInstructionTests
     public void Execute_AbsoluteDestination_UsesExtensionWord_LowByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x1234);
 
         // Set up existing value at absolute address 0x200
@@ -680,8 +662,7 @@ public class AndInstructionTests
     public void Execute_AbsoluteDestination_UsesExtensionWord_HighByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x1234);
 
         // Set up existing value at absolute address 0x200
@@ -709,8 +690,7 @@ public class AndInstructionTests
     public void Execute_ByteOperation_WorksCorrectly_RegisterValue()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x12AB);
         registerFile.WriteRegister(RegisterName.R5, 0x34CD);
 
@@ -742,8 +722,7 @@ public class AndInstructionTests
     public void Execute_SymbolicSource_UsesExtensionWord()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R5, 0xFF00);
 
         // Set up memory at symbolic address (R0 + offset)
@@ -772,8 +751,7 @@ public class AndInstructionTests
     public void Execute_SymbolicSource_UsesExtensionWord_ZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R5, 0xFF00);
 
         // Set up memory at symbolic address (R0 + offset)
@@ -802,8 +780,7 @@ public class AndInstructionTests
     public void Execute_IndexedDestination_UsesExtensionWord_LowByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x00FF);
         registerFile.WriteRegister(RegisterName.R6, 0x0200); // Base address
 
@@ -832,8 +809,7 @@ public class AndInstructionTests
     public void Execute_IndexedDestination_UsesExtensionWord_HighByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x00FF);
         registerFile.WriteRegister(RegisterName.R6, 0x0200); // Base address
 
@@ -862,8 +838,7 @@ public class AndInstructionTests
     public void Execute_BothSourceAndDestinationRequireExtensionWords_LowByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         // Set up memory values
         memory[0x0100] = 0xAA; // Source value at absolute address 0x100
@@ -892,8 +867,7 @@ public class AndInstructionTests
     public void Execute_BothSourceAndDestinationRequireExtensionWords_HighByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         // Set up memory values
         memory[0x0100] = 0xAA; // Source value at absolute address 0x100
@@ -922,8 +896,7 @@ public class AndInstructionTests
     public void Execute_BothSourceAndDestinationRequireExtensionWords_Cycles()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         // Set up memory values
         memory[0x0100] = 0xAA; // Source value at absolute address 0x100

@@ -230,12 +230,14 @@ public class BisInstructionTests
     #region Execute Method Tests
 
     [Theory]
-    [InlineData(false)]
-    public void Execute_RegisterToRegister_SetsZeroFlag(bool expectedZero)
+    [InlineData("Zero", false)]
+    [InlineData("Negative", false)]
+    [InlineData("Carry", false)]
+    [InlineData("Overflow", false)]
+    public void Execute_RegisterToRegister_SetsStatusFlags(string flagName, bool expectedValue)
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x00F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0F00);
 
@@ -251,90 +253,22 @@ public class BisInstructionTests
         instruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
         // Assert
-        Assert.Equal(expectedZero, registerFile.StatusRegister.Zero);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    public void Execute_RegisterToRegister_SetsNegativeFlag(bool expectedNegative)
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
-        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.Equal(expectedNegative, registerFile.StatusRegister.Negative);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    public void Execute_RegisterToRegister_SetsCarryFlag(bool expectedCarry)
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
-        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.Equal(expectedCarry, registerFile.StatusRegister.Carry);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    public void Execute_RegisterToRegister_SetsOverflowFlag(bool expectedOverflow)
-    {
-        // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
-        registerFile.WriteRegister(RegisterName.R4, 0x00F0);
-        registerFile.WriteRegister(RegisterName.R5, 0x0F00);
-
-        var instruction = new BisInstruction(
-            0xD000,
-            RegisterName.R4,
-            RegisterName.R5,
-            AddressingMode.Register,
-            AddressingMode.Register,
-            false);
-
-        // Act
-        instruction.Execute(registerFile, memory, Array.Empty<ushort>());
-
-        // Assert
-        Assert.Equal(expectedOverflow, registerFile.StatusRegister.Overflow);
+        bool actualValue = flagName switch
+        {
+            "Zero" => registerFile.StatusRegister.Zero,
+            "Negative" => registerFile.StatusRegister.Negative,
+            "Carry" => registerFile.StatusRegister.Carry,
+            "Overflow" => registerFile.StatusRegister.Overflow,
+            _ => throw new ArgumentException($"Unknown flag: {flagName}")
+        };
+        Assert.Equal(expectedValue, actualValue);
     }
 
     [Fact]
     public void Execute_RegisterToRegister_PerformsBisOperation()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x00F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0F00);
 
@@ -593,8 +527,7 @@ public class BisInstructionTests
     public void Execute_RegisterToRegister_ReturnsCycles()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x00F0);
         registerFile.WriteRegister(RegisterName.R5, 0x0F00);
 
@@ -618,8 +551,7 @@ public class BisInstructionTests
     public void Execute_ByteOperation_SetsZeroFlag(bool expectedZero)
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x120F);
         registerFile.WriteRegister(RegisterName.R5, 0x34F0);
 
@@ -643,8 +575,7 @@ public class BisInstructionTests
     public void Execute_ByteOperation_SetsNegativeFlag(bool expectedNegative)
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x120F);
         registerFile.WriteRegister(RegisterName.R5, 0x34F0);
 
@@ -667,8 +598,7 @@ public class BisInstructionTests
     public void Execute_ByteOperation_PerformsBisOnBytes()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[1024];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         registerFile.WriteRegister(RegisterName.R4, 0x120F);
         registerFile.WriteRegister(RegisterName.R5, 0x34F0);
 

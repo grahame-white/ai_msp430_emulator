@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.ControlFlow;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
@@ -54,8 +55,7 @@ public class JzInstructionTests
     public void Execute_ZeroFlag_UpdatesProgramCounterCorrectly(bool zeroFlag, bool shouldJump)
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new JzInstruction(0x2000, 10);
 
         ushort originalPC = 0x1000;
@@ -80,8 +80,7 @@ public class JzInstructionTests
     public void Execute_AlwaysTakesTwoCycles()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new JzInstruction(0x2000, 10);
 
         registerFile.SetProgramCounter(0x1000);

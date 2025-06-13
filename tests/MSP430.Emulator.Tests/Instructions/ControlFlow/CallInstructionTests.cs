@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.ControlFlow;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
@@ -25,8 +26,7 @@ public class CallInstructionTests
         ushort programCounter = 0x8000,
         ushort r4Value = 0x9000)
     {
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         registerFile.SetStackPointer(stackPointer);
         registerFile.SetProgramCounter(programCounter);
@@ -247,9 +247,8 @@ public class CallInstructionTests
         public void Execute_StackMemoryBeyondBounds_ThrowsException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[4]; // Very limited memory (addresses 0-3)
-            registerFile.SetStackPointer(0x0006); // SP that would decrement to 0x0004, accessing 0x0004 and 0x0005 (beyond bounds)
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
+            registerFile.SetStackPointer(0x0002); // SP that would decrement to 0x0000, accessing 0x0000 and 0x0001 (beyond stack bounds)
             registerFile.WriteRegister(RegisterName.R4, 0x9000);
             CallInstruction instruction = CreateTestInstruction();
 

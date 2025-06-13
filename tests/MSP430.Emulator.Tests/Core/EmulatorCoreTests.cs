@@ -6,6 +6,7 @@ using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Logging;
 using MSP430.Emulator.Memory;
+using MSP430.Emulator.Tests.TestUtilities;
 
 namespace MSP430.Emulator.Tests.Core;
 
@@ -25,106 +26,97 @@ namespace MSP430.Emulator.Tests.Core;
 /// </summary>
 public class EmulatorCoreTests
 {
-    private readonly RegisterFile _registerFile;
-    private readonly MemoryMap _memoryMap;
-    private readonly InstructionDecoder _instructionDecoder;
-    private readonly TestLogger _logger;
-    private readonly EmulatorCore _emulatorCore;
+    private readonly EmulatorCoreTestFixture _fixture;
 
     public EmulatorCoreTests()
     {
-        _logger = new TestLogger();
-        _registerFile = new RegisterFile(_logger);
-        _memoryMap = new MemoryMap();
-        _instructionDecoder = new InstructionDecoder();
-
-        _emulatorCore = new EmulatorCore(_registerFile, _memoryMap, _instructionDecoder, _logger);
+        _fixture = new EmulatorCoreTestFixture();
     }
 
     [Fact]
     public void Constructor_WithValidParameters_CreatesValidInstance()
     {
-        Assert.NotNull(_emulatorCore);
+        Assert.NotNull(_fixture.EmulatorCore);
     }
 
     [Fact]
     public void Constructor_WithValidParameters_InitializesToResetState()
     {
-        Assert.Equal(ExecutionState.Reset, _emulatorCore.State);
+        Assert.Equal(ExecutionState.Reset, _fixture.EmulatorCore.State);
     }
 
     [Fact]
     public void Constructor_WithValidParameters_IsNotRunning()
     {
-        Assert.False(_emulatorCore.IsRunning);
+        Assert.False(_fixture.EmulatorCore.IsRunning);
     }
 
     [Fact]
     public void Constructor_WithValidParameters_IsNotHalted()
     {
-        Assert.False(_emulatorCore.IsHalted);
+        Assert.False(_fixture.EmulatorCore.IsHalted);
     }
 
     [Fact]
     public void Constructor_WithValidParameters_HasEmptyBreakpoints()
     {
-        Assert.Empty(_emulatorCore.Breakpoints);
+        Assert.Empty(_fixture.EmulatorCore.Breakpoints);
     }
 
     [Fact]
     public void Constructor_WithNullRegisterFile_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new EmulatorCore(null!, _memoryMap, _instructionDecoder, _logger));
+            new EmulatorCore(null!, _fixture.MemoryMap, _fixture.InstructionDecoder, _fixture.Logger));
     }
 
     [Fact]
     public void Constructor_WithNullMemoryMap_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new EmulatorCore(_registerFile, null!, _instructionDecoder, _logger));
+            new EmulatorCore(_fixture.RegisterFile, null!, _fixture.InstructionDecoder, _fixture.Logger));
     }
 
     [Fact]
     public void Constructor_WithNullInstructionDecoder_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new EmulatorCore(_registerFile, _memoryMap, null!, _logger));
+            new EmulatorCore(_fixture.RegisterFile, _fixture.MemoryMap, null!, _fixture.Logger));
     }
 
     [Fact]
     public void Reset_SetsStateToReset()
     {
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
-        Assert.Equal(ExecutionState.Reset, _emulatorCore.State);
+        Assert.Equal(ExecutionState.Reset, _fixture.EmulatorCore.State);
     }
 
     [Fact]
     public void Reset_ClearsInstructionStatistics()
     {
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
-        Assert.Equal(0UL, _emulatorCore.Statistics.InstructionsExecuted);
+        Assert.Equal(0UL, _fixture.EmulatorCore.Statistics.InstructionsExecuted);
     }
 
     [Fact]
     public void Reset_LoadsProgramCounterFromResetVector()
     {
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         // When memory is uninitialized (all zeros), reset vector at 0xFFFE-0xFFFF will be 0x0000
         // So PC should be loaded with 0x0000 from the reset vector, not just reset to 0
-        Assert.Equal((ushort)0, _registerFile.GetProgramCounter());
+        Assert.Equal((ushort)0, _fixture.RegisterFile.GetProgramCounter());
     }
 
     [Fact]
     public void Reset_RaisesStateChangedEvent()
     {
         ExecutionStateChangedEventArgs? eventArgs = null;
-        _emulatorCore.StateChanged += (sender, args) => eventArgs = args;
+        _fixture.EmulatorCore.StateChanged += (sender, args) => eventArgs = args;
 
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         Assert.NotNull(eventArgs);
     }
@@ -133,9 +125,9 @@ public class EmulatorCoreTests
     public void Reset_StateChangedEventHasCorrectNewState()
     {
         ExecutionStateChangedEventArgs? eventArgs = null;
-        _emulatorCore.StateChanged += (sender, args) => eventArgs = args;
+        _fixture.EmulatorCore.StateChanged += (sender, args) => eventArgs = args;
 
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Reset();
 
         Assert.Equal(ExecutionState.Reset, eventArgs?.NewState);
     }
@@ -144,31 +136,31 @@ public class EmulatorCoreTests
     public void Step_FromResetState_ThrowsInvalidInstructionException()
     {
         // Set PC to a valid executable address (typical MSP430 program memory starts around 0x8000)
-        _registerFile.SetProgramCounter(0x8000);
+        _fixture.RegisterFile.SetProgramCounter(0x8000);
 
         // Since we don't have valid instructions in memory, this should throw InvalidInstructionException
         // when the decoder tries to decode the 0x0000 instruction word
-        Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Step());
+        Assert.Throws<InvalidInstructionException>(() => _fixture.EmulatorCore.Step());
     }
 
     [Fact]
     public void Step_FromResetState_TransitionsToSingleStepState()
     {
         // Set PC to a valid executable address (typical MSP430 program memory starts around 0x8000)
-        _registerFile.SetProgramCounter(0x8000);
+        _fixture.RegisterFile.SetProgramCounter(0x8000);
 
         // Since we don't have valid instructions in memory, this should throw InvalidInstructionException
         // when the decoder tries to decode the 0x0000 instruction word
         try
         {
-            _emulatorCore.Step();
+            _fixture.EmulatorCore.Step();
         }
         catch (InvalidInstructionException)
         {
             // Expected exception, check state after exception
         }
 
-        Assert.Equal(ExecutionState.SingleStep, _emulatorCore.State);
+        Assert.Equal(ExecutionState.SingleStep, _fixture.EmulatorCore.State);
     }
 
     [Fact]
@@ -176,7 +168,7 @@ public class EmulatorCoreTests
     {
         ushort address = 0x8000;
 
-        bool added = _emulatorCore.AddBreakpoint(address);
+        bool added = _fixture.EmulatorCore.AddBreakpoint(address);
 
         Assert.True(added);
     }
@@ -186,9 +178,9 @@ public class EmulatorCoreTests
     {
         ushort address = 0x8000;
 
-        _emulatorCore.AddBreakpoint(address);
+        _fixture.EmulatorCore.AddBreakpoint(address);
 
-        Assert.True(_emulatorCore.HasBreakpoint(address));
+        Assert.True(_fixture.EmulatorCore.HasBreakpoint(address));
     }
 
     [Fact]
@@ -196,18 +188,18 @@ public class EmulatorCoreTests
     {
         ushort address = 0x8000;
 
-        _emulatorCore.AddBreakpoint(address);
+        _fixture.EmulatorCore.AddBreakpoint(address);
 
-        Assert.Contains(address, _emulatorCore.Breakpoints);
+        Assert.Contains(address, _fixture.EmulatorCore.Breakpoints);
     }
 
     [Fact]
     public void AddBreakpoint_DuplicateAddress_ReturnsFalse()
     {
         ushort address = 0x8000;
-        _emulatorCore.AddBreakpoint(address);
+        _fixture.EmulatorCore.AddBreakpoint(address);
 
-        bool added = _emulatorCore.AddBreakpoint(address);
+        bool added = _fixture.EmulatorCore.AddBreakpoint(address);
 
         Assert.False(added);
     }
@@ -216,20 +208,20 @@ public class EmulatorCoreTests
     public void AddBreakpoint_DuplicateAddress_KeepsSingleBreakpoint()
     {
         ushort address = 0x8000;
-        _emulatorCore.AddBreakpoint(address);
+        _fixture.EmulatorCore.AddBreakpoint(address);
 
-        _emulatorCore.AddBreakpoint(address);
+        _fixture.EmulatorCore.AddBreakpoint(address);
 
-        Assert.Single(_emulatorCore.Breakpoints);
+        Assert.Single(_fixture.EmulatorCore.Breakpoints);
     }
 
     [Fact]
     public void RemoveBreakpoint_ExistingBreakpoint_ReturnsTrue()
     {
         ushort address = 0x8000;
-        _emulatorCore.AddBreakpoint(address);
+        _fixture.EmulatorCore.AddBreakpoint(address);
 
-        bool removed = _emulatorCore.RemoveBreakpoint(address);
+        bool removed = _fixture.EmulatorCore.RemoveBreakpoint(address);
 
         Assert.True(removed);
     }
@@ -238,22 +230,22 @@ public class EmulatorCoreTests
     public void RemoveBreakpoint_ExistingBreakpoint_BreakpointNotFound()
     {
         ushort address = 0x8000;
-        _emulatorCore.AddBreakpoint(address);
+        _fixture.EmulatorCore.AddBreakpoint(address);
 
-        _emulatorCore.RemoveBreakpoint(address);
+        _fixture.EmulatorCore.RemoveBreakpoint(address);
 
-        Assert.False(_emulatorCore.HasBreakpoint(address));
+        Assert.False(_fixture.EmulatorCore.HasBreakpoint(address));
     }
 
     [Fact]
     public void RemoveBreakpoint_ExistingBreakpoint_BreakpointsEmpty()
     {
         ushort address = 0x8000;
-        _emulatorCore.AddBreakpoint(address);
+        _fixture.EmulatorCore.AddBreakpoint(address);
 
-        _emulatorCore.RemoveBreakpoint(address);
+        _fixture.EmulatorCore.RemoveBreakpoint(address);
 
-        Assert.Empty(_emulatorCore.Breakpoints);
+        Assert.Empty(_fixture.EmulatorCore.Breakpoints);
     }
 
     [Fact]
@@ -261,7 +253,7 @@ public class EmulatorCoreTests
     {
         ushort address = 0x8000;
 
-        bool removed = _emulatorCore.RemoveBreakpoint(address);
+        bool removed = _fixture.EmulatorCore.RemoveBreakpoint(address);
 
         Assert.False(removed);
     }
@@ -269,29 +261,29 @@ public class EmulatorCoreTests
     [Fact]
     public void ClearBreakpoints_RemovesAllBreakpoints()
     {
-        _emulatorCore.AddBreakpoint(0x8000);
-        _emulatorCore.AddBreakpoint(0x8002);
-        _emulatorCore.AddBreakpoint(0x8004);
+        _fixture.EmulatorCore.AddBreakpoint(0x8000);
+        _fixture.EmulatorCore.AddBreakpoint(0x8002);
+        _fixture.EmulatorCore.AddBreakpoint(0x8004);
 
-        _emulatorCore.ClearBreakpoints();
+        _fixture.EmulatorCore.ClearBreakpoints();
 
-        Assert.Empty(_emulatorCore.Breakpoints);
+        Assert.Empty(_fixture.EmulatorCore.Breakpoints);
     }
 
     [Fact]
     public void Stop_SetsStateToStopped()
     {
-        _emulatorCore.Stop();
+        _fixture.EmulatorCore.Stop();
 
-        Assert.Equal(ExecutionState.Stopped, _emulatorCore.State);
+        Assert.Equal(ExecutionState.Stopped, _fixture.EmulatorCore.State);
     }
 
     [Fact]
     public void Stop_SetsIsRunningToFalse()
     {
-        _emulatorCore.Stop();
+        _fixture.EmulatorCore.Stop();
 
-        Assert.False(_emulatorCore.IsRunning);
+        Assert.False(_fixture.EmulatorCore.IsRunning);
     }
 
     [Fact]
@@ -299,13 +291,13 @@ public class EmulatorCoreTests
     {
         // First transition to a state that can be halted (e.g., SingleStep)
         // Set PC to valid address to avoid memory access issues
-        _registerFile.SetProgramCounter(0x8000);
+        _fixture.RegisterFile.SetProgramCounter(0x8000);
 
         // This will transition to SingleStep state, then fail due to invalid instruction
         // when the decoder tries to decode the 0x0000 instruction word
         try
         {
-            _emulatorCore.Step();
+            _fixture.EmulatorCore.Step();
         }
         catch (InvalidInstructionException)
         {
@@ -313,9 +305,9 @@ public class EmulatorCoreTests
         }
 
         // Now halt from SingleStep state
-        _emulatorCore.Halt();
+        _fixture.EmulatorCore.Halt();
 
-        Assert.Equal(ExecutionState.Halted, _emulatorCore.State);
+        Assert.Equal(ExecutionState.Halted, _fixture.EmulatorCore.State);
     }
 
     [Fact]
@@ -323,13 +315,13 @@ public class EmulatorCoreTests
     {
         // First transition to a state that can be halted (e.g., SingleStep)
         // Set PC to valid address to avoid memory access issues
-        _registerFile.SetProgramCounter(0x8000);
+        _fixture.RegisterFile.SetProgramCounter(0x8000);
 
         // This will transition to SingleStep state, then fail due to invalid instruction
         // when the decoder tries to decode the 0x0000 instruction word
         try
         {
-            _emulatorCore.Step();
+            _fixture.EmulatorCore.Step();
         }
         catch (InvalidInstructionException)
         {
@@ -337,31 +329,31 @@ public class EmulatorCoreTests
         }
 
         // Now halt from SingleStep state
-        _emulatorCore.Halt();
+        _fixture.EmulatorCore.Halt();
 
-        Assert.True(_emulatorCore.IsHalted);
+        Assert.True(_fixture.EmulatorCore.IsHalted);
     }
 
     [Fact]
     public void Run_WithInstructionCount_ThrowsInvalidInstructionException()
     {
         // Set PC to a valid executable address 
-        _registerFile.SetProgramCounter(0x8000);
+        _fixture.RegisterFile.SetProgramCounter(0x8000);
 
         // This will fail due to invalid instructions, but we can test that it attempts to run
-        Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Run(5));
+        Assert.Throws<InvalidInstructionException>(() => _fixture.EmulatorCore.Run(5));
     }
 
     [Fact]
     public void Run_WithInstructionCount_TransitionsToErrorState()
     {
         // Set PC to a valid executable address 
-        _registerFile.SetProgramCounter(0x8000);
+        _fixture.RegisterFile.SetProgramCounter(0x8000);
 
         // This will fail due to invalid instructions, but we can test that it attempts to run
         try
         {
-            _emulatorCore.Run(5);
+            _fixture.EmulatorCore.Run(5);
         }
         catch (InvalidInstructionException)
         {
@@ -369,31 +361,31 @@ public class EmulatorCoreTests
         }
 
         // State should transition to Error due to invalid instruction
-        Assert.Equal(ExecutionState.Error, _emulatorCore.State);
+        Assert.Equal(ExecutionState.Error, _fixture.EmulatorCore.State);
     }
 
     [Fact]
     public void Run_WithDuration_ThrowsInvalidInstructionException()
     {
         // Set PC to a valid executable address 
-        _registerFile.SetProgramCounter(0x8000);
+        _fixture.RegisterFile.SetProgramCounter(0x8000);
         var duration = TimeSpan.FromMilliseconds(10);
 
         // This will fail due to invalid instructions, but we can test that it attempts to run
-        Assert.Throws<InvalidInstructionException>(() => _emulatorCore.Run(duration));
+        Assert.Throws<InvalidInstructionException>(() => _fixture.EmulatorCore.Run(duration));
     }
 
     [Fact]
     public void Run_WithDuration_TransitionsToErrorState()
     {
         // Set PC to a valid executable address 
-        _registerFile.SetProgramCounter(0x8000);
+        _fixture.RegisterFile.SetProgramCounter(0x8000);
         var duration = TimeSpan.FromMilliseconds(10);
 
         // This will fail due to invalid instructions, but we can test that it attempts to run
         try
         {
-            _emulatorCore.Run(duration);
+            _fixture.EmulatorCore.Run(duration);
         }
         catch (InvalidInstructionException)
         {
@@ -401,19 +393,19 @@ public class EmulatorCoreTests
         }
 
         // State should transition to Error due to invalid instruction
-        Assert.Equal(ExecutionState.Error, _emulatorCore.State);
+        Assert.Equal(ExecutionState.Error, _fixture.EmulatorCore.State);
     }
 
     [Fact]
     public void Run_WithZeroInstructions_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => _emulatorCore.Run(0UL));
+        Assert.Throws<ArgumentOutOfRangeException>(() => _fixture.EmulatorCore.Run(0UL));
     }
 
     [Fact]
     public void Run_WithNegativeDuration_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => _emulatorCore.Run(TimeSpan.FromMilliseconds(-1)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => _fixture.EmulatorCore.Run(TimeSpan.FromMilliseconds(-1)));
     }
 
     [Fact]
@@ -421,29 +413,29 @@ public class EmulatorCoreTests
     {
         // This test is challenging because Run() is a blocking operation
         // In a real scenario, we'd need to test this from another thread
-        Assert.False(_emulatorCore.IsRunning); // Initially not running
+        Assert.False(_fixture.EmulatorCore.IsRunning); // Initially not running
     }
 
     [Fact]
     public void Statistics_InstructionsExecutedInitiallyZero()
     {
-        Assert.Equal(0UL, _emulatorCore.Statistics.InstructionsExecuted);
+        Assert.Equal(0UL, _fixture.EmulatorCore.Statistics.InstructionsExecuted);
     }
 
     [Fact]
     public void Statistics_TotalCyclesInitiallyZero()
     {
-        Assert.Equal(0UL, _emulatorCore.Statistics.TotalCycles);
+        Assert.Equal(0UL, _fixture.EmulatorCore.Statistics.TotalCycles);
     }
 
     [Fact]
     public void StateChanged_Event_RaisedCorrectNumberOfTimes()
     {
         var stateChanges = new List<ExecutionStateChangedEventArgs>();
-        _emulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
+        _fixture.EmulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
 
-        _emulatorCore.Stop();
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Stop();
+        _fixture.EmulatorCore.Reset();
 
         Assert.Equal(2, stateChanges.Count);
     }
@@ -452,10 +444,10 @@ public class EmulatorCoreTests
     public void StateChanged_Event_FirstTransitionToStopped()
     {
         var stateChanges = new List<ExecutionStateChangedEventArgs>();
-        _emulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
+        _fixture.EmulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
 
-        _emulatorCore.Stop();
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Stop();
+        _fixture.EmulatorCore.Reset();
 
         Assert.Equal(ExecutionState.Stopped, stateChanges[0].NewState);
     }
@@ -464,49 +456,11 @@ public class EmulatorCoreTests
     public void StateChanged_Event_SecondTransitionToReset()
     {
         var stateChanges = new List<ExecutionStateChangedEventArgs>();
-        _emulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
+        _fixture.EmulatorCore.StateChanged += (sender, args) => stateChanges.Add(args);
 
-        _emulatorCore.Stop();
-        _emulatorCore.Reset();
+        _fixture.EmulatorCore.Stop();
+        _fixture.EmulatorCore.Reset();
 
         Assert.Equal(ExecutionState.Reset, stateChanges[1].NewState);
     }
-
-    private class TestLogger : ILogger
-    {
-        public LogLevel MinimumLevel { get; set; } = LogLevel.Info;
-        public List<LogEntry> LogEntries { get; } = new();
-
-        public void Log(LogLevel level, string message)
-        {
-            if (IsEnabled(level))
-            {
-                LogEntries.Add(new LogEntry(level, message, null));
-            }
-        }
-
-        public void Log(LogLevel level, string message, object? context)
-        {
-            if (IsEnabled(level))
-            {
-                LogEntries.Add(new LogEntry(level, message, context));
-            }
-        }
-
-        public void Debug(string message) => Log(LogLevel.Debug, message);
-        public void Debug(string message, object? context) => Log(LogLevel.Debug, message, context);
-        public void Info(string message) => Log(LogLevel.Info, message);
-        public void Info(string message, object? context) => Log(LogLevel.Info, message, context);
-        public void Warning(string message) => Log(LogLevel.Warning, message);
-        public void Warning(string message, object? context) => Log(LogLevel.Warning, message, context);
-        public void Error(string message) => Log(LogLevel.Error, message);
-        public void Error(string message, object? context) => Log(LogLevel.Error, message, context);
-        public void Error(string message, Exception exception) => Log(LogLevel.Error, $"{message}: {exception}");
-        public void Fatal(string message) => Log(LogLevel.Fatal, message);
-        public void Fatal(string message, object? context) => Log(LogLevel.Fatal, message, context);
-
-        public bool IsEnabled(LogLevel level) => level >= MinimumLevel;
-    }
-
-    private record LogEntry(LogLevel Level, string Message, object? Context);
 }

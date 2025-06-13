@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Arithmetic;
+using MSP430.Emulator.Tests.TestUtilities;
 
 namespace MSP430.Emulator.Tests.Instructions.Arithmetic;
 
@@ -258,8 +259,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_DecrementsValue()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x1235);
@@ -281,8 +281,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ClearsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x1235);
@@ -304,8 +303,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ClearsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x1235);
@@ -327,8 +325,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_SetsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x1235);
@@ -350,8 +347,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x1235);
@@ -373,8 +369,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_Returns1Cycle()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x1235);
@@ -396,8 +391,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ByteOperation_DecrementsLowByteOnly()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R3, 0xAB35);
@@ -419,8 +413,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ByteOperation_ClearsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R3, 0xAB35);
@@ -442,8 +435,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ByteOperation_ClearsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R3, 0xAB35);
@@ -465,8 +457,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ByteOperation_SetsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R3, 0xAB35);
@@ -488,8 +479,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ByteOperation_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R3, 0xAB35);
@@ -511,8 +501,7 @@ public class DecInstructionTests
     public void Execute_RegisterMode_ByteOperation_Returns1Cycle()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R3, 0xAB35);
@@ -534,8 +523,7 @@ public class DecInstructionTests
     public void Execute_DecrementOne_DecrementsToZero()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x0001);
@@ -557,8 +545,7 @@ public class DecInstructionTests
     public void Execute_DecrementOne_SetsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x0001);
@@ -580,8 +567,7 @@ public class DecInstructionTests
     public void Execute_DecrementOne_ClearsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x0001);
@@ -603,8 +589,7 @@ public class DecInstructionTests
     public void Execute_DecrementOne_SetsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x0001);
@@ -626,8 +611,7 @@ public class DecInstructionTests
     public void Execute_DecrementOne_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R5, 0x0001);
@@ -649,8 +633,7 @@ public class DecInstructionTests
     public void Execute_DecrementZero_DecrementsToFFFF()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x0000);
@@ -672,8 +655,7 @@ public class DecInstructionTests
     public void Execute_DecrementZero_ClearsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x0000);
@@ -695,8 +677,7 @@ public class DecInstructionTests
     public void Execute_DecrementZero_SetsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x0000);
@@ -718,8 +699,7 @@ public class DecInstructionTests
     public void Execute_DecrementZero_ClearsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x0000);
@@ -741,8 +721,7 @@ public class DecInstructionTests
     public void Execute_DecrementZero_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x0000);
@@ -764,8 +743,7 @@ public class DecInstructionTests
     public void Execute_NegativeOverflow_DecrementsTo7FFF()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x8000); // Most negative value
@@ -787,8 +765,7 @@ public class DecInstructionTests
     public void Execute_NegativeOverflow_ClearsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x8000); // Most negative value
@@ -810,8 +787,7 @@ public class DecInstructionTests
     public void Execute_NegativeOverflow_ClearsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x8000); // Most negative value
@@ -833,8 +809,7 @@ public class DecInstructionTests
     public void Execute_NegativeOverflow_SetsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x8000); // Most negative value
@@ -856,8 +831,7 @@ public class DecInstructionTests
     public void Execute_NegativeOverflow_SetsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R4, 0x8000); // Most negative value
@@ -879,8 +853,7 @@ public class DecInstructionTests
     public void Execute_ByteNegativeOverflow_DecrementsTo127F()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R6, 0x1280); // Most negative byte value
@@ -902,8 +875,7 @@ public class DecInstructionTests
     public void Execute_ByteNegativeOverflow_ClearsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R6, 0x1280); // Most negative byte value
@@ -925,8 +897,7 @@ public class DecInstructionTests
     public void Execute_ByteNegativeOverflow_ClearsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R6, 0x1280); // Most negative byte value
@@ -948,8 +919,7 @@ public class DecInstructionTests
     public void Execute_ByteNegativeOverflow_SetsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R6, 0x1280); // Most negative byte value
@@ -971,8 +941,7 @@ public class DecInstructionTests
     public void Execute_ByteNegativeOverflow_SetsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R6, 0x1280); // Most negative byte value
@@ -994,8 +963,7 @@ public class DecInstructionTests
     public void Execute_AbsoluteMode_DecrementsMemoryValue()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = new ushort[] { 0x0200 }; // Absolute address
 
         // Set up memory with initial value
@@ -1019,8 +987,7 @@ public class DecInstructionTests
     public void Execute_AbsoluteMode_HighByteUnchanged()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = new ushort[] { 0x0200 }; // Absolute address
 
         // Set up memory with initial value
@@ -1044,8 +1011,7 @@ public class DecInstructionTests
     public void Execute_AbsoluteMode_ClearsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = new ushort[] { 0x0200 }; // Absolute address
 
         // Set up memory with initial value
@@ -1069,8 +1035,7 @@ public class DecInstructionTests
     public void Execute_AbsoluteMode_ClearsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = new ushort[] { 0x0200 }; // Absolute address
 
         // Set up memory with initial value
@@ -1094,8 +1059,7 @@ public class DecInstructionTests
     public void Execute_AbsoluteMode_SetsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = new ushort[] { 0x0200 }; // Absolute address
 
         // Set up memory with initial value
@@ -1119,8 +1083,7 @@ public class DecInstructionTests
     public void Execute_AbsoluteMode_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = new ushort[] { 0x0200 }; // Absolute address
 
         // Set up memory with initial value
@@ -1144,8 +1107,7 @@ public class DecInstructionTests
     public void Execute_AbsoluteMode_Returns4Cycles()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = new ushort[] { 0x0200 }; // Absolute address
 
         // Set up memory with initial value
@@ -1169,8 +1131,7 @@ public class DecInstructionTests
     public void Execute_IndirectMode_DecrementsMemoryValueLowByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7
@@ -1194,8 +1155,7 @@ public class DecInstructionTests
     public void Execute_IndirectMode_DecrementsMemoryValueHighByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7
@@ -1219,8 +1179,7 @@ public class DecInstructionTests
     public void Execute_IndirectMode_RegisterUnchanged()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7
@@ -1244,8 +1203,7 @@ public class DecInstructionTests
     public void Execute_IndirectMode_ClearsZeroFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7
@@ -1269,8 +1227,7 @@ public class DecInstructionTests
     public void Execute_IndirectMode_SetsNegativeFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7
@@ -1294,8 +1251,7 @@ public class DecInstructionTests
     public void Execute_IndirectMode_SetsCarryFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7
@@ -1319,8 +1275,7 @@ public class DecInstructionTests
     public void Execute_IndirectMode_ClearsOverflowFlag()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7
@@ -1344,8 +1299,7 @@ public class DecInstructionTests
     public void Execute_IndirectMode_Returns3Cycles()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[65536];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         ushort[] extensionWords = Array.Empty<ushort>();
 
         registerFile.WriteRegister(RegisterName.R7, 0x0300); // Address in R7

@@ -21,8 +21,7 @@ public class PushInstructionTests
     /// <returns>Tuple containing register file and memory array</returns>
     private static (RegisterFile RegisterFile, byte[] Memory) CreateTestEnvironment(ushort stackPointer = 0x1000, ushort r4Value = 0x1234)
     {
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         registerFile.SetStackPointer(stackPointer);
         registerFile.WriteRegister(RegisterName.R4, r4Value);
@@ -316,8 +315,7 @@ public class PushInstructionTests
     public void Execute_ByteOperationPositive_ZeroExtendsHighByte()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x1244, RegisterName.R4, AddressingMode.Register, true);
 
         registerFile.WriteRegister(RegisterName.R4, 0x1234); // Positive byte value
@@ -334,8 +332,7 @@ public class PushInstructionTests
     public void Execute_ImmediateMode_DecrementsStackPointer()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x1230, RegisterName.R0, AddressingMode.Immediate, false);
 
         registerFile.SetStackPointer(0x1000);
@@ -352,8 +349,7 @@ public class PushInstructionTests
     public void Execute_ImmediateMode_WritesLowByteToMemory()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x1230, RegisterName.R0, AddressingMode.Immediate, false);
 
         registerFile.SetStackPointer(0x1000);
@@ -370,8 +366,7 @@ public class PushInstructionTests
     public void Execute_ImmediateMode_WritesHighByteToMemory()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x1230, RegisterName.R0, AddressingMode.Immediate, false);
 
         registerFile.SetStackPointer(0x1000);
@@ -388,8 +383,7 @@ public class PushInstructionTests
     public void Execute_ImmediateMode_ReturnsCorrectCycleCount()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x1230, RegisterName.R0, AddressingMode.Immediate, false);
 
         registerFile.SetStackPointer(0x1000);
@@ -406,8 +400,7 @@ public class PushInstructionTests
     public void Execute_IndirectMode_PushesIndirectValue()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x1284, RegisterName.R4, AddressingMode.Indirect, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x2000); // Address to read from
@@ -431,8 +424,7 @@ public class PushInstructionTests
     public void Execute_IndirectAutoIncrementMode_PushesValueAndIncrementsRegister()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x12C4, RegisterName.R4, AddressingMode.IndirectAutoIncrement, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x2000); // Address to read from
@@ -457,8 +449,7 @@ public class PushInstructionTests
     public void Execute_StackOverflow_ThrowsException()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x1234);
@@ -474,12 +465,11 @@ public class PushInstructionTests
     public void Execute_StackMemoryOutOfBounds_ThrowsException()
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[4]; // Very limited memory (addresses 0-3)
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x1234);
-        registerFile.SetStackPointer(0x0006); // SP that would decrement to 0x0004, accessing 0x0004 and 0x0005 (beyond bounds)
+        registerFile.SetStackPointer(0x0002); // SP that would decrement to 0x0000, accessing memory beyond stack bounds
 
         // Act & Assert
         InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
@@ -537,8 +527,7 @@ public class PushInstructionTests
     public void Execute_AllSourceAddressingModes_ExecutesSuccessfully(AddressingMode sourceMode)
     {
         // Arrange
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000];
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         // Set up initial values
         registerFile.SetStackPointer(0x1000);

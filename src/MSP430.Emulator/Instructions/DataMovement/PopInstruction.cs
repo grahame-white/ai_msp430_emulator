@@ -86,8 +86,12 @@ public class PopInstruction : Instruction, IExecutableInstruction
         ushort currentSP = registerFile.GetStackPointer();
 
         // Check for stack overflow - ensure SP is within valid memory range
-        // Note: This checks if SP would access beyond memory bounds but uses
-        // standardized "Stack overflow detected" message per CONTRIBUTING.md guidelines
+        // Check that the current stack pointer location is within valid bounds
+        // Stack should not go below 0x0200 (system registers area) or beyond memory length
+        if (currentSP < 0x0200)
+        {
+            throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would access memory beyond bounds");
+        }
         // For byte operations, only need to check one byte; for word operations, check two bytes
         int bytesToCheck = _isByteOperation ? 1 : 2;
         if (currentSP + bytesToCheck - 1 >= memory.Length)

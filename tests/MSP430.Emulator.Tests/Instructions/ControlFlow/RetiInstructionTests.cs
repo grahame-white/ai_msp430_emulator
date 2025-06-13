@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.ControlFlow;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.ControlFlow;
@@ -28,8 +29,7 @@ public class RetiInstructionTests
         ushort stackPointer = 0x1000,
         ushort programCounter = 0x8000)
     {
-        var registerFile = new RegisterFile();
-        byte[] memory = new byte[0x10000]; // 64KB memory
+        (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
         // Initialize stack pointer and program counter
         registerFile.SetStackPointer(stackPointer);
@@ -274,9 +274,8 @@ public class RetiInstructionTests
         public void Execute_StackPointerAtMemoryBoundary_ThrowsException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[4]; // Very limited memory (addresses 0-3)
-            registerFile.SetStackPointer(0x0002); // SP=2, needs to access 2,3,4,5 (4,5 are beyond bounds)
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
+            registerFile.SetStackPointer(0x0002); // SP=2, needs to access 0x0000,0x0001,0x0002,0x0003 but 0x0000,0x0001 are beyond stack bounds
 
             RetiInstruction instruction = CreateTestInstruction();
 
@@ -290,9 +289,8 @@ public class RetiInstructionTests
         public void Execute_StackPointerNearMemoryEnd_ThrowsException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x1002]; // Memory from 0x0000 to 0x1001
-            registerFile.SetStackPointer(0x1000); // SP=0x1000, needs to access 0x1000,0x1001,0x1002,0x1003 (0x1002,0x1003 are beyond bounds)
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
+            registerFile.SetStackPointer(0x0002); // SP=0x0002, needs to access 0x0000,0x0001,0x0002,0x0003 but 0x0000,0x0001 are beyond stack bounds
 
             RetiInstruction instruction = CreateTestInstruction();
 
@@ -306,8 +304,7 @@ public class RetiInstructionTests
         public void Execute_StackPointerOverflowAfterFirstIncrement_ThrowsException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             registerFile.SetStackPointer(0xFFFF); // SP that would overflow when incremented
 
             RetiInstruction instruction = CreateTestInstruction();
@@ -322,8 +319,7 @@ public class RetiInstructionTests
         public void Execute_StackPointerOverflowAfterSecondIncrement_ThrowsException()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             registerFile.SetStackPointer(0xFFFE); // SP that would overflow on second increment (0xFFFE -> 0x0000 -> 0x0002 fails)
 
             RetiInstruction instruction = CreateTestInstruction();
@@ -344,22 +340,21 @@ public class RetiInstructionTests
         public void Execute_MinimumValidStackPointer_ExecutesSuccessfully()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[0x10000];
-            registerFile.SetStackPointer(0x0000); // Minimum valid SP that can access 4 bytes
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
+            registerFile.SetStackPointer(0x0200); // Minimum valid SP that can access 4 bytes
 
             // Set up stack data
-            memory[0x0000] = 0x08; // SR
-            memory[0x0001] = 0x00;
-            memory[0x0002] = 0x00; // PC
-            memory[0x0003] = 0x80;
+            memory[0x0200] = 0x08; // SR
+            memory[0x0201] = 0x00;
+            memory[0x0202] = 0x00; // PC
+            memory[0x0203] = 0x80;
 
             RetiInstruction instruction = CreateTestInstruction();
 
             // Act & Assert - Should not throw
             uint cycleCount = instruction.Execute(registerFile, memory, Array.Empty<ushort>());
             Assert.Equal(5U, cycleCount);
-            Assert.Equal(0x0004, registerFile.GetStackPointer());
+            Assert.Equal(0x0204, registerFile.GetStackPointer());
         }
 
         [Fact]

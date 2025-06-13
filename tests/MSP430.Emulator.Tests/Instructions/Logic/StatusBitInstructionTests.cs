@@ -2,6 +2,7 @@ using System;
 using MSP430.Emulator.Cpu;
 using MSP430.Emulator.Instructions;
 using MSP430.Emulator.Instructions.Logic;
+using MSP430.Emulator.Tests.TestUtilities;
 using Xunit;
 
 namespace MSP430.Emulator.Tests.Instructions.Logic;
@@ -80,8 +81,7 @@ public class StatusBitInstructionTests
         public void Execute_ClearCarryFlag_SetsCarryFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetcInstruction(0x0000);
 
             // Ensure carry is initially clear
@@ -98,8 +98,7 @@ public class StatusBitInstructionTests
         public void Execute_SetCarryFlag_Takes1Cycle()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetcInstruction(0x0000);
 
             // Act
@@ -113,8 +112,7 @@ public class StatusBitInstructionTests
         public void Execute_CarryAlreadySet_KeepsCarrySet()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetcInstruction(0x0000);
 
             // Set carry initially
@@ -131,8 +129,7 @@ public class StatusBitInstructionTests
         public void Execute_SetsCarryFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetcInstruction(0x0000);
 
             // Set other flags
@@ -153,8 +150,7 @@ public class StatusBitInstructionTests
         public void Execute_DoesNotAffectZeroFlag(bool expectedZero)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetcInstruction(0x0000);
 
             // Set zero flag
@@ -173,8 +169,7 @@ public class StatusBitInstructionTests
         public void Execute_DoesNotAffectNegativeFlag(bool expectedNegative)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetcInstruction(0x0000);
 
             // Set negative flag
@@ -193,8 +188,7 @@ public class StatusBitInstructionTests
         public void Execute_DoesNotAffectOverflowFlag(bool expectedOverflow)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetcInstruction(0x0000);
 
             // Set overflow flag
@@ -280,8 +274,7 @@ public class StatusBitInstructionTests
         public void Execute_SetCarryFlag_ClearsCarryFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new ClrcInstruction(0x0000);
 
             // Set carry initially
@@ -298,8 +291,7 @@ public class StatusBitInstructionTests
         public void Execute_SetCarryFlag_Returns1Cycle()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new ClrcInstruction(0x0000);
 
             // Set carry initially
@@ -316,8 +308,7 @@ public class StatusBitInstructionTests
         public void Execute_CarryAlreadyClear_KeepsCarryClear()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new ClrcInstruction(0x0000);
 
             // Ensure carry is initially clear
@@ -363,8 +354,7 @@ public class StatusBitInstructionTests
         public void Execute_ClearZeroFlag_SetsZeroFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetzInstruction(0x0000);
 
             // Ensure zero is initially clear
@@ -410,8 +400,7 @@ public class StatusBitInstructionTests
         public void Execute_SetZeroFlag_ClearsZeroFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new ClrzInstruction(0x0000);
 
             // Set zero initially
@@ -457,8 +446,7 @@ public class StatusBitInstructionTests
         public void Execute_ClearNegativeFlag_SetsNegativeFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new SetnInstruction(0x0000);
 
             // Ensure negative is initially clear
@@ -504,8 +492,7 @@ public class StatusBitInstructionTests
         public void Execute_SetNegativeFlag_ClearsNegativeFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var instruction = new ClrnInstruction(0x0000);
 
             // Set negative initially
@@ -541,8 +528,7 @@ public class StatusBitInstructionTests
         public void Execute_SetcInstruction_SetsCarryFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var setcInstruction = new SetcInstruction(0x0000);
 
             // Ensure carry is initially clear
@@ -559,8 +545,7 @@ public class StatusBitInstructionTests
         public void Execute_SetzInstruction_SetsZeroFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var setzInstruction = new SetzInstruction(0x0000);
 
             // Ensure zero is initially clear
@@ -577,8 +562,7 @@ public class StatusBitInstructionTests
         public void Execute_SetnInstruction_SetsNegativeFlag()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var setnInstruction = new SetnInstruction(0x0000);
 
             // Ensure negative is initially clear
@@ -596,8 +580,7 @@ public class StatusBitInstructionTests
         public void Execute_ClrcInstruction_AffectsCarryFlag(bool expectedCarry)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var clrcInstruction = new ClrcInstruction(0x0000);
 
             // Set all flags initially to opposite values to ensure proper testing
@@ -617,8 +600,7 @@ public class StatusBitInstructionTests
         public void Execute_ClrcInstruction_AffectsZeroFlag(bool expectedZero)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var clrcInstruction = new ClrcInstruction(0x0000);
 
             // Set all flags initially to opposite values to ensure proper testing
@@ -638,8 +620,7 @@ public class StatusBitInstructionTests
         public void Execute_ClrcInstruction_AffectsNegativeFlag(bool expectedNegative)
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
             var clrcInstruction = new ClrcInstruction(0x0000);
 
             // Set all flags initially to opposite values to ensure proper testing
@@ -658,8 +639,7 @@ public class StatusBitInstructionTests
         public void Execute_AllStatusInstructions_OneCycleEach()
         {
             // Arrange
-            var registerFile = new RegisterFile();
-            byte[] memory = new byte[65536];
+            (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
 
             var instructions = new StatusBitInstruction[]
             {

@@ -105,7 +105,12 @@ public class PushInstruction : Instruction, IExecutableInstruction
         // Pre-decrement stack pointer by 2 (stack grows downward, always operates on words)
         ushort newSP = (ushort)(currentSP - 2);
 
-        // Check that the new stack pointer location is within memory bounds
+        // Check that the new stack pointer location is within valid bounds
+        // Stack should not go below 0x0200 (system registers area) or beyond memory length
+        if (newSP < 0x0200)
+        {
+            throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{newSP:X4} would access memory beyond bounds");
+        }
         if (newSP + 1 >= memory.Length)
         {
             throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{newSP:X4} would access memory beyond bounds");

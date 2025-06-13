@@ -86,9 +86,12 @@ public class RetiInstruction : Instruction, IExecutableInstruction
         // Get current stack pointer
         ushort currentSP = registerFile.GetStackPointer();
 
-        // Check for stack overflow - ensure SP+3 is within valid memory range
-        // Note: This checks if SP would access beyond memory bounds but uses
-        // standardized "Stack overflow detected" message per CONTRIBUTING.md guidelines
+        // Check that the current stack pointer location is within valid bounds
+        // Stack should not go below 0x0200 (system registers area) or beyond memory length
+        if (currentSP < 0x0200)
+        {
+            throw new InvalidOperationException($"Stack overflow detected: Stack pointer 0x{currentSP:X4} would access memory beyond bounds");
+        }
         // RETI needs to read 4 bytes total (SR + PC), so we need SP+3 to be valid
         if (currentSP + 3 >= memory.Length)
         {

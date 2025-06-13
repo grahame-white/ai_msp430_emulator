@@ -256,7 +256,7 @@ public class RetInstructionTests
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
-            registerFile.SetStackPointer(0x0004); // SP pointing to memory beyond bounds
+            registerFile.SetStackPointer(0x0000); // SP pointing to memory beyond stack bounds
             RetInstruction instruction = CreateTestInstruction();
 
             // Act & Assert
@@ -288,11 +288,11 @@ public class RetInstructionTests
         {
             // Arrange - Test near boundaries but within valid range
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment(
-                stackPointer: 0x0002); // Minimum valid SP for RET
+                stackPointer: 0x0200); // Minimum valid SP for RET
 
             // Set return address
-            memory[0x0002] = 0x00;
-            memory[0x0003] = 0x80; // Return to 0x8000
+            memory[0x0200] = 0x00;
+            memory[0x0201] = 0x80; // Return to 0x8000
 
             RetInstruction instruction = CreateTestInstruction();
 
@@ -301,7 +301,7 @@ public class RetInstructionTests
 
             // Assert - Should work without exception
             Assert.Equal(0x8000, registerFile.GetProgramCounter());
-            Assert.Equal(0x0004, registerFile.GetStackPointer());
+            Assert.Equal(0x0202, registerFile.GetStackPointer());
         }
     }
 

@@ -341,7 +341,7 @@ public class PopInstructionTests
         (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
         var instruction = new PopInstruction(0x1304, RegisterName.R4, AddressingMode.Register, false);
 
-        registerFile.SetStackPointer(0x1000); // SP that would access beyond memory bounds
+        registerFile.SetStackPointer(0x0000); // SP that would access memory beyond stack bounds
 
         // Act & Assert
         InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>

@@ -44,6 +44,6 @@ public static class TestEnvironmentHelper
     /// <returns>A tuple containing the register file and memory array for instruction tests.</returns>
     public static (RegisterFile registerFile, byte[] memory) CreateInstructionTestEnvironment()
     {
-        return (new RegisterFile(), new byte[1024]);
+        return (new RegisterFile(), new byte[0x10000]); // 64KB memory space
     }
 }

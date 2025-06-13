@@ -248,7 +248,7 @@ public class CallInstructionTests
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = TestEnvironmentHelper.CreateInstructionTestEnvironment();
-            registerFile.SetStackPointer(0x0006); // SP that would decrement to 0x0004, accessing 0x0004 and 0x0005 (beyond bounds)
+            registerFile.SetStackPointer(0x0002); // SP that would decrement to 0x0000, accessing 0x0000 and 0x0001 (beyond stack bounds)
             registerFile.WriteRegister(RegisterName.R4, 0x9000);
             CallInstruction instruction = CreateTestInstruction();
 

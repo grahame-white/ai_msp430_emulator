@@ -469,7 +469,7 @@ public class PushInstructionTests
         var instruction = new PushInstruction(0x1204, RegisterName.R4, AddressingMode.Register, false);
 
         registerFile.WriteRegister(RegisterName.R4, 0x1234);
-        registerFile.SetStackPointer(0x0006); // SP that would decrement to 0x0004, accessing 0x0004 and 0x0005 (beyond bounds)
+        registerFile.SetStackPointer(0x0002); // SP that would decrement to 0x0000, accessing memory beyond stack bounds
 
         // Act & Assert
         InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>

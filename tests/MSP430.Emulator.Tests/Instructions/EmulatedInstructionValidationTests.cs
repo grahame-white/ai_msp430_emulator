@@ -46,7 +46,23 @@ public class EmulatedInstructionValidationTests
     public class StatusRegisterManipulationTests
     {
         [Fact]
-        public void SETC_SetCarryBit_BehavesIdenticalToCoreBisInstruction()
+        public void SETC_SetCarryBit_SetsCarryFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Carry = false;
+
+            var setcInstruction = new SetcInstruction(0xD312); // BIS #1, SR
+
+            // Act
+            setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.True(registerFile.StatusRegister.Carry);
+        }
+
+        [Fact]
+        public void SETC_SetCarryBit_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -58,12 +74,27 @@ public class EmulatedInstructionValidationTests
             uint cycles = setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.True(registerFile.StatusRegister.Carry);
             Assert.Equal(1u, cycles); // Should match BIS #1, SR cycle count
         }
 
         [Fact]
-        public void CLRC_ClearCarryBit_BehavesIdenticalToCoreBicInstruction()
+        public void CLRC_ClearCarryBit_ClearsCarryFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Carry = true;
+
+            var clrcInstruction = new ClrcInstruction(0xC312); // BIC #1, SR
+
+            // Act
+            clrcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.False(registerFile.StatusRegister.Carry);
+        }
+
+        [Fact]
+        public void CLRC_ClearCarryBit_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -75,12 +106,27 @@ public class EmulatedInstructionValidationTests
             uint cycles = clrcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.False(registerFile.StatusRegister.Carry);
             Assert.Equal(1u, cycles); // Should match BIC #1, SR cycle count
         }
 
         [Fact]
-        public void SETN_SetNegativeBit_BehavesIdenticalToCoreBisInstruction()
+        public void SETN_SetNegativeBit_SetsNegativeFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Negative = false;
+
+            var setnInstruction = new SetnInstruction(0xD322); // BIS #4, SR
+
+            // Act
+            setnInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.True(registerFile.StatusRegister.Negative);
+        }
+
+        [Fact]
+        public void SETN_SetNegativeBit_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -92,12 +138,27 @@ public class EmulatedInstructionValidationTests
             uint cycles = setnInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.True(registerFile.StatusRegister.Negative);
             Assert.Equal(1u, cycles); // Should match BIS #4, SR cycle count
         }
 
         [Fact]
-        public void CLRN_ClearNegativeBit_BehavesIdenticalToCoreBicInstruction()
+        public void CLRN_ClearNegativeBit_ClearsNegativeFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Negative = true;
+
+            var clrnInstruction = new ClrnInstruction(0xC322); // BIC #4, SR
+
+            // Act
+            clrnInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.False(registerFile.StatusRegister.Negative);
+        }
+
+        [Fact]
+        public void CLRN_ClearNegativeBit_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -109,12 +170,27 @@ public class EmulatedInstructionValidationTests
             uint cycles = clrnInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.False(registerFile.StatusRegister.Negative);
             Assert.Equal(1u, cycles); // Should match BIC #4, SR cycle count
         }
 
         [Fact]
-        public void SETZ_SetZeroBit_BehavesIdenticalToCoreBisInstruction()
+        public void SETZ_SetZeroBit_SetsZeroFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Zero = false;
+
+            var setzInstruction = new SetzInstruction(0xD32A); // BIS #2, SR
+
+            // Act
+            setzInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.True(registerFile.StatusRegister.Zero);
+        }
+
+        [Fact]
+        public void SETZ_SetZeroBit_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -126,12 +202,27 @@ public class EmulatedInstructionValidationTests
             uint cycles = setzInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.True(registerFile.StatusRegister.Zero);
             Assert.Equal(1u, cycles); // Should match BIS #2, SR cycle count
         }
 
         [Fact]
-        public void CLRZ_ClearZeroBit_BehavesIdenticalToCoreBicInstruction()
+        public void CLRZ_ClearZeroBit_ClearsZeroFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.Zero = true;
+
+            var clrzInstruction = new ClrzInstruction(0xC32A); // BIC #2, SR
+
+            // Act
+            clrzInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.False(registerFile.StatusRegister.Zero);
+        }
+
+        [Fact]
+        public void CLRZ_ClearZeroBit_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -143,12 +234,27 @@ public class EmulatedInstructionValidationTests
             uint cycles = clrzInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.False(registerFile.StatusRegister.Zero);
             Assert.Equal(1u, cycles); // Should match BIC #2, SR cycle count
         }
 
         [Fact]
-        public void DINT_DisableInterrupts_BehavesIdenticalToCoreBicInstruction()
+        public void DINT_DisableInterrupts_DisablesInterrupts()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.GeneralInterruptEnable = true;
+
+            var dintInstruction = new DintInstruction(0xC232); // BIC #8, SR
+
+            // Act
+            dintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.False(registerFile.StatusRegister.GeneralInterruptEnable);
+        }
+
+        [Fact]
+        public void DINT_DisableInterrupts_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -160,12 +266,27 @@ public class EmulatedInstructionValidationTests
             uint cycles = dintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.False(registerFile.StatusRegister.GeneralInterruptEnable);
             Assert.Equal(1u, cycles); // Should match BIC #8, SR cycle count
         }
 
         [Fact]
-        public void EINT_EnableInterrupts_BehavesIdenticalToCoreBisInstruction()
+        public void EINT_EnableInterrupts_EnablesInterrupts()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.StatusRegister.GeneralInterruptEnable = false;
+
+            var eintInstruction = new EintInstruction(0xD232); // BIS #8, SR
+
+            // Act
+            eintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.True(registerFile.StatusRegister.GeneralInterruptEnable);
+        }
+
+        [Fact]
+        public void EINT_EnableInterrupts_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -177,12 +298,11 @@ public class EmulatedInstructionValidationTests
             uint cycles = eintInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.True(registerFile.StatusRegister.GeneralInterruptEnable);
             Assert.Equal(1u, cycles); // Should match BIS #8, SR cycle count
         }
 
         [Fact]
-        public void StatusRegisterInstructions_DoNotAffectOtherFlags()
+        public void SETC_SetsCarryBit()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -199,11 +319,95 @@ public class EmulatedInstructionValidationTests
             // Act
             setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
-            // Assert - Only carry should change
+            // Assert
             Assert.True(registerFile.StatusRegister.Carry); // Changed
+        }
+
+        [Fact]
+        public void SETC_DoesNotAffectZeroFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Set initial state
+            registerFile.StatusRegister.Carry = false;
+            registerFile.StatusRegister.Zero = true;
+            registerFile.StatusRegister.Negative = true;
+            registerFile.StatusRegister.Overflow = false;
+            registerFile.StatusRegister.GeneralInterruptEnable = true;
+
+            var setcInstruction = new SetcInstruction(0xD312); // BIS #1, SR
+
+            // Act
+            setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.True(registerFile.StatusRegister.Zero); // Unchanged
+        }
+
+        [Fact]
+        public void SETC_DoesNotAffectNegativeFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Set initial state
+            registerFile.StatusRegister.Carry = false;
+            registerFile.StatusRegister.Zero = true;
+            registerFile.StatusRegister.Negative = true;
+            registerFile.StatusRegister.Overflow = false;
+            registerFile.StatusRegister.GeneralInterruptEnable = true;
+
+            var setcInstruction = new SetcInstruction(0xD312); // BIS #1, SR
+
+            // Act
+            setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.True(registerFile.StatusRegister.Negative); // Unchanged
+        }
+
+        [Fact]
+        public void SETC_DoesNotAffectOverflowFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Set initial state
+            registerFile.StatusRegister.Carry = false;
+            registerFile.StatusRegister.Zero = true;
+            registerFile.StatusRegister.Negative = true;
+            registerFile.StatusRegister.Overflow = false;
+            registerFile.StatusRegister.GeneralInterruptEnable = true;
+
+            var setcInstruction = new SetcInstruction(0xD312); // BIS #1, SR
+
+            // Act
+            setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.False(registerFile.StatusRegister.Overflow); // Unchanged
+        }
+
+        [Fact]
+        public void SETC_DoesNotAffectInterruptEnableFlag()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Set initial state
+            registerFile.StatusRegister.Carry = false;
+            registerFile.StatusRegister.Zero = true;
+            registerFile.StatusRegister.Negative = true;
+            registerFile.StatusRegister.Overflow = false;
+            registerFile.StatusRegister.GeneralInterruptEnable = true;
+
+            var setcInstruction = new SetcInstruction(0xD312); // BIS #1, SR
+
+            // Act
+            setcInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
             Assert.True(registerFile.StatusRegister.GeneralInterruptEnable); // Unchanged
         }
     }
@@ -214,15 +418,64 @@ public class EmulatedInstructionValidationTests
     public class ControlFlowEmulatedTests
     {
         [Fact]
-        public void NOP_NoOperation_BehavesIdenticalToCoreMovInstruction()
+        public void NOP_NoOperation_DoesNotChangeProgramCounter()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
 
             // Store initial register state
             ushort initialPc = registerFile.GetProgramCounter();
+
+            var nopInstruction = new NopInstruction(0x4303); // MOV R3, R3
+
+            // Act
+            nopInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(initialPc, registerFile.GetProgramCounter()); // PC unchanged
+        }
+
+        [Fact]
+        public void NOP_NoOperation_DoesNotChangeStackPointer()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Store initial register state
             ushort initialSp = registerFile.GetStackPointer();
+
+            var nopInstruction = new NopInstruction(0x4303); // MOV R3, R3
+
+            // Act
+            nopInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(initialSp, registerFile.GetStackPointer()); // SP unchanged
+        }
+
+        [Fact]
+        public void NOP_NoOperation_DoesNotChangeR3Register()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Store initial register state
             ushort initialR3 = registerFile.ReadRegister(RegisterName.R3);
+
+            var nopInstruction = new NopInstruction(0x4303); // MOV R3, R3
+
+            // Act
+            nopInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(initialR3, registerFile.ReadRegister(RegisterName.R3)); // R3 unchanged (moved to itself)
+        }
+
+        [Fact]
+        public void NOP_NoOperation_ReturnsCorrectCycleCount()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
 
             var nopInstruction = new NopInstruction(0x4303); // MOV R3, R3
 
@@ -230,14 +483,53 @@ public class EmulatedInstructionValidationTests
             uint cycles = nopInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.Equal(initialPc, registerFile.GetProgramCounter()); // PC unchanged
-            Assert.Equal(initialSp, registerFile.GetStackPointer()); // SP unchanged
-            Assert.Equal(initialR3, registerFile.ReadRegister(RegisterName.R3)); // R3 unchanged (moved to itself)
             Assert.Equal(1u, cycles); // Should match MOV R3, R3 cycle count
         }
 
         [Fact]
-        public void RET_ReturnFromSubroutine_BehavesIdenticalToCoreMovInstruction()
+        public void RET_ReturnFromSubroutine_SetsProgramCounter()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Set up stack with return address
+            ushort returnAddress = 0x1234;
+            registerFile.SetStackPointer(0x8000);
+            memory[0x8000] = (byte)(returnAddress & 0xFF);       // Low byte
+            memory[0x8001] = (byte)((returnAddress >> 8) & 0xFF); // High byte
+
+            var retInstruction = new RetInstruction(0x4130); // MOV @SP+, PC
+
+            // Act
+            retInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(returnAddress, registerFile.GetProgramCounter());
+        }
+
+        [Fact]
+        public void RET_ReturnFromSubroutine_IncrementsStackPointer()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Set up stack with return address
+            ushort returnAddress = 0x1234;
+            registerFile.SetStackPointer(0x8000);
+            memory[0x8000] = (byte)(returnAddress & 0xFF);       // Low byte
+            memory[0x8001] = (byte)((returnAddress >> 8) & 0xFF); // High byte
+
+            var retInstruction = new RetInstruction(0x4130); // MOV @SP+, PC
+
+            // Act
+            retInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(0x8002, registerFile.GetStackPointer()); // SP incremented by 2
+        }
+
+        [Fact]
+        public void RET_ReturnFromSubroutine_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -254,8 +546,6 @@ public class EmulatedInstructionValidationTests
             uint cycles = retInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.Equal(returnAddress, registerFile.GetProgramCounter());
-            Assert.Equal(0x8002, registerFile.GetStackPointer()); // SP incremented by 2
             Assert.Equal(4u, cycles); // Should match MOV @SP+, PC cycle count per SLAU445I Table 4-8
         }
     }
@@ -266,7 +556,23 @@ public class EmulatedInstructionValidationTests
     public class ArithmeticEmulatedTests
     {
         [Fact]
-        public void DEC_DecrementByOne_BehavesIdenticalToCoreSubInstruction()
+        public void DEC_DecrementByOne_ProducesCorrectResult()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+            var decInstruction = new DecInstruction(0x8314, RegisterName.R4, AddressingMode.Register, false);
+
+            // Act
+            decInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(0x1233, registerFile.ReadRegister(RegisterName.R4));
+        }
+
+        [Fact]
+        public void DEC_DecrementByOne_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -278,12 +584,27 @@ public class EmulatedInstructionValidationTests
             uint cycles = decInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.Equal(0x1233, registerFile.ReadRegister(RegisterName.R4));
             Assert.Equal(1u, cycles); // Should match SUB #1, R4 cycle count
         }
 
         [Fact]
-        public void INC_IncrementByOne_BehavesIdenticalToCoreAddInstruction()
+        public void INC_IncrementByOne_ProducesCorrectResult()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+            registerFile.WriteRegister(RegisterName.R4, 0x1234);
+
+            var incInstruction = new IncInstruction(0x5314, RegisterName.R4, AddressingMode.Register, false);
+
+            // Act
+            incInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(0x1235, registerFile.ReadRegister(RegisterName.R4));
+        }
+
+        [Fact]
+        public void INC_IncrementByOne_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -295,7 +616,6 @@ public class EmulatedInstructionValidationTests
             uint cycles = incInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.Equal(0x1235, registerFile.ReadRegister(RegisterName.R4));
             Assert.Equal(1u, cycles); // Should match ADD #1, R4 cycle count (register mode = 1 cycle)
         }
     }
@@ -306,7 +626,49 @@ public class EmulatedInstructionValidationTests
     public class DataMovementEmulatedTests
     {
         [Fact]
-        public void POP_PopFromStack_BehavesIdenticalToCoreMovInstruction()
+        public void POP_PopFromStack_LoadsValueFromStack()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Set up stack with value to pop
+            ushort valueOnStack = 0x5678;
+            registerFile.SetStackPointer(0x8000);
+            memory[0x8000] = (byte)(valueOnStack & 0xFF);       // Low byte
+            memory[0x8001] = (byte)((valueOnStack >> 8) & 0xFF); // High byte
+
+            var popInstruction = new PopInstruction(0x4134, RegisterName.R4, AddressingMode.Register, false);
+
+            // Act
+            popInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(valueOnStack, registerFile.ReadRegister(RegisterName.R4));
+        }
+
+        [Fact]
+        public void POP_PopFromStack_IncrementsStackPointer()
+        {
+            // Arrange
+            (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
+
+            // Set up stack with value to pop
+            ushort valueOnStack = 0x5678;
+            registerFile.SetStackPointer(0x8000);
+            memory[0x8000] = (byte)(valueOnStack & 0xFF);       // Low byte
+            memory[0x8001] = (byte)((valueOnStack >> 8) & 0xFF); // High byte
+
+            var popInstruction = new PopInstruction(0x4134, RegisterName.R4, AddressingMode.Register, false);
+
+            // Act
+            popInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
+
+            // Assert
+            Assert.Equal(0x8002, registerFile.GetStackPointer()); // SP incremented by 2
+        }
+
+        [Fact]
+        public void POP_PopFromStack_ReturnsCorrectCycleCount()
         {
             // Arrange
             (RegisterFile registerFile, byte[] memory) = CreateTestEnvironment();
@@ -323,8 +685,6 @@ public class EmulatedInstructionValidationTests
             uint cycles = popInstruction.Execute(registerFile, memory, Array.Empty<ushort>());
 
             // Assert
-            Assert.Equal(valueOnStack, registerFile.ReadRegister(RegisterName.R4));
-            Assert.Equal(0x8002, registerFile.GetStackPointer()); // SP incremented by 2
             Assert.Equal(1u, cycles); // Should match MOV @SP+, R4 cycle count (register destination = 1 cycle)
         }
     }

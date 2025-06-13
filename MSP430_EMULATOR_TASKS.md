@@ -2187,7 +2187,7 @@ tests/MSP430.Emulator.Tests/CLI/CommandTests.cs
 
 **Priority**: Medium
 **Estimated Effort**: 4-5 hours
-**Dependencies**: Task 10.5
+**Dependencies**: Task 10.4
 
 Generate comprehensive API documentation with clear and consistent visual diagrams and architecture guides.
 

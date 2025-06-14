@@ -6,3 +6,4 @@ and instruction set.
 > [!NOTE]
 > The MSP430X CPUX implemented on this device family, formally called CPUXV2, has in some cases, slightly
 > different cycle counts from the MSP430X CPUX implemented on the 2xx and 4xx families.
+

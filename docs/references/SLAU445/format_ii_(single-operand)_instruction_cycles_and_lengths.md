@@ -15,3 +15,4 @@ Table 4-9 lists the length and the CPU cycles for all addressing modes of the MS
 | &EDE            | 4                                      | 4                     | 6                     | 2                        | SXT &EDE    |
 
 **Table 4-9. MSP430 Format II Instruction Cycles and Length**
+

@@ -11,4 +11,3 @@ The system control module (SYS) is available on all devices. The basic features 
 - Providing interrupt vector generators for reset and NMIs
 - FRAM write protection
 - On-chip module-to-module signaling control
-

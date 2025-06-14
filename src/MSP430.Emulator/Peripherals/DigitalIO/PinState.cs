@@ -96,26 +96,22 @@ public class PinState
     {
         get
         {
+            // When configured as output, reading returns the output value
             if (_direction == IODirection.Output)
             {
-                // When configured as output, reading returns the output value
                 return _outputValue;
             }
 
             // When configured as input, check if external signal is applied
-            if (HasExternalSignal)
-            {
-                return _externalInput;
-            }
-
-            // No external signal, use pull resistor if enabled
-            return _pullResistor switch
-            {
-                PullResistor.PullUp => true,
-                PullResistor.PullDown => false,
-                PullResistor.None => false, // Floating input reads as 0
-                _ => false
-            };
+            return HasExternalSignal
+                ? _externalInput
+                : _pullResistor switch
+                {
+                    PullResistor.PullUp => true,
+                    PullResistor.PullDown => false,
+                    PullResistor.None => false, // Floating input reads as 0
+                    _ => false
+                };
         }
     }
 

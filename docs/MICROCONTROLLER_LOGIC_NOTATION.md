@@ -114,17 +114,14 @@ SR Latch with Feedback:
 
 ### Gate Truth Tables
 
-```text
-AND Gate Truth Table:
-┌─────┬─────┬─────┐
-│  A  │  B  │  Y  │
-├─────┼─────┼─────┤
-│  0  │  0  │  0  │
-│  0  │  1  │  0  │
-│  1  │  0  │  0  │
-│  1  │  1  │  1  │
-└─────┴─────┴─────┘
-```
+**AND Gate Truth Table:**
+
+| A | B | Y |
+|---|---|---|
+| 0 | 0 | 0 |
+| 0 | 1 | 0 |
+| 1 | 0 | 0 |
+| 1 | 1 | 1 |
 
 ## Blackbox Logic Blocks
 
@@ -144,36 +141,34 @@ Simple Functional Block:
 
 ```text
 ALU (Arithmetic Logic Unit):
-┌─────────────────────────────────────────┐
-│                   ALU                   │
-│ Performs arithmetic and logic operations │
-├─────────────────────────────────────────┤
-│ Inputs:                                 │
-│   A[15:0]    ⟶ ◯  Data Input A         │
-│   B[15:0]    ⟶ ◯  Data Input B         │
-│   OP[3:0]    ⟶ ◯  Operation Select     │
-│   CLK        ⟶ ◯  Clock                │
-│                                         │
-│ Outputs:                                │
-│   RESULT[15:0] ⟶ ◯  Operation Result   │
-│   FLAGS[3:0]   ⟶ ◯  Status Flags       │
-│   OVERFLOW     ⟶ ◯  Overflow Flag      │
-└─────────────────────────────────────────┘
-
-Operation Codes:
-┌──────┬────────────┬─────────────────┐
-│ OP   │ Operation  │ Description     │
-├──────┼────────────┼─────────────────┤
-│ 0000 │ ADD        │ A + B           │
-│ 0001 │ SUB        │ A - B           │
-│ 0010 │ AND        │ A & B           │
-│ 0011 │ OR         │ A | B           │
-│ 0100 │ XOR        │ A ^ B           │
-│ 0101 │ SHL        │ A << B          │
-│ 0110 │ SHR        │ A >> B          │
-│ 0111 │ CMP        │ Compare A, B    │
-└──────┴────────────┴─────────────────┘
+┌─────────────────────────────────────┐
+│               ALU                   │
+├─────────────────────────────────────┤
+│ Inputs:                             │
+│   A[15:0]    ⟶ ◯  Data Input A     │
+│   B[15:0]    ⟶ ◯  Data Input B     │
+│   OP[3:0]    ⟶ ◯  Operation Select │
+│   CLK        ⟶ ◯  Clock            │
+│                                     │
+│ Outputs:                            │
+│   RESULT[15:0] ⟶ ◯  Operation Result│
+│   FLAGS[3:0]   ⟶ ◯  Status Flags   │
+│   OVERFLOW     ⟶ ◯  Overflow Flag  │
+└─────────────────────────────────────┘
 ```
+
+**Operation Codes:**
+
+| OP   | Operation | Description |
+|------|-----------|-------------|
+| 0000 | ADD       | A + B       |
+| 0001 | SUB       | A - B        |
+| 0010 | AND       | A & B        |
+| 0011 | OR        | A \| B       |
+| 0100 | XOR       | A ^ B        |
+| 0101 | SHL       | A << B       |
+| 0110 | SHR       | A >> B       |
+| 0111 | CMP       | Compare A, B |
 
 ## Registers and Fields
 
@@ -301,15 +296,14 @@ Bus Connection with Multiple Devices:
               │     │
     SEL ⟹ ◯──┤     ├
               └─────┘
-
-Truth Table:
-┌─────┬─────┐
-│ SEL │ OUT │
-├─────┼─────┤
-│  0  │ IN0 │
-│  1  │ IN1 │
-└─────┴─────┘
 ```
+
+**Truth Table:**
+
+| SEL | OUT |
+|-----|-----|
+| 0   | IN0 |
+| 1   | IN1 |
 
 ### 4:1 Multiplexor
 
@@ -322,17 +316,16 @@ Truth Table:
               │       │
     SEL[1:0] ⟹◯──┤       ├
               └───────┘
-
-Selection Logic:
-┌──────────┬─────┐
-│ SEL[1:0] │ OUT │
-├──────────┼─────┤
-│    00    │ IN0 │
-│    01    │ IN1 │
-│    10    │ IN2 │
-│    11    │ IN3 │
-└──────────┴─────┘
 ```
+
+**Selection Logic:**
+
+| SEL[1:0] | OUT |
+|----------|-----|
+| 00       | IN0 |
+| 01       | IN1 |
+| 10       | IN2 |
+| 11       | IN3 |
 
 ### Hierarchical Multiplexor
 
@@ -536,15 +529,14 @@ Enabled Switch Matrix:
     INPUT_B ⟶ ◯──┤ ├── ◯ ⟶ OUTPUT_2
                  └─┘
 
-Truth Table:
-┌─────┬─────┬──────────┬──────────┐
-│ EN1 │ EN2 │ OUTPUT_1 │ OUTPUT_2 │
-├─────┼─────┼──────────┼──────────┤
-│  0  │  0  │    Z     │    Z     │
-│  0  │  1  │    Z     │ INPUT_B  │
-│  1  │  0  │ INPUT_A  │    Z     │
-│  1  │  1  │ INPUT_A  │ INPUT_B  │
-└─────┴─────┴──────────┴──────────┘
+**Truth Table:**
+
+| EN1 | EN2 | OUTPUT_1 | OUTPUT_2 |
+|-----|-----|----------|----------|
+| 0   | 0   | Z        | Z        |
+| 0   | 1   | Z        | INPUT_B  |
+| 1   | 0   | INPUT_A  | Z        |
+| 1   | 1   | INPUT_A  | INPUT_B  |
 ```
 
 ### Default Switch States
@@ -568,17 +560,17 @@ Operation:
 
 ```text
 CPU Core Boundary:
-╔═══════════════════════════════════════╗
-║                CPU CORE               ║
-║                                       ║
-║  ┌─────────┐  ┌─────────┐  ┌─────────┐ ║
-║  │   ALU   │  │ REG FILE│  │ CONTROL │ ║
-║  │         │  │         │  │  UNIT   │ ║
-║  └─────────┘  └─────────┘  └─────────┘ ║
-║       │            │            │     ║
-║       └────────────┼────────────┘     ║
-║                    │                  ║
-╚════════════════════╪══════════════════╝
+┌─────────────────────────────────────┐
+│              CPU CORE               │
+│                                     │
+│  ┌─────────┐  ┌─────────┐  ┌─────── │
+│  │   ALU   │  │ REG FILE│  │ CONTROL│
+│  │         │  │         │  │  UNIT  │
+│  └─────────┘  └─────────┘  └────────│
+│       │            │            │  │
+│       └────────────┼────────────┘  │
+│                    │               │
+└────────────────────┼───────────────┘
                      │ 
                 SYSTEM_BUS
 ```
@@ -586,54 +578,54 @@ CPU Core Boundary:
 ### Hierarchical Boundaries
 
 ```text
-System Level Boundaries:
-╔═══════════════════════════════════════════════╗
-║                   SYSTEM                      ║
-║                                               ║
-║ ╔═══════════════╗  ╔═══════════════════════╗  ║
-║ ║   CPU CORE    ║  ║     PERIPHERALS       ║  ║
-║ ║               ║  ║                       ║  ║
-║ ║ ┌───────────┐ ║  ║ ┌─────┐ ┌─────┐      ║  ║
-║ ║ │    ALU    │ ║  ║ │UART │ │ SPI │      ║  ║
-║ ║ └───────────┘ ║  ║ └─────┘ └─────┘      ║  ║
-║ ╚═══════════════╝  ╚═══════════════════════╝  ║
-║         │                    │               ║
-║         └──────────BUS───────┘               ║
-║                                               ║
-║ ╔═══════════════════════════════════════════╗ ║
-║ ║              MEMORY                       ║ ║
-║ ║ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ║ ║
-║ ║ │FRAM │ │SRAM │ │ SFR │ │ I/O │ │ IVT │ ║ ║
-║ ║ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ ║ ║
-║ ╚═══════════════════════════════════════════╝ ║
-╚═══════════════════════════════════════════════╝
+System Level Organization:
+┌───────────────────────────────────────┐
+│                SYSTEM                 │
+│                                       │
+│ ┌─────────────┐  ┌─────────────────┐  │
+│ │  CPU CORE   │  │   PERIPHERALS   │  │
+│ │             │  │                 │  │
+│ │ ┌─────────┐ │  │ ┌─────┐ ┌─────┐ │  │
+│ │ │   ALU   │ │  │ │UART │ │ SPI │ │  │
+│ │ └─────────┘ │  │ └─────┘ └─────┘ │  │
+│ └─────────────┘  └─────────────────┘  │
+│         │                    │       │
+│         └──────────BUS───────┘       │
+│                                       │
+│ ┌─────────────────────────────────────│
+│ │              MEMORY                 │
+│ │ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐   │
+│ │ │FRAM │ │SRAM │ │ SFR │ │ I/O │   │
+│ │ └─────┘ └─────┘ └─────┘ └─────┘   │
+│ └─────────────────────────────────────│
+└───────────────────────────────────────┘
 ```
 
 ### Interface Boundaries
 
 ```text
 Interface Boundary Definition:
-┌─────────────────────────┐    ┌─────────────────────────┐
-│       MODULE_A          │    │       MODULE_B          │
-│                         │    │                         │
-│ Internal Logic          │    │ Internal Logic          │
-│ ┌─────┐  ┌─────┐       │    │ ┌─────┐  ┌─────┐       │
-│ │Logic│  │Logic│       │    │ │Logic│  │Logic│       │
-│ └─────┘  └─────┘       │    │ └─────┘  └─────┘       │
-│           │             │    │           │             │
-│           ▼             │    │           ▼             │
-│ ╔═══════════════════════╪════╪═══════════════════════╗ │
-│ ║    INTERFACE_A        │    │    INTERFACE_B        ║ │
-│ ║                       │    │                       ║ │
-│ ║ DATA[7:0]  ◯ ⟶ ⟶ ⟶ ⟶│ ⟶ ⟶│⟶ ◯  DATA[7:0]        ║ │
-│ ║ VALID      ◯ ⟶ ⟶ ⟶ ⟶│ ⟶ ⟶│⟶ ◯  VALID             ║ │
-│ ║ READY      ◯ ⟵ ⟵ ⟵ ⟵│ ⟵ ⟵│⟵ ◯  READY             ║ │
-│ ║ CLK        ◯ ⟶ ⟶ ⟶ ⟶│ ⟶ ⟶│⟶ ◯  CLK               ║ │
-│ ╚═══════════════════════╪════╪═══════════════════════╝ │
-└─────────────────────────┘    └─────────────────────────┘
-         ^                                  ^
-         │                                  │
-    Protocol A                         Protocol A
+┌─────────────────────┐    ┌─────────────────────┐
+│     MODULE_A        │    │     MODULE_B        │
+│                     │    │                     │
+│ Internal Logic      │    │ Internal Logic      │
+│ ┌─────┐  ┌─────┐   │    │ ┌─────┐  ┌─────┐   │
+│ │Logic│  │Logic│   │    │ │Logic│  │Logic│   │
+│ └─────┘  └─────┘   │    │ └─────┘  └─────┘   │
+│           │         │    │           │         │
+│           ▼         │    │           ▼         │
+│ ┌─────────────────┐ │    │ ┌─────────────────┐ │
+│ │   INTERFACE_A   │ │    │ │   INTERFACE_B   │ │
+│ │                 │ │    │ │                 │ │
+│ │ DATA[7:0] ◯ ────┼─┼────┼─┼──── ◯ DATA[7:0]│ │
+│ │ VALID     ◯ ────┼─┼────┼─┼──── ◯ VALID    │ │
+│ │ READY     ◯ ────┼─┼────┼─┼──── ◯ READY    │ │
+│ │ CLK       ◯ ────┼─┼────┼─┼──── ◯ CLK      │ │
+│ └─────────────────┘ │    │ └─────────────────┘ │
+└─────────────────────┘    └─────────────────────┘
+         ^                              ^
+         │                              │
+    Protocol A                     Protocol A
 ```
 
 ## Complex Examples
@@ -679,39 +671,39 @@ MSP430 CPU Data Path Example:
 
 ```text
 UART Peripheral Interface:
-╔══════════════════════════════════════════════════════════════╗
-║                       UART MODULE                           ║
-║                                                              ║
-║ ╔══════════════════╗  ╔════════════════╗  ╔═══════════════╗ ║
-║ ║   TRANSMITTER    ║  ║    RECEIVER    ║  ║   CONTROL     ║ ║
-║ ║                  ║  ║                ║  ║   LOGIC       ║ ║
-║ ║ ┌──────────────┐ ║  ║ ┌────────────┐ ║  ║               ║ ║
-║ ║ │  TX_BUFFER   │ ║  ║ │ RX_BUFFER  │ ║  ║ ┌───────────┐ ║ ║
-║ ║ │   [8 bits]   │ ║  ║ │  [8 bits]  │ ║  ║ │BAUD_RATE  │ ║ ║
-║ ║ └──────────────┘ ║  ║ └────────────┘ ║  ║ │GENERATOR  │ ║ ║
-║ ║        │         ║  ║        ▲       ║  ║ └───────────┘ ║ ║
-║ ║        ▼         ║  ║        │       ║  ║       │       ║ ║
-║ ║ ┌──────────────┐ ║  ║ ┌────────────┐ ║  ║       ▼       ║ ║
-║ ║ │ SHIFT_REG_TX │ ║  ║ │SHIFT_REG_RX│ ║  ║ ┌───────────┐ ║ ║
-║ ║ └──────────────┘ ║  ║ └────────────┘ ║  ║ │ CLK_DIV   │ ║ ║
-║ ║        │         ║  ║        ▲       ║  ║ └───────────┘ ║ ║
-║ ╚════════╪═════════╝  ╚════════╪═══════╝  ╚═══════════════╝ ║
-║          │                     │                            ║
-║          ▼                     ▼                            ║
-║    ⦿ TX_PIN               ⦿ RX_PIN                          ║
-║                                                              ║
-║ ╔══════════════════════════════════════════════════════════╗ ║
-║ ║                   REGISTER INTERFACE                     ║ ║
-║ ║                                                          ║ ║
-║ ║ DATA_REG    ◯ ⟷ SYSTEM_BUS[7:0]                        ║ ║
-║ ║ CTRL_REG    ◯ ⟷ SYSTEM_BUS[7:0]                        ║ ║
-║ ║ STATUS_REG  ◯ ⟷ SYSTEM_BUS[7:0]                        ║ ║
-║ ║ BAUD_REG    ◯ ⟷ SYSTEM_BUS[7:0]                        ║ ║
-║ ║                                                          ║ ║
-║ ║ IRQ_TX      ◯ ⟶ INTERRUPT_CONTROLLER                   ║ ║
-║ ║ IRQ_RX      ◯ ⟶ INTERRUPT_CONTROLLER                   ║ ║
-║ ╚══════════════════════════════════════════════════════════╝ ║
-╚══════════════════════════════════════════════════════════════╝
+┌──────────────────────────────────────────────────────┐
+│                   UART MODULE                        │
+│                                                      │
+│ ┌──────────────┐  ┌────────────┐  ┌─────────────┐   │
+│ │ TRANSMITTER  │  │  RECEIVER  │  │   CONTROL   │   │
+│ │              │  │            │  │   LOGIC     │   │
+│ │ ┌──────────┐ │  │ ┌────────┐ │  │             │   │
+│ │ │TX_BUFFER │ │  │ │RX_BUFFER│ │  │ ┌─────────┐ │   │
+│ │ │ [8 bits] │ │  │ │[8 bits] │ │  │ │BAUD_RATE│ │   │
+│ │ └──────────┘ │  │ └────────┘ │  │ │GENERATOR│ │   │
+│ │      │       │  │      ▲     │  │ └─────────┘ │   │
+│ │      ▼       │  │      │     │  │      │      │   │
+│ │ ┌──────────┐ │  │ ┌────────┐ │  │      ▼      │   │
+│ │ │SHIFT_REG │ │  │ │SHIFT_REG│ │  │ ┌─────────┐ │   │
+│ │ └──────────┘ │  │ └────────┘ │  │ │ CLK_DIV │ │   │
+│ │      │       │  │      ▲     │  │ └─────────┘ │   │
+│ └──────┼───────┘  └──────┼─────┘  └─────────────┘   │
+│        │                 │                          │
+│        ▼                 ▼                          │
+│  ⦿ TX_PIN         ⦿ RX_PIN                          │
+│                                                      │
+│ ┌──────────────────────────────────────────────────┐ │
+│ │              REGISTER INTERFACE                  │ │
+│ │                                                  │ │
+│ │ DATA_REG    ◯ ⟷ SYSTEM_BUS[7:0]                │ │
+│ │ CTRL_REG    ◯ ⟷ SYSTEM_BUS[7:0]                │ │
+│ │ STATUS_REG  ◯ ⟷ SYSTEM_BUS[7:0]                │ │
+│ │ BAUD_REG    ◯ ⟷ SYSTEM_BUS[7:0]                │ │
+│ │                                                  │ │
+│ │ IRQ_TX      ◯ ⟶ INTERRUPT_CONTROLLER           │ │
+│ │ IRQ_RX      ◯ ⟶ INTERRUPT_CONTROLLER           │ │
+│ └──────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────┘
 ```
 
 ## Best Practices
@@ -728,7 +720,7 @@ UART Peripheral Interface:
 
 1. **Signal Flow**: Always show direction with arrows (⟶, ⟷, ⟹)
 2. **Connection Points**: Use ◯ for all connection points
-3. **Boundaries**: Use ╔╗║ for major functional boundaries, ┌┐│ for minor ones
+3. **Boundaries**: Use ┌┐│└┘├┤─ for functional boundaries (simple box drawing)
 4. **Unconnected**: Always mark with ✗ to indicate intentional
 5. **Power**: Use ⚡ to distinguish power/reset signals
 

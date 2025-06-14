@@ -311,10 +311,7 @@ public class DigitalIOPort : PeripheralBase
         ushort inputValue = 0;
         for (int i = 0; i < 8; i++)
         {
-            if (_pins[i].InputValue)
-            {
-                inputValue |= (ushort)(1 << i);
-            }
+            inputValue |= _pins[i].InputValue ? (ushort)(1 << i) : (ushort)0;
         }
 
         inReg.SetValue(inputValue);

@@ -285,16 +285,11 @@ public class DigitalIOPort : PeripheralBase
         {
             bool previousInput = _pins[i].InputValue;
 
-            if ((renValue & (1 << i)) != 0)
-            {
-                // Pull resistor enabled - direction determined by OUT bit
-                _pins[i].PullResistor = (outValue & (1 << i)) != 0 ? PullResistor.PullUp : PullResistor.PullDown;
-            }
-            else
-            {
-                // Pull resistor disabled
-                _pins[i].PullResistor = PullResistor.None;
-            }
+            // Pull resistor configuration based on REN and OUT bits
+            bool resistorEnabled = (renValue & (1 << i)) != 0;
+            bool pullUp = (outValue & (1 << i)) != 0;
+            PullResistor resistorType = pullUp ? PullResistor.PullUp : PullResistor.PullDown;
+            _pins[i].PullResistor = resistorEnabled ? resistorType : PullResistor.None;
 
             CheckForInterrupt(i, previousInput, _pins[i].InputValue);
         }

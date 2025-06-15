@@ -173,10 +173,23 @@ Declares an array of blocks.
 ### Index Mapping
 
 ```text
-@BlockArray[].property = variable
+@BlockArray[].property = index
 ```
 
-Maps array indices to variables.
+Maps array indices to block properties. Each element of the array has its specified property set to the array index value.
+
+**Example**:
+
+```text
+CCRn[0..6]: CCR @CCRn[].n = index
+```
+
+This creates an array of CCR blocks where:
+
+- `CCRn[0].n = 0`
+- `CCRn[1].n = 1`
+- `CCRn[2].n = 2`
+- ... and so on through `CCRn[6].n = 6`
 
 ### Bus Distribution
 
@@ -185,6 +198,19 @@ Signal -> BlockArray[].Input @ bus
 ```
 
 Distributes signal to all array elements.
+
+**Example**:
+
+```text
+Timer Block.Count -> CCRn[].Count @ bus
+```
+
+This connects the `Timer Block.Count` signal to the `Count` input of every element in the CCRn array:
+
+- `Timer Block.Count -> CCRn[0].Count`
+- `Timer Block.Count -> CCRn[1].Count`
+- `Timer Block.Count -> CCRn[2].Count`
+- ... and so on for all array elements
 
 ## Special Notations
 

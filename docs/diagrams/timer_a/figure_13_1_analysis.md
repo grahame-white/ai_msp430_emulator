@@ -21,19 +21,7 @@ Completed items have been removed to maintain focus on actionable work.
 
 ## Structural Issues Requiring Attention
 
-### 1. Missing Block Interface Definitions ⚠️
-
-Several blocks still lack complete interface definitions:
-
-```text
-Logic: block          # No inputs/outputs specified
-  # Should define capture overflow logic
-
-Sync: synchronizer    # Purpose unclear
-  # Should clarify edge synchronization function
-```
-
-### 2. Signal Type Consistency ⚠️
+### 1. Signal Type Consistency ⚠️
 
 **Remaining Issues**:
 
@@ -55,54 +43,33 @@ CountBus: data @width(16) @bus
 ClockInput: clock @edge
 ```
 
-### 3. Array Notation ⚠️
-
-**Current Issue**:
-
-```text
-CCRn[0..6]: CCR @CCRn[].n = index
-```
-
-**Problems**:
-
-- The `@CCRn[].n = index` syntax remains unclear
-- Array instantiation rules need clarification
-- Connection pattern to timer count not explicit enough
-
-**Recommended Improvement**:
-
-```text
-CCRBlocks[0..6]: CCR @array
-  # Each CCR block indexed by n (0 to 6, device dependent)
-  # All blocks receive timer count via shared bus
-  # CCR0.EQU0 provides timer mode control feedback
-```
-
 ## Implementation Priority
 
 ### Phase 1 - Critical Fixes 📋
 
-1. Complete missing block interface definitions
+1. Standardize signal type notation
 2. Resolve undefined signal references
 
 ### Phase 2 - Consistency Improvements 📋
 
-1. Standardize signal type notation
-2. Clarify array instantiation syntax
-3. Complete bidirectional signal documentation
+1. Complete bidirectional signal documentation
+2. Add hierarchical block organization
 
 ### Phase 3 - Enhancement ✨
 
-1. Add hierarchical block organization
-2. Implement signal attribute validation
-3. Create comprehensive connection validation
+1. Implement signal attribute validation
+2. Create comprehensive connection validation
 
 ## Outstanding Work
 
-1. **Complete block interface definitions** (Logic, Sync blocks)
-2. **Standardize signal type notation** across all definitions
-3. **Clarify array instantiation syntax** for CCR blocks
-4. **Validate all signal references** for consistency
+1. **Standardize signal type notation** across all definitions
+2. **Validate all signal references** for consistency
+
+## Recent Improvements ✅
+
+- **Logic and Sync blocks**: Updated with complete interface definitions based on original TI diagram analysis
+- **Array notation**: Clarified `@CCRn[].n = index` syntax - each array element has its `n` property set to the array index
+- **Connection patterns**: Documented bus distribution syntax for array connections like `Timer Block.Count -> CCRn[].Count`
 
 ## References
 

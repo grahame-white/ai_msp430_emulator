@@ -327,11 +327,10 @@ public class TimerATests
     {
         // Simulate writing to the control register to set mode
         ushort controlValue = (ushort)((ushort)mode << 4);
-        var controlRegister = _timer.GetType()
-            .GetMethod("GetRegister", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            ?.Invoke(_timer, new object[] { (ushort)(_timer.BaseAddress + 0x00) }) as PeripheralRegister;
+        ushort controlAddress = (ushort)(_timer.BaseAddress + 0x00);
 
-        controlRegister?.WriteWord(controlValue);
+        // Use the peripheral's WriteWord method to properly trigger register change handling
+        _timer.WriteWord(controlAddress, controlValue);
     }
 
     private void SetTimerValue(ushort value)

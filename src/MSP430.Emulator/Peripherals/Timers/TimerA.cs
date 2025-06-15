@@ -435,7 +435,9 @@ public class TimerA : PeripheralBase
         }
         else
         {
-            if (_timerValue >= period)
+            // According to SLAU445I Section 13.2.3.1: 
+            // "When the timer value equals TAxCCR0, the timer restarts counting from zero"
+            if (_timerValue == period)
             {
                 _timerValue = 0x0000;
                 rollover = true;
@@ -483,10 +485,13 @@ public class TimerA : PeripheralBase
 
         if (_isCountingUp)
         {
-            if (_timerValue >= period)
+            // According to SLAU445I Section 13.2.3: Timer counts up to TAxCCR0 then down
+            if (_timerValue == period)
             {
                 _isCountingUp = false;
                 rollover = true;
+                // Don't increment on the turn-around point, start counting down
+                _timerValue--;
             }
             else
             {
@@ -499,6 +504,8 @@ public class TimerA : PeripheralBase
             {
                 _isCountingUp = true;
                 rollover = true;
+                // Don't decrement below 0, start counting up
+                _timerValue++;
             }
             else
             {

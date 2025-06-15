@@ -19,7 +19,7 @@ This notation system enables:
 
 ```text
 BlockName: type
-```text
+```
 
 Where `type` can be:
 
@@ -38,7 +38,7 @@ Where `type` can be:
 ```text
 BlockName: type
   Width: N-bit
-```text
+```
 
 Defines the bit width of data paths through the block.
 
@@ -49,7 +49,7 @@ BlockName: type
   Options:
     Description1: binary_value
     Description2: binary_value
-```text
+```
 
 Enumerates possible configurations with their binary encodings.
 
@@ -61,7 +61,7 @@ BlockName: type
     SignalName: type @attributes
   Outputs:
     SignalName: type @attributes
-```text
+```
 
 ### Signal Types
 
@@ -103,7 +103,7 @@ TAxR: block
     CLK: 1-bit @edge     # Clock responds to transitions
     CLR: 1-bit           # Clear responds to level (active high/low)
     Mode: 2-bit @bi      # Mode is bidirectional level signal
-```text
+```
 
 This distinction is critical for accurate hardware implementation as edge-triggered signals require edge detection
 circuitry while level-triggered signals use simple combinational logic.
@@ -114,7 +114,7 @@ circuitry while level-triggered signals use simple combinational logic.
 
 ```text
 Source -> Target
-```text
+```
 
 Direct connection from source to target.
 
@@ -122,7 +122,7 @@ Direct connection from source to target.
 
 ```text
 Block.Output -> Target.Input
-```text
+```
 
 Connection between specific block pins.
 
@@ -130,7 +130,7 @@ Connection between specific block pins.
 
 ```text
 Signal ->| Target.Input
-```text
+```
 
 Connection to a block input (pipe notation indicates input).
 
@@ -138,7 +138,7 @@ Connection to a block input (pipe notation indicates input).
 
 ```text
 Signal @ bus
-```text
+```
 
 Indicates bus-type connection.
 
@@ -146,7 +146,7 @@ Indicates bus-type connection.
 
 ```text
 Signal ->| Target.Input @condition
-```text
+```
 
 Connection active under specific conditions.
 
@@ -155,7 +155,7 @@ Connection active under specific conditions.
 ```text
 Signal -->| Target1.Input
 Signal -->| Target2.Input
-```text
+```
 
 Indicates that one signal drives multiple destinations (fanout). The `-->|` notation specifically
 represents signal fanout in visual diagrams where a single source connects to multiple targets.
@@ -166,7 +166,7 @@ represents signal fanout in visual diagrams where a single source connects to mu
 
 ```text
 BlockArray[start..end]: type @qualifier
-```text
+```
 
 Declares an array of blocks.
 
@@ -174,7 +174,7 @@ Declares an array of blocks.
 
 ```text
 @BlockArray[].property = variable
-```text
+```
 
 Maps array indices to variables.
 
@@ -182,7 +182,7 @@ Maps array indices to variables.
 
 ```text
 Signal -> BlockArray[].Input @ bus
-```text
+```
 
 Distributes signal to all array elements.
 
@@ -196,7 +196,7 @@ MuxName: multiplexor
   Signal2 -> MuxName.01
   Signal3 -> MuxName.10
   Signal4 -> MuxName.11
-```text
+```
 
 Binary notation indicates multiplexor select values.
 
@@ -209,7 +209,7 @@ DividerName: divider
     2: 01
     4: 10
     8: 11
-```text
+```
 
 Maps division ratios to control bit patterns.
 
@@ -223,7 +223,7 @@ GateName: AND
     C: 1-bit
   Outputs:
     Y: 1-bit
-```text
+```
 
 ## Connection Sections
 
@@ -233,7 +233,7 @@ GateName: AND
 Connections:
   Signal1 -> Target1
   Signal2 -> Target2
-```text
+```
 
 Groups related connections together.
 
@@ -254,7 +254,7 @@ systems where clock signals, data buses, and control signals need to reach multi
 TimerClock -->| TAxR.CLK
 TimerClock -->| Sync.CLK
 TimerClock -->| DataLatch.CLK
-```text
+```
 
 #### Data Bus Fanout Example
 
@@ -262,7 +262,7 @@ TimerClock -->| DataLatch.CLK
 Count -->| CCR0.Count @ bus
 Count -->| CCR1.Count @ bus
 Count -->| CCRn.Count @ bus
-```text
+```
 
 #### Control Signal Fanout Example
 
@@ -270,7 +270,7 @@ Count -->| CCRn.Count @ bus
 TACLR -->| ID.Clear
 TACLR -->| IDEX.Clear
 TACLR -->| TAxR.Clear
-```text
+```
 
 In visual representations (Mermaid diagrams), the `-->|` notation specifically indicates fanout
 connections where the label can describe the signal type or connection properties.
@@ -288,13 +288,13 @@ MainBlock: block
     ...
   Connections:
     SubBlock1.Out -> SubBlock2.In
-```text
+```
 
 ### Conditional Logic
 
 ```text
 Signal ->| Target @condition
-```text
+```
 
 Where condition can be edge types, states, or other qualifiers.
 
@@ -302,7 +302,7 @@ Where condition can be edge types, states, or other qualifiers.
 
 ```text
 Block.Output <-> Block.Input
-```text
+```
 
 Bidirectional or feedback connections.
 

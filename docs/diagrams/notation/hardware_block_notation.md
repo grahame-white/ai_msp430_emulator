@@ -153,11 +153,11 @@ Connection active under specific conditions.
 ### Signal Fanout
 
 ```text
-Signal -->| Target1.Input
-Signal -->| Target2.Input
+Signal ->| Target1.Input
+Signal ->| Target2.Input
 ```
 
-Indicates that one signal drives multiple destinations (fanout). The `-->|` notation specifically
+Indicates that one signal drives multiple destinations (fanout). The `->|` notation specifically
 represents signal fanout in visual diagrams where a single source connects to multiple targets.
 
 ## Array and Indexing Notation
@@ -202,7 +202,7 @@ Distributes signal to all array elements.
 **Example**:
 
 ```text
-Timer Block.Count -->| CCRn[].Count @ bus
+Timer Block.Count ->| CCRn[].Count @ bus
 ```
 
 This connects the `Timer Block.Count` signal to the `Count` input of every element in the CCRn array:
@@ -277,28 +277,28 @@ systems where clock signals, data buses, and control signals need to reach multi
 #### Clock Fanout Example
 
 ```text
-TimerClock -->| TAxR.CLK
-TimerClock -->| Sync.CLK
-TimerClock -->| DataLatch.CLK
+TimerClock ->| TAxR.CLK
+TimerClock ->| Sync.CLK
+TimerClock ->| DataLatch.CLK
 ```
 
 #### Data Bus Fanout Example
 
 ```text
-Count -->| CCR0.Count @ bus
-Count -->| CCR1.Count @ bus
-Count -->| CCRn.Count @ bus
+Count ->| CCR0.Count @ bus
+Count ->| CCR1.Count @ bus
+Count ->| CCRn.Count @ bus
 ```
 
 #### Control Signal Fanout Example
 
 ```text
-TACLR -->| ID.Clear
-TACLR -->| IDEX.Clear
-TACLR -->| TAxR.Clear
+TACLR ->| ID.Clear
+TACLR ->| IDEX.Clear
+TACLR ->| TAxR.Clear
 ```
 
-In visual representations (Mermaid diagrams), the `-->|` notation specifically indicates fanout
+In visual representations (Mermaid diagrams), the `->|` notation specifically indicates fanout
 connections where the label can describe the signal type or connection properties.
 
 ### Hierarchical Blocks

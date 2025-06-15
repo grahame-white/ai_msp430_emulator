@@ -68,7 +68,7 @@ ClockInput: clock @edge
   - Connection references updated to use hierarchical notation
 - **Logic and Sync blocks**: Updated with complete interface definitions based on original TI diagram analysis
 - **Array notation**: Clarified `@CCRn[].n = index` syntax - each array element has its `n` property set to the array index
-- **Connection patterns**: Documented bus distribution syntax for array connections like `Timer Block.Count -->| CCRn[].Count`
+- **Connection patterns**: Documented bus distribution syntax for array connections like `Timer Block.Count ->| CCRn[].Count`
   using fanout notation
 
 ## References

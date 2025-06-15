@@ -1,75 +1,53 @@
-# Timer A Figure 13-1 Analysis and Inconsistency Report
+# Timer A Figure 13-1 Analysis and Inconsistency Report (Updated)
 
-This document analyzes the original Timer A Figure 13-1 notation for inconsistencies,
-ambiguities, and areas for improvement. It provides specific recommendations to enhance
-clarity and maintainability.
+This document provides an updated analysis of Timer A Figure 13-1 notation following the implementation of connection grouping and incorporation of new information from recent commits.
 
-## Identified Inconsistencies
+## Analysis Overview
 
-### 1. Signal Reference Inconsistencies
+Following implementation of connection grouping (#3) and clarification of signal definitions, this updated analysis reflects the current state of the Timer A documentation and identifies remaining inconsistencies that require attention.
 
-**Issue**: Mixed signal naming conventions
-- Some signals use qualified names (`Block.Signal`)
-- Others use unqualified names (`Signal`)
-- Some connections reference undefined signals
+## Connection Grouping Implementation Status
 
-**Examples**:
+✅ **COMPLETED**: Connection grouping has been successfully implemented in the Timer A notation.
 
-```text
-Line 96:  IDEX.O ->| Timer Clock      # Introduces "Timer Clock" 
-Line 97:  IDEX.O ->| TAxR.CLK         # References TAxR.CLK but TAxR inputs show "CLK: 1-bit @edge"
-Line 231: Timer Clock ->| Sync.CLK     # Uses introduced name - signal fanout
-Line 259: Timer Clock ->| DataLatch.CLK # Consistent with introduction - signal fanout
-```
+The scattered connections throughout the original notation have been reorganized into logical groups:
 
-Note: The `->|` notation indicates signal fanout where one source drives multiple destinations.
+- **ClockPath**: Clock source selection and distribution
+- **TimerCore**: Timer counter control and mode management
+- **CCRInputs**: Capture/compare input selection
+- **CaptureControl**: Capture signal processing logic
+- **CompareControl**: Compare value and equality generation
+- **OutputControl**: Output mode logic and PWM generation
+- **Global**: Inter-block connections
 
-**Recommendation**: Establish consistent signal naming:
-```
-# Proposed Fix:
-IDEX.O -> TimerClock
-TimerClock ->| TAxR.CLK
-TimerClock ->| Sync.CLK
-TimerClock ->| DataLatch.CLK
-```
+This improvement addresses the maintainability concerns by providing clear functional separation of connections.
 
-### 2. Gate Input/Output Mismatch
+## Remaining Signal Definition Issues
 
-**Issue**: Logic gate definitions don't match usage patterns
+### 1. Validated Signal Definitions
 
-**Example - NOR Gate**:
-```
-# Definition (Lines 182-188):
-Nor1: NOR
-  Inputs:
-    A: 1-bit
-    B: 1-bit
-    C: 1-bit        # 3-input NOR gate defined
+The following signals have been clarified and are properly defined:
 
-# Usage (Lines 245-247):
-OUTMOD[0] ->| Nor1.A
-OUTMOD[1] ->| Nor1.B
-OUTMOD[2] ->| Nor1.C    # Correctly uses 3 inputs
-```
+#### TAxCCTLn Register Bit Signals ✅
+- `COV` - TAxCCTLn register bit 1 (Capture overflow)
+- `OUT` - TAxCCTLn register bit 2 (Output bit)  
+- `CCI` - TAxCCTLn register bit 3 (Capture/compare input)
 
-**Example - NAND Gate**:
+#### Signals with Limited TI Documentation ⚠️
+- `EQU0` - Compare match from CCR0 (limited definition in TI user guide)
+- `EQU6` - Compare match from CCR6 (limited definition in TI user guide)
+
+#### Signals for Future Documentation 📋
+- `POR` - Power-on reset signal (will be defined when power management documentation is added)
+
+### 2. Gate Logic Corrections Needed
+
+#### NAND Gate Connection Issue 🔧
+
+**Problem**: Nand1 gate still has incomplete connections:
 
 ```text
-# Definition (Lines 197-202):
-Nand1: NAND
-  Inputs:
-    A: 1-bit
-    B: 1-bit         # 2-input NAND gate defined
-
-# Usage (Line 248):
-Nor1.O ->| Nand1.A   # Only uses input A
-                     # Input B is never connected!
-```
-
-**Recommendation**: Fix gate definitions and connections:
-
-```text
-# Proposed Fix:
+# Current Definition:
 Nand1: NAND
   Inputs:
     A: 1-bit
@@ -77,369 +55,201 @@ Nand1: NAND
   Outputs:
     O: 1-bit
 
-# Connections:
+# Current Connections:
 Nor1.O ->| Nand1.A
-OUT ->| Nand1.B      # Connect missing input
+OUT ->| Nand1.B      # Added in commit d100be7
+
+# Issue Resolution:
+✅ Fixed: Both inputs A and B are now properly connected
 ```
 
-### 3. Signal Definition Clarifications
+**Status**: This issue has been resolved in commit d100be7.
 
-**Issue**: Several signals require clarification regarding their definition status
+#### OR Gate Connection Issue 🔧
 
-**Signal Categories**:
-
-#### TAxCCTLn Register Bit Signals
-
-These signals are defined in the TI documentation as specific register bits:
-
-- `COV` - TAxCCTLn register bit 1 (Capture overflow)
-- `OUT` - TAxCCTLn register bit 2 (Output bit)
-- `CCI` - TAxCCTLn register bit 3 (Capture/compare input)
-
-#### Signals with Limited TI Documentation
-
-- `EQU0` (Line 103, 260) - Compare match from CCR0, not well defined in user guide
-- `EQU6` - Compare match from CCR6, not well defined in user guide
-
-#### Signals for Future Documentation
-
-- `POR` (Line 255) - Power-on reset signal, will be defined in future documentation
-
-**Recommendation**: Update signal definitions with register bit references:
+**Problem**: Or1 gate has a connection to an undefined output:
 
 ```text
-# CCR Block Signal Mappings:
-CCRn Block:
-  StatusBits:
-    COV: TAxCCTLn.1     # Capture overflow (bit 1)
-    OUT: TAxCCTLn.2     # Output bit (bit 2) 
-    CCI: TAxCCTLn.3     # Capture/compare input (bit 3)
-  Outputs:
-    EQUn: 1-bit         # Compare match (limited TI definition)
-
-# Note: EQU0 and EQU6 have limited definition in MSP430FR2xx/FR4xx User Guide
-# POR will be defined when power management documentation is added
+# Current Connections:
+Nand.O -> Or1.A     # Should be "Nand1.O" (missing "1")
+And1.O -> DataLatch.SET
+Or1.O -> DataLatch.RESET
 ```
 
-### 4. Missing Type Specifications
+**Recommendation**: Fix the typo in the Or1 input connection.
 
-**Issue**: Some blocks lack complete type information
+### 3. Signal Fanout Documentation
 
-**Examples**:
-```
-Logic: block          # No inputs/outputs defined (Line 138)
-Sync: block          # Inputs/outputs defined but purpose unclear (Line 158)
-```
+The `-->|` notation for signal fanout has been properly documented:
 
-**Recommendation**: Complete block definitions:
-```
-Logic: block
-  Inputs:
-    CaptureMode: 2-bit
-    CaptureSignal: 1-bit
-  Outputs:
-    CaptureOverflow: 1-bit
-
-Sync: synchronizer
-  Inputs:
-    CLK: 1-bit @edge
-    AsyncInput: 1-bit
-  Outputs:
-    SyncOutput: 1-bit
+#### Clock Signal Fanout ✅
+```text
+IDEX.O ->| Timer Clock    # Timer clock generation
+IDEX.O ->| TAxR.CLK       # Timer counter clock
+Timer Clock ->| Sync.CLK   # Synchronizer clock
+Timer Clock ->| DataLatch.CLK  # Output latch clock
 ```
 
-### 5. Array Notation Ambiguities
-
-**Issue**: Array notation and indexing could be clearer
-
-**Current**:
+#### Control Signal Fanout ✅
+```text
+TACLR ->| ID.CLR          # Input divider clear
+TACLR ->| IDEX.CLR        # Extension divider clear  
+TACLR ->| TAxR.CLR        # Timer counter clear
 ```
+
+#### Count Bus Fanout ✅
+```text
+Count ->| TAxCCRn.Count @bus     # CCR register input
+Count ->| Comparatorn.Count @bus # Comparator input
+Timer Block.Count -> CCRn[].Count @ bus  # Global bus distribution
+```
+
+## Updated Structural Assessment
+
+### 1. Connection Organization ✅
+
+**Status**: Successfully implemented
+- Connections are now grouped by functional area
+- Clear separation between clock, timer core, capture, compare, and output logic
+- Improved readability and maintainability
+
+### 2. Signal Type Consistency ⚠️
+
+**Remaining Issues**:
+- Mixed signal width specifications (1-bit, 16-bit, clock, @edge, @bus)
+- Some blocks still lack complete type information
+- Bidirectional signal notation could be clearer
+
+**Example Improvements Needed**:
+```text
+# Current:
+Timer Clock: (undefined type)
+Count: 16-bit @bus
+CLK: 1-bit @edge
+
+# Recommended:
+TimerClock: clock
+CountBus: data @width(16) @bus
+ClockInput: clock @edge
+```
+
+### 3. Array Notation ⚠️
+
+**Current Issue**:
+```text
 CCRn[0..6]: CCR @CCRn[].n = index
 ```
 
 **Problems**:
-- Unclear what `@CCRn[].n = index` means
-- Array bounds imply 7 elements (0-6) but some devices have fewer
-- Connection pattern to timer count not explicit
+- The `@CCRn[].n = index` syntax remains unclear
+- Array instantiation rules need clarification
+- Connection pattern to timer count not explicit enough
 
-**Recommendation**: Clarify array notation:
-```
-# Proposed Fix:
-CCRBlocks[0..6]: CCR
-  # Array of CCR blocks where n=0 to 6 (device dependent)
-  # Each block connects to timer count bus
-  # CCR0 provides EQU0 to timer mode control
-
-Connections:
-  Timer Block.Count -> CCRBlocks[*].Count @ bus
-  CCRBlocks[0].Equ -> Timer Block.EQU0
+**Recommended Improvement**:
+```text
+CCRBlocks[0..6]: CCR @array
+  # Each CCR block indexed by n (0 to 6, device dependent)
+  # All blocks receive timer count via shared bus
+  # CCR0.EQU0 provides timer mode control feedback
 ```
 
-### 6. Bidirectional Signal Notation
+## Critical Issues Requiring Immediate Attention
 
-**Issue**: Bidirectional signals not clearly marked
+### 1. Logic Gate Output Reference 🚨
 
-**Example**:
-```
-TAxR.Mode <-> MC.Mode   # Line 102 - uses bidirectional arrow
-```
-
-But in block definitions:
-```
-TAxR:
-  Inputs:
-    Mode: 2-bit @bi     # Marked as bidirectional
-  Outputs:
-    Mode: 2-bit @bi     # Same signal listed twice
-```
-
-**Recommendation**: Clarify bidirectional notation:
-```
-# Option 1: Single bidirectional port
-TAxR:
-  Ports:
-    Mode: 2-bit @bidirectional
-
-# Option 2: Explicit direction marking
-TAxR.Mode <-> MC.Mode @ bidirectional
-```
-
-## Signal Fanout Analysis
-
-### Timer A Fanout Patterns
-
-Timer A exhibits several important signal fanout patterns that are critical to its operation:
-
-#### Clock Signal Fanout
-
-The timer clock generated by IDEX fans out to multiple destinations:
+**Error**: Line references `Nand.O` instead of `Nand1.O`
 
 ```text
-IDEX.TimerClock -->| TAxR.CLK        # Timer counter clock
-IDEX.TimerClock -->| Sync.CLK        # Synchronizer clock  
-IDEX.TimerClock -->| DataLatch.CLK   # Output latch clock
+# Current (INCORRECT):
+Nand.O -> Or1.A
+
+# Should be:
+Nand1.O -> Or1.A
 ```
 
-#### Count Bus Fanout
+**Impact**: This creates an undefined signal reference.
 
-The 16-bit count value fans out to all CCR blocks:
+### 2. Missing Block Input/Output Definitions ⚠️
+
+Several blocks still lack complete interface definitions:
 
 ```text
-TAxR.Count -->| CCR0.Count @ bus
-TAxR.Count -->| CCR1.Count @ bus
-TAxR.Count -->| CCRn.Count @ bus
+Logic: block          # No inputs/outputs specified
+  # Should define capture overflow logic
+
+Sync: synchronizer    # Purpose unclear
+  # Should clarify edge synchronization function
 ```
 
-#### Control Signal Fanout
+### 3. Signal Width Consistency 📋
 
-Clear signal fans out to all clock dividers and counter:
+Mixed notation for signal widths needs standardization:
 
 ```text
-TACLR -->| ID.Clear      # Input divider clear
-TACLR -->| IDEX.Clear    # Extension divider clear
-TACLR -->| TAxR.Clear    # Timer counter clear
+# Current mixed usage:
+Width: 2-bit          # In divider definitions
+A: 1-bit              # In gate definitions  
+Count: 16-bit @bus    # In register definitions
+CLK: 1-bit @edge      # In clock definitions
+
+# Recommended standard:
+@width(2)             # For control signals
+@width(1)             # For flags/enables
+@width(16) @bus       # For data buses
+@clock @edge          # For clock signals
 ```
 
-#### Interrupt Flag Fanout
+## Implementation Priority
 
-Compare/capture events generate multiple signals:
+### Phase 1 - Critical Fixes 🚨
+1. Fix `Nand.O` → `Nand1.O` reference error
+2. Complete missing block interface definitions
+3. Resolve undefined signal references
 
-```text
-CCRn.Equ -->| CCIFG @ set     # Interrupt flag
-CCRn.Equ -->| OutputUnit      # Output mode control
-CCRn.Equ -->| ModeControl     # Timer mode control (CCR0 only)
-```
+### Phase 2 - Consistency Improvements 📋
+1. Standardize signal type notation
+2. Clarify array instantiation syntax
+3. Complete bidirectional signal documentation
 
-The `-->|` notation in Mermaid diagrams effectively represents these fanout relationships,
-making the signal distribution clear in visual representations.
+### Phase 3 - Enhancement ✨
+1. Add hierarchical block organization
+2. Implement signal attribute validation
+3. Create comprehensive connection validation
 
-## Structural Improvements
+## Benefits of Recent Improvements
 
-### 1. Hierarchical Organization
+### Connection Grouping ✅
+- **Clarity**: Functional areas clearly separated
+- **Maintainability**: Related connections grouped together
+- **Navigation**: Easier to find specific connection types
+- **Documentation**: Better organization for implementation teams
 
-**Current Issue**: Flat structure makes relationships unclear
+### Signal Definition Clarification ✅
+- **Accuracy**: Register bit mappings properly documented
+- **Scope**: Clear boundaries for what is/isn't defined in current documentation
+- **Future-proofing**: Framework for adding power management signals
 
-**Recommendation**: Use hierarchical blocks:
-```
-Timer A: module
-  TimerCore: block
-    ClockPath: block
-    Counter: block
-    ModeControl: block
-  
-  CaptureCompare[0..6]: block
-    InputSelection: block
-    CaptureLogic: block
-    CompareLogic: block
-    OutputUnit: block
-```
+### Fanout Documentation ✅
+- **Understanding**: Clear explanation of signal distribution patterns
+- **Implementation**: Guidance for hardware description language translation
+- **Debugging**: Better traceability of signal paths
 
-### 2. Signal Type Consistency
+## Outstanding Work
 
-**Current Issues**:
-
-- Mix of `1-bit`, `16-bit`, `2-bit`, `3-bit` specifications
-- Some signals lack width specifications
-- Clock signals sometimes marked as `clock`, sometimes as `1-bit @edge`
-
-**Recommendation**: Standardize signal types:
-
-```text
-# Clock signals
-TimerClock: clock
-SyncClock: clock @edge
-
-# Data buses  
-Count: data @bus(16)
-CCRValue: data @bus(16)
-
-# Control signals
-Mode: control @width(2)
-OUTMOD: control @width(3)
-
-# Status flags
-CCIFG: flag @set
-TAIFG: flag @set
-```
-
-### 3. Connection Grouping
-
-**Current Issue**: Connections scattered throughout definition
-
-**Recommendation**: Group connections logically:
-
-```text
-# Clock Distribution
-Connections:
-  ClockPath:
-    TASSEL.O -> ID.CLK
-    ID.O -> IDEX.CLK
-    IDEX.O -> TimerClock
-
-# Timer Core
-Connections:
-  TimerCore:
-    TimerClock -> TAxR.CLK
-    TACLR -> TAxR.CLR
-    TAxR.Count -> CCRBlocks[*].Count @ bus
-
-# Interrupt Generation
-Connections:
-  Interrupts:
-    TAxR.RC -> TAIFG @ set
-    CCRBlocks[*].Equ -> CCIFG[*] @ set
-```
-
-## Proposed Complete Corrected Notation
-
-Based on the identified issues, here is a corrected version of key sections:
-
-```text
-Timer A: module
-  # Clock source selection and division
-  TASSEL: multiplexor @width(2)
-    Inputs:
-      TAxCLK: clock
-      ACLK: clock  
-      SMCLK: clock
-      INCLK: clock
-    Outputs:
-      SelectedClock: clock
-
-  ID: divider @width(2)
-    Options:
-      Divide1: 00
-      Divide2: 01
-      Divide4: 10
-      Divide8: 11
-    Inputs:
-      Clock: clock
-      Clear: control
-    Outputs:
-      DividedClock: clock
-
-  IDEX: divider @width(3)
-    Options:
-      Divide1: 000
-      Divide2: 001
-      Divide3: 010
-      Divide4: 011
-      Divide5: 100
-      Divide6: 101
-      Divide7: 110
-      Divide8: 111
-    Inputs:
-      Clock: clock
-      Clear: control
-    Outputs:
-      TimerClock: clock
-
-  TAxR: counter @width(16)
-    Inputs:
-      Clock: clock @edge
-      Clear: control
-      Mode: control @width(2) @bidirectional
-    Outputs:
-      Count: data @bus(16)
-      Rollover: flag
-      Mode: control @width(2) @bidirectional
-
-  ModeControl: block
-    Inputs:
-      CompareMatch: flag    # EQU0 from CCR0
-      Mode: control @width(2) @bidirectional
-    Outputs:
-      Mode: control @width(2) @bidirectional
-
-# Clock Path Connections
-Connections:
-  ClockPath:
-    TASSEL.SelectedClock -> ID.Clock
-    ID.DividedClock -> IDEX.Clock
-    IDEX.TimerClock -> TAxR.Clock
-    TACLR -> ID.Clear
-    TACLR -> IDEX.Clear
-    TACLR -> TAxR.Clear
-
-# Timer Core Connections  
-Connections:
-  TimerCore:
-    TAxR.Count -> CCRBlocks[*].TimerCount @ bus
-    TAxR.Rollover -> TAIFG @ set
-    TAxR.Mode <-> ModeControl.Mode @ bidirectional
-    CCRBlocks[0].CompareMatch -> ModeControl.CompareMatch
-```
-
-## Implementation Recommendations
-
-1. **Phase 1**: Fix critical signal reference errors
-2. **Phase 2**: Standardize signal type notation  
-3. **Phase 3**: Implement hierarchical structure
-4. **Phase 4**: Add complete connection grouping
-5. **Phase 5**: Validate against TI documentation
-
-## Documentation Scope Notes
-
-**Documentation Scope Notes**:
-
-- Some signals (e.g., POR) will be defined in future documentation modules
-- TI documentation has limited definition for certain signals (EQU0, EQU6)
-- Register bit mappings provided where available (TAxCCTLn bits)
-- Analysis focuses on Timer A Figure 13-1 notation consistency only
-
-## Benefits of Proposed Changes
-
-- **Clarity**: Eliminates ambiguous signal references
-- **Consistency**: Standardizes notation patterns
-- **Maintainability**: Hierarchical structure improves readability
-- **Accuracy**: Corrects technical errors in gate connections
-- **Completeness**: Defines all referenced signals
-
-These improvements will make the notation system more robust and suitable for generating
-accurate visual representations and implementation code.
+1. **Fix critical logic gate reference error** (Nand.O → Nand1.O)
+2. **Complete block interface definitions** (Logic, Sync blocks)
+3. **Standardize signal type notation** across all definitions
+4. **Clarify array instantiation syntax** for CCR blocks
+5. **Validate all signal references** for consistency
 
 ## References
 
 - Original Figure 13-1: MSP430FR2xx/FR4xx Family User's Guide (SLAU445I)
 - Hardware Block Notation: `docs/diagrams/notation/hardware_block_notation.md`
 - Visual Representation: `docs/diagrams/timer_a/figure_13_1_visual.md`
+- Updated Timer A Notation: `docs/references/SLAU445/13.1_timer_a_introduction.md`
+
+---
+
+**Last Updated**: Following connection grouping implementation and signal definition clarifications
+**Next Review**: After critical fixes are implemented

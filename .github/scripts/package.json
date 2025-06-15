@@ -6,6 +6,7 @@
     "test": "node test-runner.js",
     "lint": "eslint *.js",
     "lint:fix": "eslint *.js --fix",
+    "lint:json": "eslint *.js --format json",
     "format": "prettier --write *.js *.json *.md ../**/*.yml ../**/*.yaml",
     "format:check": "prettier --check *.js *.json *.md ../**/*.yml ../**/*.yaml",
     "lint:yaml": "npx yaml-lint ../**/*.yml ../**/*.yaml",

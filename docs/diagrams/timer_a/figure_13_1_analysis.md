@@ -50,12 +50,7 @@ ClockInput: clock @edge
 1. Standardize signal type notation
 2. Resolve undefined signal references
 
-### Phase 2 - Consistency Improvements 📋
-
-1. Complete bidirectional signal documentation
-2. Add hierarchical block organization
-
-### Phase 3 - Enhancement ✨
+### Phase 2 - Enhancement ✨
 
 1. Implement signal attribute validation
 2. Create comprehensive connection validation
@@ -67,6 +62,10 @@ ClockInput: clock @edge
 
 ## Recent Improvements ✅
 
+- **Hierarchical Structure**: Implemented hierarchical block organization with logical groupings:
+  - Timer Block organized into ClockPath and TimerCore sub-blocks
+  - CCR block organized into InputSelection, CaptureLogic, StorageAndCompare, and OutputLogic sub-blocks
+  - Connection references updated to use hierarchical notation
 - **Logic and Sync blocks**: Updated with complete interface definitions based on original TI diagram analysis
 - **Array notation**: Clarified `@CCRn[].n = index` syntax - each array element has its `n` property set to the array index
 - **Connection patterns**: Documented bus distribution syntax for array connections like `Timer Block.Count -> CCRn[].Count`
@@ -80,5 +79,5 @@ ClockInput: clock @edge
 
 ---
 
-**Last Updated**: After removing completed items to focus on outstanding work
+**Last Updated**: After implementing hierarchical block organization
 **Next Review**: After critical fixes are implemented

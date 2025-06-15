@@ -149,6 +149,15 @@ When review comments highlight problems, consider if tools could have caught the
 - **Test failures**: Should be caught by `./script/test` before committing
 - **Dynamic keyword usage**: Should be caught during code review (no automated rule available)
 
+### File Exclusion Policy
+**Never exclude files from linting tools** - Excluding files from linting can mask real problems and lead to accumulating technical debt. Instead of excluding files:
+- Fix the actual linting issues (reflow long lines, fix syntax errors, etc.)
+- Update linting configuration rules if they are too restrictive for valid use cases
+- Use inline comments to disable specific rules only when absolutely necessary
+- Document any exceptions clearly with rationale
+
+This policy ensures that all code and documentation maintains consistent quality standards and prevents degradation over time.
+
 ### Quick Commands Reference
 
 ```bash

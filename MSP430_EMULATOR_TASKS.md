@@ -2448,7 +2448,7 @@ void main(void) {
 
 **TI-TXT Binary Format**:
 
-```txt
+```text
 @8000
 31 80 06 00 3E 40 00 00 3E F0 3F 00 81 4E 00 00 
 3F 40 01 00 1F F3 81 4F 02 00 3D 40 01 00 1D F3 
@@ -2587,7 +2587,7 @@ _start      jmp     _start
 
 **TI-TXT Binary Format**:
 
-```txt
+```text
 @8000
 31 40 00 30 B2 40 80 5A CC 01 FF 3F 03 43 32 D0 
 10 00 FD 3F 03 43 

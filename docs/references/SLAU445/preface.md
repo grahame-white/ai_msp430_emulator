@@ -2,9 +2,14 @@
 
 ## About this manual
 
-This manual describes the modules and peripherals of the MSP430FR4xx and MSP430FR2xx family of devices. Each description presents the module or peripheral in a general sense. Not all features and functions of all modules or peripherals may be present on all devices. In addition, modules or peripherals may differ in their exact implementation between device families, or may not be fully implemented on an individual device or device family.
+This manual describes the modules and peripherals of the MSP430FR4xx and MSP430FR2xx family of
+devices. Each description presents the module or peripheral in a general sense. Not all features and
+functions of all modules or peripherals may be present on all devices. In addition, modules or
+peripherals may differ in their exact implementation between device families, or may not be fully
+implemented on an individual device or device family.
 
-Pin functions, internal signal connections, and operational parameters differ from device to device. Consult the device-specific data sheet for these details.
+Pin functions, internal signal connections, and operational parameters differ from device to device.
+Consult the device-specific data sheet for these details.
 
 ## Related documentation from Texas Instruments
 

@@ -24,8 +24,7 @@ dotnet build --configuration Release --verbosity quiet
 # Lint Markdown documentation
 echo "==> Linting Markdown documentation..."
 if command -v npm >/dev/null 2>&1 && [ -f "package.json" ]; then
-    # Lint main documentation (excluding SLAU445 reference files for now due to long technical lines)
-    npx markdownlint-cli2 "docs/diagrams/**/*.md" "docs/references/MSP430*.md" "*.md" || exit 1
+    npx markdownlint-cli2 "docs/**/*.md" "*.md" || exit 1
 else
     echo "Error: npm or package.json not found. Run './script/bootstrap' to install all required tools."
     exit 1

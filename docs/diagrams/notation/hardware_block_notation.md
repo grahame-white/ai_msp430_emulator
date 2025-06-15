@@ -212,6 +212,36 @@ This connects the `Timer Block.Count` signal to the `Count` input of every eleme
 - `Timer Block.Count -> CCRn[2].Count`
 - ... and so on for all array elements
 
+### Bit Indexing
+
+```text
+Signal[bit_index] ->| Target.Input
+```
+
+Connects a specific bit of a multi-bit signal to a single-bit input. Uses zero-based indexing where
+bit 0 is the least significant bit.
+
+**Example**:
+
+```text
+OUTMOD[0] ->| CCR.OutputLogic.Nor1.A
+OUTMOD[1] ->| CCR.OutputLogic.Nor1.B
+OUTMOD[2] ->| CCR.OutputLogic.Nor1.C
+```
+
+This connects individual bits of the 3-bit OUTMOD signal to separate single-bit inputs:
+
+- `OUTMOD[0]` (bit 0, LSB) connects to `CCR.OutputLogic.Nor1.A`
+- `OUTMOD[1]` (bit 1) connects to `CCR.OutputLogic.Nor1.B`
+- `OUTMOD[2]` (bit 2, MSB) connects to `CCR.OutputLogic.Nor1.C`
+
+**Usage Guidelines**:
+
+- Use zero-based indexing (`[0]`, `[1]`, `[2]`, etc.)
+- Bit 0 is always the least significant bit (LSB)
+- Use fanout notation (`->|`) when the same bit drives multiple destinations
+- Document the bit width and meaning of multi-bit signals clearly
+
 ## Special Notations
 
 ### Multiplexor Inputs

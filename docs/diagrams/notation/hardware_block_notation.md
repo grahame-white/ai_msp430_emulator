@@ -1,26 +1,31 @@
 # Hardware Block Notation System
 
-This document defines the notation system used to describe hardware block diagrams in the MSP430 emulator documentation. This notation was developed to represent complex digital logic systems in a text-based format that is both human-readable and suitable for version control.
+This document defines the notation system used to describe hardware block diagrams in the MSP430 emulator
+documentation. This notation was developed to represent complex digital logic systems in a text-based format
+that is both human-readable and suitable for version control.
 
 ## Purpose and Scope
 
 This notation system enables:
+
 - Clear representation of digital hardware blocks and their interconnections
-- Version-controllable documentation of complex logic diagrams  
+- Version-controllable documentation of complex logic diagrams
 - Consistent documentation across different hardware modules
 - Easy translation to visual formats (Mermaid, SVG, etc.)
 
 ## Basic Syntax
 
 ### Block Declaration
-```
+
+```text
 BlockName: type
-```
+```text
 
 Where `type` can be:
+
 - `block` - Generic hardware block
 - `multiplexor` - Multiplexer/selector
-- `divider` - Clock divider  
+- `divider` - Clock divider
 - Logic gates: `AND`, `OR`, `NAND`, `NOR`, `XOR`, `NOT`
 - Storage: `RS FlipFlop`, `D FlipFlop`, `Latch`
 - `register` - Data register
@@ -29,31 +34,37 @@ Where `type` can be:
 ### Block Properties
 
 #### Width Specification
-```
+
+```text
 BlockName: type
   Width: N-bit
-```
+```text
+
 Defines the bit width of data paths through the block.
 
-#### Configuration Options  
-```
+#### Configuration Options
+
+```text
 BlockName: type
   Options:
     Description1: binary_value
     Description2: binary_value
-```
+```text
+
 Enumerates possible configurations with their binary encodings.
 
 #### Input/Output Definitions
-```
+
+```text
 BlockName: type
   Inputs:
     SignalName: type @attributes
   Outputs:
     SignalName: type @attributes
-```
+```text
 
 ### Signal Types
+
 - `1-bit` - Single bit signal
 - `N-bit` - Multi-bit signal (where N is a number)
 - `clock` - Clock signal
@@ -61,10 +72,11 @@ BlockName: type
 - `enable` - Enable signal
 
 ### Signal Attributes
+
 - `@bus` - Multi-bit bus signal
 - `@edge` - Edge-triggered signal (responds to transitions rather than steady levels)
 - `@rising` - Rising edge triggered (0→1 transition)
-- `@falling` - Falling edge triggered (1→0 transition)  
+- `@falling` - Falling edge triggered (1→0 transition)
 - `@set` - Sets a flag/bit
 - `@clear` - Clears a flag/bit
 - `@bi` - Bidirectional signal
@@ -77,108 +89,133 @@ The `@edge` attribute specifically marks signals that are **edge-triggered** as 
   - Clock inputs to registers, flip-flops, and latches
   - Capture trigger signals that activate on transitions
   - Synchronization signals that require edge detection
-  
+
 - **Level-triggered**: Responds to steady signal levels (high or low state)
   - Enable signals that gate operations while active
-  - Select signals for multiplexers  
+  - Select signals for multiplexers
   - Control signals that maintain state
 
 **Example Usage in Timer A:**
+
 ```text
 TAxR: block
   Inputs:
     CLK: 1-bit @edge     # Clock responds to transitions
     CLR: 1-bit           # Clear responds to level (active high/low)
     Mode: 2-bit @bi      # Mode is bidirectional level signal
-```
+```text
 
-This distinction is critical for accurate hardware implementation as edge-triggered signals require edge detection 
+This distinction is critical for accurate hardware implementation as edge-triggered signals require edge detection
 circuitry while level-triggered signals use simple combinational logic.
 
 ## Connection Syntax
 
 ### Basic Connections
-```
+
+```text
 Source -> Target
-```
+```text
+
 Direct connection from source to target.
 
 ### Qualified Connections
-```
+
+```text
 Block.Output -> Target.Input
-```
+```text
+
 Connection between specific block pins.
 
 ### Input Connections
-```
+
+```text
 Signal ->| Target.Input
-```
+```text
+
 Connection to a block input (pipe notation indicates input).
 
 ### Array/Bus Connections
-```
+
+```text
 Signal @ bus
-```
+```text
+
 Indicates bus-type connection.
 
 ### Conditional Connections
-```
+
+```text
 Signal ->| Target.Input @condition
-```
+```text
+
 Connection active under specific conditions.
 
 ### Signal Fanout
-```
+
+```text
 Signal -->| Target1.Input
 Signal -->| Target2.Input
-```
-Indicates that one signal drives multiple destinations (fanout). The `-->|` notation specifically represents signal fanout in visual diagrams where a single source connects to multiple targets.
+```text
+
+Indicates that one signal drives multiple destinations (fanout). The `-->|` notation specifically
+represents signal fanout in visual diagrams where a single source connects to multiple targets.
 
 ## Array and Indexing Notation
 
 ### Array Declaration
-```
+
+```text
 BlockArray[start..end]: type @qualifier
-```
+```text
+
 Declares an array of blocks.
 
 ### Index Mapping
-```
+
+```text
 @BlockArray[].property = variable
-```
+```text
+
 Maps array indices to variables.
 
 ### Bus Distribution
-```
+
+```text
 Signal -> BlockArray[].Input @ bus
-```
+```text
+
 Distributes signal to all array elements.
 
 ## Special Notations
 
 ### Multiplexor Inputs
-```
+
+```text
 MuxName: multiplexor
   Signal1 -> MuxName.00
   Signal2 -> MuxName.01
   Signal3 -> MuxName.10
   Signal4 -> MuxName.11
-```
+```text
+
 Binary notation indicates multiplexor select values.
 
 ### Clock Dividers
-```
+
+```text
 DividerName: divider
   Options:
     1: 00
     2: 01
-    4: 10  
+    4: 10
     8: 11
-```
+```text
+
 Maps division ratios to control bit patterns.
 
 ### Logic Gate Inputs
-```
+
+```text
 GateName: AND
   Inputs:
     A: 1-bit
@@ -186,34 +223,38 @@ GateName: AND
     C: 1-bit
   Outputs:
     Y: 1-bit
-```
+```text
 
 ## Connection Sections
 
 ### Global Connections
-```
+
+```text
 Connections:
   Signal1 -> Target1
   Signal2 -> Target2
-```
+```text
+
 Groups related connections together.
 
 ### Local Block Connections
+
 Connections within a block's definition are local to that block.
 
 ## Advanced Features
 
 ### Signal Fanout Patterns
 
-Signal fanout occurs when one signal source drives multiple destinations. This is common in digital systems where clock signals, data buses, and control signals need to reach multiple blocks.
+Signal fanout occurs when one signal source drives multiple destinations. This is common in digital
+systems where clock signals, data buses, and control signals need to reach multiple blocks.
 
 #### Clock Fanout Example
 
 ```text
 TimerClock -->| TAxR.CLK
-TimerClock -->| Sync.CLK  
+TimerClock -->| Sync.CLK
 TimerClock -->| DataLatch.CLK
-```
+```text
 
 #### Data Bus Fanout Example
 
@@ -221,7 +262,7 @@ TimerClock -->| DataLatch.CLK
 Count -->| CCR0.Count @ bus
 Count -->| CCR1.Count @ bus
 Count -->| CCRn.Count @ bus
-```
+```text
 
 #### Control Signal Fanout Example
 
@@ -229,13 +270,14 @@ Count -->| CCRn.Count @ bus
 TACLR -->| ID.Clear
 TACLR -->| IDEX.Clear
 TACLR -->| TAxR.Clear
-```
+```text
 
 In visual representations (Mermaid diagrams), the `-->|` notation specifically indicates fanout
 connections where the label can describe the signal type or connection properties.
 
 ### Hierarchical Blocks
-```
+
+```text
 MainBlock: block
   SubBlock1: type
     Inputs:
@@ -246,23 +288,28 @@ MainBlock: block
     ...
   Connections:
     SubBlock1.Out -> SubBlock2.In
-```
+```text
 
 ### Conditional Logic
-```
+
+```text
 Signal ->| Target @condition
-```
+```text
+
 Where condition can be edge types, states, or other qualifiers.
 
 ### Feedback Paths
-```
+
+```text
 Block.Output <-> Block.Input
-```
+```text
+
 Bidirectional or feedback connections.
 
 ## Best Practices
 
 ### Naming Conventions
+
 - Use descriptive names that match hardware documentation
 - Maintain consistency with official documentation (TI manuals)
 - Use standard abbreviations (CLK for clock, RST for reset)
@@ -296,8 +343,8 @@ Bidirectional or feedback connections.
 
 ## Example Usage
 
-See `docs/references/SLAU445/13.1_timer_a_introduction.md` for a complete example of this notation system describing 
-the Timer A module.
+See `docs/references/SLAU445/13.1_timer_a_introduction.md` for a complete example of this notation
+system describing the Timer A module.
 
 ## Extension Guidelines
 
@@ -309,5 +356,5 @@ When extending this notation:
 4. Provide examples of usage
 5. Consider translation impact to visual formats
 
-This notation system provides a foundation for documenting complex hardware systems in a maintainable, 
+This notation system provides a foundation for documenting complex hardware systems in a maintainable,
 version-controllable format while preserving the detailed information needed for accurate implementation.

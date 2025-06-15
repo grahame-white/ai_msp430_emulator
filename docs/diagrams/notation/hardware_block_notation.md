@@ -202,7 +202,7 @@ Distributes signal to all array elements.
 **Example**:
 
 ```text
-Timer Block.Count -> CCRn[].Count @ bus
+Timer Block.Count -->| CCRn[].Count @ bus
 ```
 
 This connects the `Timer Block.Count` signal to the `Count` input of every element in the CCRn array:

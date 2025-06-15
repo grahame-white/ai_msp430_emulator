@@ -53,7 +53,8 @@ OUTMOD[2] ->| Nor1.C    # Correctly uses 3 inputs
 ```
 
 **Example - NAND Gate**:
-```
+
+```text
 # Definition (Lines 197-202):
 Nand1: NAND
   Inputs:
@@ -66,7 +67,8 @@ Nor1.O ->| Nand1.A   # Only uses input A
 ```
 
 **Recommendation**: Fix gate definitions and connections:
-```
+
+```text
 # Proposed Fix:
 Nand1: NAND
   Inputs:
@@ -80,26 +82,43 @@ Nor1.O ->| Nand1.A
 OUT ->| Nand1.B      # Connect missing input
 ```
 
-### 3. Undefined Signal References
+### 3. Signal Definition Clarifications
 
-**Issue**: Several signals are referenced but never defined
+**Issue**: Several signals require clarification regarding their definition status
 
-**Examples**:
-- `EQU0` (Line 103, 260) - Used but not defined in timer block
-- `OUT` (Line 250, 251) - Referenced but source unclear
-- `POR` (Line 255) - Power-on reset signal not defined
-- `COV` (Line 233) - Capture overflow signal output location unclear
+**Signal Categories**:
 
-**Recommendation**: Add explicit signal definitions:
-```
-# Proposed Additions:
-Timer Block:
-  Inputs:
-    EQU0: 1-bit      # From CCR0 comparator
-    OUT: 1-bit       # Output control bit
-    POR: 1-bit       # Power-on reset
+#### TAxCCTLn Register Bit Signals
+
+These signals are defined in the TI documentation as specific register bits:
+
+- `COV` - TAxCCTLn register bit 1 (Capture overflow)
+- `OUT` - TAxCCTLn register bit 2 (Output bit)
+- `CCI` - TAxCCTLn register bit 3 (Capture/compare input)
+
+#### Signals with Limited TI Documentation
+
+- `EQU0` (Line 103, 260) - Compare match from CCR0, not well defined in user guide
+- `EQU6` - Compare match from CCR6, not well defined in user guide
+
+#### Signals for Future Documentation
+
+- `POR` (Line 255) - Power-on reset signal, will be defined in future documentation
+
+**Recommendation**: Update signal definitions with register bit references:
+
+```text
+# CCR Block Signal Mappings:
+CCRn Block:
+  StatusBits:
+    COV: TAxCCTLn.1     # Capture overflow (bit 1)
+    OUT: TAxCCTLn.2     # Output bit (bit 2) 
+    CCI: TAxCCTLn.3     # Capture/compare input (bit 3)
   Outputs:
-    COV: 1-bit       # Capture overflow flag
+    EQUn: 1-bit         # Compare match (limited TI definition)
+
+# Note: EQU0 and EQU6 have limited definition in MSP430FR2xx/FR4xx User Guide
+# POR will be defined when power management documentation is added
 ```
 
 ### 4. Missing Type Specifications
@@ -394,10 +413,19 @@ Connections:
 ## Implementation Recommendations
 
 1. **Phase 1**: Fix critical signal reference errors
-2. **Phase 2**: Standardize signal type notation
+2. **Phase 2**: Standardize signal type notation  
 3. **Phase 3**: Implement hierarchical structure
 4. **Phase 4**: Add complete connection grouping
 5. **Phase 5**: Validate against TI documentation
+
+## Documentation Scope Notes
+
+**Documentation Scope Notes**:
+
+- Some signals (e.g., POR) will be defined in future documentation modules
+- TI documentation has limited definition for certain signals (EQU0, EQU6)
+- Register bit mappings provided where available (TAxCCTLn bits)
+- Analysis focuses on Timer A Figure 13-1 notation consistency only
 
 ## Benefits of Proposed Changes
 

@@ -101,6 +101,13 @@ Signal ->| Target.Input @condition
 ```
 Connection active under specific conditions.
 
+### Signal Fanout
+```
+Signal -->| Target1.Input
+Signal -->| Target2.Input
+```
+Indicates that one signal drives multiple destinations (fanout). The `-->|` notation specifically represents signal fanout in visual diagrams where a single source connects to multiple targets.
+
 ## Array and Indexing Notation
 
 ### Array Declaration
@@ -169,6 +176,37 @@ Groups related connections together.
 Connections within a block's definition are local to that block.
 
 ## Advanced Features
+
+### Signal Fanout Patterns
+
+Signal fanout occurs when one signal source drives multiple destinations. This is common in digital systems where clock signals, data buses, and control signals need to reach multiple blocks.
+
+#### Clock Fanout Example
+
+```text
+TimerClock -->| TAxR.CLK
+TimerClock -->| Sync.CLK  
+TimerClock -->| DataLatch.CLK
+```
+
+#### Data Bus Fanout Example
+
+```text
+Count -->| CCR0.Count @ bus
+Count -->| CCR1.Count @ bus
+Count -->| CCRn.Count @ bus
+```
+
+#### Control Signal Fanout Example
+
+```text
+TACLR -->| ID.Clear
+TACLR -->| IDEX.Clear
+TACLR -->| TAxR.Clear
+```
+
+In visual representations (Mermaid diagrams), the `-->|` notation specifically indicates fanout
+connections where the label can describe the signal type or connection properties.
 
 ### Hierarchical Blocks
 ```

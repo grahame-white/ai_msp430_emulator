@@ -62,12 +62,38 @@ BlockName: type
 
 ### Signal Attributes
 - `@bus` - Multi-bit bus signal
-- `@edge` - Edge-triggered signal
-- `@rising` - Rising edge triggered
-- `@falling` - Falling edge triggered  
+- `@edge` - Edge-triggered signal (responds to transitions rather than steady levels)
+- `@rising` - Rising edge triggered (0→1 transition)
+- `@falling` - Falling edge triggered (1→0 transition)  
 - `@set` - Sets a flag/bit
 - `@clear` - Clears a flag/bit
 - `@bi` - Bidirectional signal
+
+#### Edge-Triggered vs Level-Triggered Signals
+
+The `@edge` attribute specifically marks signals that are **edge-triggered** as opposed to **level-triggered**:
+
+- **Edge-triggered** (`@edge`): Responds to signal transitions (changes from 0→1 or 1→0)
+  - Clock inputs to registers, flip-flops, and latches
+  - Capture trigger signals that activate on transitions
+  - Synchronization signals that require edge detection
+  
+- **Level-triggered**: Responds to steady signal levels (high or low state)
+  - Enable signals that gate operations while active
+  - Select signals for multiplexers  
+  - Control signals that maintain state
+
+**Example Usage in Timer A:**
+```text
+TAxR: block
+  Inputs:
+    CLK: 1-bit @edge     # Clock responds to transitions
+    CLR: 1-bit           # Clear responds to level (active high/low)
+    Mode: 2-bit @bi      # Mode is bidirectional level signal
+```
+
+This distinction is critical for accurate hardware implementation as edge-triggered signals require edge detection 
+circuitry while level-triggered signals use simple combinational logic.
 
 ## Connection Syntax
 
@@ -242,12 +268,14 @@ Bidirectional or feedback connections.
 - Use standard abbreviations (CLK for clock, RST for reset)
 
 ### Organization
+
 - Declare blocks before connections
 - Group related blocks together
 - Use consistent indentation
 - Add comments for complex logic
 
 ### Signal Flow
+
 - Follow logical signal flow in connection order
 - Group inputs, outputs, and internal connections separately
 - Use qualified names for clarity in complex diagrams
@@ -255,26 +283,31 @@ Bidirectional or feedback connections.
 ## Translation Guidelines
 
 ### To Mermaid Diagrams
+
 - Blocks become nodes
 - Connections become arrows
 - Attributes become node styling
 
 ### To SVG/Visual
+
 - Block types determine visual representation
 - Signal attributes affect line styling
 - Hierarchical structure defines layout
 
 ## Example Usage
 
-See `docs/references/SLAU445/13.1_timer_a_introduction.md` for a complete example of this notation system describing the Timer A module.
+See `docs/references/SLAU445/13.1_timer_a_introduction.md` for a complete example of this notation system describing 
+the Timer A module.
 
 ## Extension Guidelines
 
 When extending this notation:
+
 1. Maintain backward compatibility
 2. Use consistent syntax patterns
 3. Document new features clearly
 4. Provide examples of usage
 5. Consider translation impact to visual formats
 
-This notation system provides a foundation for documenting complex hardware systems in a maintainable, version-controllable format while preserving the detailed information needed for accurate implementation.
+This notation system provides a foundation for documenting complex hardware systems in a maintainable, 
+version-controllable format while preserving the detailed information needed for accurate implementation.

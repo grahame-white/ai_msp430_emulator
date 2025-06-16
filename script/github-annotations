@@ -20,11 +20,15 @@ github_annotation() {
     local message="$5"
     
     if is_github_actions; then
-        if [ -n "$file" ] && [ -n "$line" ]; then
-            if [ -n "$col" ]; then
-                echo "::${type} file=${file},line=${line},col=${col}::${message}"
+        if [ -n "$file" ]; then
+            if [ -n "$line" ]; then
+                if [ -n "$col" ]; then
+                    echo "::${type} file=${file},line=${line},col=${col}::${message}"
+                else
+                    echo "::${type} file=${file},line=${line}::${message}"
+                fi
             else
-                echo "::${type} file=${file},line=${line}::${message}"
+                echo "::${type} file=${file}::${message}"
             fi
         else
             echo "::${type}::${message}"

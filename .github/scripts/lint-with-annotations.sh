@@ -19,7 +19,7 @@ process_automation_eslint_annotations() {
     
     # Extract JSON from the output (skip npm header lines)
     local json_content
-    json_content=$(grep -A 9999 '^\[{' "$json_file" | head -n -0)
+    json_content=$(grep -A 9999 '^\[{' "$json_file")
     
     if [ -z "$json_content" ]; then
         return 0

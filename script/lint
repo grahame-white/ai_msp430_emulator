@@ -6,16 +6,50 @@
 # - dotnet format: C# code formatting verification
 # - dotnet build: Static analysis via compiler warnings/errors
 # - markdownlint-cli2: Markdown linting for documentation
+#
+# Options:
+#   --annotations    Enable GitHub Actions annotations output
 
 set -e
 
 cd "$(dirname "$0")/.."
 
+# Source annotation helper functions
+source script/github-annotations
+
+# Parse command line arguments
+ANNOTATIONS_MODE=false
+for arg in "$@"; do
+    case $arg in
+        --annotations)
+            ANNOTATIONS_MODE=true
+            shift
+            ;;
+    esac
+done
+
+# Auto-enable annotations in GitHub Actions if not explicitly set
+if is_github_actions && [ "$ANNOTATIONS_MODE" = false ]; then
+    ANNOTATIONS_MODE=true
+fi
+
 echo "==> Running MSP430 Emulator code analysis..."
 
 # Format code (check only, don't modify)
 echo "==> Checking code formatting..."
-dotnet format --verify-no-changes --verbosity diagnostic
+if [ "$ANNOTATIONS_MODE" = true ]; then
+    # Capture output for annotation processing
+    DOTNET_OUTPUT=$(mktemp)
+    if ! dotnet format --verify-no-changes --verbosity diagnostic > "$DOTNET_OUTPUT" 2>&1; then
+        process_dotnet_format_annotations "$DOTNET_OUTPUT"
+        cat "$DOTNET_OUTPUT"
+        rm -f "$DOTNET_OUTPUT"
+        exit 1
+    fi
+    rm -f "$DOTNET_OUTPUT"
+else
+    dotnet format --verify-no-changes --verbosity diagnostic
+fi
 
 # Run static analysis via build with warnings as errors
 echo "==> Running static analysis..."
@@ -24,7 +58,19 @@ dotnet build --configuration Release --verbosity quiet
 # Lint Markdown documentation
 echo "==> Linting Markdown documentation..."
 if command -v npm >/dev/null 2>&1 && [ -f "package.json" ]; then
-    npx markdownlint-cli2 "docs/**/*.md" "*.md" || exit 1
+    if [ "$ANNOTATIONS_MODE" = true ]; then
+        # Capture markdownlint output for annotation processing
+        MARKDOWN_OUTPUT=$(mktemp)
+        if ! npx markdownlint-cli2 "docs/**/*.md" "*.md" > "$MARKDOWN_OUTPUT" 2>&1; then
+            process_markdownlint_annotations "$MARKDOWN_OUTPUT"
+            cat "$MARKDOWN_OUTPUT"
+            rm -f "$MARKDOWN_OUTPUT"
+            exit 1
+        fi
+        rm -f "$MARKDOWN_OUTPUT"
+    else
+        npx markdownlint-cli2 "docs/**/*.md" "*.md" || exit 1
+    fi
 else
     echo "Error: npm or package.json not found. Run './script/bootstrap' to install all required tools."
     exit 1

@@ -35,7 +35,7 @@ jobs:
         run: ./script/bootstrap
 
       - name: Lint code
-        run: ./script/lint
+        run: ./script/lint --annotations
 
       - name: Build project
         run: ./script/build
@@ -136,21 +136,10 @@ jobs:
           fi
           echo "✅ No ANSI escape sequences detected"
 
-      - name: Lint automation scripts
+      - name: Validate YAML files and lint automation scripts
         run: |
           cd .github/scripts
-          echo "Installing dependencies..."
-          npm install
-          echo "Running ESLint..."
-          npm run lint
-          echo "Running Prettier check..."
-          npm run format:check
-
-      - name: Validate YAML files
-        run: |
-          cd .github/scripts
-          echo "Running YAML linting..."
-          npm run lint:yaml
+          ./lint-with-annotations.sh
 
       - name: Run actionlint
         uses: reviewdog/action-actionlint@v1

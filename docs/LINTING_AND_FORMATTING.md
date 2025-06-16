@@ -5,6 +5,70 @@ developers make informed decisions about code quality tools.
 
 ## Tools Overview
 
+The linting and formatting tools support GitHub Actions annotations to display inline error messages in pull requests and
+workflow runs.
+
+### Annotation Support
+
+| Tool | Annotation Support | Notes |
+|------|-------------------|-------|
+| **dotnet format** | ✅ Yes | Via `script/github-annotations` helper |
+| **markdownlint-cli2** | ✅ Yes | Parsed output format: `file:line:col rule message` |
+| **eslint** | ✅ Yes | JSON output format parsed for annotations |
+| **prettier** | ✅ Yes | File listing converted to annotations |
+| **actionlint** | ✅ Yes | Native support via reviewdog action |
+| **yamllint** | ⚠️ Limited | Basic error display (no structured output) |
+
+### Enabling Annotations
+
+Annotations are automatically enabled when running in GitHub Actions. You can also manually enable them:
+
+```bash
+# Enable annotations for main linting script
+./script/lint --annotations
+
+# Enable annotations for comprehensive formatting check
+./script/check-format-all --annotations
+```
+
+#### Automation Scripts with Annotations
+
+For JavaScript automation scripts in `.github/scripts/`, use the dedicated annotation-enabled linting script:
+
+```bash
+# Run automation script linting with annotations
+cd .github/scripts && ./lint-with-annotations.sh
+
+# This script automatically:
+# - Detects GitHub Actions environment
+# - Runs ESLint with JSON output for structured annotations  
+# - Runs Prettier check with annotation support
+# - Runs YAML linting with basic error reporting
+# - Sources shared annotation functions from script/github-annotations
+```
+
+The automation script linting includes:
+
+- **ESLint**: JavaScript code quality and style checks
+- **Prettier**: Code formatting verification for JS, JSON, MD, YAML files
+- **yamllint**: YAML syntax and style validation
+
+### Annotation Format
+
+The tools output GitHub Actions annotations in the standard format:
+
+```text
+::error file={file},line={line},col={col}::{message}
+::warning file={file},line={line},col={col}::{message}
+::notice file={file},line={line},col={col}::{message}
+```
+
+These annotations appear as:
+
+- Inline comments in the Files Changed view of pull requests
+- Grouped error/warning messages in the Actions summary
+- Check annotations in the Checks tab
+
 ### C# Code Quality
 
 | Tool | Purpose | Script Usage | Configuration |

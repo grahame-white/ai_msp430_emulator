@@ -6,42 +6,11 @@ set -e
 
 cd "$(dirname "$0")"
 
-# Check if we're in GitHub Actions
-is_github_actions() {
-    [ -n "${GITHUB_ACTIONS}" ]
-}
+# Source shared annotation helper functions
+source "../../script/github-annotations"
 
-# Generate GitHub Actions annotation
-github_annotation() {
-    local type="$1"
-    local file="$2"
-    local line="$3"
-    local col="$4"
-    local message="$5"
-    
-    if is_github_actions; then
-        if [ -n "$file" ] && [ -n "$line" ]; then
-            if [ -n "$col" ]; then
-                echo "::${type} file=${file},line=${line},col=${col}::${message}"
-            else
-                echo "::${type} file=${file},line=${line}::${message}"
-            fi
-        else
-            echo "::${type}::${message}"
-        fi
-    else
-        # Non-GitHub Actions environment - output human-readable format
-        case "$type" in
-            "error")   echo "❌ ${file}:${line}:${col}: ${message}" ;;
-            "warning") echo "⚠️  ${file}:${line}:${col}: ${message}" ;;
-            "notice")  echo "ℹ️  ${file}:${line}:${col}: ${message}" ;;
-            *)         echo "${file}:${line}:${col}: ${message}" ;;
-        esac
-    fi
-}
-
-# Process ESLint JSON output into annotations  
-process_eslint_annotations() {
+# Process ESLint JSON output into annotations for automation scripts
+process_automation_eslint_annotations() {
     local json_file="$1"
     
     if [ ! -f "$json_file" ]; then
@@ -69,7 +38,7 @@ process_eslint_annotations() {
                 "2") annotation_type="error" ;;
             esac
             
-            # Convert to relative path
+            # Convert to relative path and add .github/scripts prefix
             local relative_file="${file#${PWD}/}"
             relative_file="${relative_file#../../}"  # Remove relative path prefix
             
@@ -78,8 +47,8 @@ process_eslint_annotations() {
     fi
 }
 
-# Process Prettier check output into annotations
-process_prettier_annotations() {
+# Process Prettier check output into annotations for automation scripts
+process_automation_prettier_annotations() {
     local output_file="$1"
     
     if [ ! -f "$output_file" ]; then
@@ -89,7 +58,7 @@ process_prettier_annotations() {
     # Prettier outputs files that need formatting
     while IFS= read -r line; do
         if [[ "$line" =~ ^.+\.(js|json|md|yml|yaml)$ ]]; then
-            # Convert to relative path
+            # Convert to relative path and add .github/scripts prefix
             local relative_file="${line#${PWD}/}"
             relative_file="${relative_file#../../}"  # Remove relative path prefix
             
@@ -107,7 +76,7 @@ if is_github_actions; then
     # Redirect npm output to stderr, capture only eslint JSON output
     if ! npm run lint:json 2>/dev/null > "$ESLINT_OUTPUT"; then
         echo "❌ ESLint issues detected!"
-        process_eslint_annotations "$ESLINT_OUTPUT"
+        process_automation_eslint_annotations "$ESLINT_OUTPUT"
         # Also show regular output
         npm run lint || true
         rm -f "$ESLINT_OUTPUT"
@@ -123,7 +92,7 @@ if is_github_actions; then
     PRETTIER_OUTPUT=$(mktemp)
     if ! npm run format:check > "$PRETTIER_OUTPUT" 2>&1; then
         echo "❌ Prettier formatting issues detected!"
-        process_prettier_annotations "$PRETTIER_OUTPUT"
+        process_automation_prettier_annotations "$PRETTIER_OUTPUT"
         cat "$PRETTIER_OUTPUT"
         rm -f "$PRETTIER_OUTPUT" 
         exit 1

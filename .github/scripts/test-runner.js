@@ -809,15 +809,15 @@ runner.test('Duplicate issue prevention scenario (original bug reproduction)', (
 runner.test('lint-with-annotations.sh has required structure', () => {
     const scriptPath = path.resolve('./lint-with-annotations.sh');
     runner.assertExists(scriptPath);
-    
+
     const content = fs.readFileSync(scriptPath, 'utf8');
-    
+
     // Test that it sources github-annotations helper
     runner.assert(
         content.includes('source "../../script/github-annotations"'),
         'Should source github-annotations helper script'
     );
-    
+
     // Test that it has automation-specific processor functions
     runner.assert(
         content.includes('process_automation_eslint_annotations'),
@@ -827,39 +827,27 @@ runner.test('lint-with-annotations.sh has required structure', () => {
         content.includes('process_automation_prettier_annotations'),
         'Should have process_automation_prettier_annotations function'
     );
-    
+
     // Test that it checks for GitHub Actions environment
-    runner.assert(
-        content.includes('is_github_actions'),
-        'Should check GitHub Actions environment'
-    );
-    
+    runner.assert(content.includes('is_github_actions'), 'Should check GitHub Actions environment');
+
     // Test that it handles npm commands properly
-    runner.assert(
-        content.includes('npm run lint:json'),
-        'Should run ESLint JSON output'
-    );
-    runner.assert(
-        content.includes('npm run format:check'),
-        'Should run Prettier format check'
-    );
-    runner.assert(
-        content.includes('npm run lint:yaml'),
-        'Should run YAML linting'
-    );
+    runner.assert(content.includes('npm run lint:json'), 'Should run ESLint JSON output');
+    runner.assert(content.includes('npm run format:check'), 'Should run Prettier format check');
+    runner.assert(content.includes('npm run lint:yaml'), 'Should run YAML linting');
 });
 
 // Test: Annotation script path handling
 runner.test('lint-with-annotations.sh handles path processing correctly', () => {
     const scriptPath = path.resolve('./lint-with-annotations.sh');
     const content = fs.readFileSync(scriptPath, 'utf8');
-    
+
     // Test that it converts to relative paths with .github/scripts prefix
     runner.assert(
         content.includes('.github/scripts/$relative_file'),
         'Should add .github/scripts prefix to relative file paths'
     );
-    
+
     // Test that it removes path prefixes correctly
     runner.assert(
         content.includes('relative_file="${relative_file#../../}"'),
@@ -871,7 +859,7 @@ runner.test('lint-with-annotations.sh handles path processing correctly', () => 
 runner.test('Annotation test script exists and is functional', () => {
     const testScriptPath = path.resolve('../../script/test-annotations');
     runner.assertExists(testScriptPath, 'Annotation test script should exist');
-    
+
     // Check if it's executable (on Unix systems)
     try {
         const stats = fs.statSync(testScriptPath);
@@ -880,7 +868,7 @@ runner.test('Annotation test script exists and is functional', () => {
             (stats.mode & parseInt('100', 8)) !== 0,
             'Annotation test script should be executable'
         );
-    } catch (error) {
+    } catch {
         // If we can't check permissions, at least verify the file exists
         runner.assertExists(testScriptPath);
     }

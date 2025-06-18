@@ -38,15 +38,7 @@ echo "==> Running MSP430 Emulator code analysis..."
 # Format code (check only, don't modify)
 echo "==> Checking code formatting..."
 if [ "$ANNOTATIONS_MODE" = true ]; then
-    # Capture output for annotation processing
-    DOTNET_OUTPUT=$(mktemp)
-    if ! dotnet format --verify-no-changes --verbosity diagnostic > "$DOTNET_OUTPUT" 2>&1; then
-        process_dotnet_format_annotations "$DOTNET_OUTPUT"
-        cat "$DOTNET_OUTPUT"
-        rm -f "$DOTNET_OUTPUT"
-        exit 1
-    fi
-    rm -f "$DOTNET_OUTPUT"
+    run_with_annotations "dotnet format --verify-no-changes --verbosity diagnostic" "process_dotnet_format_annotations" || exit 1
 else
     dotnet format --verify-no-changes --verbosity diagnostic
 fi
@@ -59,15 +51,7 @@ dotnet build --configuration Release --verbosity quiet
 echo "==> Linting Markdown documentation..."
 if command -v npm >/dev/null 2>&1 && [ -f "package.json" ]; then
     if [ "$ANNOTATIONS_MODE" = true ]; then
-        # Capture markdownlint output for annotation processing
-        MARKDOWN_OUTPUT=$(mktemp)
-        if ! npx markdownlint-cli2 "docs/**/*.md" "*.md" > "$MARKDOWN_OUTPUT" 2>&1; then
-            process_markdownlint_annotations "$MARKDOWN_OUTPUT"
-            cat "$MARKDOWN_OUTPUT"
-            rm -f "$MARKDOWN_OUTPUT"
-            exit 1
-        fi
-        rm -f "$MARKDOWN_OUTPUT"
+        run_with_annotations "npx markdownlint-cli2 \"docs/**/*.md\" \"*.md\"" "process_markdownlint_annotations" || exit 1
     else
         npx markdownlint-cli2 "docs/**/*.md" "*.md" || exit 1
     fi

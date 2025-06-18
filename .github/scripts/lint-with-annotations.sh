@@ -68,7 +68,7 @@ process_automation_prettier_annotations() {
 }
 
 echo "Installing dependencies..."
-npm install
+npm ci
 
 echo "Running ESLint..."
 if is_github_actions; then

@@ -131,3 +131,25 @@ process_prettier_annotations() {
         fi
     done < "$output_file"
 }
+
+# Helper function to run a command with temporary file capture and annotation processing
+# Usage: run_with_annotations COMMAND PROCESSOR_FUNCTION [ERROR_MESSAGE]
+run_with_annotations() {
+    local command="$1"
+    local processor_function="$2"
+    local error_message="${3:-Command failed}"
+    
+    local temp_output
+    temp_output=$(mktemp)
+    
+    if ! eval "$command" > "$temp_output" 2>&1; then
+        "$processor_function" "$temp_output"
+        cat "$temp_output"
+        rm -f "$temp_output"
+        echo "$error_message" >&2
+        return 1
+    fi
+    
+    rm -f "$temp_output"
+    return 0
+}

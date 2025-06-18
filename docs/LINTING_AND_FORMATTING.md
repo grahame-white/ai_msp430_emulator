@@ -69,6 +69,49 @@ These annotations appear as:
 - Grouped error/warning messages in the Actions summary
 - Check annotations in the Checks tab
 
+## Error Prevention and CI Reliability
+
+To prevent automation script CI failures, several preventative measures are in place:
+
+### Local Validation Script
+
+Use `./script/check-automation-scripts` before committing changes that might affect the automation scripts CI workflow:
+
+```bash
+# Run comprehensive automation scripts validation
+./script/check-automation-scripts
+```
+
+This script validates:
+
+- package-lock.json synchronization with package.json
+- Proper error handling in scripts
+- Required Node.js dependencies availability
+- Automation script test execution
+- lint-with-annotations.sh functionality
+- Annotation test execution
+
+### Enhanced Error Handling
+
+The automation scripts CI workflow includes:
+
+- **Strict error handling**: Uses `set -euo pipefail` for robust error detection
+- **Dependency validation**: Checks package-lock.json synchronization before running
+- **Enhanced logging**: Debug mode available with `DEBUG=1` environment variable
+- **Improved JSON processing**: More robust ESLint output parsing with validation
+- **Automatic cleanup**: Temporary files are cleaned up on script exit or interruption
+- **Comprehensive testing**: Extended timeout periods and better error reporting
+
+### CI Workflow Improvements
+
+The GitHub Actions workflow has been enhanced with:
+
+- `npm ci --no-audit --no-fund` for faster, more reliable dependency installation
+- Enhanced security audit checks with appropriate failure levels
+- Better error reporting with detailed logs
+- Artifact collection for debugging failures
+- Comprehensive validation of package.json structure
+
 ### C# Code Quality
 
 | Tool | Purpose | Script Usage | Configuration |

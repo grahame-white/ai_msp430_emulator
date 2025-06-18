@@ -447,6 +447,47 @@ test_automation_script_annotations() {
         return 1
     fi
     
+    # Test enhanced error handling features
+    if ! grep -q "set -euo pipefail" "$script_path"; then
+        echo "  Automation script should use strict error handling (set -euo pipefail)"
+        return 1
+    fi
+    
+    if ! grep -q "cleanup" "$script_path"; then
+        echo "  Automation script should have cleanup function"
+        return 1
+    fi
+    
+    if ! grep -q "log_error" "$script_path"; then
+        echo "  Automation script should have error logging"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Test: Improved JSON processing for ESLint annotations
+test_improved_json_processing() {
+    # Need to source the improved function from the automation script
+    local script_path=".github/scripts/lint-with-annotations.sh"
+    
+    if [ ! -f "$script_path" ]; then
+        echo "  Automation script not found for testing JSON processing"
+        return 1
+    fi
+    
+    # Test that the script has improved JSON processing
+    if ! grep -q "sed -n" "$script_path"; then
+        echo "  Automation script should have improved JSON extraction"
+        return 1
+    fi
+    
+    if ! grep -q "jq empty.*2>/dev/null" "$script_path"; then
+        echo "  Automation script should validate JSON before processing"
+        return 1
+    fi
+    
+    echo "  Automation script has improved JSON processing features"
     return 0
 }
 
@@ -468,6 +509,7 @@ run_test "ESLint edge cases" test_eslint_edge_cases
 run_test "Lint script integration" test_lint_script_integration
 run_test "Check-format-all script integration" test_check_format_all_integration
 run_test "Automation script annotations" test_automation_script_annotations
+run_test "Improved JSON processing" test_improved_json_processing
 
 # Summary
 echo "=========================================="

@@ -35,7 +35,7 @@ jobs:
         run: ./script/bootstrap
 
       - name: Lint code
-        run: ./script/lint
+        run: ./script/lint --annotations
 
       - name: Build project
         run: ./script/build
@@ -119,9 +119,9 @@ jobs:
       - name: Install dependencies
         run: |
           cd .github/scripts
-          npm install
+          npm ci --no-audit --no-fund
 
-      - name: Check for formatting issues
+      - name: Check for ANSI escape sequences
         run: |
           echo "Checking for ANSI escape sequences in source files..."
           if find . -name "*.js" -o -name "*.cs" -o -name "*.md" | \
@@ -136,21 +136,28 @@ jobs:
           fi
           echo "✅ No ANSI escape sequences detected"
 
-      - name: Lint automation scripts
+      - name: Validate dependencies and security
         run: |
           cd .github/scripts
-          echo "Installing dependencies..."
-          npm install
-          echo "Running ESLint..."
-          npm run lint
-          echo "Running Prettier check..."
-          npm run format:check
+          echo "Checking package-lock.json synchronization..."
+          if ! npm ci --dry-run > /dev/null 2>&1; then
+            echo "❌ package-lock.json is out of sync with package.json"
+            echo "   Run 'npm install' and commit the updated package-lock.json"
+            exit 1
+          fi
+          echo "✅ Dependencies are synchronized"
 
-      - name: Validate YAML files
+          echo "Running security audit..."
+          npm audit --audit-level=high
+          echo "✅ No high-severity vulnerabilities found"
+
+      - name: Validate YAML files and lint automation scripts
+        env:
+          DEBUG: "1"
         run: |
           cd .github/scripts
-          echo "Running YAML linting..."
-          npm run lint:yaml
+          echo "Running lint-with-annotations.sh with enhanced error handling..."
+          ./lint-with-annotations.sh
 
       - name: Run actionlint
         uses: reviewdog/action-actionlint@v1
@@ -159,38 +166,102 @@ jobs:
           level: error
           fail_level: error
 
-      - name: Validate package.json
+      - name: Validate package.json structure
         run: |
           cd .github/scripts
-          npm audit --audit-level=high
-          npm outdated || true
+          echo "Validating package.json structure..."
 
-      - name: Test task parsing
-        run: |
-          cd .github/scripts
-          echo "Testing task parsing functionality..."
-          if node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > \
-             /tmp/parse-test.json; then
-            echo "✅ Parse test passed"
-            # Validate JSON output
-            jq empty /tmp/parse-test.json
-            echo "✅ Generated valid JSON"
-          else
-            echo "❌ Parse test failed"
+          # Check required fields exist
+          if ! jq -e '.name' package.json > /dev/null; then
+            echo "❌ package.json missing 'name' field"
             exit 1
           fi
 
-      - name: Test dry-run functionality
+          if ! jq -e '.scripts.lint' package.json > /dev/null; then
+            echo "❌ package.json missing 'lint' script"
+            exit 1
+          fi
+
+          if ! jq -e '.scripts.test' package.json > /dev/null; then
+            echo "❌ package.json missing 'test' script"
+            exit 1
+          fi
+
+          echo "✅ package.json structure is valid"
+
+          echo "Checking for outdated packages..."
+          npm outdated || true
+
+      - name: Test task parsing with error handling
+        run: |
+          cd .github/scripts
+          echo "Testing task parsing functionality with enhanced error handling..."
+
+          # Check if task file exists
+          if [ ! -f "../../MSP430_EMULATOR_TASKS.md" ]; then
+            echo "❌ MSP430_EMULATOR_TASKS.md not found"
+            exit 1
+          fi
+
+          # Test parsing with timeout and proper error handling
+          if timeout 60s node parse-tasks.js ../../MSP430_EMULATOR_TASKS.md > \
+             /tmp/parse-test.json 2>/tmp/parse-error.log; then
+            echo "✅ Parse test passed"
+            
+            # Validate JSON output
+            if jq empty /tmp/parse-test.json 2>/dev/null; then
+              echo "✅ Generated valid JSON"
+              
+              # Check if output has reasonable size (not empty, not too large)
+              size=$(wc -c < /tmp/parse-test.json)
+              if [ "$size" -lt 10 ]; then
+                echo "❌ Generated JSON seems too small ($size bytes)"
+                exit 1
+              elif [ "$size" -gt 1048576 ]; then  # 1MB
+                echo "❌ Generated JSON seems too large ($size bytes)"
+                exit 1
+              fi
+              echo "✅ Generated JSON has reasonable size ($size bytes)"
+            else
+              echo "❌ Generated invalid JSON"
+              cat /tmp/parse-test.json
+              exit 1
+            fi
+          else
+            echo "❌ Parse test failed or timed out"
+            if [ -f /tmp/parse-error.log ]; then
+              echo "Error log:"
+              cat /tmp/parse-error.log
+            fi
+            exit 1
+          fi
+
+      - name: Test dry-run functionality with error handling
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd .github/scripts
-          echo "Testing dry-run functionality..."
-          if timeout 30s node dry-run.js ../../MSP430_EMULATOR_TASKS.md > \
-             /tmp/dry-run-test.txt; then
+          echo "Testing dry-run functionality with enhanced error handling..."
+
+          # Test dry-run with timeout and proper error handling
+          if timeout 60s node dry-run.js ../../MSP430_EMULATOR_TASKS.md > \
+             /tmp/dry-run-test.txt 2>/tmp/dry-run-error.log; then
             echo "✅ Dry-run test passed"
+            
+            # Check if output has reasonable content
+            if [ -s /tmp/dry-run-test.txt ]; then
+              lines=$(wc -l < /tmp/dry-run-test.txt)
+              echo "✅ Dry-run generated output ($lines lines)"
+            else
+              echo "❌ Dry-run generated no output"
+              exit 1
+            fi
           else
             echo "❌ Dry-run test failed or timed out"
+            if [ -f /tmp/dry-run-error.log ]; then
+              echo "Error log:"
+              cat /tmp/dry-run-error.log
+            fi
             exit 1
           fi
 
@@ -202,4 +273,6 @@ jobs:
           path: |
             /tmp/parse-test.json
             /tmp/dry-run-test.txt
+            /tmp/parse-error.log
+            /tmp/dry-run-error.log
           retention-days: 7

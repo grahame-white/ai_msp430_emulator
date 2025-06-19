@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# script/check-automation-scripts
+# Validate automation scripts for common issues that could cause CI failures
+# This script is designed to be run locally before committing changes
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+echo "🔍 Checking automation scripts for common CI failure causes..."
+
+# Check 1: Validate package-lock.json synchronization
+echo "Checking package-lock.json synchronization..."
+cd .github/scripts
+
+if ! npm ci --dry-run > /dev/null 2>&1; then
+    echo "❌ package-lock.json is out of sync with package.json"
+    echo "   Run 'npm install' in .github/scripts and commit the updated package-lock.json"
+    exit 1
+fi
+echo "✅ Dependencies are synchronized"
+
+# Check 2: Validate that all scripts have proper error handling
+echo "Checking for proper error handling..."
+if ! grep -q "set -e" lint-with-annotations.sh; then
+    echo "❌ lint-with-annotations.sh should use 'set -e' for proper error handling"
+    exit 1
+fi
+echo "✅ Error handling is proper"
+
+# Check 3: Validate that required Node.js modules are available
+echo "Checking Node.js dependencies..."
+if ! node -e "require('eslint')" 2>/dev/null; then
+    echo "❌ ESLint is not properly installed"
+    exit 1
+fi
+
+if ! node -e "require('prettier')" 2>/dev/null; then
+    echo "❌ Prettier is not properly installed"
+    exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+    echo "❌ jq is not available (required for JSON processing)"
+    exit 1
+fi
+echo "✅ All required dependencies are available"
+
+# Check 4: Run the actual automation script tests
+echo "Running automation script tests..."
+if ! npm test > /dev/null 2>&1; then
+    echo "❌ Automation script tests failed"
+    echo "   Run 'cd .github/scripts && npm test' for details"
+    exit 1
+fi
+echo "✅ Automation script tests passed"
+
+# Check 5: Test the lint-with-annotations.sh script
+echo "Testing lint-with-annotations.sh..."
+if ! ./lint-with-annotations.sh > /dev/null 2>&1; then
+    echo "❌ lint-with-annotations.sh failed"
+    echo "   Run 'cd .github/scripts && ./lint-with-annotations.sh' for details"
+    exit 1
+fi
+echo "✅ lint-with-annotations.sh executed successfully"
+
+cd ../..
+
+# Check 6: Validate annotation tests
+echo "Running annotation tests..."
+if ! ./script/test-annotations > /dev/null 2>&1; then
+    echo "❌ Annotation tests failed"
+    echo "   Run './script/test-annotations' for details"
+    exit 1
+fi
+echo "✅ Annotation tests passed"
+
+echo ""
+echo "🎉 All automation script checks passed!"
+echo "   Your changes are ready for CI"

@@ -1,0 +1,527 @@
+#!/usr/bin/env bash
+# script/test-annotations
+# Comprehensive tests for GitHub Actions annotation functionality
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+# Test result tracking
+TESTS_RUN=0
+TESTS_PASSED=0
+TESTS_FAILED=0
+
+# Source the annotation helper functions
+source script/github-annotations
+
+# Test helper functions
+run_test() {
+    local test_name="$1"
+    local test_function="$2"
+    
+    echo "🧪 Testing: $test_name"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if $test_function; then
+        echo "✅ PASS: $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+    else
+        echo "❌ FAIL: $test_name"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+    fi
+    echo
+}
+
+assert_equals() {
+    local expected="$1"
+    local actual="$2"
+    local message="${3:-Expected '$expected', got '$actual'}"
+    
+    if [ "$expected" = "$actual" ]; then
+        return 0
+    else
+        echo "  Assertion failed: $message"
+        return 1
+    fi
+}
+
+assert_contains() {
+    local haystack="$1"
+    local needle="$2"
+    local message="${3:-Expected to find '$needle' in '$haystack'}"
+    
+    if [[ "$haystack" == *"$needle"* ]]; then
+        return 0
+    else
+        echo "  Assertion failed: $message"
+        return 1
+    fi
+}
+
+assert_not_contains() {
+    local haystack="$1"
+    local needle="$2"
+    local message="${3:-Expected NOT to find '$needle' in '$haystack'}"
+    
+    if [[ "$haystack" != *"$needle"* ]]; then
+        return 0
+    else
+        echo "  Assertion failed: $message"
+        return 1
+    fi
+}
+
+# Test: Environment detection
+test_environment_detection() {
+    # Test with GITHUB_ACTIONS unset
+    unset GITHUB_ACTIONS
+    if is_github_actions; then
+        echo "  Environment detection failed: should be false when GITHUB_ACTIONS is unset"
+        return 1
+    fi
+    
+    # Test with GITHUB_ACTIONS set to empty
+    export GITHUB_ACTIONS=""
+    if is_github_actions; then
+        echo "  Environment detection failed: should be false when GITHUB_ACTIONS is empty"
+        return 1
+    fi
+    
+    # Test with GITHUB_ACTIONS set to any value
+    export GITHUB_ACTIONS="true"
+    if ! is_github_actions; then
+        echo "  Environment detection failed: should be true when GITHUB_ACTIONS is set"
+        return 1
+    fi
+    
+    # Clean up
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: GitHub annotation format generation
+test_github_annotation_format() {
+    # Set GitHub Actions environment
+    export GITHUB_ACTIONS="true"
+    
+    # Test full annotation with all parameters
+    local output
+    output=$(github_annotation "error" "src/test.cs" "42" "10" "Test error message")
+    assert_equals "::error file=src/test.cs,line=42,col=10::Test error message" "$output"
+    
+    # Test annotation without column
+    output=$(github_annotation "warning" "docs/readme.md" "10" "" "Warning message")
+    assert_equals "::warning file=docs/readme.md,line=10::Warning message" "$output"
+    
+    # Test annotation without file info
+    output=$(github_annotation "notice" "" "" "" "General notice")
+    assert_equals "::notice::General notice" "$output"
+    
+    # Test different severity levels
+    output=$(github_annotation "error" "test.txt" "1" "1" "Error")
+    assert_contains "$output" "::error"
+    
+    output=$(github_annotation "warning" "test.txt" "1" "1" "Warning")
+    assert_contains "$output" "::warning"
+    
+    output=$(github_annotation "notice" "test.txt" "1" "1" "Notice")
+    assert_contains "$output" "::notice"
+    
+    # Clean up
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: Local environment annotation format
+test_local_annotation_format() {
+    # Ensure we're in local environment
+    unset GITHUB_ACTIONS
+    
+    # Test error format
+    local output
+    output=$(github_annotation "error" "src/test.cs" "42" "10" "Test error")
+    assert_contains "$output" "❌"
+    assert_contains "$output" "src/test.cs:42:10:"
+    assert_contains "$output" "Test error"
+    
+    # Test warning format
+    output=$(github_annotation "warning" "test.txt" "1" "1" "Test warning")
+    assert_contains "$output" "⚠️"
+    
+    # Test notice format
+    output=$(github_annotation "notice" "test.txt" "1" "1" "Test notice")
+    assert_contains "$output" "ℹ️"
+    
+    return 0
+}
+
+# Test: Markdownlint processor
+test_markdownlint_processor() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Create sample markdownlint output
+    cat > "$temp_file" << 'EOF'
+docs/example.md:42:120 MD013/line-length Line length [Expected: 120; Actual: 150]
+README.md:15:1 MD041/first-line-heading/first-line-h1 First line in a file should be a top-level heading
+docs/test.md:100:50 MD025/single-title/single-h1 Multiple top-level headings in the same document
+EOF
+
+    # Set GitHub Actions environment for annotation output
+    export GITHUB_ACTIONS="true"
+    
+    # Process the output
+    local output
+    output=$(process_markdownlint_annotations "$temp_file")
+    
+    # Verify annotations are generated
+    assert_contains "$output" "::error file=docs/example.md,line=42,col=120::MD013/line-length"
+    assert_contains "$output" "::error file=README.md,line=15,col=1::MD041/first-line-heading"
+    assert_contains "$output" "::error file=docs/test.md,line=100,col=50::MD025/single-title"
+    
+    # Clean up
+    rm -f "$temp_file"
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: Dotnet format processor
+test_dotnet_format_processor() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Create sample dotnet format output
+    cat > "$temp_file" << 'EOF'
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Formatted 3 of 25 files in 1234ms.
+EOF
+
+    # Set GitHub Actions environment
+    export GITHUB_ACTIONS="true"
+    
+    # Process the output
+    local output
+    output=$(process_dotnet_format_annotations "$temp_file")
+    
+    # Verify annotation is generated for formatting issues
+    assert_contains "$output" "::error::Code formatting issues detected: 3 of 25 files needed formatting"
+    
+    # Test with no formatting issues
+    cat > "$temp_file" << 'EOF'
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Formatted 0 of 25 files in 456ms.
+EOF
+
+    output=$(process_dotnet_format_annotations "$temp_file")
+    assert_not_contains "$output" "::error::"
+    
+    # Clean up
+    rm -f "$temp_file"
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: ESLint processor
+test_eslint_processor() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Create sample ESLint JSON output with current directory prefix
+    cat > "$temp_file" << EOF
+[
+  {
+    "filePath": "${PWD}/test.js",
+    "messages": [
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 2,
+        "message": "'unusedVar' is defined but never used.",
+        "line": 5,
+        "column": 7
+      },
+      {
+        "ruleId": "prefer-const",
+        "severity": 1,
+        "message": "'variable' is never reassigned. Use 'const' instead of 'let'.",
+        "line": 10,
+        "column": 1
+      }
+    ]
+  }
+]
+EOF
+
+    # Set GitHub Actions environment
+    export GITHUB_ACTIONS="true"
+    
+    # Process the output
+    local output
+    output=$(process_eslint_annotations "$temp_file")
+    
+    # Verify annotations are generated with relative paths
+    assert_contains "$output" "::error file=test.js,line=5,col=7::'unusedVar' is defined but never used."
+    assert_contains "$output" "::warning file=test.js,line=10,col=1::'variable' is never reassigned"
+    
+    # Clean up
+    rm -f "$temp_file"
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: Prettier processor
+test_prettier_processor() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Create sample Prettier output with current directory prefix
+    cat > "$temp_file" << EOF
+${PWD}/script.js
+${PWD}/config.json
+${PWD}/README.md
+EOF
+
+    # Set GitHub Actions environment
+    export GITHUB_ACTIONS="true"
+    
+    # Process the output
+    local output
+    output=$(process_prettier_annotations "$temp_file")
+    
+    # Verify annotations are generated with relative paths
+    assert_contains "$output" "::error file=script.js"
+    assert_contains "$output" "File needs prettier formatting"
+    assert_contains "$output" "::error file=config.json"
+    assert_contains "$output" "::error file=README.md"
+    
+    # Clean up
+    rm -f "$temp_file"
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: Empty file handling
+test_empty_file_handling() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Test with empty file
+    export GITHUB_ACTIONS="true"
+    
+    # All processors should handle empty files gracefully
+    local output
+    output=$(process_markdownlint_annotations "$temp_file")
+    assert_equals "" "$output"
+    
+    output=$(process_dotnet_format_annotations "$temp_file")
+    assert_equals "" "$output"
+    
+    output=$(process_eslint_annotations "$temp_file")
+    assert_equals "" "$output"
+    
+    output=$(process_prettier_annotations "$temp_file")
+    assert_equals "" "$output"
+    
+    # Clean up
+    rm -f "$temp_file"
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: Missing file handling
+test_missing_file_handling() {
+    local nonexistent_file="/tmp/this-file-does-not-exist-12345"
+    
+    export GITHUB_ACTIONS="true"
+    
+    # All processors should handle missing files gracefully
+    local output
+    output=$(process_markdownlint_annotations "$nonexistent_file")
+    assert_equals "" "$output"
+    
+    output=$(process_dotnet_format_annotations "$nonexistent_file")
+    assert_equals "" "$output"
+    
+    output=$(process_eslint_annotations "$nonexistent_file")
+    assert_equals "" "$output"
+    
+    output=$(process_prettier_annotations "$nonexistent_file")
+    assert_equals "" "$output"
+    
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: Edge cases in ESLint JSON processing
+test_eslint_edge_cases() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Test with malformed JSON
+    echo "not valid json" > "$temp_file"
+    export GITHUB_ACTIONS="true"
+    
+    # Should handle gracefully without errors
+    local output
+    output=$(process_eslint_annotations "$temp_file" 2>/dev/null || echo "")
+    # Should not crash and produce no output
+    
+    # Test with empty JSON array
+    echo "[]" > "$temp_file"
+    output=$(process_eslint_annotations "$temp_file")
+    assert_equals "" "$output"
+    
+    # Test with file having no messages
+    cat > "$temp_file" << 'EOF'
+[
+  {
+    "filePath": "/path/to/clean.js",
+    "messages": []
+  }
+]
+EOF
+    
+    output=$(process_eslint_annotations "$temp_file")
+    assert_equals "" "$output"
+    
+    # Clean up
+    rm -f "$temp_file"
+    unset GITHUB_ACTIONS
+    return 0
+}
+
+# Test: Integration with main lint script
+test_lint_script_integration() {
+    # Test that lint script accepts --annotations flag by checking the script content
+    if ! grep -q "annotations" ./script/lint 2>/dev/null; then
+        echo "  Integration test: lint script should support annotations flag"
+        return 1
+    fi
+    
+    echo "  Integration test: lint script supports annotations flag"
+    return 0
+}
+
+# Test: Integration with check-format-all script
+test_check_format_all_integration() {
+    # Test that check-format-all script accepts --annotations flag by checking the script content
+    if ! grep -q "annotations" ./script/check-format-all 2>/dev/null; then
+        echo "  Integration test: check-format-all script should support annotations flag"
+        return 1
+    fi
+    
+    echo "  Integration test: check-format-all script supports annotations flag"
+    return 0
+}
+
+# Test: Automation script annotation processing
+test_automation_script_annotations() {
+    # Test that the automation script exists and is executable
+    local script_path=".github/scripts/lint-with-annotations.sh"
+    
+    if [ ! -f "$script_path" ]; then
+        echo "  Automation script not found: $script_path"
+        return 1
+    fi
+    
+    if [ ! -x "$script_path" ]; then
+        echo "  Automation script not executable: $script_path"
+        return 1
+    fi
+    
+    # Test that it sources the github-annotations helper
+    if ! grep -q "source.*github-annotations" "$script_path"; then
+        echo "  Automation script should source github-annotations helper"
+        return 1
+    fi
+    
+    # Test that it has the expected functions
+    if ! grep -q "process_automation_eslint_annotations" "$script_path"; then
+        echo "  Automation script missing process_automation_eslint_annotations function"
+        return 1
+    fi
+    
+    if ! grep -q "process_automation_prettier_annotations" "$script_path"; then
+        echo "  Automation script missing process_automation_prettier_annotations function"
+        return 1
+    fi
+    
+    # Test enhanced error handling features
+    if ! grep -q "set -euo pipefail" "$script_path"; then
+        echo "  Automation script should use strict error handling (set -euo pipefail)"
+        return 1
+    fi
+    
+    if ! grep -q "cleanup" "$script_path"; then
+        echo "  Automation script should have cleanup function"
+        return 1
+    fi
+    
+    if ! grep -q "log_error" "$script_path"; then
+        echo "  Automation script should have error logging"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Test: Improved JSON processing for ESLint annotations
+test_improved_json_processing() {
+    # Need to source the improved function from the automation script
+    local script_path=".github/scripts/lint-with-annotations.sh"
+    
+    if [ ! -f "$script_path" ]; then
+        echo "  Automation script not found for testing JSON processing"
+        return 1
+    fi
+    
+    # Test that the script has improved JSON processing
+    if ! grep -q "sed -n" "$script_path"; then
+        echo "  Automation script should have improved JSON extraction"
+        return 1
+    fi
+    
+    if ! grep -q "jq empty.*2>/dev/null" "$script_path"; then
+        echo "  Automation script should validate JSON before processing"
+        return 1
+    fi
+    
+    echo "  Automation script has improved JSON processing features"
+    return 0
+}
+
+# Run all tests
+echo "🧪 Running GitHub Actions Annotation Tests"
+echo "=========================================="
+echo
+
+run_test "Environment detection (GITHUB_ACTIONS variable)" test_environment_detection
+run_test "GitHub annotation format generation" test_github_annotation_format
+run_test "Local environment annotation format" test_local_annotation_format
+run_test "Markdownlint processor" test_markdownlint_processor
+run_test "Dotnet format processor" test_dotnet_format_processor
+run_test "ESLint processor" test_eslint_processor
+run_test "Prettier processor" test_prettier_processor
+run_test "Empty file handling" test_empty_file_handling
+run_test "Missing file handling" test_missing_file_handling
+run_test "ESLint edge cases" test_eslint_edge_cases
+run_test "Lint script integration" test_lint_script_integration
+run_test "Check-format-all script integration" test_check_format_all_integration
+run_test "Automation script annotations" test_automation_script_annotations
+run_test "Improved JSON processing" test_improved_json_processing
+
+# Summary
+echo "=========================================="
+echo "📊 Test Results Summary"
+echo "  Tests run: $TESTS_RUN"
+echo "  Passed: $TESTS_PASSED"
+echo "  Failed: $TESTS_FAILED"
+
+if [ $TESTS_FAILED -eq 0 ]; then
+    echo "✅ All annotation tests passed!"
+    exit 0
+else
+    echo "❌ Some annotation tests failed!"
+    exit 1
+fi

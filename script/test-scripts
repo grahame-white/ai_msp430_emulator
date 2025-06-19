@@ -63,3 +63,14 @@ else
 fi
 
 echo "==> All script smoke tests passed!"
+
+# Test annotation functionality
+echo "==> Testing annotation functionality..."
+if timeout 60s ./script/test-annotations; then
+    echo "✅ script/test-annotations completed successfully"
+else
+    echo "❌ script/test-annotations failed or timed out"
+    exit 1
+fi
+
+echo "==> All script tests passed!"

@@ -8,10 +8,32 @@
 # - eslint: JavaScript code linting and formatting check
 # - yamllint: YAML file linting (via npm scripts)
 # - actionlint: GitHub Actions workflow linting (via npm scripts)
+#
+# Options:
+#   --annotations    Enable GitHub Actions annotations output
 
 set -e
 
 cd "$(dirname "$0")/.."
+
+# Source annotation helper functions
+source script/github-annotations
+
+# Parse command line arguments
+ANNOTATIONS_MODE=false
+for arg in "$@"; do
+    case $arg in
+        --annotations)
+            ANNOTATIONS_MODE=true
+            shift
+            ;;
+    esac
+done
+
+# Auto-enable annotations in GitHub Actions if not explicitly set
+if is_github_actions && [ "$ANNOTATIONS_MODE" = false ]; then
+    ANNOTATIONS_MODE=true
+fi
 
 echo "==> Checking MSP430 Emulator code formatting..."
 
@@ -19,12 +41,27 @@ FORMAT_ISSUES=0
 
 # Check C# code formatting
 echo "==> Checking C# code formatting..."
-if ! dotnet format --verify-no-changes --verbosity diagnostic; then
-    echo "❌ C# formatting issues detected!"
-    echo "   Run './script/format' to fix C# formatting"
-    FORMAT_ISSUES=1
+if [ "$ANNOTATIONS_MODE" = true ]; then
+    DOTNET_OUTPUT=$(mktemp)
+    if ! dotnet format --verify-no-changes --verbosity diagnostic > "$DOTNET_OUTPUT" 2>&1; then
+        echo "❌ C# formatting issues detected!"
+        echo "   Run './script/format' to fix C# formatting"
+        process_dotnet_format_annotations "$DOTNET_OUTPUT"
+        cat "$DOTNET_OUTPUT"
+        FORMAT_ISSUES=1
+        rm -f "$DOTNET_OUTPUT"
+    else
+        echo "✅ C# code formatting is correct"
+        rm -f "$DOTNET_OUTPUT"
+    fi
 else
-    echo "✅ C# code formatting is correct"
+    if ! dotnet format --verify-no-changes --verbosity diagnostic; then
+        echo "❌ C# formatting issues detected!"
+        echo "   Run './script/format' to fix C# formatting"
+        FORMAT_ISSUES=1
+    else
+        echo "✅ C# code formatting is correct"
+    fi
 fi
 
 # Check JavaScript, JSON, YAML, and Markdown formatting
@@ -38,22 +75,53 @@ if [ ! -d "node_modules" ]; then
 fi
 
 # Check Prettier formatting
-if ! npm run format:check; then
-    echo "❌ Prettier formatting issues detected!"
-    echo "   Run 'cd .github/scripts && npm run format' to fix formatting"
-    FORMAT_ISSUES=1
+if [ "$ANNOTATIONS_MODE" = true ]; then
+    PRETTIER_OUTPUT=$(mktemp)
+    if ! npm run format:check > "$PRETTIER_OUTPUT" 2>&1; then
+        echo "❌ Prettier formatting issues detected!"
+        echo "   Run 'cd .github/scripts && npm run format' to fix formatting"
+        process_prettier_annotations "$PRETTIER_OUTPUT"
+        cat "$PRETTIER_OUTPUT"
+        FORMAT_ISSUES=1
+        rm -f "$PRETTIER_OUTPUT"
+    else
+        echo "✅ Prettier formatting is correct"
+        rm -f "$PRETTIER_OUTPUT"
+    fi
 else
-    echo "✅ Prettier formatting is correct"
+    if ! npm run format:check; then
+        echo "❌ Prettier formatting issues detected!"
+        echo "   Run 'cd .github/scripts && npm run format' to fix formatting"
+        FORMAT_ISSUES=1
+    else
+        echo "✅ Prettier formatting is correct"
+    fi
 fi
 
 # Check ESLint
 echo "==> Checking ESLint..."
-if ! npm run lint; then
-    echo "❌ ESLint issues detected!"
-    echo "   Run 'cd .github/scripts && npm run lint:fix' to auto-fix or fix manually"
-    FORMAT_ISSUES=1
+if [ "$ANNOTATIONS_MODE" = true ]; then
+    ESLINT_OUTPUT=$(mktemp)
+    if ! npm run lint:json > "$ESLINT_OUTPUT" 2>&1; then
+        echo "❌ ESLint issues detected!"
+        echo "   Run 'cd .github/scripts && npm run lint:fix' to auto-fix or fix manually"
+        process_eslint_annotations "$ESLINT_OUTPUT"
+        # Also show regular output for debugging
+        npm run lint || true
+        FORMAT_ISSUES=1
+        rm -f "$ESLINT_OUTPUT"
+    else
+        echo "✅ ESLint checks passed"
+        rm -f "$ESLINT_OUTPUT"
+    fi
 else
-    echo "✅ ESLint checks passed"
+    if ! npm run lint; then
+        echo "❌ ESLint issues detected!"
+        echo "   Run 'cd .github/scripts && npm run lint:fix' to auto-fix or fix manually"
+        FORMAT_ISSUES=1
+    else
+        echo "✅ ESLint checks passed"
+    fi
 fi
 
 cd - > /dev/null

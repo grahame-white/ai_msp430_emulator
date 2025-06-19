@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+# script/github-annotations
+# Helper functions for generating GitHub Actions annotations
+#
+# Usage: source this file in other scripts to use annotation functions
+
+# Check if running in GitHub Actions
+is_github_actions() {
+    [ -n "${GITHUB_ACTIONS}" ]
+}
+
+# Generate GitHub Actions annotation
+# Usage: github_annotation TYPE FILE LINE COL MESSAGE
+# TYPE: error, warning, notice
+github_annotation() {
+    local type="$1"
+    local file="$2"
+    local line="$3"
+    local col="$4"
+    local message="$5"
+    
+    if is_github_actions; then
+        if [ -n "$file" ]; then
+            if [ -n "$line" ]; then
+                if [ -n "$col" ]; then
+                    echo "::${type} file=${file},line=${line},col=${col}::${message}"
+                else
+                    echo "::${type} file=${file},line=${line}::${message}"
+                fi
+            else
+                echo "::${type} file=${file}::${message}"
+            fi
+        else
+            echo "::${type}::${message}"
+        fi
+    else
+        # Non-GitHub Actions environment - output human-readable format
+        case "$type" in
+            "error")   echo "❌ ${file}:${line}:${col}: ${message}" ;;
+            "warning") echo "⚠️  ${file}:${line}:${col}: ${message}" ;;
+            "notice")  echo "ℹ️  ${file}:${line}:${col}: ${message}" ;;
+            *)         echo "${file}:${line}:${col}: ${message}" ;;
+        esac
+    fi
+}
+
+# Process markdownlint-cli2 output into annotations
+process_markdownlint_annotations() {
+    local output_file="$1"
+    
+    if [ ! -f "$output_file" ]; then
+        return 0
+    fi
+    
+    # markdownlint-cli2 outputs in format: file:line:col rule message
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^([^:]+):([0-9]+):([0-9]+)\ (.+)$ ]]; then
+            local file="${BASH_REMATCH[1]}"
+            local line_num="${BASH_REMATCH[2]}"
+            local col_num="${BASH_REMATCH[3]}"
+            local msg="${BASH_REMATCH[4]}"
+            
+            github_annotation "error" "$file" "$line_num" "$col_num" "$msg"
+        fi
+    done < "$output_file"
+}
+
+# Process dotnet format output into annotations
+process_dotnet_format_annotations() {
+    local output_file="$1"
+    
+    if [ ! -f "$output_file" ]; then
+        return 0
+    fi
+    
+    # Look for formatting issues in dotnet format output
+    # dotnet format with --verbosity diagnostic shows file paths when there are issues
+    while IFS= read -r line; do
+        if [[ "$line" =~ Formatted\ ([0-9]+)\ of\ ([0-9]+)\ files ]]; then
+            local formatted="${BASH_REMATCH[1]}"
+            local total="${BASH_REMATCH[2]}"
+            if [ "$formatted" -gt 0 ]; then
+                github_annotation "error" "" "" "" "Code formatting issues detected: $formatted of $total files needed formatting"
+            fi
+        fi
+    done < "$output_file"
+}
+
+# Process ESLint JSON output into annotations  
+process_eslint_annotations() {
+    local json_file="$1"
+    
+    if [ ! -f "$json_file" ]; then
+        return 0
+    fi
+    
+    # Parse ESLint JSON output
+    if command -v jq >/dev/null 2>&1; then
+        jq -r '.[] | 
+            .filePath as $file | 
+            .messages[] | 
+            "\($file)|\(.line)|\(.column)|\(.severity)|\(.message)"' "$json_file" | \
+        while IFS='|' read -r file line col severity message; do
+            local annotation_type="notice"
+            case "$severity" in
+                "1") annotation_type="warning" ;;
+                "2") annotation_type="error" ;;
+            esac
+            
+            # Remove absolute path prefix to make relative
+            local relative_file="${file#${PWD}/}"
+            github_annotation "$annotation_type" "$relative_file" "$line" "$col" "$message"
+        done
+    fi
+}
+
+# Process Prettier check output into annotations
+process_prettier_annotations() {
+    local output_file="$1"
+    
+    if [ ! -f "$output_file" ]; then
+        return 0
+    fi
+    
+    # Prettier outputs files that need formatting
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^.+\.(js|json|md|yml|yaml)$ ]]; then
+            # Remove absolute path prefix to make relative  
+            local relative_file="${line#${PWD}/}"
+            github_annotation "error" "$relative_file" "" "" "File needs prettier formatting"
+        fi
+    done < "$output_file"
+}
+
+# Helper function to run a command with temporary file capture and annotation processing
+# Usage: run_with_annotations COMMAND PROCESSOR_FUNCTION [ERROR_MESSAGE]
+run_with_annotations() {
+    local command="$1"
+    local processor_function="$2"
+    local error_message="${3:-Command failed}"
+    
+    local temp_output
+    temp_output=$(mktemp)
+    
+    if ! eval "$command" > "$temp_output" 2>&1; then
+        "$processor_function" "$temp_output"
+        cat "$temp_output"
+        rm -f "$temp_output"
+        echo "$error_message" >&2
+        return 1
+    fi
+    
+    rm -f "$temp_output"
+    return 0
+}

@@ -6,16 +6,42 @@
 # - dotnet format: C# code formatting verification
 # - dotnet build: Static analysis via compiler warnings/errors
 # - markdownlint-cli2: Markdown linting for documentation
+#
+# Options:
+#   --annotations    Enable GitHub Actions annotations output
 
 set -e
 
 cd "$(dirname "$0")/.."
 
+# Source annotation helper functions
+source script/github-annotations
+
+# Parse command line arguments
+ANNOTATIONS_MODE=false
+for arg in "$@"; do
+    case $arg in
+        --annotations)
+            ANNOTATIONS_MODE=true
+            shift
+            ;;
+    esac
+done
+
+# Auto-enable annotations in GitHub Actions if not explicitly set
+if is_github_actions && [ "$ANNOTATIONS_MODE" = false ]; then
+    ANNOTATIONS_MODE=true
+fi
+
 echo "==> Running MSP430 Emulator code analysis..."
 
 # Format code (check only, don't modify)
 echo "==> Checking code formatting..."
-dotnet format --verify-no-changes --verbosity diagnostic
+if [ "$ANNOTATIONS_MODE" = true ]; then
+    run_with_annotations "dotnet format --verify-no-changes --verbosity diagnostic" "process_dotnet_format_annotations" || exit 1
+else
+    dotnet format --verify-no-changes --verbosity diagnostic
+fi
 
 # Run static analysis via build with warnings as errors
 echo "==> Running static analysis..."
@@ -24,10 +50,27 @@ dotnet build --configuration Release --verbosity quiet
 # Lint Markdown documentation
 echo "==> Linting Markdown documentation..."
 if command -v npm >/dev/null 2>&1 && [ -f "package.json" ]; then
-    npx markdownlint-cli2 "docs/**/*.md" "*.md" || exit 1
+    if [ "$ANNOTATIONS_MODE" = true ]; then
+        run_with_annotations "npx markdownlint-cli2 \"docs/**/*.md\" \"*.md\"" "process_markdownlint_annotations" || exit 1
+    else
+        npx markdownlint-cli2 "docs/**/*.md" "*.md" || exit 1
+    fi
 else
     echo "Error: npm or package.json not found. Run './script/bootstrap' to install all required tools."
     exit 1
+fi
+
+# Validate GitHub Actions workflows for shell scripting issues
+echo "==> Validating GitHub Actions workflows..."
+if [ -d ".github/scripts" ]; then
+    cd .github/scripts
+    if [ ! -d "node_modules" ]; then
+        npm ci --no-audit --no-fund > /dev/null 2>&1
+    fi
+    npm run validate:workflow-shell
+    cd ../..
+else
+    echo "Warning: .github/scripts directory not found, skipping workflow validation"
 fi
 
 echo "==> Code analysis completed successfully!"

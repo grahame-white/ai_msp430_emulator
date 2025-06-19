@@ -213,7 +213,6 @@ jobs:
               echo "✅ Generated valid JSON"
               
               # Check if output has reasonable size (not empty, not too large)
-              local size
               size=$(wc -c < /tmp/parse-test.json)
               if [ "$size" -lt 10 ]; then
                 echo "❌ Generated JSON seems too small ($size bytes)"
@@ -251,7 +250,6 @@ jobs:
             
             # Check if output has reasonable content
             if [ -s /tmp/dry-run-test.txt ]; then
-              local lines
               lines=$(wc -l < /tmp/dry-run-test.txt)
               echo "✅ Dry-run generated output ($lines lines)"
             else

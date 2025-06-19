@@ -60,4 +60,17 @@ else
     exit 1
 fi
 
+# Validate GitHub Actions workflows for shell scripting issues
+echo "==> Validating GitHub Actions workflows..."
+if [ -d ".github/scripts" ]; then
+    cd .github/scripts
+    if [ ! -d "node_modules" ]; then
+        npm ci --no-audit --no-fund > /dev/null 2>&1
+    fi
+    npm run validate:workflow-shell
+    cd ../..
+else
+    echo "Warning: .github/scripts directory not found, skipping workflow validation"
+fi
+
 echo "==> Code analysis completed successfully!"

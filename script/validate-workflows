@@ -1,0 +1,32 @@
+#!/bin/bash
+# Check GitHub Actions workflows for shell scripting issues
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+echo "==> Validating GitHub Actions workflows..."
+
+# Check if automation scripts directory exists
+if [ ! -d "$PROJECT_ROOT/.github/scripts" ]; then
+    echo "$PROJECT_ROOT/.github/scripts directory not found"
+    exit 1
+fi
+
+cd "$PROJECT_ROOT/.github/scripts"
+
+# Install dependencies if needed
+if [ ! -d "node_modules" ]; then
+    echo "==> Installing dependencies..."
+    npm ci --no-audit --no-fund
+fi
+
+# Run workflow validation
+echo "==> Running workflow shell validation..."
+npm run validate:workflow-shell
+
+echo "==> Running actionlint validation..."
+npm run lint:workflows
+
+echo "==> GitHub Actions workflow validation completed successfully!"

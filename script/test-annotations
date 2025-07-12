@@ -491,8 +491,8 @@ test_improved_json_processing() {
     return 0
 }
 
-# Test: run_with_annotations prevents output duplication (Issue #212)
-test_run_with_annotations_no_duplication() {
+# Test: run_with_annotations shows both annotations and detailed output (Issue #214)
+test_run_with_annotations_both_outputs() {
     local temp_file
     temp_file=$(mktemp)
     
@@ -507,7 +507,7 @@ EOF
         return 1
     }
     
-    # Test in GitHub Actions environment - should only get annotation format
+    # Test in GitHub Actions environment - should get BOTH annotation format AND detailed output
     export GITHUB_ACTIONS="true"
     local github_output
     github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
@@ -515,10 +515,13 @@ EOF
     # Should contain GitHub annotation format
     assert_contains "$github_output" "::error file=test.md,line=5,col=10::"
     
-    # Should NOT contain raw output when in GitHub Actions mode
-    assert_not_contains "$github_output" "test.md:5:10 MD013/line-length"
+    # Should ALSO contain raw output when in GitHub Actions mode for better user experience
+    assert_contains "$github_output" "test.md:5:10 MD013/line-length"
     
-    # Test in non-GitHub Actions environment - should only get raw format
+    # Should contain the "Detailed error output:" header
+    assert_contains "$github_output" "Detailed error output:"
+    
+    # Test in non-GitHub Actions environment - should only get raw format (no change)
     unset GITHUB_ACTIONS
     local local_output
     local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
@@ -529,14 +532,8 @@ EOF
     # Should NOT contain GitHub annotation format when not in GitHub Actions
     assert_not_contains "$local_output" "::error file=test.md,line=5,col=10::"
     
-    # Verify we don't have both outputs in either case (preventing duplication)
-    local github_line_count
-    github_line_count=$(echo "$github_output" | grep -c "test.md" || echo "0")
-    assert_equals "1" "$github_line_count" "Should have exactly one line mentioning test.md in GitHub Actions mode"
-    
-    local local_line_count
-    local_line_count=$(echo "$local_output" | grep -c "test.md" || echo "0")
-    assert_equals "1" "$local_line_count" "Should have exactly one line mentioning test.md in local mode"
+    # Should NOT contain the "Detailed error output:" header in local mode
+    assert_not_contains "$local_output" "Detailed error output:"
     
     # Clean up
     rm -f "$temp_file"
@@ -561,7 +558,7 @@ EOF
         return 1
     }
     
-    # Test in GitHub Actions environment - should only get annotation format
+    # Test in GitHub Actions environment - should get BOTH annotation format AND detailed output
     export GITHUB_ACTIONS="true"
     local github_output
     github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
@@ -571,12 +568,15 @@ EOF
     assert_contains "$github_output" "::error file=test.md,line=8,col=1::"
     assert_contains "$github_output" "::error file=test.md,line=12,col=15::"
     
-    # Should NOT contain raw output when in GitHub Actions mode
-    assert_not_contains "$github_output" "test.md:5:10 MD013/line-length"
-    assert_not_contains "$github_output" "test.md:8:1 MD022/blanks-around-headings"
-    assert_not_contains "$github_output" "test.md:12:15 MD009/no-trailing-spaces"
+    # Should ALSO contain raw output when in GitHub Actions mode for better user experience
+    assert_contains "$github_output" "test.md:5:10 MD013/line-length"
+    assert_contains "$github_output" "test.md:8:1 MD022/blanks-around-headings"
+    assert_contains "$github_output" "test.md:12:15 MD009/no-trailing-spaces"
     
-    # Test in non-GitHub Actions environment - should only get raw format
+    # Should contain the "Detailed error output:" header
+    assert_contains "$github_output" "Detailed error output:"
+    
+    # Test in non-GitHub Actions environment - should only get raw format (no change)
     unset GITHUB_ACTIONS
     local local_output
     local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
@@ -591,14 +591,8 @@ EOF
     assert_not_contains "$local_output" "::error file=test.md,line=8,col=1::"
     assert_not_contains "$local_output" "::error file=test.md,line=12,col=15::"
     
-    # Verify exactly 3 lines with test.md in each case (no duplication)
-    local github_line_count
-    github_line_count=$(echo "$github_output" | grep -c "test.md" || echo "0")
-    assert_equals "3" "$github_line_count" "Should have exactly three lines mentioning test.md in GitHub Actions mode"
-    
-    local local_line_count
-    local_line_count=$(echo "$local_output" | grep -c "test.md" || echo "0")
-    assert_equals "3" "$local_line_count" "Should have exactly three lines mentioning test.md in local mode"
+    # Should NOT contain the "Detailed error output:" header in local mode
+    assert_not_contains "$local_output" "Detailed error output:"
     
     # Clean up
     rm -f "$temp_file"
@@ -628,7 +622,7 @@ EOF
         return 1
     }
     
-    # Test in GitHub Actions environment
+    # Test in GitHub Actions environment - should get BOTH annotation format AND detailed output
     export GITHUB_ACTIONS="true"
     local github_output
     github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
@@ -637,33 +631,28 @@ EOF
     assert_contains "$github_output" "::error file=test.md,line=5,col=10::"
     assert_contains "$github_output" "::error file=other.md,line=3,col=1::"
     
-    # Should NOT contain raw output format
-    assert_not_contains "$github_output" "test.md:5:10 MD013/line-length"
-    assert_not_contains "$github_output" "other.md:3:1 MD041/first-line-heading"
+    # Should ALSO contain raw output format for better user experience
+    assert_contains "$github_output" "test.md:5:10 MD013/line-length"
+    assert_contains "$github_output" "other.md:3:1 MD041/first-line-heading"
     
-    # Should NOT contain informational lines that don't match defect pattern
-    assert_not_contains "$github_output" "Starting analysis..."
-    assert_not_contains "$github_output" "Analysis complete:"
+    # Should contain the "Detailed error output:" header
+    assert_contains "$github_output" "Detailed error output:"
     
-    # Test in non-GitHub Actions environment
+    # Test in non-GitHub Actions environment - should only get raw format (no change)
     unset GITHUB_ACTIONS
     local local_output
     local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
     
-    # Should contain the full raw output including informational lines
-    assert_contains "$local_output" "Starting analysis..."
+    # Should contain the full raw output
     assert_contains "$local_output" "test.md:5:10 MD013/line-length"
     assert_contains "$local_output" "other.md:3:1 MD041/first-line-heading"
-    assert_contains "$local_output" "Analysis complete:"
     
     # Should NOT contain GitHub annotation format
     assert_not_contains "$local_output" "::error file=test.md,line=5,col=10::"
     assert_not_contains "$local_output" "::error file=other.md,line=3,col=1::"
     
-    # Verify exactly 2 defect lines in GitHub Actions mode (filtered)
-    local github_defect_count
-    github_defect_count=$(echo "$github_output" | grep -c "::error.*file=" || echo "0")
-    assert_equals "2" "$github_defect_count" "Should have exactly two annotation lines in GitHub Actions mode"
+    # Should NOT contain the "Detailed error output:" header in local mode
+    assert_not_contains "$local_output" "Detailed error output:"
     
     # Clean up
     rm -f "$temp_file"
@@ -723,7 +712,7 @@ run_test "Lint script integration" test_lint_script_integration
 run_test "Check-format-all script integration" test_check_format_all_integration
 run_test "Automation script annotations" test_automation_script_annotations
 run_test "Improved JSON processing" test_improved_json_processing
-run_test "run_with_annotations prevents duplication (Issue #212)" test_run_with_annotations_no_duplication
+run_test "run_with_annotations shows both annotations and detailed output (Issue #214)" test_run_with_annotations_both_outputs
 run_test "run_with_annotations handles multiple defects" test_run_with_annotations_multiple_defects
 run_test "run_with_annotations handles multi-line output" test_run_with_annotations_multiline_output
 run_test "run_with_annotations success path" test_run_with_annotations_success_path

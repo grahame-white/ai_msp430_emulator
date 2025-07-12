@@ -27,6 +27,7 @@ public class TimerA : PeripheralBase
     private readonly TimerClock _clock;
     private readonly CaptureCompareUnit[] _captureCompareUnits;
     private ushort _timerValue;
+    private ushort _lastTimerValue;
     private TimerMode _mode;
     private bool _isCountingUp;
     private bool _interruptEnable;
@@ -152,9 +153,25 @@ public class TimerA : PeripheralBase
         }
 
         // Check for capture/compare events
-        foreach (CaptureCompareUnit unit in _captureCompareUnits)
+        for (int i = 0; i < _captureCompareUnits.Length; i++)
         {
-            unit.HandleCompareEvent(_timerValue, rollover);
+            CaptureCompareUnit unit = _captureCompareUnits[i];
+
+            // Check for EQUn event (timer equals this unit's CCR value)
+            bool isEqunEvent = _timerValue == unit.CaptureCompareValue;
+
+            // Check for EQU0 event (timer equals CCR0 - only relevant for units 1+ in certain modes)
+            bool isEqu0Event = false;
+            if (i > 0) // Unit 0 doesn't respond to its own EQU0 event for output modes
+            {
+                isEqu0Event = _timerValue == _captureCompareUnits[0].CaptureCompareValue;
+            }
+
+            // Handle the compare event
+            if (isEqunEvent || isEqu0Event)
+            {
+                unit.HandleCompareEvent(_timerValue, isEqu0Event);
+            }
         }
 
         // Handle timer overflow interrupt
@@ -228,6 +245,7 @@ public class TimerA : PeripheralBase
     protected override void OnReset()
     {
         _timerValue = 0x0000;
+        _lastTimerValue = 0x0000;
         _mode = TimerMode.Stop;
         _isCountingUp = true;
         _interruptEnable = false;
@@ -258,12 +276,24 @@ public class TimerA : PeripheralBase
                 break;
 
             case OffsetTAxCCR0:
+                // Warn if updating compare value while timer is running
+                if (_mode != TimerMode.Stop && _captureCompareUnits[0].Mode == CaptureCompareMode.Compare)
+                {
+                    Logger?.Warning($"Timer {_timerName} CCR0 updated while timer is running. This may cause unexpected behavior. " +
+                                   "Stop timer (MC=0) before updating compare values.");
+                }
                 _captureCompareUnits[0].CaptureCompareValue = register.ReadWord();
                 break;
 
             case OffsetTAxCCR1:
                 if (_captureCompareUnits.Length > 1)
                 {
+                    // Warn if updating compare value while timer is running
+                    if (_mode != TimerMode.Stop && _captureCompareUnits[1].Mode == CaptureCompareMode.Compare)
+                    {
+                        Logger?.Warning($"Timer {_timerName} CCR1 updated while timer is running. This may cause unexpected behavior. " +
+                                       "Stop timer (MC=0) before updating compare values.");
+                    }
                     _captureCompareUnits[1].CaptureCompareValue = register.ReadWord();
                 }
 
@@ -272,6 +302,12 @@ public class TimerA : PeripheralBase
             case OffsetTAxCCR2:
                 if (_captureCompareUnits.Length > 2)
                 {
+                    // Warn if updating compare value while timer is running
+                    if (_mode != TimerMode.Stop && _captureCompareUnits[2].Mode == CaptureCompareMode.Compare)
+                    {
+                        Logger?.Warning($"Timer {_timerName} CCR2 updated while timer is running. This may cause unexpected behavior. " +
+                                       "Stop timer (MC=0) before updating compare values.");
+                    }
                     _captureCompareUnits[2].CaptureCompareValue = register.ReadWord();
                 }
 
@@ -409,6 +445,84 @@ public class TimerA : PeripheralBase
         unit.OutputValue = (value & TAxCCTLn_OUT) != 0;
 
         Logger?.Debug($"Timer {_timerName} CCR{unitNumber} control updated: Mode={unit.Mode}, OutputMode={unit.OutputMode}");
+
+        // Handle COV bit clearing on write
+        if ((value & TAxCCTLn_COV) == 0 && unit.CaptureOverflow)
+        {
+            unit.ClearCaptureOverflow();
+            Logger?.Debug($"Timer {_timerName} CCR{unitNumber} COV flag cleared");
+        }
+    }
+
+    /// <inheritdoc />
+    public override ushort ReadWord(ushort address)
+    {
+        ushort offset = (ushort)(address - BaseAddress);
+
+        // Handle dynamic register values that need to be built from current state
+        switch (offset)
+        {
+            case OffsetTAxR:
+                // Update timer register with current value
+                GetRegister(address)?.WriteWord(_timerValue);
+                break;
+
+            case OffsetTAxCCTL0:
+            case OffsetTAxCCTL1:
+            case OffsetTAxCCTL2:
+                // Update control register with current unit state including COV
+                int unitIndex = (offset - OffsetTAxCCTL0) / 2;
+                if (unitIndex < _captureCompareUnits.Length)
+                {
+                    ushort controlValue = BuildCaptureCompareControlValue(unitIndex);
+                    GetRegister(address)?.WriteWord(controlValue);
+                }
+                break;
+        }
+
+        return base.ReadWord(address);
+    }
+
+    /// <summary>
+    /// Builds the current control register value for a capture/compare unit.
+    /// </summary>
+    /// <param name="unitNumber">The unit number.</param>
+    /// <returns>The control register value with current flags.</returns>
+    private ushort BuildCaptureCompareControlValue(int unitNumber)
+    {
+        CaptureCompareUnit unit = _captureCompareUnits[unitNumber];
+        ushort value = 0;
+
+        // Build control value from current unit state
+        if (unit.InterruptFlag)
+        {
+            value |= TAxCCTLn_CCIFG;
+        }
+
+        if (unit.CaptureOverflow)
+        {
+            value |= TAxCCTLn_COV;
+        }
+
+        if (unit.OutputValue)
+        {
+            value |= TAxCCTLn_OUT;
+        }
+
+        if (unit.InterruptEnable)
+        {
+            value |= TAxCCTLn_CCIE;
+        }
+
+        value |= (ushort)((ushort)unit.OutputMode << 5);
+        if (unit.Mode == CaptureCompareMode.Capture)
+        {
+            value |= TAxCCTLn_CAP;
+        }
+
+        value |= (ushort)((ushort)unit.CaptureInput << 12);
+
+        return value;
     }
 
     /// <summary>
@@ -470,12 +584,16 @@ public class TimerA : PeripheralBase
 
     /// <summary>
     /// Handles timer tick in up/down mode.
+    /// According to SLAU445I Section 13.2.3.4: 
+    /// - TAxCCR0 CCIFG is set when timer counts from TAxCCR0-1 to TAxCCR0
+    /// - TAIFG is set when timer completes counting down from 0001h to 0000h
     /// </summary>
     /// <param name="rollover">Returns true if a rollover occurred.</param>
     private void TickUpDownMode(out bool rollover)
     {
         rollover = false;
         ushort period = _captureCompareUnits[0].CaptureCompareValue;
+        _lastTimerValue = _timerValue;
 
         if (period == 0)
         {
@@ -485,17 +603,26 @@ public class TimerA : PeripheralBase
 
         if (_isCountingUp)
         {
-            // According to SLAU445I Section 13.2.3: Timer counts up to TAxCCR0 then down
+            // Timer counts up to TAxCCR0 then down
             if (_timerValue == period)
             {
                 _isCountingUp = false;
-                rollover = true;
                 // Don't increment on the turn-around point, start counting down
                 _timerValue--;
             }
             else
             {
                 _timerValue++;
+
+                // Check for TAxCCR0 CCIFG: set when counting from CCR0-1 to CCR0
+                if (_lastTimerValue == (period - 1) && _timerValue == period)
+                {
+                    _captureCompareUnits[0].InterruptFlag = true;
+                    if (_captureCompareUnits[0].InterruptEnable)
+                    {
+                        OnCaptureCompareInterrupt(_captureCompareUnits[0], new CaptureCompareInterruptEventArgs(0));
+                    }
+                }
             }
         }
         else
@@ -504,6 +631,17 @@ public class TimerA : PeripheralBase
             {
                 _isCountingUp = true;
                 rollover = true;
+
+                // TAIFG is set when counting down from 0001h to 0000h
+                if (_lastTimerValue == 1 && _timerValue == 0)
+                {
+                    _interruptFlag = true;
+                    if (_interruptEnable)
+                    {
+                        OnInterruptRequested(_interruptVector, $"{_timerName}_TAIFG", 1);
+                    }
+                }
+
                 // Don't decrement below 0, start counting up
                 _timerValue++;
             }

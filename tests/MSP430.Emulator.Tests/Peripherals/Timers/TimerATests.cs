@@ -162,6 +162,41 @@ public class TimerATests
         }
 
         [Fact]
+        public void CaptureCompareUnit_MultipleCaptures_SetsCOVFlag()
+        {
+            _timer.CaptureCompareUnits[1].Mode = CaptureCompareMode.Capture;
+
+            // First capture
+            SetTimerValue(0x1000);
+            _timer.TriggerCaptureEvent(1);
+            Assert.False(_timer.CaptureCompareUnits[1].CaptureOverflow);
+
+            // Second capture before reading first value - should set COV
+            SetTimerValue(0x2000);
+            _timer.TriggerCaptureEvent(1);
+            Assert.True(_timer.CaptureCompareUnits[1].CaptureOverflow);
+        }
+
+        [Fact]
+        public void CaptureCompareUnit_ReadAfterCapture_ClearsCOVLogic()
+        {
+            _timer.CaptureCompareUnits[1].Mode = CaptureCompareMode.Capture;
+
+            // First capture
+            SetTimerValue(0x1000);
+            _timer.TriggerCaptureEvent(1);
+
+            // Read the captured value
+            ushort capturedValue = _timer.CaptureCompareUnits[1].CaptureCompareValue;
+            Assert.Equal(0x1000, capturedValue);
+
+            // Second capture after reading - should NOT set COV
+            SetTimerValue(0x2000);
+            _timer.TriggerCaptureEvent(1);
+            Assert.False(_timer.CaptureCompareUnits[1].CaptureOverflow);
+        }
+
+        [Fact]
         public void ClearInterruptFlag_WhenSet_ClearsFlag()
         {
             _timer.CaptureCompareUnits[0].InterruptFlag = true;
@@ -246,6 +281,68 @@ public class TimerATests
             double dutyCycle = _timer.GetPwmDutyCycle(1);
 
             Assert.Equal(0.0, dutyCycle);
+        }
+
+        [Fact]
+        public void OutputMode_SetReset_BehavesCorrectly()
+        {
+            // Test output mode 3 (Set/Reset): Set on EQUn, reset on EQU0
+            _timer.CaptureCompareUnits[0].CaptureCompareValue = 10; // Period
+            _timer.CaptureCompareUnits[1].CaptureCompareValue = 5;  // Compare value
+            _timer.CaptureCompareUnits[1].Mode = CaptureCompareMode.Compare;
+            _timer.CaptureCompareUnits[1].OutputMode = OutputMode.SetReset;
+
+            SetTimerMode(TimerMode.Up);
+
+            // Initially false
+            Assert.False(_timer.CaptureCompareUnits[1].OutputValue);
+
+            // Step timer to compare value (5)
+            for (int i = 0; i < 5; i++)
+            {
+                _timer.Tick();
+            }
+            Assert.Equal(5, _timer.TimerValue);
+            Assert.True(_timer.CaptureCompareUnits[1].OutputValue); // Should be set on EQU1
+
+            // Step timer to period value (10) 
+            for (int i = 0; i < 5; i++)
+            {
+                _timer.Tick();
+            }
+            Assert.Equal(10, _timer.TimerValue);
+            Assert.False(_timer.CaptureCompareUnits[1].OutputValue); // Should be reset on EQU0
+        }
+
+        [Fact]
+        public void OutputMode_ToggleReset_BehavesCorrectly()
+        {
+            // Test output mode 2 (Toggle/Reset): Toggle on EQUn, reset on EQU0
+            _timer.CaptureCompareUnits[0].CaptureCompareValue = 10; // Period
+            _timer.CaptureCompareUnits[1].CaptureCompareValue = 5;  // Compare value
+            _timer.CaptureCompareUnits[1].Mode = CaptureCompareMode.Compare;
+            _timer.CaptureCompareUnits[1].OutputMode = OutputMode.ToggleReset;
+
+            SetTimerMode(TimerMode.Up);
+
+            // Initially false
+            Assert.False(_timer.CaptureCompareUnits[1].OutputValue);
+
+            // Step timer to compare value (5)
+            for (int i = 0; i < 5; i++)
+            {
+                _timer.Tick();
+            }
+            Assert.Equal(5, _timer.TimerValue);
+            Assert.True(_timer.CaptureCompareUnits[1].OutputValue); // Should toggle to true on EQU1
+
+            // Step timer to period value (10)
+            for (int i = 0; i < 5; i++)
+            {
+                _timer.Tick();
+            }
+            Assert.Equal(10, _timer.TimerValue);
+            Assert.False(_timer.CaptureCompareUnits[1].OutputValue); // Should be reset on EQU0
         }
     }
 

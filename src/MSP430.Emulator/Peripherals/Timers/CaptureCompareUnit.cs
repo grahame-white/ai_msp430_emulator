@@ -144,6 +144,8 @@ public class CaptureCompareUnit
     private bool _outputValue;
     private bool _interruptEnable;
     private bool _interruptFlag;
+    private bool _captureOverflow;
+    private bool _lastCaptureRead;
 
     /// <summary>
     /// Initializes a new instance of the CaptureCompareUnit class.
@@ -165,7 +167,15 @@ public class CaptureCompareUnit
     /// </summary>
     public ushort CaptureCompareValue
     {
-        get => _captureCompareValue;
+        get
+        {
+            // Mark that the capture value has been read (for COV logic)
+            if (_mode == CaptureCompareMode.Capture)
+            {
+                _lastCaptureRead = true;
+            }
+            return _captureCompareValue;
+        }
         set => _captureCompareValue = value;
     }
 
@@ -224,6 +234,20 @@ public class CaptureCompareUnit
     }
 
     /// <summary>
+    /// Gets or sets the capture overflow flag (COV).
+    /// Set when a second capture is performed before the first capture value was read.
+    /// Must be cleared by software.
+    /// 
+    /// MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 13.2.4.1:
+    /// "Capture Mode" - Figure 13-11
+    /// </summary>
+    public bool CaptureOverflow
+    {
+        get => _captureOverflow;
+        set => _captureOverflow = value;
+    }
+
+    /// <summary>
     /// Event raised when an interrupt condition occurs.
     /// </summary>
     public event EventHandler<CaptureCompareInterruptEventArgs>? InterruptRequested;
@@ -232,23 +256,23 @@ public class CaptureCompareUnit
     /// Handles a timer count update in compare mode.
     /// </summary>
     /// <param name="timerValue">The current timer value.</param>
-    /// <param name="isRollover">True if this is a timer rollover event.</param>
-    public void HandleCompareEvent(ushort timerValue, bool isRollover = false)
+    /// <param name="isEqu0Event">True if this is an EQU0 event (timer equals TAxCCR0).</param>
+    public void HandleCompareEvent(ushort timerValue, bool isEqu0Event = false)
     {
         if (_mode != CaptureCompareMode.Compare)
         {
             return;
         }
 
-        bool compareMatch = timerValue == _captureCompareValue;
+        bool isEqunEvent = timerValue == _captureCompareValue;
 
-        if (compareMatch || isRollover)
+        if (isEqunEvent || isEqu0Event)
         {
-            UpdateOutput(compareMatch, isRollover);
+            UpdateOutput(isEqunEvent, isEqu0Event);
 
-            if (compareMatch)
+            if (isEqunEvent)
             {
-                // Set interrupt flag
+                // Set interrupt flag only on EQUn events (not EQU0)
                 _interruptFlag = true;
 
                 // Raise interrupt if enabled
@@ -271,8 +295,16 @@ public class CaptureCompareUnit
             return;
         }
 
+        // Check for capture overflow according to SLAU445I Section 13.2.4.1 Figure 13-11
+        // COV is set if a second capture occurs before the first capture was read
+        if (_interruptFlag && !_lastCaptureRead)
+        {
+            _captureOverflow = true;
+        }
+
         // Capture the timer value
         _captureCompareValue = timerValue;
+        _lastCaptureRead = false;
 
         // Set interrupt flag
         _interruptFlag = true;
@@ -293,6 +325,15 @@ public class CaptureCompareUnit
     }
 
     /// <summary>
+    /// Clears the capture overflow flag.
+    /// Must be called by software to clear COV bit.
+    /// </summary>
+    public void ClearCaptureOverflow()
+    {
+        _captureOverflow = false;
+    }
+
+    /// <summary>
     /// Resets the capture/compare unit to its default state.
     /// </summary>
     public void Reset()
@@ -304,95 +345,96 @@ public class CaptureCompareUnit
         _outputValue = false;
         _interruptEnable = false;
         _interruptFlag = false;
+        _captureOverflow = false;
+        _lastCaptureRead = true;
     }
 
     /// <summary>
     /// Updates the output signal based on the output mode and event type.
+    /// 
+    /// MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 13.2.5.1:
+    /// Table 13-2: Output Modes
     /// </summary>
-    /// <param name="compareMatch">True if this is a compare match event.</param>
-    /// <param name="isRollover">True if this is a timer rollover event.</param>
-    private void UpdateOutput(bool compareMatch, bool isRollover)
+    /// <param name="isEqunEvent">True if this is an EQUn event (timer equals TAxCCRn).</param>
+    /// <param name="isEqu0Event">True if this is an EQU0 event (timer equals TAxCCR0).</param>
+    private void UpdateOutput(bool isEqunEvent, bool isEqu0Event)
     {
         switch (_outputMode)
         {
             case OutputMode.Output:
-                // Output is controlled by the OUT bit
+                // Mode 0: Output is controlled by the OUT bit - no automatic changes
                 break;
 
             case OutputMode.Set:
-                if (compareMatch)
+                // Mode 1: Set on EQUn, remains set until reset or mode change
+                if (isEqunEvent)
                 {
                     _outputValue = true;
                 }
-
-                if (isRollover)
-                {
-                    _outputValue = false;
-                }
-
                 break;
 
             case OutputMode.ToggleReset:
-                if (compareMatch)
+                // Mode 2: Toggle on EQUn, reset on EQU0
+                if (isEqunEvent)
                 {
                     _outputValue = !_outputValue;
                 }
-
-                if (isRollover)
+                if (isEqu0Event)
                 {
                     _outputValue = false;
                 }
-
                 break;
 
             case OutputMode.SetReset:
-                if (compareMatch)
+                // Mode 3: Set on EQUn, reset on EQU0
+                if (isEqunEvent)
                 {
                     _outputValue = true;
                 }
-                // Reset happens at period (handled by unit 0)
+                if (isEqu0Event)
+                {
+                    _outputValue = false;
+                }
                 break;
 
             case OutputMode.Toggle:
-                if (compareMatch)
+                // Mode 4: Toggle on EQUn - output period is double timer period
+                if (isEqunEvent)
                 {
                     _outputValue = !_outputValue;
                 }
-
                 break;
 
             case OutputMode.Reset:
-                if (compareMatch)
+                // Mode 5: Reset on EQUn, remains reset until mode change
+                if (isEqunEvent)
                 {
                     _outputValue = false;
                 }
-
-                if (isRollover)
-                {
-                    _outputValue = true;
-                }
-
                 break;
 
             case OutputMode.ToggleSet:
-                if (compareMatch)
+                // Mode 6: Toggle on EQUn, set on EQU0
+                if (isEqunEvent)
                 {
                     _outputValue = !_outputValue;
                 }
-
-                if (isRollover)
+                if (isEqu0Event)
                 {
                     _outputValue = true;
                 }
-
                 break;
 
             case OutputMode.ResetSet:
-                if (compareMatch)
+                // Mode 7: Reset on EQUn, set on EQU0
+                if (isEqunEvent)
                 {
                     _outputValue = false;
                 }
-                // Set happens at period (handled by unit 0)
+                if (isEqu0Event)
+                {
+                    _outputValue = true;
+                }
                 break;
         }
     }

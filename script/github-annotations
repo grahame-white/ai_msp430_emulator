@@ -6,7 +6,7 @@
 
 # Check if running in GitHub Actions
 is_github_actions() {
-    [ -n "${GITHUB_ACTIONS}" ]
+    [ -n "${GITHUB_ACTIONS:-}" ]
 }
 
 # Generate GitHub Actions annotation
@@ -139,17 +139,22 @@ run_with_annotations() {
     local processor_function="$2"
     local error_message="${3:-Command failed}"
     
-    local temp_output
-    temp_output=$(mktemp)
+    local temp_output=$(mktemp)
+    
+    # Set up cleanup trap to ensure temp file is always removed when function returns
+    trap 'rm -f "$temp_output"' RETURN
     
     if ! eval "$command" > "$temp_output" 2>&1; then
-        "$processor_function" "$temp_output"
-        cat "$temp_output"
-        rm -f "$temp_output"
+        if is_github_actions; then
+            # In GitHub Actions: process annotations, but don't output raw content to avoid duplication
+            "$processor_function" "$temp_output"
+        else
+            # Outside GitHub Actions: output raw content for human readability
+            cat "$temp_output"
+        fi
         echo "$error_message" >&2
         return 1
     fi
     
-    rm -f "$temp_output"
     return 0
 }

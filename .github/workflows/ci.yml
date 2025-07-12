@@ -6,6 +6,7 @@ name: CI/CD Pipeline
     branches: [main]
   pull_request:
     branches: [main]
+  merge_group: {}
 
 jobs:
   build-and-test:

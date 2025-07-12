@@ -24,7 +24,7 @@
     "@octokit/rest": "^22.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.29.0",
+    "@eslint/js": "^9.31.0",
     "eslint": "^9.29.0",
     "node-actionlint": "^1.2.2",
     "prettier": "^3.2.5",

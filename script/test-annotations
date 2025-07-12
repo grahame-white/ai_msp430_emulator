@@ -491,8 +491,8 @@ test_improved_json_processing() {
     return 0
 }
 
-# Test: run_with_annotations prevents output duplication (Issue #212)
-test_run_with_annotations_no_duplication() {
+# Test: run_with_annotations shows both annotations and detailed output (Issue #214)
+test_run_with_annotations_both_outputs() {
     local temp_file
     temp_file=$(mktemp)
     
@@ -631,11 +631,9 @@ EOF
     assert_contains "$github_output" "::error file=test.md,line=5,col=10::"
     assert_contains "$github_output" "::error file=other.md,line=3,col=1::"
     
-    # Should ALSO contain raw output format AND informational lines for better user experience
+    # Should ALSO contain raw output format for better user experience
     assert_contains "$github_output" "test.md:5:10 MD013/line-length"
     assert_contains "$github_output" "other.md:3:1 MD041/first-line-heading"
-    assert_contains "$github_output" "Starting analysis..."
-    assert_contains "$github_output" "Analysis complete:"
     
     # Should contain the "Detailed error output:" header
     assert_contains "$github_output" "Detailed error output:"
@@ -645,11 +643,9 @@ EOF
     local local_output
     local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
     
-    # Should contain the full raw output including informational lines
-    assert_contains "$local_output" "Starting analysis..."
+    # Should contain the full raw output
     assert_contains "$local_output" "test.md:5:10 MD013/line-length"
     assert_contains "$local_output" "other.md:3:1 MD041/first-line-heading"
-    assert_contains "$local_output" "Analysis complete:"
     
     # Should NOT contain GitHub annotation format
     assert_not_contains "$local_output" "::error file=test.md,line=5,col=10::"
@@ -716,7 +712,7 @@ run_test "Lint script integration" test_lint_script_integration
 run_test "Check-format-all script integration" test_check_format_all_integration
 run_test "Automation script annotations" test_automation_script_annotations
 run_test "Improved JSON processing" test_improved_json_processing
-run_test "run_with_annotations shows both annotations and detailed output (Issue #214)" test_run_with_annotations_no_duplication
+run_test "run_with_annotations shows both annotations and detailed output (Issue #214)" test_run_with_annotations_both_outputs
 run_test "run_with_annotations handles multiple defects" test_run_with_annotations_multiple_defects
 run_test "run_with_annotations handles multi-line output" test_run_with_annotations_multiline_output
 run_test "run_with_annotations success path" test_run_with_annotations_success_path

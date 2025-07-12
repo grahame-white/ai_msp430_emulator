@@ -491,6 +491,219 @@ test_improved_json_processing() {
     return 0
 }
 
+# Test: run_with_annotations prevents output duplication (Issue #212)
+test_run_with_annotations_no_duplication() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Create sample output that would cause duplicated annotations
+    cat > "$temp_file" << 'EOF'
+test.md:5:10 MD013/line-length Line length issue
+EOF
+    
+    # Define a test command that outputs the file content and returns failure
+    test_command() {
+        cat "$temp_file"
+        return 1
+    }
+    
+    # Test in GitHub Actions environment - should only get annotation format
+    export GITHUB_ACTIONS="true"
+    local github_output
+    github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
+    
+    # Should contain GitHub annotation format
+    assert_contains "$github_output" "::error file=test.md,line=5,col=10::"
+    
+    # Should NOT contain raw output when in GitHub Actions mode
+    assert_not_contains "$github_output" "test.md:5:10 MD013/line-length"
+    
+    # Test in non-GitHub Actions environment - should only get raw format
+    unset GITHUB_ACTIONS
+    local local_output
+    local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
+    
+    # Should contain raw output format
+    assert_contains "$local_output" "test.md:5:10 MD013/line-length"
+    
+    # Should NOT contain GitHub annotation format when not in GitHub Actions
+    assert_not_contains "$local_output" "::error file=test.md,line=5,col=10::"
+    
+    # Verify we don't have both outputs in either case (preventing duplication)
+    local github_line_count
+    github_line_count=$(echo "$github_output" | grep -c "test.md" || echo "0")
+    assert_equals "1" "$github_line_count" "Should have exactly one line mentioning test.md in GitHub Actions mode"
+    
+    local local_line_count
+    local_line_count=$(echo "$local_output" | grep -c "test.md" || echo "0")
+    assert_equals "1" "$local_line_count" "Should have exactly one line mentioning test.md in local mode"
+    
+    # Clean up
+    rm -f "$temp_file"
+    return 0
+}
+
+# Test: run_with_annotations handles multiple defects without duplication
+test_run_with_annotations_multiple_defects() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Create sample output with multiple defects on different lines
+    cat > "$temp_file" << 'EOF'
+test.md:5:10 MD013/line-length Line too long
+test.md:8:1 MD022/blanks-around-headings Headings should be surrounded by blank lines
+test.md:12:15 MD009/no-trailing-spaces Trailing spaces
+EOF
+    
+    # Define a test command that outputs the file content and returns failure
+    test_command() {
+        cat "$temp_file"
+        return 1
+    }
+    
+    # Test in GitHub Actions environment - should only get annotation format
+    export GITHUB_ACTIONS="true"
+    local github_output
+    github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
+    
+    # Should contain GitHub annotation format for all defects
+    assert_contains "$github_output" "::error file=test.md,line=5,col=10::"
+    assert_contains "$github_output" "::error file=test.md,line=8,col=1::"
+    assert_contains "$github_output" "::error file=test.md,line=12,col=15::"
+    
+    # Should NOT contain raw output when in GitHub Actions mode
+    assert_not_contains "$github_output" "test.md:5:10 MD013/line-length"
+    assert_not_contains "$github_output" "test.md:8:1 MD022/blanks-around-headings"
+    assert_not_contains "$github_output" "test.md:12:15 MD009/no-trailing-spaces"
+    
+    # Test in non-GitHub Actions environment - should only get raw format
+    unset GITHUB_ACTIONS
+    local local_output
+    local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
+    
+    # Should contain raw output format for all defects
+    assert_contains "$local_output" "test.md:5:10 MD013/line-length"
+    assert_contains "$local_output" "test.md:8:1 MD022/blanks-around-headings"
+    assert_contains "$local_output" "test.md:12:15 MD009/no-trailing-spaces"
+    
+    # Should NOT contain GitHub annotation format when not in GitHub Actions
+    assert_not_contains "$local_output" "::error file=test.md,line=5,col=10::"
+    assert_not_contains "$local_output" "::error file=test.md,line=8,col=1::"
+    assert_not_contains "$local_output" "::error file=test.md,line=12,col=15::"
+    
+    # Verify exactly 3 lines with test.md in each case (no duplication)
+    local github_line_count
+    github_line_count=$(echo "$github_output" | grep -c "test.md" || echo "0")
+    assert_equals "3" "$github_line_count" "Should have exactly three lines mentioning test.md in GitHub Actions mode"
+    
+    local local_line_count
+    local_line_count=$(echo "$local_output" | grep -c "test.md" || echo "0")
+    assert_equals "3" "$local_line_count" "Should have exactly three lines mentioning test.md in local mode"
+    
+    # Clean up
+    rm -f "$temp_file"
+    return 0
+}
+
+# Test: run_with_annotations handles multi-line command output without duplication
+test_run_with_annotations_multiline_output() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Create sample output with mixed content (defects and informational lines)
+    cat > "$temp_file" << 'EOF'
+Starting analysis...
+Checking file: test.md
+test.md:5:10 MD013/line-length Line too long
+Found 1 issue in test.md
+Checking file: other.md
+other.md:3:1 MD041/first-line-heading First line in file should be a top level heading
+Found 1 issue in other.md
+Analysis complete: 2 issues found
+EOF
+    
+    # Define a test command that outputs the file content and returns failure
+    test_command() {
+        cat "$temp_file"
+        return 1
+    }
+    
+    # Test in GitHub Actions environment
+    export GITHUB_ACTIONS="true"
+    local github_output
+    github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
+    
+    # Should contain GitHub annotation format only for actual defects
+    assert_contains "$github_output" "::error file=test.md,line=5,col=10::"
+    assert_contains "$github_output" "::error file=other.md,line=3,col=1::"
+    
+    # Should NOT contain raw output format
+    assert_not_contains "$github_output" "test.md:5:10 MD013/line-length"
+    assert_not_contains "$github_output" "other.md:3:1 MD041/first-line-heading"
+    
+    # Should NOT contain informational lines that don't match defect pattern
+    assert_not_contains "$github_output" "Starting analysis..."
+    assert_not_contains "$github_output" "Analysis complete:"
+    
+    # Test in non-GitHub Actions environment
+    unset GITHUB_ACTIONS
+    local local_output
+    local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
+    
+    # Should contain the full raw output including informational lines
+    assert_contains "$local_output" "Starting analysis..."
+    assert_contains "$local_output" "test.md:5:10 MD013/line-length"
+    assert_contains "$local_output" "other.md:3:1 MD041/first-line-heading"
+    assert_contains "$local_output" "Analysis complete:"
+    
+    # Should NOT contain GitHub annotation format
+    assert_not_contains "$local_output" "::error file=test.md,line=5,col=10::"
+    assert_not_contains "$local_output" "::error file=other.md,line=3,col=1::"
+    
+    # Verify exactly 2 defect lines in GitHub Actions mode (filtered)
+    local github_defect_count
+    github_defect_count=$(echo "$github_output" | grep -c "::error.*file=" || echo "0")
+    assert_equals "2" "$github_defect_count" "Should have exactly two annotation lines in GitHub Actions mode"
+    
+    # Clean up
+    rm -f "$temp_file"
+    return 0
+}
+
+# Test: run_with_annotations success path produces no output
+test_run_with_annotations_success_path() {
+    # Define a test command that succeeds and produces no output
+    test_command() {
+        return 0
+    }
+    
+    # Test in GitHub Actions environment - should produce no output and return 0
+    export GITHUB_ACTIONS="true"
+    local github_output
+    github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1)
+    local github_exit_code=$?
+    
+    # Should return 0 for success
+    assert_equals "0" "$github_exit_code" "Should return 0 when command succeeds in GitHub Actions mode"
+    
+    # Should produce no output when there are no defects
+    assert_equals "" "$github_output" "Should produce no output when command succeeds in GitHub Actions mode"
+    
+    # Test in non-GitHub Actions environment - should also produce no output and return 0
+    unset GITHUB_ACTIONS
+    local local_output
+    local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1)
+    local local_exit_code=$?
+    
+    # Should return 0 for success
+    assert_equals "0" "$local_exit_code" "Should return 0 when command succeeds in local mode"
+    
+    # Should produce no output when there are no defects
+    assert_equals "" "$local_output" "Should produce no output when command succeeds in local mode"
+    
+    return 0
+}
+
 # Run all tests
 echo "🧪 Running GitHub Actions Annotation Tests"
 echo "=========================================="
@@ -510,6 +723,10 @@ run_test "Lint script integration" test_lint_script_integration
 run_test "Check-format-all script integration" test_check_format_all_integration
 run_test "Automation script annotations" test_automation_script_annotations
 run_test "Improved JSON processing" test_improved_json_processing
+run_test "run_with_annotations prevents duplication (Issue #212)" test_run_with_annotations_no_duplication
+run_test "run_with_annotations handles multiple defects" test_run_with_annotations_multiple_defects
+run_test "run_with_annotations handles multi-line output" test_run_with_annotations_multiline_output
+run_test "run_with_annotations success path" test_run_with_annotations_success_path
 
 # Summary
 echo "=========================================="

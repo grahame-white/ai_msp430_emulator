@@ -146,8 +146,11 @@ run_with_annotations() {
     
     if ! eval "$command" > "$temp_output" 2>&1; then
         if is_github_actions; then
-            # In GitHub Actions: process annotations, but don't output raw content to avoid duplication
+            # In GitHub Actions: process annotations first for structured output
             "$processor_function" "$temp_output"
+            # Always show the raw error output so users can see what needs fixing
+            echo "Detailed error output:" >&2
+            cat "$temp_output" >&2
         else
             # Outside GitHub Actions: output raw content for human readability
             cat "$temp_output"

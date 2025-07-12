@@ -6,7 +6,7 @@
 
 # Check if running in GitHub Actions
 is_github_actions() {
-    [ -n "${GITHUB_ACTIONS}" ]
+    [ -n "${GITHUB_ACTIONS:-}" ]
 }
 
 # Generate GitHub Actions annotation
@@ -143,8 +143,13 @@ run_with_annotations() {
     temp_output=$(mktemp)
     
     if ! eval "$command" > "$temp_output" 2>&1; then
-        "$processor_function" "$temp_output"
-        cat "$temp_output"
+        if is_github_actions; then
+            # In GitHub Actions: process annotations, but don't output raw content to avoid duplication
+            "$processor_function" "$temp_output"
+        else
+            # Outside GitHub Actions: output raw content for human readability
+            cat "$temp_output"
+        fi
         rm -f "$temp_output"
         echo "$error_message" >&2
         return 1

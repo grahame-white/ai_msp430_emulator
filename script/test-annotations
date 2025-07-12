@@ -491,6 +491,58 @@ test_improved_json_processing() {
     return 0
 }
 
+# Test: run_with_annotations prevents output duplication (Issue #212)
+test_run_with_annotations_no_duplication() {
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Create sample output that would cause duplicated annotations
+    cat > "$temp_file" << 'EOF'
+test.md:5:10 MD013/line-length Line length issue
+EOF
+    
+    # Define a test command that outputs the file content and returns failure
+    test_command() {
+        cat "$temp_file"
+        return 1
+    }
+    
+    # Test in GitHub Actions environment - should only get annotation format
+    export GITHUB_ACTIONS="true"
+    local github_output
+    github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
+    
+    # Should contain GitHub annotation format
+    assert_contains "$github_output" "::error file=test.md,line=5,col=10::"
+    
+    # Should NOT contain raw output when in GitHub Actions mode
+    assert_not_contains "$github_output" "test.md:5:10 MD013/line-length"
+    
+    # Test in non-GitHub Actions environment - should only get raw format
+    unset GITHUB_ACTIONS
+    local local_output
+    local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1 || true)
+    
+    # Should contain raw output format
+    assert_contains "$local_output" "test.md:5:10 MD013/line-length"
+    
+    # Should NOT contain GitHub annotation format when not in GitHub Actions
+    assert_not_contains "$local_output" "::error file=test.md,line=5,col=10::"
+    
+    # Verify we don't have both outputs in either case (preventing duplication)
+    local github_line_count
+    github_line_count=$(echo "$github_output" | grep -c "test.md" || echo "0")
+    assert_equals "1" "$github_line_count" "Should have exactly one line mentioning test.md in GitHub Actions mode"
+    
+    local local_line_count
+    local_line_count=$(echo "$local_output" | grep -c "test.md" || echo "0")
+    assert_equals "1" "$local_line_count" "Should have exactly one line mentioning test.md in local mode"
+    
+    # Clean up
+    rm -f "$temp_file"
+    return 0
+}
+
 # Run all tests
 echo "🧪 Running GitHub Actions Annotation Tests"
 echo "=========================================="
@@ -510,6 +562,7 @@ run_test "Lint script integration" test_lint_script_integration
 run_test "Check-format-all script integration" test_check_format_all_integration
 run_test "Automation script annotations" test_automation_script_annotations
 run_test "Improved JSON processing" test_improved_json_processing
+run_test "run_with_annotations prevents duplication (Issue #212)" test_run_with_annotations_no_duplication
 
 # Summary
 echo "=========================================="

@@ -141,8 +141,8 @@ run_with_annotations() {
     
     local temp_output=$(mktemp)
     
-    # Set up cleanup trap to ensure temp file is always removed
-    trap 'rm -f "$temp_output"' EXIT
+    # Set up cleanup trap to ensure temp file is always removed when function returns
+    trap 'rm -f "$temp_output"' RETURN
     
     if ! eval "$command" > "$temp_output" 2>&1; then
         if is_github_actions; then

@@ -670,6 +670,40 @@ EOF
     return 0
 }
 
+# Test: run_with_annotations success path produces no output
+test_run_with_annotations_success_path() {
+    # Define a test command that succeeds and produces no output
+    test_command() {
+        return 0
+    }
+    
+    # Test in GitHub Actions environment - should produce no output and return 0
+    export GITHUB_ACTIONS="true"
+    local github_output
+    github_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1)
+    local github_exit_code=$?
+    
+    # Should return 0 for success
+    assert_equals "0" "$github_exit_code" "Should return 0 when command succeeds in GitHub Actions mode"
+    
+    # Should produce no output when there are no defects
+    assert_equals "" "$github_output" "Should produce no output when command succeeds in GitHub Actions mode"
+    
+    # Test in non-GitHub Actions environment - should also produce no output and return 0
+    unset GITHUB_ACTIONS
+    local local_output
+    local_output=$(run_with_annotations "test_command" "process_markdownlint_annotations" "Test failed" 2>&1)
+    local local_exit_code=$?
+    
+    # Should return 0 for success
+    assert_equals "0" "$local_exit_code" "Should return 0 when command succeeds in local mode"
+    
+    # Should produce no output when there are no defects
+    assert_equals "" "$local_output" "Should produce no output when command succeeds in local mode"
+    
+    return 0
+}
+
 # Run all tests
 echo "🧪 Running GitHub Actions Annotation Tests"
 echo "=========================================="
@@ -692,6 +726,7 @@ run_test "Improved JSON processing" test_improved_json_processing
 run_test "run_with_annotations prevents duplication (Issue #212)" test_run_with_annotations_no_duplication
 run_test "run_with_annotations handles multiple defects" test_run_with_annotations_multiple_defects
 run_test "run_with_annotations handles multi-line output" test_run_with_annotations_multiline_output
+run_test "run_with_annotations success path" test_run_with_annotations_success_path
 
 # Summary
 echo "=========================================="

@@ -139,8 +139,10 @@ run_with_annotations() {
     local processor_function="$2"
     local error_message="${3:-Command failed}"
     
-    local temp_output
-    temp_output=$(mktemp)
+    local temp_output=$(mktemp)
+    
+    # Set up cleanup trap to ensure temp file is always removed
+    trap 'rm -f "$temp_output"' EXIT
     
     if ! eval "$command" > "$temp_output" 2>&1; then
         if is_github_actions; then
@@ -150,11 +152,9 @@ run_with_annotations() {
             # Outside GitHub Actions: output raw content for human readability
             cat "$temp_output"
         fi
-        rm -f "$temp_output"
         echo "$error_message" >&2
         return 1
     fi
     
-    rm -f "$temp_output"
     return 0
 }

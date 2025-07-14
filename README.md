@@ -12,6 +12,18 @@
 
 An exploration of using an AI agent to develop a high accuracy MSP430 emulator
 
+## Quick Start for Contributors
+
+### 🤖 For AI/Copilot Developers
+
+**Start here**: [AI Developer Guidelines](.github/copilot-instructions.md) - Comprehensive guidance designed
+specifically for AI agents, including required reading list and development standards.
+
+### 👥 For Human Developers
+
+**Start here**: [Contributing Guidelines](CONTRIBUTING.md) - Complete development setup, coding standards, and
+workflow for human contributors.
+
 ## Code Coverage
 
 This project enforces both line and branch coverage validation:
@@ -27,16 +39,7 @@ This project enforces both line and branch coverage validation:
 COVERAGE_THRESHOLD=85 BRANCH_COVERAGE_THRESHOLD=75 ./script/coverage
 ```
 
-## Contributing
-
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, and workflow guidelines.
-
 ## Documentation
 
 - [MSP430 Memory Architecture](docs/MSP430_MEMORY_ARCHITECTURE.md) - MSP430FR2355 memory layout and architecture details
 - [Diagnostic Reporting](docs/DiagnosticReporting.md) - Generate comprehensive diagnostic reports for GitHub issues
-
-## AI Development Guidelines
-
-For AI/Copilot developers, please see [AI Developer Guidelines](.github/copilot-instructions.md) for
-comprehensive guidance on code standards, workflow, and best practices.

@@ -8,6 +8,13 @@ cd "$(dirname "$0")/.."
 
 echo "==> Starting MSP430 Emulator..."
 
+# Update application to ensure it's current (per Scripts to Rule Them All pattern)
+# Skip update in CI environments where the build has already ensured dependencies are current
+if [[ "${CI}" != "true" ]]; then
+  echo "==> Ensuring application is up to date..."
+  ./script/update
+fi
+
 # Check if the project is built with proper output directories
 if [ ! -d "src/MSP430.Emulator/bin/Release" ] && [ ! -d "src/MSP430.Emulator/bin/Debug" ]; then
     echo "==> Project not built, building first..."

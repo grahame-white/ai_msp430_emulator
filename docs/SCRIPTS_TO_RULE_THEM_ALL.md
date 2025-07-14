@@ -89,7 +89,7 @@ to always ensure that the application is up to date. If called from
 This script is typically only called from your CI server.
 
 You should set up any specific things for your environment here before your tests
-are run. Your test are run simply by calling [`script/test`][test].
+are run. Your tests are run simply by calling [`script/test`][test].
 
 ### script/console
 

@@ -51,7 +51,7 @@
   <rect x="220" y="140" width="120" height="60" class="clock-block"/>
   <text x="280" y="160" class="label">Clock Path</text>
   <text x="280" y="175" class="label" style="font-size: 9px;">TASSEL → ID → IDEX</text>
-  <text x="280" y="190" class="label" style="font-size: 9px;">Clock Selection & Division</text>
+  <text x="280" y="190" class="label" style="font-size: 9px;">Clock Selection &amp; Division</text>
   
   <!-- Timer Core inside Main Timer Block -->
   <rect x="360" y="140" width="120" height="60" class="clock-block"/>

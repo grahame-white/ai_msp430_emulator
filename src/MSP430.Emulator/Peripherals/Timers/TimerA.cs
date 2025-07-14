@@ -66,6 +66,8 @@ public class TimerA : PeripheralBase
     private const ushort TAxCCTLn_CCIE = 0x0010;    // Capture/Compare Interrupt Enable
     private const ushort TAxCCTLn_OUTMOD_MASK = 0x00E0; // Output Mode Mask
     private const ushort TAxCCTLn_CAP = 0x0100;     // Capture Mode
+    private const ushort TAxCCTLn_SCCI = 0x0400;    // Synchronized Capture/Compare Input
+    private const ushort TAxCCTLn_SCS = 0x0800;     // Synchronize Capture Source
     private const ushort TAxCCTLn_CCIS_MASK = 0x3000; // Capture/Compare Input Select Mask
     private const ushort TAxCCTLn_CM_MASK = 0xC000; // Capture Mode Mask
 
@@ -395,6 +397,8 @@ public class TimerA : PeripheralBase
         if ((value & TAxCTL_TACLR) != 0)
         {
             _timerValue = 0x0000;
+            // According to SLAU445I Section 13.2.3.4: "The TACLR bit also clears the direction"
+            _isCountingUp = true;
             // Clear bit is automatically cleared after operation
             PeripheralRegister? ctlRegister = GetRegister((ushort)(BaseAddress + OffsetTAxCTL));
             ctlRegister?.WriteWord((ushort)(value & ~TAxCTL_TACLR));
@@ -438,13 +442,29 @@ public class TimerA : PeripheralBase
         int captureInputField = (value & TAxCCTLn_CCIS_MASK) >> 12;
         unit.CaptureInput = (CaptureInputSelect)captureInputField;
 
+        // Update capture edge mode (for capture mode)
+        int captureEdgeField = (value & TAxCCTLn_CM_MASK) >> 14;
+        unit.CaptureEdgeMode = (CaptureEdgeMode)captureEdgeField;
+
+        // Update synchronize capture source
+        unit.SynchronizeCaptureSource = (value & TAxCCTLn_SCS) != 0;
+
         // Update interrupt enable
         unit.InterruptEnable = (value & TAxCCTLn_CCIE) != 0;
 
         // Update output value
         unit.OutputValue = (value & TAxCCTLn_OUT) != 0;
 
-        Logger?.Debug($"Timer {_timerName} CCR{unitNumber} control updated: Mode={unit.Mode}, OutputMode={unit.OutputMode}");
+        // Handle software-initiated capture per SLAU445I Section 13.2.4.1.1
+        // When CCIS is set to VCC/GND and toggled, it can trigger a capture
+        if (unit.Mode == CaptureCompareMode.Capture &&
+            (unit.CaptureInput == CaptureInputSelect.VCC || unit.CaptureInput == CaptureInputSelect.GND))
+        {
+            // Check if this is a transition that should trigger a capture
+            CheckSoftwareCaptureTransition(unit);
+        }
+
+        Logger?.Debug($"Timer {_timerName} CCR{unitNumber} control updated: Mode={unit.Mode}, OutputMode={unit.OutputMode}, CaptureEdge={unit.CaptureEdgeMode}");
 
         // Handle COV bit clearing on write
         if ((value & TAxCCTLn_COV) == 0 && unit.CaptureOverflow)
@@ -509,18 +529,35 @@ public class TimerA : PeripheralBase
             value |= TAxCCTLn_OUT;
         }
 
+        if (unit.CaptureCompareInput)
+        {
+            value |= TAxCCTLn_CCI;
+        }
+
         if (unit.InterruptEnable)
         {
             value |= TAxCCTLn_CCIE;
         }
 
         value |= (ushort)((ushort)unit.OutputMode << 5);
+
         if (unit.Mode == CaptureCompareMode.Capture)
         {
             value |= TAxCCTLn_CAP;
         }
 
+        if (unit.SynchronizedCaptureCompareInput)
+        {
+            value |= TAxCCTLn_SCCI;
+        }
+
+        if (unit.SynchronizeCaptureSource)
+        {
+            value |= TAxCCTLn_SCS;
+        }
+
         value |= (ushort)((ushort)unit.CaptureInput << 12);
+        value |= (ushort)((ushort)unit.CaptureEdgeMode << 14);
 
         return value;
     }
@@ -649,6 +686,47 @@ public class TimerA : PeripheralBase
             {
                 _timerValue--;
             }
+        }
+    }
+
+    /// <summary>
+    /// Checks for software-initiated capture transitions according to SLAU445I Section 13.2.4.1.1.
+    /// When CCIS is set to VCC or GND, toggling can trigger captures.
+    /// </summary>
+    /// <param name="unit">The capture/compare unit to check.</param>
+    private void CheckSoftwareCaptureTransition(CaptureCompareUnit unit)
+    {
+        bool newInputValue = unit.CaptureInput == CaptureInputSelect.VCC;
+        bool oldInputValue = unit.CaptureCompareInput;
+
+        // Update the current input value
+        unit.CaptureCompareInput = newInputValue;
+
+        // Check if this transition should trigger a capture based on edge mode
+        bool triggerCapture = false;
+        switch (unit.CaptureEdgeMode)
+        {
+            case CaptureEdgeMode.RisingEdge:
+                triggerCapture = !oldInputValue && newInputValue;
+                break;
+
+            case CaptureEdgeMode.FallingEdge:
+                triggerCapture = oldInputValue && !newInputValue;
+                break;
+
+            case CaptureEdgeMode.BothEdges:
+                triggerCapture = oldInputValue != newInputValue;
+                break;
+
+            default: // CaptureEdgeMode.None or other values
+                triggerCapture = false;
+                break;
+        }
+
+        if (triggerCapture)
+        {
+            unit.HandleCaptureEvent(_timerValue);
+            Logger?.Debug($"Timer {_timerName} software capture triggered on unit {unit.UnitNumber}");
         }
     }
 

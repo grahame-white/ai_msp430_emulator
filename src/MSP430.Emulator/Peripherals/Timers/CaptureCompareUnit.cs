@@ -90,6 +90,41 @@ public enum OutputMode : byte
 }
 
 /// <summary>
+/// Defines the capture edge selection for Timer_A capture/compare units in capture mode.
+/// 
+/// The capture mode selects which edge of the input signal triggers a capture event.
+/// 
+/// MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 13.2.4.1:
+/// "Capture Mode"
+/// </summary>
+public enum CaptureEdgeMode : byte
+{
+    /// <summary>
+    /// No capture.
+    /// CM = 00b in TAxCCTLn register.
+    /// </summary>
+    None = 0x00,
+
+    /// <summary>
+    /// Capture on rising edge.
+    /// CM = 01b in TAxCCTLn register.
+    /// </summary>
+    RisingEdge = 0x01,
+
+    /// <summary>
+    /// Capture on falling edge.
+    /// CM = 10b in TAxCCTLn register.
+    /// </summary>
+    FallingEdge = 0x02,
+
+    /// <summary>
+    /// Capture on both rising and falling edges.
+    /// CM = 11b in TAxCCTLn register.
+    /// </summary>
+    BothEdges = 0x03
+}
+
+/// <summary>
 /// Defines the capture input select for Timer_A capture/compare units in capture mode.
 /// 
 /// The capture input select determines which input signal triggers a capture event.
@@ -141,11 +176,15 @@ public class CaptureCompareUnit
     private CaptureCompareMode _mode;
     private OutputMode _outputMode;
     private CaptureInputSelect _captureInput;
+    private CaptureEdgeMode _captureEdgeMode;
+    private bool _synchronizeCaptureSource;
     private bool _outputValue;
     private bool _interruptEnable;
     private bool _interruptFlag;
     private bool _captureOverflow;
     private bool _lastCaptureRead;
+    private bool _captureCompareInput;
+    private bool _synchronizedCaptureCompareInput;
 
     /// <summary>
     /// Initializes a new instance of the CaptureCompareUnit class.
@@ -205,6 +244,53 @@ public class CaptureCompareUnit
         get => _captureInput;
         set => _captureInput = value;
     }
+
+    /// <summary>
+    /// Gets or sets the capture edge mode (used in capture mode).
+    /// 
+    /// MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 13.2.4.1:
+    /// "Capture Mode"
+    /// </summary>
+    public CaptureEdgeMode CaptureEdgeMode
+    {
+        get => _captureEdgeMode;
+        set => _captureEdgeMode = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether capture source is synchronized with timer clock.
+    /// Setting this bit synchronizes the capture with the next timer clock.
+    /// 
+    /// MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 13.2.4.1:
+    /// "Capture Mode"
+    /// </summary>
+    public bool SynchronizeCaptureSource
+    {
+        get => _synchronizeCaptureSource;
+        set => _synchronizeCaptureSource = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the current capture/compare input value (CCI bit).
+    /// The input signal level can be read at any time through this property.
+    /// 
+    /// MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 13.2.4.1:
+    /// "Capture Mode"
+    /// </summary>
+    public bool CaptureCompareInput
+    {
+        get => _captureCompareInput;
+        set => _captureCompareInput = value;
+    }
+
+    /// <summary>
+    /// Gets the synchronized capture/compare input value (SCCI bit).
+    /// In compare mode, the input signal CCI is latched into SCCI.
+    /// 
+    /// MSP430FR2xx FR4xx Family User's Guide (SLAU445I) - Section 13.2.4.2:
+    /// "Compare Mode"
+    /// </summary>
+    public bool SynchronizedCaptureCompareInput => _synchronizedCaptureCompareInput;
 
     /// <summary>
     /// Gets or sets the current output value.
@@ -272,6 +358,9 @@ public class CaptureCompareUnit
 
             if (isEqunEvent)
             {
+                // According to SLAU445I Section 13.2.4.2: "The input signal CCI is latched into SCCI"
+                _synchronizedCaptureCompareInput = _captureCompareInput;
+
                 // Set interrupt flag only on EQUn events (not EQU0)
                 _interruptFlag = true;
 
@@ -342,11 +431,15 @@ public class CaptureCompareUnit
         _mode = CaptureCompareMode.Compare;
         _outputMode = OutputMode.Output;
         _captureInput = CaptureInputSelect.CCIxA;
+        _captureEdgeMode = CaptureEdgeMode.None;
+        _synchronizeCaptureSource = false;
         _outputValue = false;
         _interruptEnable = false;
         _interruptFlag = false;
         _captureOverflow = false;
         _lastCaptureRead = true;
+        _captureCompareInput = false;
+        _synchronizedCaptureCompareInput = false;
     }
 
     /// <summary>

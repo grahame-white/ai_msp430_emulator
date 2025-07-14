@@ -38,6 +38,17 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Update application if not being called from script/cibuild (per Scripts to Rule Them All pattern)
+# The documentation states that script/test should call script/update in development
+# environments but not when called from CI (script/cibuild)
+if [[ "$0" != *"cibuild"* ]] && [[ "${BASH_SOURCE[1]}" != *"cibuild"* ]]; then
+  # Skip update if explicitly in CI environment to avoid redundant operations
+  if [[ "${CI}" != "true" ]]; then
+    echo "==> Ensuring application is up to date..."
+    ./script/update
+  fi
+fi
+
 if [ "$WITH_COVERAGE" = true ]; then
   echo "==> Running tests with coverage..."
   ./script/coverage

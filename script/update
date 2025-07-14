@@ -8,6 +8,10 @@ cd "$(dirname "$0")/.."
 
 echo "==> Updating MSP430 Emulator dependencies..."
 
+# Bootstrap dependencies first (per Scripts to Rule Them All pattern)
+echo "==> Bootstrapping dependencies..."
+script/bootstrap
+
 # Update NuGet packages
 echo "==> Updating NuGet packages..."
 dotnet restore --force

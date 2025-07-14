@@ -10,7 +10,7 @@
       .comparator { fill: #fce4ec; stroke: #c2185b; stroke-width: 2; }
       .flipflop { fill: #f3e5f5; stroke: #6a1b9a; stroke-width: 2; }
       .connection { stroke: #333; stroke-width: 2; fill: none; }
-      .bus { stroke: #333; stroke-width: 4; fill: none; }
+      .bus { stroke: #333; stroke-width: 3; fill: none; }
       .label { font-family: Arial, sans-serif; font-size: 11px; fill: #333; text-anchor: middle; }
       .signal-label { font-family: Arial, sans-serif; font-size: 9px; fill: #666; text-anchor: middle; }
       .connection-dot { fill: #333; }
@@ -18,8 +18,8 @@
     </style>
     
     <!-- Arrow marker definition -->
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
+      <polygon points="0 0, 6 2, 0 4" fill="#333" />
     </marker>
   </defs>
   
@@ -36,23 +36,23 @@
   <text x="40" y="145" class="signal-label">VCC</text>
   
   <!-- CCIS Multiplexor -->
-  <polygon points="90,75 150,75 160,110 150,145 90,145 100,110" class="multiplexor"/>
-  <text x="125" y="105" class="label">CCIS</text>
-  <text x="125" y="118" class="label" style="font-size: 9px;">2-bit MUX</text>
-  <text x="105" y="88" class="signal-label">00</text>
-  <text x="105" y="108" class="signal-label">01</text>
-  <text x="105" y="128" class="signal-label">10</text>
-  <text x="105" y="138" class="signal-label">11</text>
+  <polygon points="90,75 140,85 140,135 90,145 90,75" class="multiplexor"/>
+  <text x="115" y="105" class="label">CCIS</text>
+  <text x="115" y="118" class="label" style="font-size: 9px;">2-bit MUX</text>
+  <text x="95" y="88" class="signal-label">00</text>
+  <text x="95" y="108" class="signal-label">01</text>
+  <text x="95" y="128" class="signal-label">10</text>
+  <text x="95" y="138" class="signal-label">11</text>
   
   <!-- Input connections to CCIS -->
   <line x1="70" y1="85" x2="90" y2="85" class="connection" marker-end="url(#arrowhead)"/>
   <line x1="70" y1="105" x2="90" y2="105" class="connection" marker-end="url(#arrowhead)"/>
   <line x1="70" y1="125" x2="90" y2="125" class="connection" marker-end="url(#arrowhead)"/>
   <line x1="70" y1="145" x2="90" y2="135" class="connection" marker-end="url(#arrowhead)"/>
-  
+
   <!-- CCI signal output -->
-  <line x1="160" y1="110" x2="200" y2="110" class="connection"/>
-  <text x="180" y="105" class="signal-label">CCI</text>
+  <line x1="140" y1="110" x2="200" y2="110" class="connection"/>
+  <text x="170" y="105" class="signal-label">CCI</text>
   
   <!-- CCI distribution point -->
   <circle cx="200" cy="110" r="3" class="branch-point"/>
@@ -96,9 +96,9 @@
   <text x="390" y="275" class="signal-label">CLK</text>
   
   <!-- SCS (Synchronize Capture Source) -->
-  <polygon points="480,225 540,225 550,240 540,255 480,255 490,240" class="multiplexor"/>
-  <text x="515" y="240" class="label">SCS</text>
-  <text x="515" y="250" class="label" style="font-size: 8px;">Sync</text>
+  <polygon points="480,225 530,235 530,245 480,255 480,225" class="multiplexor"/>
+  <text x="505" y="240" class="label">SCS</text>
+  <text x="505" y="250" class="label" style="font-size: 8px;">Sync</text>
   
   <!-- Sync to SCS connection -->
   <line x1="440" y1="240" x2="480" y2="240" class="connection" marker-end="url(#arrowhead)"/>
@@ -107,17 +107,17 @@
   <line x1="330" y1="210" x2="350" y2="210" class="connection"/>
   <line x1="350" y1="210" x2="350" y2="230" class="connection"/>
   <line x1="350" y1="230" x2="480" y2="230" class="connection" marker-end="url(#arrowhead)"/>
-  <text x="490" y="225" class="signal-label">0</text>
-  <text x="490" y="248" class="signal-label">1</text>
+  <text x="485" y="230" class="signal-label">0</text>
+  <text x="485" y="248" class="signal-label">1</text>
   
   <!-- CAP (Capture) Multiplexor -->
-  <polygon points="600,220 660,220 670,240 660,260 600,260 610,240" class="multiplexor"/>
-  <text x="635" y="240" class="label">CAP</text>
-  <text x="635" y="250" class="label" style="font-size: 8px;">Mode</text>
+  <polygon points="600,220 650,230 650,250 600,260 600,220" class="multiplexor"/>
+  <text x="625" y="240" class="label">CAP</text>
+  <text x="625" y="250" class="label" style="font-size: 8px;">Mode</text>
   
   <!-- SCS to CAP connection -->
-  <line x1="550" y1="240" x2="600" y2="240" class="connection" marker-end="url(#arrowhead)"/>
-  <text x="610" y="248" class="signal-label">1</text>
+  <line x1="530" y1="240" x2="600" y2="240" class="connection" marker-end="url(#arrowhead)"/>
+  <text x="605" y="248" class="signal-label">1</text>
   
   <!-- Storage and Compare Section -->
   <text x="320" y="300" class="label" style="font-size: 14px; fill: #666;">Storage and Compare</text>
@@ -128,7 +128,7 @@
   <text x="300" y="363" class="label" style="font-size: 9px;">16-bit Register</text>
   
   <!-- CAP to TAxCCRn connection -->
-  <line x1="670" y1="240" x2="680" y2="240" class="connection"/>
+  <line x1="650" y1="240" x2="680" y2="240" class="connection"/>
   <line x1="680" y1="240" x2="680" y2="320" class="connection"/>
   <line x1="680" y1="320" x2="320" y2="320" class="connection"/>
   <line x1="320" y1="320" x2="320" y2="330" class="connection" marker-end="url(#arrowhead)"/>
@@ -151,7 +151,8 @@
   
   <!-- Timer Count to Comparator connection -->
   <line x1="220" y1="380" x2="390" y2="380" class="bus"/>
-  <line x1="390" y1="380" x2="400" y2="370" class="bus" marker-end="url(#arrowhead)"/>
+  <line x1="390" y1="380" x2="390" y2="370" class="bus"/>
+  <line x1="390" y1="370" x2="400" y2="370" class="bus" marker-end="url(#arrowhead)"/>
   <text x="375" y="385" class="signal-label">Count</text>
   
   <!-- Equ output from Comparator -->
@@ -164,16 +165,20 @@
   <line x1="520" y1="360" x2="520" y2="450" class="connection"/>
   
   <!-- Equ to CAP connection -->
-  <line x1="520" y1="250" x2="600" y2="230" class="connection" marker-end="url(#arrowhead)"/>
-  <text x="610" y="225" class="signal-label">0</text>
+  <line x1="520" y1="250" x2="580" y2="250" class="connection"/>
+  <line x1="580" y1="250" x2="580" y2="230" class="connection"/>
+  <line x1="580" y1="230" x2="600" y2="230" class="connection" marker-end="url(#arrowhead)"/>
+  <text x="605" y="225" class="signal-label">0</text>
   
   <!-- CCILatch -->
   <rect x="530" y="320" width="70" height="40" class="flipflop"/>
   <text x="565" y="340" class="label">CCILatch</text>
   
   <!-- CCI to CCILatch -->
-  <line x1="200" y1="350" x2="530" y2="340" class="connection" marker-end="url(#arrowhead)"/>
-  <text x="540" y="335" class="signal-label">A</text>
+  <line x1="200" y1="350" x2="460" y2="350" class="connection"/>
+  <line x1="460" y1="350" x2="460" y2="340" class="connection"/>
+  <line x1="460" y1="340" x2="530" y2="340" class="connection" marker-end="url(#arrowhead)"/>
+  <text x="535" y="335" class="signal-label">A</text>
   
   <!-- Equ to CCILatch EN -->
   <line x1="520" y1="350" x2="530" y2="350" class="connection" marker-end="url(#arrowhead)"/>
@@ -186,8 +191,8 @@
   <!-- CCIFG output -->
   <rect x="720" y="225" width="60" height="30" class="block-rect"/>
   <text x="750" y="245" class="label" style="font-size: 10px;">CCIFG</text>
-  <line x1="670" y1="240" x2="720" y2="240" class="connection" marker-end="url(#arrowhead)"/>
-  <text x="690" y="235" class="signal-label">set</text>
+  <line x1="650" y1="240" x2="720" y2="240" class="connection" marker-end="url(#arrowhead)"/>
+  <text x="685" y="235" class="signal-label">set</text>
   
   <!-- Output Logic Section -->
   <text x="450" y="480" class="label" style="font-size: 14px; fill: #666;">Output Logic</text>
@@ -210,46 +215,59 @@
   
   <!-- Logic Gates for Output Mode -->
   <!-- NOR Gate -->
-  <ellipse cx="200" cy="640" rx="30" ry="20" class="logic-gate"/>
-  <text x="200" y="645" class="label" style="font-size: 10px;">NOR</text>
+  <path d="M 170 630 Q 175 635 180 640 Q 175 645 170 650 Q 185 645 200 640 Q 185 635 170 630 Z" class="logic-gate"/>
+  <circle cx="205" cy="640" r="3" fill="none" stroke="#2e7d32" stroke-width="2"/>
+  <text x="185" y="645" class="label" style="font-size: 10px;">NOR</text>
   
   <!-- OUTMOD bits to NOR -->
   <text x="120" y="620" class="signal-label">OUTMOD[0]</text>
   <text x="120" y="640" class="signal-label">OUTMOD[1]</text>
   <text x="120" y="660" class="signal-label">OUTMOD[2]</text>
-  <line x1="150" y1="620" x2="175" y2="630" class="connection" marker-end="url(#arrowhead)"/>
-  <line x1="150" y1="640" x2="175" y2="640" class="connection" marker-end="url(#arrowhead)"/>
-  <line x1="150" y1="660" x2="175" y2="650" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="150" y1="620" x2="160" y2="620" class="connection"/>
+  <line x1="160" y1="620" x2="160" y2="635" class="connection"/>
+  <line x1="160" y1="635" x2="170" y2="635" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="150" y1="640" x2="170" y2="640" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="150" y1="660" x2="160" y2="660" class="connection"/>
+  <line x1="160" y1="660" x2="160" y2="645" class="connection"/>
+  <line x1="160" y1="645" x2="170" y2="645" class="connection" marker-end="url(#arrowhead)"/>
   
   <!-- AND Gate -->
-  <ellipse cx="300" cy="600" rx="25" ry="20" class="logic-gate"/>
-  <text x="300" y="605" class="label" style="font-size: 10px;">AND</text>
+  <path d="M 275 590 L 300 590 A 10 10 0 0 1 300 610 L 275 610 Z" class="logic-gate"/>
+  <text x="287" y="605" class="label" style="font-size: 10px;">AND</text>
   
   <!-- NAND Gate -->
-  <ellipse cx="300" cy="680" rx="25" ry="20" class="logic-gate"/>
-  <text x="300" y="685" class="label" style="font-size: 10px;">NAND</text>
+  <path d="M 275 670 L 300 670 A 10 10 0 0 1 300 690 L 275 690 Z" class="logic-gate"/>
+  <circle cx="305" cy="680" r="3" fill="none" stroke="#2e7d32" stroke-width="2"/>
+  <text x="287" y="685" class="label" style="font-size: 10px;">NAND</text>
   
   <!-- OR Gate -->
-  <ellipse cx="450" cy="640" rx="25" ry="20" class="logic-gate"/>
-  <text x="450" y="645" class="label" style="font-size: 10px;">OR</text>
+  <path d="M 425 630 Q 430 635 435 640 Q 430 645 425 650 Q 440 645 455 640 Q 440 635 425 630 Z" class="logic-gate"/>
+  <text x="440" y="645" class="label" style="font-size: 10px;">OR</text>
   
   <!-- NOR to AND and NAND -->
-  <line x1="230" y1="640" x2="275" y2="610" class="connection" marker-end="url(#arrowhead)"/>
-  <line x1="230" y1="640" x2="275" y2="670" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="205" y1="640" x2="250" y2="640" class="connection"/>
+  <line x1="250" y1="640" x2="250" y2="600" class="connection"/>
+  <line x1="250" y1="600" x2="275" y2="600" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="250" y1="640" x2="250" y2="680" class="connection"/>
+  <line x1="250" y1="680" x2="275" y2="680" class="connection" marker-end="url(#arrowhead)"/>
   
   <!-- OUT bit input -->
   <text x="230" y="580" class="signal-label">OUT</text>
-  <line x1="250" y1="580" x2="275" y2="590" class="connection" marker-end="url(#arrowhead)"/>
   <line x1="250" y1="580" x2="260" y2="580" class="connection"/>
+  <line x1="260" y1="580" x2="260" y2="590" class="connection"/>
+  <line x1="260" y1="590" x2="275" y2="590" class="connection" marker-end="url(#arrowhead)"/>
   <line x1="260" y1="580" x2="260" y2="690" class="connection"/>
   <line x1="260" y1="690" x2="275" y2="690" class="connection" marker-end="url(#arrowhead)"/>
   
   <!-- NAND to OR -->
-  <line x1="325" y1="680" x2="425" y2="630" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="308" y1="680" x2="400" y2="680" class="connection"/>
+  <line x1="400" y1="680" x2="400" y2="650" class="connection"/>
+  <line x1="400" y1="650" x2="425" y2="650" class="connection" marker-end="url(#arrowhead)"/>
   
   <!-- POR input to OR -->
   <text x="380" y="680" class="signal-label">POR</text>
-  <line x1="400" y1="680" x2="425" y2="650" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="400" y1="680" x2="400" y2="630" class="connection"/>
+  <line x1="400" y1="630" x2="425" y2="630" class="connection" marker-end="url(#arrowhead)"/>
   
   <!-- DataLatch (RS Flip-Flop) -->
   <rect x="550" y="600" width="80" height="80" class="flipflop"/>
@@ -263,13 +281,13 @@
   <text x="530" y="615" class="signal-label">DATA</text>
   
   <!-- AND to DataLatch SET -->
-  <line x1="325" y1="600" x2="500" y2="600" class="connection"/>
+  <line x1="300" y1="600" x2="500" y2="600" class="connection"/>
   <line x1="500" y1="600" x2="500" y2="640" class="connection"/>
   <line x1="500" y1="640" x2="550" y2="640" class="connection" marker-end="url(#arrowhead)"/>
   <text x="530" y="635" class="signal-label">SET</text>
   
   <!-- OR to DataLatch RESET -->
-  <line x1="475" y1="640" x2="490" y2="640" class="connection"/>
+  <line x1="455" y1="640" x2="490" y2="640" class="connection"/>
   <line x1="490" y1="640" x2="490" y2="660" class="connection"/>
   <line x1="490" y1="660" x2="550" y2="660" class="connection" marker-end="url(#arrowhead)"/>
   <text x="530" y="655" class="signal-label">RESET</text>

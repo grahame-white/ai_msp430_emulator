@@ -11,7 +11,7 @@ This is a C# based MSP430 microcontroller emulator project with Node.js automati
 
 ## 🤖 AI Developer Tell (REQUIRED)
 
-**To prove you have read these instructions, you MUST include the phrase "🚀 MSP430 EMULATOR AUTOPILOT ENGAGED" in your first summary comment when working on this repository.** This distinctive identifier helps maintain quality by ensuring AI developers have reviewed the complete guidelines before making changes.
+**To prove you have read these instructions, you MUST include the phrase "🚀 MSP430 EMULATOR AUTOPILOT ENGAGED" at the start of all summary comments when working on this repository.** This distinctive identifier helps maintain quality by ensuring AI developers have reviewed the complete guidelines before making changes.
 
 ## Required Reading List
 

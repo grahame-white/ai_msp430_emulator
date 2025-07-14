@@ -10,7 +10,7 @@ echo "==> Updating MSP430 Emulator dependencies..."
 
 # Bootstrap dependencies first (per Scripts to Rule Them All pattern)
 echo "==> Bootstrapping dependencies..."
-script/bootstrap
+./script/bootstrap
 
 # Update NuGet packages
 echo "==> Updating NuGet packages..."

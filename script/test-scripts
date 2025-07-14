@@ -64,6 +64,41 @@ fi
 
 echo "==> All script smoke tests passed!"
 
+# Test CI environment behavior for script/test
+echo "==> Testing script/test CI environment behavior..."
+
+# Test that script/test skips update in CI environment
+echo "==> Testing script/test skips update when CI=true..."
+if CI=true timeout 60s bash -c './script/test --fast 2>&1 | grep -q "Ensuring application is up to date"'; then
+    echo "❌ script/test should NOT call update when CI=true"
+    exit 1
+else
+    echo "✅ script/test correctly skips update when CI=true"
+fi
+
+# Test that script/test calls update in non-CI environment (development)
+echo "==> Testing script/test calls update when CI is not set..."
+if timeout 60s bash -c 'unset CI && ./script/test --fast 2>&1 | grep -q "Ensuring application is up to date"'; then
+    echo "✅ script/test correctly calls update in development environment"
+else
+    echo "❌ script/test should call update when CI is not set"
+    exit 1
+fi
+
+# Test CI environment behavior for script/server
+echo "==> Testing script/server CI environment behavior..."
+
+# Test that script/server skips update in CI environment
+echo "==> Testing script/server skips update when CI=true..."
+if CI=true timeout 30s bash -c './script/server --help 2>&1 | grep -q "Ensuring application is up to date"' 2>/dev/null; then
+    echo "❌ script/server should NOT call update when CI=true"
+    exit 1
+else
+    echo "✅ script/server correctly skips update when CI=true"
+fi
+
+echo "==> CI environment behavior tests passed!"
+
 # Test annotation functionality
 echo "==> Testing annotation functionality..."
 if timeout 60s ./script/test-annotations; then

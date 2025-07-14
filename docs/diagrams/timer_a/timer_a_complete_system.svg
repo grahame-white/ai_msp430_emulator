@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <!-- Define styles for consistent appearance -->
+    <style>
+      .main-block { fill: #e3f2fd; stroke: #1565c0; stroke-width: 3; }
+      .ccr-block { fill: #f3e5f5; stroke: #6a1b9a; stroke-width: 2; }
+      .clock-block { fill: #fff3cd; stroke: #856404; stroke-width: 2; }
+      .external-signal { fill: #e8f5e8; stroke: #2e7d32; stroke-width: 2; }
+      .output-signal { fill: #ffebee; stroke: #c62828; stroke-width: 2; }
+      .connection { stroke: #333; stroke-width: 2; fill: none; }
+      .bus { stroke: #333; stroke-width: 4; fill: none; }
+      .control-signal { stroke: #666; stroke-width: 1.5; fill: none; stroke-dasharray: 3,3; }
+      .label { font-family: Arial, sans-serif; font-size: 11px; fill: #333; text-anchor: middle; }
+      .title-label { font-family: Arial, sans-serif; font-size: 13px; fill: #333; text-anchor: middle; font-weight: bold; }
+      .signal-label { font-family: Arial, sans-serif; font-size: 9px; fill: #666; text-anchor: middle; }
+      .connection-dot { fill: #333; }
+      .branch-point { fill: #333; }
+    </style>
+    
+    <!-- Arrow marker definition -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+    <marker id="control-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#666" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="600" y="25" class="title-label" style="font-size: 18px;">Complete Timer A System Architecture</text>
+  
+  <!-- External Clock Sources -->
+  <rect x="50" y="80" width="80" height="30" class="external-signal"/>
+  <text x="90" y="100" class="label">TAxCLK</text>
+  
+  <rect x="50" y="120" width="80" height="30" class="external-signal"/>
+  <text x="90" y="140" class="label">ACLK</text>
+  
+  <rect x="50" y="160" width="80" height="30" class="external-signal"/>
+  <text x="90" y="180" class="label">SMCLK</text>
+  
+  <rect x="50" y="200" width="80" height="30" class="external-signal"/>
+  <text x="90" y="220" class="label">INCLK</text>
+  
+  <!-- Main Timer Block -->
+  <rect x="200" y="100" width="300" height="180" class="main-block"/>
+  <text x="350" y="125" class="title-label">Timer A Main Block</text>
+  
+  <!-- Clock Path inside Main Timer Block -->
+  <rect x="220" y="140" width="120" height="60" class="clock-block"/>
+  <text x="280" y="160" class="label">Clock Path</text>
+  <text x="280" y="175" class="label" style="font-size: 9px;">TASSEL → ID → IDEX</text>
+  <text x="280" y="190" class="label" style="font-size: 9px;">Clock Selection &amp; Division</text>
+  
+  <!-- Timer Core inside Main Timer Block -->
+  <rect x="360" y="140" width="120" height="60" class="clock-block"/>
+  <text x="420" y="160" class="label">Timer Core</text>
+  <text x="420" y="175" class="label" style="font-size: 9px;">TAxR (16-bit Counter)</text>
+  <text x="420" y="190" class="label" style="font-size: 9px;">Mode Control (MC)</text>
+  
+  <!-- Clock connections to Main Timer Block -->
+  <line x1="130" y1="95" x2="180" y2="95" class="connection"/>
+  <line x1="180" y1="95" x2="180" y2="150" class="connection"/>
+  <line x1="180" y1="150" x2="220" y2="150" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="130" y1="135" x2="190" y2="135" class="connection"/>
+  <line x1="190" y1="135" x2="190" y2="160" class="connection"/>
+  <line x1="190" y1="160" x2="220" y2="160" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="130" y1="175" x2="200" y2="175" class="connection"/>
+  <line x1="200" y1="175" x2="200" y2="170" class="connection"/>
+  <line x1="200" y1="170" x2="220" y2="170" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="130" y1="215" x2="210" y2="215" class="connection"/>
+  <line x1="210" y1="215" x2="210" y2="180" class="connection"/>
+  <line x1="210" y1="180" x2="220" y2="180" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <!-- Internal connection from Clock Path to Timer Core -->
+  <line x1="340" y1="170" x2="360" y2="170" class="connection" marker-end="url(#arrowhead)"/>
+  <text x="350" y="165" class="signal-label">CLK</text>
+  
+  <!-- Control Signals -->
+  <rect x="50" y="300" width="80" height="30" class="external-signal"/>
+  <text x="90" y="320" class="label">TACLR</text>
+  <line x1="130" y1="315" x2="330" y2="315" class="control-signal"/>
+  <line x1="330" y1="315" x2="330" y2="280" class="control-signal"/>
+  <line x1="330" y1="280" x2="350" y2="280" class="control-signal" marker-end="url(#control-arrow)"/>
+  <text x="200" y="295" class="signal-label">Clear Signal</text>
+  
+  <!-- Timer Count Bus Output -->
+  <line x1="420" y1="200" x2="420" y2="320" class="bus"/>
+  <text x="430" y="310" class="signal-label">Count Bus (16-bit)</text>
+  
+  <!-- Count Bus Distribution -->
+  <circle cx="420" cy="320" r="4" class="branch-point"/>
+  <line x1="420" y1="320" x2="200" y2="320" class="bus"/>
+  <line x1="420" y1="320" x2="600" y2="320" class="bus"/>
+  <line x1="420" y1="320" x2="800" y2="320" class="bus"/>
+  <line x1="420" y1="320" x2="1000" y2="320" class="bus"/>
+  
+  <!-- CCR0 Block (Special - Period Control) -->
+  <rect x="150" y="400" width="150" height="120" class="ccr-block"/>
+  <text x="225" y="425" class="title-label">CCR0 Block</text>
+  <text x="225" y="440" class="label" style="font-size: 9px;">Period Control</text>
+  <text x="225" y="455" class="label" style="font-size: 9px;">Input Selection</text>
+  <text x="225" y="470" class="label" style="font-size: 9px;">Capture/Compare Logic</text>
+  <text x="225" y="485" class="label" style="font-size: 9px;">Output Generation</text>
+  <text x="225" y="500" class="label" style="font-size: 9px;">PWM Output OUT0</text>
+  
+  <!-- Count bus to CCR0 -->
+  <line x1="200" y1="320" x2="225" y2="320" class="bus"/>
+  <line x1="225" y1="320" x2="225" y2="400" class="bus" marker-end="url(#arrowhead)"/>
+  
+  <!-- CCR1 Block -->
+  <rect x="350" y="400" width="150" height="120" class="ccr-block"/>
+  <text x="425" y="425" class="title-label">CCR1 Block</text>
+  <text x="425" y="440" class="label" style="font-size: 9px;">Capture/Compare</text>
+  <text x="425" y="455" class="label" style="font-size: 9px;">Input Selection</text>
+  <text x="425" y="470" class="label" style="font-size: 9px;">Capture/Compare Logic</text>
+  <text x="425" y="485" class="label" style="font-size: 9px;">Output Generation</text>
+  <text x="425" y="500" class="label" style="font-size: 9px;">PWM Output OUT1</text>
+  
+  <!-- Count bus to CCR1 -->
+  <line x1="420" y1="320" x2="425" y2="320" class="bus"/>
+  <line x1="425" y1="320" x2="425" y2="400" class="bus" marker-end="url(#arrowhead)"/>
+  
+  <!-- CCR2 Block -->
+  <rect x="550" y="400" width="150" height="120" class="ccr-block"/>
+  <text x="625" y="425" class="title-label">CCR2 Block</text>
+  <text x="625" y="440" class="label" style="font-size: 9px;">Capture/Compare</text>
+  <text x="625" y="455" class="label" style="font-size: 9px;">Input Selection</text>
+  <text x="625" y="470" class="label" style="font-size: 9px;">Capture/Compare Logic</text>
+  <text x="625" y="485" class="label" style="font-size: 9px;">Output Generation</text>
+  <text x="625" y="500" class="label" style="font-size: 9px;">PWM Output OUT2</text>
+  
+  <!-- Count bus to CCR2 -->
+  <line x1="600" y1="320" x2="625" y2="320" class="bus"/>
+  <line x1="625" y1="320" x2="625" y2="400" class="bus" marker-end="url(#arrowhead)"/>
+  
+  <!-- CCR3-6 Block (Grouped) -->
+  <rect x="750" y="400" width="150" height="120" class="ccr-block"/>
+  <text x="825" y="425" class="title-label">CCR3-6 Blocks</text>
+  <text x="825" y="440" class="label" style="font-size: 9px;">Capture/Compare</text>
+  <text x="825" y="455" class="label" style="font-size: 9px;">Input Selection</text>
+  <text x="825" y="470" class="label" style="font-size: 9px;">Capture/Compare Logic</text>
+  <text x="825" y="485" class="label" style="font-size: 9px;">Output Generation</text>
+  <text x="825" y="500" class="label" style="font-size: 9px;">PWM Outputs OUT3-6</text>
+  
+  <!-- Count bus to CCR3-6 -->
+  <line x1="800" y1="320" x2="825" y2="320" class="bus"/>
+  <line x1="825" y1="320" x2="825" y2="400" class="bus" marker-end="url(#arrowhead)"/>
+  
+  <!-- External Input Signals for CCR blocks -->
+  <rect x="50" y="580" width="80" height="30" class="external-signal"/>
+  <text x="90" y="600" class="label">CCInA0</text>
+  
+  <rect x="50" y="620" width="80" height="30" class="external-signal"/>
+  <text x="90" y="640" class="label">CCInB0</text>
+  
+  <rect x="250" y="580" width="80" height="30" class="external-signal"/>
+  <text x="290" y="600" class="label">CCInA1</text>
+  
+  <rect x="250" y="620" width="80" height="30" class="external-signal"/>
+  <text x="290" y="640" class="label">CCInB1</text>
+  
+  <rect x="450" y="580" width="80" height="30" class="external-signal"/>
+  <text x="490" y="600" class="label">CCInA2</text>
+  
+  <rect x="450" y="620" width="80" height="30" class="external-signal"/>
+  <text x="490" y="640" class="label">CCInB2</text>
+  
+  <rect x="650" y="580" width="80" height="30" class="external-signal"/>
+  <text x="690" y="600" class="label">CCInA3-6</text>
+  
+  <rect x="650" y="620" width="80" height="30" class="external-signal"/>
+  <text x="690" y="640" class="label">CCInB3-6</text>
+  
+  <!-- Input connections to CCR blocks -->
+  <line x1="130" y1="595" x2="160" y2="595" class="connection"/>
+  <line x1="160" y1="595" x2="160" y2="520" class="connection"/>
+  <line x1="160" y1="520" x2="175" y2="520" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="130" y1="635" x2="150" y2="635" class="connection"/>
+  <line x1="150" y1="635" x2="150" y2="520" class="connection"/>
+  <line x1="150" y1="520" x2="175" y2="520" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <line x1="330" y1="595" x2="360" y2="595" class="connection"/>
+  <line x1="360" y1="595" x2="360" y2="520" class="connection"/>
+  <line x1="360" y1="520" x2="375" y2="520" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="330" y1="635" x2="350" y2="635" class="connection"/>
+  <line x1="350" y1="635" x2="350" y2="520" class="connection"/>
+  <line x1="350" y1="520" x2="375" y2="520" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <line x1="530" y1="595" x2="560" y2="595" class="connection"/>
+  <line x1="560" y1="595" x2="560" y2="520" class="connection"/>
+  <line x1="560" y1="520" x2="575" y2="520" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="530" y1="635" x2="550" y2="635" class="connection"/>
+  <line x1="550" y1="635" x2="550" y2="520" class="connection"/>
+  <line x1="550" y1="520" x2="575" y2="520" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <line x1="730" y1="595" x2="760" y2="595" class="connection"/>
+  <line x1="760" y1="595" x2="760" y2="520" class="connection"/>
+  <line x1="760" y1="520" x2="775" y2="520" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="730" y1="635" x2="750" y2="635" class="connection"/>
+  <line x1="750" y1="635" x2="750" y2="520" class="connection"/>
+  <line x1="750" y1="520" x2="775" y2="520" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <!-- EQU0 Special Connection (CCR0 to Main Timer for Period Control) -->
+  <line x1="225" y1="400" x2="225" y2="350" class="control-signal"/>
+  <line x1="225" y1="350" x2="420" y2="350" class="control-signal"/>
+  <line x1="420" y1="350" x2="420" y2="280" class="control-signal" marker-end="url(#control-arrow)"/>
+  <text x="320" y="345" class="signal-label">EQU0 (Period Control)</text>
+  
+  <!-- Timer Clock Distribution -->
+  <line x1="280" y1="200" x2="280" y2="340" class="connection"/>
+  <circle cx="280" cy="340" r="3" class="branch-point"/>
+  <line x1="280" y1="340" x2="225" y2="340" class="connection"/>
+  <line x1="280" y1="340" x2="425" y2="340" class="connection"/>
+  <line x1="280" y1="340" x2="625" y2="340" class="connection"/>
+  <line x1="280" y1="340" x2="825" y2="340" class="connection"/>
+  
+  <!-- Clock connections to CCR blocks -->
+  <line x1="225" y1="340" x2="225" y2="400" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="425" y1="340" x2="425" y2="400" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="625" y1="340" x2="625" y2="400" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="825" y1="340" x2="825" y2="400" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <text x="300" y="335" class="signal-label">Timer Clock Distribution</text>
+  
+  <!-- Output Signals -->
+  <rect x="1050" y="350" width="80" height="30" class="output-signal"/>
+  <text x="1090" y="370" class="label">OUT0</text>
+  
+  <rect x="1050" y="390" width="80" height="30" class="output-signal"/>
+  <text x="1090" y="410" class="label">OUT1</text>
+  
+  <rect x="1050" y="430" width="80" height="30" class="output-signal"/>
+  <text x="1090" y="450" class="label">OUT2</text>
+  
+  <rect x="1050" y="470" width="80" height="30" class="output-signal"/>
+  <text x="1090" y="490" class="label">OUT3-6</text>
+  
+  <!-- Output connections from CCR blocks -->
+  <line x1="300" y1="460" x2="1020" y2="460" class="connection"/>
+  <line x1="1020" y1="460" x2="1020" y2="365" class="connection"/>
+  <line x1="1020" y1="365" x2="1050" y2="365" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="500" y1="460" x2="1030" y2="460" class="connection"/>
+  <line x1="1030" y1="460" x2="1030" y2="405" class="connection"/>
+  <line x1="1030" y1="405" x2="1050" y2="405" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="700" y1="460" x2="1040" y2="460" class="connection"/>
+  <line x1="1040" y1="460" x2="1040" y2="445" class="connection"/>
+  <line x1="1040" y1="445" x2="1050" y2="445" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="900" y1="460" x2="1010" y2="460" class="connection"/>
+  <line x1="1010" y1="460" x2="1010" y2="485" class="connection"/>
+  <line x1="1010" y1="485" x2="1050" y2="485" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <!-- Interrupt Signals -->
+  <rect x="1050" y="550" width="80" height="30" class="output-signal"/>
+  <text x="1090" y="570" class="label">TAIFG</text>
+  
+  <rect x="1050" y="590" width="80" height="30" class="output-signal"/>
+  <text x="1090" y="610" class="label">CCIFG0-6</text>
+  
+  <!-- Interrupt connections -->
+  <line x1="480" y1="190" x2="950" y2="190" class="connection"/>
+  <line x1="950" y1="190" x2="950" y2="565" class="connection"/>
+  <line x1="950" y1="565" x2="1050" y2="565" class="connection" marker-end="url(#arrowhead)"/>
+  <text x="970" y="185" class="signal-label">Timer Overflow</text>
+  
+  <line x1="300" y1="430" x2="970" y2="430" class="connection"/>
+  <line x1="500" y1="430" x2="970" y2="430" class="connection"/>
+  <line x1="700" y1="430" x2="970" y2="430" class="connection"/>
+  <line x1="900" y1="430" x2="970" y2="430" class="connection"/>
+  <circle cx="970" cy="430" r="3" class="branch-point"/>
+  <line x1="970" y1="430" x2="970" y2="605" class="connection"/>
+  <line x1="970" y1="605" x2="1050" y2="605" class="connection" marker-end="url(#arrowhead)"/>
+  <text x="980" y="425" class="signal-label">Compare/Capture Events</text>
+  
+  <!-- Status Signals -->
+  <rect x="1050" y="650" width="80" height="30" class="output-signal"/>
+  <text x="1090" y="670" class="label">SCCI</text>
+  
+  <rect x="1050" y="690" width="80" height="30" class="output-signal"/>
+  <text x="1090" y="710" class="label">COV</text>
+  
+  <!-- Status signal connections -->
+  <line x1="300" y1="490" x2="990" y2="490" class="connection"/>
+  <line x1="500" y1="490" x2="990" y2="490" class="connection"/>
+  <line x1="700" y1="490" x2="990" y2="490" class="connection"/>
+  <line x1="900" y1="490" x2="990" y2="490" class="connection"/>
+  <circle cx="990" cy="490" r="3" class="branch-point"/>
+  <line x1="990" y1="490" x2="990" y2="665" class="connection"/>
+  <line x1="990" y1="665" x2="1050" y2="665" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <line x1="300" y1="510" x2="1010" y2="510" class="connection"/>
+  <line x1="500" y1="510" x2="1010" y2="510" class="connection"/>
+  <line x1="700" y1="510" x2="1010" y2="510" class="connection"/>
+  <line x1="900" y1="510" x2="1010" y2="510" class="connection"/>
+  <circle cx="1010" cy="510" r="3" class="branch-point"/>
+  <line x1="1010" y1="510" x2="1010" y2="705" class="connection"/>
+  <line x1="1010" y1="705" x2="1050" y2="705" class="connection" marker-end="url(#arrowhead)"/>
+  
+  <!-- Control Signals Section Label -->
+  <text x="90" y="270" class="title-label" style="font-size: 12px;">Control Signals</text>
+  
+  <!-- External Inputs Section Label -->
+  <text x="400" y="560" class="title-label" style="font-size: 12px;">External Capture Inputs</text>
+  
+  <!-- Outputs Section Label -->
+  <text x="1090" y="330" class="title-label" style="font-size: 12px;">Outputs</text>
+  
+  <!-- Data Flow Legend -->
+  <rect x="50" y="750" width="1100" height="100" fill="none" stroke="#666" stroke-width="1"/>
+  <text x="600" y="770" class="title-label" style="font-size: 14px;">Signal Legend</text>
+  
+  <line x1="100" y1="790" x2="150" y2="790" class="bus"/>
+  <text x="160" y="795" class="label">16-bit Data Bus</text>
+  
+  <line x1="300" y1="790" x2="350" y2="790" class="connection" marker-end="url(#arrowhead)"/>
+  <text x="360" y="795" class="label">Control/Data Signal</text>
+  
+  <line x1="500" y1="790" x2="550" y2="790" class="control-signal" marker-end="url(#control-arrow)"/>
+  <text x="560" y="795" class="label">Control Signal</text>
+  
+  <circle cx="700" cy="790" r="3" class="branch-point"/>
+  <text x="720" y="795" class="label">Signal Distribution Point</text>
+  
+  <text x="100" y="815" class="label">Clock Sources</text>
+  <rect x="90" y="820" width="60" height="20" class="external-signal"/>
+  
+  <text x="300" y="815" class="label">Timer Main Block</text>
+  <rect x="280" y="820" width="60" height="20" class="main-block"/>
+  
+  <text x="500" y="815" class="label">CCR Blocks</text>
+  <rect x="480" y="820" width="60" height="20" class="ccr-block"/>
+  
+  <text x="700" y="815" class="label">Outputs/Interrupts</text>
+  <rect x="680" y="820" width="60" height="20" class="output-signal"/>
+  
+</svg>

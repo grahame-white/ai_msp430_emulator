@@ -2,7 +2,20 @@
 
 This is a C# based MSP430 microcontroller emulator project with Node.js automation scripts for GitHub Actions. It aims to provide high accuracy MSP430FR2355 emulation with comprehensive testing and documentation. Please follow these guidelines when contributing:
 
+## ABSOLUTE MANDATORY RULES
+
+- You must review these instructions in full before executing any steps to understand the full instructions guidelines.
+- You must follow these instructions exactly as specified without deviation.
+- You must always use the provided scripts where possible
+- You may only augment the provided scripts if they do not already provide the necessary functionality
+
+
+## Required reading list
+
+- [Scripts to rule them all](/docs/SCRIPTS_TO_RULE_THEM_ALL.md)
+
 ## Prerequisites
+
 - .NET 8.0 SDK or later
 - Node.js 18.0 or later (for automation scripts)
 - Git
@@ -10,11 +23,13 @@ This is a C# based MSP430 microcontroller emulator project with Node.js automati
 ## Code Standards
 
 ### Required Before Each Commit
+
 - Run `./script/lint && ./script/test` before committing any .NET changes to ensure proper code formatting and passing tests
 - Run `cd .github/scripts && npm run validate:all && npm test` before committing automation script changes
 - This will run static analysis, formatting checks, and comprehensive testing
 
 ### Development Flow
+
 - Bootstrap: `./script/bootstrap` (install all required dependencies)
 - Build: `./script/build`
 - Test: `./script/test` (includes coverage reporting)

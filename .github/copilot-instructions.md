@@ -7,7 +7,7 @@ This is a C# based MSP430 microcontroller emulator project with Node.js automati
 - You must review these instructions in full before executing any steps to understand the full instructions guidelines.
 - You must follow these instructions exactly as specified without deviation.
 - You must always use the provided scripts where possible
-- You may only augment the provided scripts if they do not already necessary functionality
+- You may only augment the provided scripts if they do not already provide the necessary functionality
 
 
 ## Required reading list

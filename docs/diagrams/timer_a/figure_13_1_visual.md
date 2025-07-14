@@ -1,6 +1,31 @@
 # Timer A Figure 13-1 Visual Representation
 
-This document provides visual representations of Timer A Figure 13-1 using Mermaid diagrams.
+This document provides visual representations of Timer A Figure 13-1. The documentation includes
+both Mermaid diagrams for quick reference and detailed SVG diagrams that meet professional circuit
+documentation standards.
+
+## Professional SVG Diagrams
+
+The following native SVG diagrams provide detailed technical illustrations:
+
+- **[Timer A Main Block](timer_a_main_block.svg)** - Clock path and timer core with proper
+  electrical symbols
+- **[CCR Block Detail](timer_a_ccr_block.svg)** - Complete capture/compare register architecture
+- **[Complete Timer A System](timer_a_complete_system.svg)** - System overview with all
+  interconnections
+
+These SVG diagrams feature:
+
+- ✅ Appropriate symbols for each logic block
+- ✅ No overlapping blocks  
+- ✅ No crossing connections
+- ✅ Branched style connections with multiple endpoints
+- ✅ Connection dots showing connected vs crossing lines
+- ✅ Orthogonal line routing
+- ✅ Professional circuit diagram standards
+
+## Mermaid Reference Diagrams
+
 The original logic notation has been translated to standard flowcharts and block diagrams for
 improved clarity.
 

@@ -74,14 +74,14 @@ the application is up to date and can run appropriately.
 A good pattern to support is having an optional argument that is a file path.
 This allows you to support running single tests.
 
-Linting (i.e. rubocop, jshint, pmd, etc.) can also be considered a form of testing. These tend to run faster than tests, so put them towards the beginning of a [`script/test`][test] so it fails faster if there's a linting problem.
+- Linting (i.e. rubocop, jshint, pmd, etc.) can also be considered a form of testing. These tend to run faster than
+tests, so put them towards the beginning of a [`script/test`][test] so it fails faster if there's a linting problem.
 
 [`script/test`][test] should be called from [`script/cibuild`][cibuild], so it should handle
 setting up the application appropriately based on the environment. For example,
 if called in a development environment, it should probably call [`script/update`][update]
 to always ensure that the application is up to date. If called from
 [`script/cibuild`][cibuild], it should probably reset the application to a clean state.
-
 
 ### script/cibuild
 

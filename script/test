@@ -38,6 +38,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Update application if not in CI environment (per Scripts to Rule Them All pattern)
+# The documentation states that script/test should call script/update in development
+# environments but not when called from CI
+if [[ "${CI}" != "true" ]]; then
+  echo "==> Ensuring application is up to date..."
+  ./script/update
+fi
+
 if [ "$WITH_COVERAGE" = true ]; then
   echo "==> Running tests with coverage..."
   ./script/coverage

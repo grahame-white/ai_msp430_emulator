@@ -43,8 +43,12 @@
   <!-- Input connections to TASSEL -->
   <line x1="80" y1="80" x2="120" y2="80" class="connection" marker-end="url(#arrowhead)"/>
   <line x1="80" y1="110" x2="120" y2="110" class="connection" marker-end="url(#arrowhead)"/>
-  <line x1="80" y1="140" x2="120" y2="120" class="connection" marker-end="url(#arrowhead)"/>
-  <line x1="80" y1="170" x2="120" y2="125" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="80" y1="140" x2="100" y2="140" class="connection"/>
+  <line x1="100" y1="140" x2="100" y2="120" class="connection"/>
+  <line x1="100" y1="120" x2="120" y2="120" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="80" y1="170" x2="90" y2="170" class="connection"/>
+  <line x1="90" y1="170" x2="90" y2="125" class="connection"/>
+  <line x1="90" y1="125" x2="120" y2="125" class="connection" marker-end="url(#arrowhead)"/>
   
   <!-- ID Divider -->
   <rect x="240" y="75" width="80" height="50" class="divider"/>
@@ -131,7 +135,9 @@
   <!-- TAIFG output -->
   <rect x="420" y="310" width="60" height="30" class="block-rect"/>
   <text x="450" y="330" class="label" style="font-size: 10px;">TAIFG</text>
-  <line x1="370" y1="320" x2="420" y2="325" class="connection" marker-end="url(#arrowhead)"/>
+  <line x1="370" y1="320" x2="390" y2="320" class="connection"/>
+  <line x1="390" y1="320" x2="390" y2="325" class="connection"/>
+  <line x1="390" y1="325" x2="420" y2="325" class="connection" marker-end="url(#arrowhead)"/>
   <text x="390" y="315" class="signal-label">set</text>
   
   <!-- Clear signal distribution -->

@@ -30,7 +30,10 @@ This is a C# based MSP430 microcontroller emulator project with Node.js automati
 ./script/setup        # Configure development environment and git hooks
 ```
 
-### Pre-Commit Validation (Always Required)
+### 🚨 MANDATORY: Pre-Commit Validation (ALWAYS REQUIRED)
+
+**YOU MUST RUN THESE COMMANDS BEFORE EVERY COMMIT:**
+
 ```bash
 # For .NET code changes:
 ./script/format && ./script/lint && ./script/test
@@ -39,7 +42,17 @@ This is a C# based MSP430 microcontroller emulator project with Node.js automati
 cd .github/scripts && npm run validate:all && npm test
 ```
 
-**⚠️ CRITICAL**: Always run these commands before committing to prevent CI failures.
+**⚠️ CRITICAL WARNING**: 
+- **Pre-commit hook WILL REJECT commits** with formatting/linting errors
+- **If commit fails**: You MUST notice the error, fix the issues, and retry
+- **Common failure**: Formatting errors caught by hook that you don't notice
+- **Always verify**: Check that `git commit` actually succeeded before proceeding
+
+**🔧 If pre-commit hook fails:**
+1. Read the error message carefully
+2. Run the suggested fix commands (usually `./script/format`)
+3. Stage the formatting changes with `git add .`
+4. Retry the commit
 
 ## Core Development Standards (Summary)
 

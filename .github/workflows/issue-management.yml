@@ -330,7 +330,7 @@ jobs:
     steps:
       - name: Create completion issue comment
         if: needs.synchronize-issues.result == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -354,7 +354,7 @@ jobs:
 
       - name: Create error notification
         if: needs.synchronize-issues.result == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { owner, repo } = context.repo;

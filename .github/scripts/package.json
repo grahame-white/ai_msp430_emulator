@@ -21,7 +21,7 @@
     "recover": "node disaster-recovery.js ../../MSP430_EMULATOR_TASKS.md --dry-run"
   },
   "dependencies": {
-    "@octokit/rest": "^22.0.0"
+    "@octokit/rest": "^22.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",

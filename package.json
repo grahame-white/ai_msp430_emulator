@@ -7,7 +7,7 @@
     "lint:docs": "markdownlint-cli2 \"docs/**/*.md\" \"*.md\""
   },
   "devDependencies": {
-    "markdownlint-cli2": "^0.18.1"
+    "markdownlint-cli2": "^0.19.0"
   },
   "engines": {
     "node": ">=18.0.0"

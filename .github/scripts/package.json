@@ -25,9 +25,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
-    "eslint": "^9.31.0",
+    "eslint": "^9.39.1",
     "node-actionlint": "^1.2.2",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.3",
     "yaml-lint": "^1.7.0"
   },
   "engines": {
